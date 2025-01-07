@@ -1,0 +1,20 @@
+[project]
+name = "fordefi-api"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "base58>=2.1.1",
+    "ecdsa>=0.19.0",
+    "fastapi>=0.115.5",
+    "jito-py-rpc>=0.1.0",
+    "jito-py>=0.1.2",
+    "pydantic>=2.10.2",
+    "python-dotenv>=1.0.1",
+    "requests>=2.32.3",
+    "uvicorn>=0.32.1",
+    "solders>=0.23.0",
+    "solana>=0.36.1",
+    "cachetools>=5.5.0",
+]
