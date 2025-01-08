@@ -91,25 +91,24 @@ def sign(payload):
 
 ### Core logic
 
-## Set config
+## CONFIG
 USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
+EVM_VAULT_ID = os.getenv("EVM_VAULT_ID")
 evm_chain = "bsc"
-#evm_chain = "ethereum"  
-path = "/api/v1/transactions"
-vault_id = "81e82853-3c4f-4cd4-b494-78fb4abf168a" # CHANGE
+path = "/api/v1/transactions" # CHANGE
 destination = "0xF659feEE62120Ce669A5C45Eb6616319D552dD93" # CHANGE
 custom_note = "hello!"
 value = "0.0001" # BNB or ETH
 
 ## Building transaction
-request_json = evm_tx_native(evm_chain=evm_chain, vault_id=vault_id, destination=destination, custom_note=custom_note, value=value)
+request_json = evm_tx_native(evm_chain=evm_chain, vault_id=EVM_VAULT_ID, destination=destination, custom_note=custom_note, value=value)
 request_body = json.dumps(request_json)
 timestamp = datetime.datetime.now().strftime("%s")
 payload = f"{path}|{timestamp}|{request_body}"
 
-## Sign transaction with API Signer (local)
+## Signing transaction with API Signer (local)
 signature = sign(payload=payload)
 
-## Broadcast tx
+## Broadcasting tx
 resp_tx = broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
 print("✅ Transaction submitted successfully!")
