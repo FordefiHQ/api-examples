@@ -39,44 +39,35 @@ def broadcast_tx(path, access_token, signature, timestamp, request_body):
         raise RuntimeError(f"Network error occurred: {str(e)}")
 
 
-def evm_tx_native(evm_chain, vault_id, destination, custom_note, value):
-
-    value_in_wei = str(int(float(value) * 10**18))
-    print(f"⚙️ Preparing tx for {value}!")
-
-    """
-    Native ETH or BNB transfer
-
-    """
+def sol_tx_tokens(vault_id, destination, custom_note, value, token):
 
     request_json = {
         "signer_type": "api_signer",
-        "vault_id": vault_id,
-        "note": custom_note,
-        "type": "evm_transaction",
+        "type": "solana_transaction",
         "details": {
-            "type": "evm_transfer",
-            "gas": {
-                "type": "priority",
-                "priority_level": "medium"
-            },
+            "type": "solana_transfer",
             "to": destination,
-            "asset_identifier": {
-                "type": "evm",
-                "details": {
-                    "type": "native",
-                    "chain": f"evm_{evm_chain}_mainnet"
-                }
-            },
             "value": {
                 "type": "value",
-                "value": value_in_wei
+                "value": value
+            },
+            "asset_identifier": {
+                "type": "solana",
+                "details": {
+                    "type": "spl_token",
+                    "token": {
+                        "chain": "solana_mainnet",
+                        "base58_repr": token
+                    }
+                }
             }
-        }
+        },
+        "note": custom_note,
+        "vault_id": vault_id
     }
-    
-    return request_json
 
+
+    return request_json
 
 def sign(payload):
 
@@ -95,15 +86,15 @@ def sign(payload):
 
 ## CONFIG
 USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-EVM_VAULT_ID = os.getenv("EVM_VAULT_ID")
-evm_chain = "bsc"
-path = "/api/v1/transactions" # CHANGE
-destination = "0xF659feEE62120Ce669A5C45Eb6616319D552dD93" # CHANGE
+SOL_VAULT_ID = os.getenv("SOL_VAULT_ID")
+path = "/api/v1/transactions"
+destination = "9BgxwZMyNzGUgp6hYXMyRKv3kSkyYZAMPGisqJgnXCFS" # CHANGE
 custom_note = "hello!"
-value = "0.0001" # BNB or ETH
+value = "1"
+token_address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
 
 ## Building transaction
-request_json = evm_tx_native(evm_chain=evm_chain, vault_id=EVM_VAULT_ID, destination=destination, custom_note=custom_note, value=value)
+request_json = sol_tx_tokens(vault_id=SOL_VAULT_ID, destination=destination, custom_note=custom_note, value=value, token=token_address)
 request_body = json.dumps(request_json)
 timestamp = datetime.datetime.now().strftime("%s")
 payload = f"{path}|{timestamp}|{request_body}"
