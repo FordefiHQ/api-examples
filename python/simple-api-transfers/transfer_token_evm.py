@@ -6,6 +6,8 @@ import base64
 import json
 import datetime
 from decimal import Decimal
+from dotenv import load_dotenv
+load_dotenv()
 
 ### FUNCTIONS
 
