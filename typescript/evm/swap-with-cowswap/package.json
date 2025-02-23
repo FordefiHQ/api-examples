@@ -1,0 +1,25 @@
+{
+  "name": "@fordefi/cow-swap",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "swap": "npx ts-node src/swap.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@cowprotocol/cow-sdk": "^5.10.0",
+    "@fordefi/web3-provider": "^0.2.5",
+    "dotenv": "^16.4.7",
+    "ethers": "^5.7.2",
+    "hardhat": "^2.22.18"
+  }
+}
