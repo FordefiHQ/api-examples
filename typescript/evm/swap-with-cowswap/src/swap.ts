@@ -1,5 +1,5 @@
 import { FordefiWeb3Provider, EvmChainId, FordefiProviderConfig } from '@fordefi/web3-provider';
-import { OrderBookApi, OrderSigningUtils, SupportedChainId, OrderQuoteRequest, OrderQuoteSideKindSell, SigningScheme } from '@cowprotocol/cow-sdk'
+import { OrderBookApi, OrderSigningUtils, OrderQuoteRequest, OrderQuoteSideKindSell, SigningScheme } from '@cowprotocol/cow-sdk'
 import { ethers } from 'ethers';
 import dotenv from 'dotenv';
 import fs from 'fs'
@@ -25,23 +25,22 @@ const provider = new ethers.providers.Web3Provider(fordefiProvider)
 
 // Prepare CowSwap quote
 const quoteRequest: OrderQuoteRequest = {
-  sellToken: '0xC4441c2BE5d8fA8126822B9929CA0b81Ea0DE38E', // USUAL
-  buyToken: '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT
+  sellToken: '0xC4441c2BE5d8fA8126822B9929CA0b81Ea0DE38E', // $USUAL token
+  buyToken: '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT token
   from: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
   receiver: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
-  sellAmountBeforeFee: (1000000000000 * 18 ** 6).toString(),
+  sellAmountBeforeFee: (1_000_000_000_000 * 18 ** 6).toString(),
   kind: OrderQuoteSideKindSell.SELL,
   signingScheme: SigningScheme.EIP712
 }
 
 // Init CowSwap orderbook
-const orderBookApi = new OrderBookApi({ chainId: SupportedChainId.MAINNET })
+const orderBookApi = new OrderBookApi({ chainId: EvmChainId.NUMBER_1 })
 
 async function main() {
-
   // Request quote from CowSwap
   const { quote } = await orderBookApi.getQuote(quoteRequest)
-  console.log(quote)
+  console.log("Your quote is", quote);
   
   const unsignedQuote = {
     ...quote,
@@ -50,8 +49,8 @@ async function main() {
   
   // Sign quote with Fordefi
   const signer = provider.getSigner();
-  const signedQuote = await OrderSigningUtils.signOrder(unsignedQuote, SupportedChainId.MAINNET, signer);
-  console.log(signedQuote)
+  const signedQuote = await OrderSigningUtils.signOrder(unsignedQuote, EvmChainId.NUMBER_1, signer);
+  console.log("Your signed quote is", signedQuote);
 
   // Created swap order
   const orderCreation = {
@@ -59,12 +58,12 @@ async function main() {
     signature: signedQuote.signature,
     signingScheme: signedQuote.signingScheme as unknown as SigningScheme,
   };
-  console.log(orderCreation)
+  console.log("Your order creation request is", orderCreation);
 
   // Send order to CowSwap for execution
   const orderId = await orderBookApi.sendOrder(orderCreation);
   const order = await orderBookApi.getOrder(orderId)
-  console.log(order)
+  console.log("Your order is", orderCreation);
 }
 
 main().catch(console.error);

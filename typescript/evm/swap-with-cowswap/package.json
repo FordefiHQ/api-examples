@@ -1,5 +1,5 @@
 {
-  "name": "cow-swap",
+  "name": "@fordefi/cow-swap",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
