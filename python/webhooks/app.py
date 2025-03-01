@@ -30,7 +30,7 @@ def verify_signature(signature: str, body: bytes) -> bool:
         print(f"Signature verification error: {e}")
         return False
 
-@app.post("/fordefi_webhook")
+@app.post("/")
 async def fordefi_webhook(request: Request):
     """
     A webhook endpoint that listens for Fordefi events.
