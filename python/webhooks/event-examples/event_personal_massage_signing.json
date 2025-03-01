@@ -1,0 +1,24 @@
+{
+    "webhook_id": "1547fa74-f09f-46b2-a816-77b84a86a0cd",
+    "created_at": "2025-02-03T15:54:32Z",
+    "event_id": "3a06c9fb-694c-4bee-9fe6-bbd54611722e",
+    "attempt": 1,
+    "sent_at": "2025-02-03T15:54:32.400918Z",
+    "event": {
+      "transaction_id": "c5b1de29-06c1-4e7d-ba5a-0c644359fa3a",
+      "is_managed_transaction": true,
+      "direction": "outgoing",
+      "note": null,
+      "spam_state": "unset",
+      "type": "evm_message",
+      "evm_message_type": "personal_message_type",
+      "state": "completed",
+      "chain": {
+        "chain_type": "evm",
+        "named_chain_id": "base_mainnet",
+        "chain_id": 8453,
+        "unique_id": "evm_base_mainnet"
+      }
+    },
+    "event_type": "transaction_state_update"
+}
