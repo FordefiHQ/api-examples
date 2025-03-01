@@ -12,6 +12,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
   * ERC20 token transfers
   * Solana SOL transfers
   * Solana SPL token transfers
+* Setting up Fordefi Webhooks
 
 ## TypeScript Examples 🟦
 * On EVM chains (Ethereum, Base, Arbitrum, etc.):

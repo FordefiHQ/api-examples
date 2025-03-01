@@ -68,7 +68,7 @@ Then configure your Fordefi webhook to use the ngrok URL.
 
 1. Log in to your Fordefi console
 2. Navigate to Settings > Webhooks
-3. Add a new webhook with your server's URL (e.g., `https://your-server.com/fordefi_webhook`)
+3. Add a new webhook with your ngrok server's URL (e.g., `https://your-server.com/`)
 4. Save the webhook configuration
 5. Test the webhook
 
