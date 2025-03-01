@@ -2,6 +2,13 @@
 
 This webhook handler listens for events from your Fordefi organization and processes transaction data.
 
+It exposes a single POST endpoint which:
+
+1. Verifies the signature in the `X-Signature` header
+2. Extracts the transaction ID from the event
+3. Fetches detailed transaction data from the Fordefi API
+4. Returns the transaction data for further processing
+
 ## Prerequisites
 
 - Python 3.x
@@ -37,7 +44,10 @@ This webhook handler listens for events from your Fordefi organization and proce
    ```
    Then select "Run signer" in the Docker container.
 
-## Running the Webhook Server
+
+## Testing
+
+### Running the Webhook Server
 
 Start the webhook server with:
 ```bash
@@ -46,34 +56,21 @@ uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 
 This will start a FastAPI server on port 8000 that listens for webhook events from Fordefi.
 
-## Webhook Endpoint
-
-The webhook exposes a single endpoint:
-
-- **POST /fordefi_webhook**: Receives webhook events from Fordefi
-
-The endpoint:
-1. Verifies the signature in the `X-Signature` header
-2. Extracts the transaction ID from the event
-3. Fetches detailed transaction data from the Fordefi API
-4. Returns the transaction data for further processing
-
-## Configuring Fordefi Webhooks
-
-1. Log in to your Fordefi console
-2. Navigate to Settings > Webhooks
-3. Add a new webhook with your server's URL (e.g., `https://your-server.com/fordefi_webhook`)
-4. Save the webhook configuration
-
-## Testing
-
-You can use tools like ngrok to expose your local webhook server to the internet for testing:
+You can now use tools like ngrok to expose your local webhook server to the internet for testing:
 
 ```bash
 ngrok http 8000
 ```
 
 Then configure your Fordefi webhook to use the ngrok URL.
+
+### Configuring Fordefi Webhooks
+
+1. Log in to your Fordefi console
+2. Navigate to Settings > Webhooks
+3. Add a new webhook with your server's URL (e.g., `https://your-server.com/fordefi_webhook`)
+4. Save the webhook configuration
+5. Test the webhook
 
 ## Learn More About the Fordefi API:
 
