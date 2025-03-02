@@ -83,11 +83,10 @@ def main():
   
         print("Making API request to Fordefi 📡")
         method = "post" 
-        resp_tx = make_api_request(PATH, FORDEFI_API_USER_TOKEN, signature, timestamp, request_body, method=method)
+        response_data = make_api_request(PATH, FORDEFI_API_USER_TOKEN, signature, timestamp, request_body, method=method)
 
         try:
 
-            response_data = resp_tx.json()
             print("\nResponse Data:")
             print(json.dumps(response_data, indent=2))
 
@@ -106,16 +105,16 @@ def main():
         except json.JSONDecodeError:
             print("Failed printing response data!")
         
-        resp_tx.raise_for_status()
-        return resp_tx
+        response_data.raise_for_status()
+        return response_data
     except requests.exceptions.HTTPError as e:
         error_message = f"HTTP error occurred: {str(e)}"
-        if resp_tx.text:
+        if response_data.text:
             try:
-                error_detail = resp_tx.json()
+                error_detail = response_data.json()
                 error_message += f"\nError details: {error_detail}"
             except json.JSONDecodeError:
-                error_message += f"\nRaw response: {resp_tx.text}"
+                error_message += f"\nRaw response: {response_data.text}"
         raise RuntimeError(error_message)
     except requests.exceptions.RequestException as e:
         raise RuntimeError(f"Network error occurred: {str(e)}")

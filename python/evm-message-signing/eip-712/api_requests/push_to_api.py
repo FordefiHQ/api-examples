@@ -27,7 +27,7 @@ def make_api_request(path, access_token, signature, timestamp, request_body, met
             data=request_body,
         )
         resp_tx.raise_for_status()
-        
+
         return resp_tx.json()
 
     except requests.exceptions.HTTPError as e:
