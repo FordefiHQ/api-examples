@@ -104,9 +104,6 @@ def main():
 
         except json.JSONDecodeError:
             print("Failed printing response data!")
-        
-        response_data.raise_for_status()
-        return response_data
     except requests.exceptions.HTTPError as e:
         error_message = f"HTTP error occurred: {str(e)}"
         if response_data.text:
