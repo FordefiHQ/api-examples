@@ -1,7 +1,8 @@
 import ecdsa
 import hashlib
+from pathlib import Path
 
-PRIVATE_KEY_PEM_FILE = "./secret/private.pem"
+PRIVATE_KEY_PEM_FILE = Path("./secret/private.pem")
 
 def sign(payload):
 

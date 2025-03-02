@@ -11,7 +11,7 @@ The script allows you to:
 
 ## Prerequisites
 
-- Python 3.x
+- Python 3.8+
 - Fordefi EVM Vault
 - Fordefi API User Token and API Signer (setup instructions can be found [here](https://docs.fordefi.com/developers/program-overview))
 
