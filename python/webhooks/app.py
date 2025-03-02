@@ -4,6 +4,7 @@ import requests
 import base64
 import hashlib
 import ecdsa
+from pathlib import Path 
 from http import HTTPStatus
 from dotenv import load_dotenv
 from ecdsa.util import sigdecode_der
@@ -11,9 +12,10 @@ from fastapi import FastAPI, Request, HTTPException
 
 app = FastAPI()
 
+# Load Fordefi credentials
 load_dotenv()
 FORDEFI_API_USER_TOKEN = os.getenv("FORDEFI_API_USER_TOKEN")
-public_key_path = "./public_key.pem"
+public_key_path = Path("./public_key.pem")
 with open(public_key_path, "r") as f:
     FORDEFI_PUBLIC_KEY = f.read()
 signature_pub_key = ecdsa.VerifyingKey.from_pem(FORDEFI_PUBLIC_KEY)

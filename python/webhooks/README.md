@@ -11,7 +11,7 @@ It exposes a single POST endpoint which:
 
 ## Prerequisites
 
-- Python 3.x
+- Python 3.8+
 - Fordefi API User Token and Fordefi API Signer set up: [https://docs.fordefi.com/developers/program-overview](https://docs.fordefi.com/developers/program-overview)
 - Setting up webhook from Fordefi console: [https://docs.fordefi.com/developers/webhooks](https://docs.fordefi.com/developers/webhooks)
 
