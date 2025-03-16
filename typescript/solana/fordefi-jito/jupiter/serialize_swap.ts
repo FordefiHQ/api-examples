@@ -78,7 +78,7 @@ async function getSwapTxIx(quote: any, user: PublicKey) {
     ];
 }
 
-async function main(){
+export async function createJupiterSwapTx(){
 
     // We generate a quote from Jupiter
     const quote = await getSwapQuote(SWAP_AMOUNT, SLIPPAGE, INPUT_TOKEN, OUTPUT_TOKEN)
@@ -143,14 +143,15 @@ async function main(){
         "wait_for_state": "signed" // only for create-and-wait
     };
 
-    // For debugging - write json body to file
-    fs.writeFileSync(
-        './txs/serialized_tx.json',
-        JSON.stringify(jsonBody, null, 2), 
-        'utf8'
-    );
-    console.log("Tx data written to .txs/serialized_tx.json");
+    // // For debugging - write json body to file
+    // fs.writeFileSync(
+    //     './txs/serialized_tx.json',
+    //     JSON.stringify(jsonBody, null, 2), 
+    //     'utf8'
+    // );
+    // console.log("Tx data written to .txs/serialized_tx.json");
+
+    return jsonBody
 
 
-    }
-    main().catch(console.error);
+}
