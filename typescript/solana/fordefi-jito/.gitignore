@@ -4,3 +4,4 @@ withdraw_tx.json
 secret/*
 package-lock.json
 txs/*
+bin
