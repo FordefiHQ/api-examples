@@ -1,10 +1,8 @@
 import os
-from dotenv import load_dotenv
 import argparse  
 import logging  
 import time  
 import uuid
-
 import requests
 
 PORT = 8080
@@ -57,11 +55,8 @@ def parse_args() -> argparse.Namespace:
 
 
 if __name__ == "__main__":  
-    # Load environment variables from .env file
-    load_dotenv()
-    
+
     args = parse_args()  
-    
     # Use access token from args if provided, otherwise from .env variable
     access_token = args.access_token or os.getenv("FORDEFI_API_USER_TOKEN")
     if not access_token:

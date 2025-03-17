@@ -20,12 +20,6 @@ class WebhooksListener(http.server.BaseHTTPRequestHandler):
         self.send_response(http.HTTPStatus.OK, "OK")  
         self.end_headers()
 
-    def do_GET(self):
-        logger.info("Received GET request")
-        self.send_response(http.HTTPStatus.OK)
-        self.end_headers()
-        self.wfile.write(b"Got GET request")
-
     def _on_transaction_update(self, transaction_event) -> None:
         transaction_id = transaction_event["transaction_id"]
         state = transaction_event["state"]
