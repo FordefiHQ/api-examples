@@ -20,7 +20,7 @@ A tool for creating and broadcasting Solana transactions with Jito's Block Engin
    RPC_PROVIDER_KEY="<your_rpc_access_token>" // ONLY if you're not using a public RPC provider
    ```
 5. Create a `/secret` folder at the root of the `fordefi-jito` project and place your API User's `private.pem` private key file in the folder.
-6. Create an empty `txs` at the root of the `fordefi-jito` project
+6. Create an empty `txs` at the root of the `fordefi-jito` project.
 7. In `create_sign_push.ts`, configure the following:
 ```typescript
 const fordefiConfig = {
