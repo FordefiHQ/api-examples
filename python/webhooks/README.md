@@ -51,15 +51,15 @@ It exposes a single POST endpoint which:
 
 Start the webhook server with:
 ```bash
-uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+uvicorn app:app --host 0.0.0.0 --port 8080 --reload
 ```
 
-This will start a FastAPI server on port 8000 that listens for webhook events from Fordefi.
+This will start a FastAPI server on port 8080 that listens for webhook events from Fordefi.
 
 You can now use tools like ngrok to expose your local webhook server to the internet for testing:
 
 ```bash
-ngrok http 8000
+ngrok http 8080
 ```
 
 Then configure your Fordefi webhook to use the ngrok URL.
