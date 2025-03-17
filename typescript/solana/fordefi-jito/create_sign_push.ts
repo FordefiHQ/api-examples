@@ -1,6 +1,6 @@
-import { signWithApiSigner } from './signing/signer';
+import { signWithApiSigner } from './signer';
 import { createAndSignTx } from './utils/process_tx'
-import { pushToJito } from './jito/push_to_jito'
+import { pushToJito } from './push_to_jito'
 import { createJupiterSwapTx } from './jupiter/serialize_swap'
 import { createMeteoraSwapTx } from './meteora/serialize_swap'
 import dotenv from 'dotenv'

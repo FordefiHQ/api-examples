@@ -1,5 +1,4 @@
 import axios, { AxiosResponse } from 'axios';
-//import * as base64 from 'base-64';
 
 export async function createAndSignTx(
   path: string,
