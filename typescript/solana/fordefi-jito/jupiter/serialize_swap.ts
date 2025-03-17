@@ -1,4 +1,3 @@
-import fs from 'fs'
 import axios from 'axios';
 import * as web3 from '@solana/web3.js'
 import * as jito from 'jito-ts'
@@ -8,12 +7,9 @@ import { getJitoTipAccount } from '../utils/get_jito_tip_account'
 
 ////// TO CONFIGURE //////
 dotenv.config()
-const QUICKNODE_KEY = process.env.QUICKNODE_MAINNET_KEY
-const connection = new web3.Connection(`${QUICKNODE_KEY}`)
-const VAULT_ID = process.env.VAULT_ID
-const FORDEFI_SOLANA_ADDRESS_PUBKEY = new web3.PublicKey("CtvSEG7ph7SQumMtbnSKtDTLoUQoy8bxPUcjwvmNgGim")
+const connection = new web3.Connection("https://api.mainnet-beta.solana.com")
 const JITO_TIP = 1000 // Jito tip amount in lamports (1 SOL = 1e9 lamports)
-const SWAP_AMOUNT = '10000000' // in lamports
+const SWAP_AMOUNT = '1000000' // in lamports
 const SLIPPAGE =  '50' //in bps
 const INPUT_TOKEN = 'So11111111111111111111111111111111111111112' // SOL
 const OUTPUT_TOKEN = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' // USDC Mint Address
@@ -78,13 +74,13 @@ async function getSwapTxIx(quote: any, user: PublicKey) {
     ];
 }
 
-export async function createJupiterSwapTx(){
+export async function createJupiterSwapTx(vaultId: string, fordefiSolanaVaultAddress: string){
 
     // We generate a quote from Jupiter
     const quote = await getSwapQuote(SWAP_AMOUNT, SLIPPAGE, INPUT_TOKEN, OUTPUT_TOKEN)
 
     // We grab the instructions and the lookup table
-    const [jupiterSwapTxIx, lookupTableAddress] = await getSwapTxIx(quote, FORDEFI_SOLANA_ADDRESS_PUBKEY)
+    const [jupiterSwapTxIx, lookupTableAddress] = await getSwapTxIx(quote, new web3.PublicKey(fordefiSolanaVaultAddress))
 
     // We fetch the actual lookup table
     const lookupTableAccount = await connection.getAddressLookupTable(
@@ -104,7 +100,7 @@ export async function createJupiterSwapTx(){
     // Create all instructions including Jito tip
     const swapTxIx = [
         web3.SystemProgram.transfer({
-            fromPubkey: FORDEFI_SOLANA_ADDRESS_PUBKEY,
+            fromPubkey: new web3.PublicKey(fordefiSolanaVaultAddress),
             toPubkey: jitoTipAccount,
             lamports: JITO_TIP,
         }),
@@ -117,7 +113,7 @@ export async function createJupiterSwapTx(){
     // We create a V0 TransactionMessage and add our lookup table
     const messageV0 = new web3.VersionedTransaction(
         new web3.TransactionMessage({
-            payerKey: FORDEFI_SOLANA_ADDRESS_PUBKEY,
+            payerKey: new web3.PublicKey(fordefiSolanaVaultAddress),
             recentBlockhash: blockhash,
             instructions: swapTxIx
         }).compileToV0Message([lookupTableAccount])
@@ -130,7 +126,7 @@ export async function createJupiterSwapTx(){
 
     // We create a JSON
     const jsonBody = {
-        "vault_id": VAULT_ID, // Replace with your vault ID
+        "vault_id": vaultId, // Replace with your vault ID
         "signer_type": "api_signer",
         "sign_mode": "auto", // IMPORTANT
         "type": "solana_transaction",

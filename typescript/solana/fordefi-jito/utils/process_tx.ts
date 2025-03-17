@@ -56,9 +56,6 @@ export async function createAndSignTx(
 export async function get_tx(
   path: string,
   accessToken: string,
-  signature: string,
-  timestamp: number,
-  requestBody: string
 ): Promise<any> {
   const url = `https://api.fordefi.com${path}`;
 
@@ -66,11 +63,8 @@ export async function get_tx(
     const respTx = await axios.request({
       method: 'GET',
       url,
-      params: requestBody ? JSON.parse(requestBody) : {},
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        'x-signature': signature,
-        'x-timestamp': timestamp,
         'Content-Type': 'application/json',
       },
       validateStatus: () => true,
