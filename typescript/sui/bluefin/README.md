@@ -40,8 +40,15 @@ A tool for swapping and creating pools on Bluefin on Sui with your Fordefi Vault
 1. Ensure your API Signer is running.
 2. In `pool.ts`, configure the `liquidityParams`, for example:
 ```typescript
-liquidityParams
+  const liquidityParams = {
+    fix_amount_a: true, 
+    coinAmount: "1000", // Amount of the fixed token
+    tokenMaxA: "1000", // Max amount of token A to use (if fix_amount_a is false)
+    tokenMaxB: "1000",  // Max amount of token B to use (if fix_amount_a is true)
+    lowerTick: -100000,
+    upperTick: 100000
+  };
 ```
-3. Run `npm run swap`. The script will create and sign a swap transaction with your Fordefi Vault and send the transaction to Bluefin for execution.
+3. Run `npm run pool`. The script will create and sign a swap transaction with your Fordefi Vault and send the transaction to Bluefin for execution.
 
 
