@@ -1,6 +1,6 @@
-# Solana Transaction Sender with Fordefi Integration
+# Swappin SPL Tokens on Jupiter or Meteora from your Fordefi Vault
 
-A tool for creating and broadcasting Solana transactions with Jito's Block Engine integration and the Fordefi API.
+Helper code for creating and broadcasting Solana swaps with Jupiter, Meteora and Jito's Block Engine for improved landing rate.
 
 ## Prerequisites
 
@@ -45,8 +45,8 @@ const swapConfig = {
   jitoTip: 1000, // Jito tip amount in lamports (1 SOL = 1e9 lamports)
   swapAmount: '1000000', // in lamports
   slippage: '50', // in bps
-  inputToken: '<address_of_input_token>', 
-  outputToken: '<address_of_output_token>'
+  inputToken: '<mint_address_of_input_token>', 
+  outputToken: '<mint_address_of_output_token>'
 }
 ```
 3. Run `npm run jupiter_swap`. The script will create and sign a swap transaction with your Fordefi Vault and send the transaction to Jito's Block Engine.
