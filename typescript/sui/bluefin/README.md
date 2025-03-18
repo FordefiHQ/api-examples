@@ -5,7 +5,7 @@ A tool for swapping and creating pools on Bluefin on Sui with your Fordefi Vault
 ## Prerequisites
 
 - Fordefi API user token and API Signer set up ([link to tutorial](https://docs.fordefi.com/developers/program-overview))
-- Sui Vault in Foredefi
+- Sui Vault in Fordefi
 
 ## Setup
 
@@ -15,13 +15,14 @@ A tool for swapping and creating pools on Bluefin on Sui with your Fordefi Vault
 4. Run `npm install` to install all the dependencies.
 5. Create a `.env` file in the root directory with the following variable:
    ```typescript
-   FORDEFI_API_TOKEN="<your_api_token>" // Your Fordefi API User JWT
-   VAULT_ID="<you_Fordefi_Sui_Vault_ID>"
-   VAULT_ADDRESS="<you_Fordefi_Ui_Vault_address>"
+   FORDEFI_API_TOKEN="<your_api_user_token>" // Your Fordefi API User JWT
+   VAULT_ID="<your_Fordefi_Sui_Vault_ID>"
+   VAULT_ADDRESS="<your_Fordefi_Sui_Vault_address>"
    ```
 6. Create a `/fordefi_secret` folder at the root of the `bluefin` project and place your API User's `private.pem` private key file in the folder.
 
 ## Example usage for a swap on Bluefin
+
 1. Ensure your API Signer is running.
 2. In `swap.ts`, configure the `swapParams`, for example:
 ```typescript
@@ -37,6 +38,7 @@ A tool for swapping and creating pools on Bluefin on Sui with your Fordefi Vault
 3. Run `npm run swap`. The script will create and sign a swap transaction with your Fordefi Vault and send the transaction to Bluefin for execution.
 
 ## Example usage for creating a pool on Bluefin
+
 1. Ensure your API Signer is running.
 2. In `pool.ts`, configure the `liquidityParams`, for example:
 ```typescript

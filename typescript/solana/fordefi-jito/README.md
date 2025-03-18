@@ -1,4 +1,4 @@
-# Swappin SPL Tokens on Jupiter or Meteora from your Fordefi Vault
+# Swapping SPL Tokens on Jupiter or Meteora from your Fordefi Vault
 
 Helper code for creating and broadcasting Solana swaps with Jupiter, Meteora and Jito's Block Engine for improved landing rate.
 
@@ -6,7 +6,7 @@ Helper code for creating and broadcasting Solana swaps with Jupiter, Meteora and
 
 - Fordefi API user token and API Signer set up ([link to tutorial](https://docs.fordefi.com/developers/program-overview))
 - Solana Vault in Foredefi
-- OPTIONAL: RPC token (Quicknode, Helius, etc.) if you do not want to use Solana's public RPC endpoint
+- OPTIONAL: RPC API token (Quicknode, Helius, etc.) if you do not want to use Solana's public RPC endpoint
 
 ## Setup
 
@@ -16,9 +16,9 @@ Helper code for creating and broadcasting Solana swaps with Jupiter, Meteora and
 4. Run `npm install` to install all the dependencies.
 5. Create a `.env` file in the root directory with the following variable:
    ```typescript
-   FORDEFI_API_TOKEN="<your_api_token>" // Your Fordefi API User JWT
-   VAULT_ID="<you_Fordefi_Solana_Vault_ID>"
-   VAULT_ADDRESS="<you_Fordefi_Solana_Vault_address>"
+   FORDEFI_API_TOKEN="<your_api_user_token>" // Your Fordefi API User JWT
+   VAULT_ID="<your_Fordefi_Solana_Vault_ID>"
+   VAULT_ADDRESS="<your_Fordefi_Solana_Vault_address>"
    ```
 6. Create a `/secret` folder at the root of the `fordefi-jito` project and place your API User's `private.pem` private key file in the folder.
 7. Create an empty `txs` at the root of the `fordefi-jito` project.
