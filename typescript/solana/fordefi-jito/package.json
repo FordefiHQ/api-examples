@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "tx": "ts-node --project tsconfig.json create_sign_push.ts"
+    "jupiter_swap": "ts-node --project tsconfig.json jupiter_swap.ts",
+    "meteora_swap": "ts-node --project tsconfig.json meteora_swap.ts"
   },
   "keywords": [],
   "author": "",
