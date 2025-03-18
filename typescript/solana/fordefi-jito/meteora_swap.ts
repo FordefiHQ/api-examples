@@ -1,8 +1,9 @@
 import { signWithApiSigner } from './signer';
 import { createAndSignTx } from './utils/process_tx'
 import { pushToJito } from './push_to_jito'
-import { createJupiterSwapTx } from './jupiter/serialize_swap'
 import { createMeteoraSwapTx } from './meteora/serialize_swap'
+import { PublicKey } from '@solana/web3.js'
+import { BN } from 'bn.js'
 import dotenv from 'dotenv'
 import fs from 'fs'
 
@@ -10,12 +11,19 @@ import fs from 'fs'
 // Fordefi Config to configure
 dotenv.config()
 const fordefiConfig = {
-  accessToken: process.env.FORDEFI_API_TOKEN,
-  vaultId: "9597e08a-32a8-4f96-a043-a3e7f1675f8d",
-  fordefiSolanaVaultAddress:"CtvSEG7ph7SQumMtbnSKtDTLoUQoy8bxPUcjwvmNgGim",
+  accessToken: process.env.FORDEFI_API_TOKEN || "",
+  vaultId: process.env.VAULT_ID || "",
+  fordefiSolanaVaultAddress: process.env.VAULT_ADDRESS || "",
   privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
   apiPathEndpoint: '/api/v1/transactions/create-and-wait'
 };
+
+const swapConfig = {
+  jitoTip: 1000, // Jito tip amount in lamports (1 SOL = 1e9 lamports)
+  swapAmount: new BN(100), // in lamports
+  pool: new PublicKey('A8nPhpCJqtqHdqUk35Uj9Hy2YsGXFkCZGuNwvkD3k7VC') // TRUMP_USDC_POOL
+}
+
 
 async function main(): Promise<void> {
   if (!fordefiConfig.accessToken) {
@@ -23,9 +31,7 @@ async function main(): Promise<void> {
     return;
   }
   // We create the tx (In this case we're using Jupiter)
-  const jsonBody = await createJupiterSwapTx(fordefiConfig.vaultId, fordefiConfig.fordefiSolanaVaultAddress)
-  // (... but you can change it to Meteora)
-  //const jsonBody = await createMeteoraSwapTx(fordefiConfig.vaultId, fordefiConfig.fordefiSolanaVaultAddress)
+  const jsonBody = await createMeteoraSwapTx(fordefiConfig.vaultId, fordefiConfig.fordefiSolanaVaultAddress, swapConfig)
 
   // Fetch serialized tx from json file
   const requestBody = JSON.stringify(jsonBody);

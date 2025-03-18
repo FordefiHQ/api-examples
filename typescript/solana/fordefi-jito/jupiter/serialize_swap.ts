@@ -1,25 +1,19 @@
 import axios from 'axios';
 import * as web3 from '@solana/web3.js'
 import * as jito from 'jito-ts'
-import dotenv from 'dotenv'
 import { PublicKey } from '@solana/web3.js';
 import { getJitoTipAccount } from '../utils/get_jito_tip_account'
 
-////// TO CONFIGURE //////
-dotenv.config()
-const connection = new web3.Connection("https://api.mainnet-beta.solana.com")
-const JITO_TIP = 1000 // Jito tip amount in lamports (1 SOL = 1e9 lamports)
-const SWAP_AMOUNT = '1000000' // in lamports
-const SLIPPAGE =  '50' //in bps
-const INPUT_TOKEN = 'So11111111111111111111111111111111111111112' // SOL
-const OUTPUT_TOKEN = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' // USDC Mint Address
-////// TO CONFIGURE //////
 
+const connection = new web3.Connection("https://api.mainnet-beta.solana.com")
 
 // Get quote from Jupiter
 async function getSwapQuote(swap_amount: string, slippage: string, input_token: string, output_token: string): Promise<any> {
 
-    const quoteResponse = await axios.get('https://quote-api.jup.ag/v6/quote', {
+    console.log("Input token", input_token )
+    console.log("Output token", output_token )
+
+    const quoteResponse = await axios.get('https://api.jup.ag/swap/v1/quote', {
         params: {
             inputMint:input_token,
             outputMint: output_token,
@@ -36,7 +30,7 @@ async function getSwapQuote(swap_amount: string, slippage: string, input_token: 
 async function getSwapTxIx(quote: any, user: PublicKey) {
 
     // We get a series of instructions and a lookup table from the API
-    const response = await axios.post('https://quote-api.jup.ag/v6/swap-instructions', {
+    const response = await axios.post('https://api.jup.ag/swap/v1/swap-instructions', {
         quoteResponse: quote,
         userPublicKey: user.toBase58(),
         minimizeSteps: true
@@ -74,10 +68,12 @@ async function getSwapTxIx(quote: any, user: PublicKey) {
     ];
 }
 
-export async function createJupiterSwapTx(vaultId: string, fordefiSolanaVaultAddress: string){
+export async function createJupiterSwapTx(vaultId: string, fordefiSolanaVaultAddress: string, swapConfig: any){
+
+    console.log("SwapConfig", swapConfig)
 
     // We generate a quote from Jupiter
-    const quote = await getSwapQuote(SWAP_AMOUNT, SLIPPAGE, INPUT_TOKEN, OUTPUT_TOKEN)
+    const quote = await getSwapQuote(swapConfig.swapAmount, swapConfig.slippage, swapConfig.inputToken, swapConfig.outputToken)
 
     // We grab the instructions and the lookup table
     const [jupiterSwapTxIx, lookupTableAddress] = await getSwapTxIx(quote, new web3.PublicKey(fordefiSolanaVaultAddress))
@@ -95,14 +91,14 @@ export async function createJupiterSwapTx(vaultId: string, fordefiSolanaVaultAdd
 
     // Get Jito Tip Account
     const jitoTipAccount = await getJitoTipAccount(client)
-    console.log(`Tip amount -> ${JITO_TIP}`)
+    console.log(`Tip amount -> ${swapConfig.jitoTip}`)
 
     // Create all instructions including Jito tip
     const swapTxIx = [
         web3.SystemProgram.transfer({
             fromPubkey: new web3.PublicKey(fordefiSolanaVaultAddress),
             toPubkey: jitoTipAccount,
-            lamports: JITO_TIP,
+            lamports: swapConfig.jitoTip,
         }),
         ...jupiterSwapTxIx
     ];

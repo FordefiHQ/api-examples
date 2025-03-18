@@ -5,31 +5,24 @@ import * as jito from 'jito-ts'
 import { getJitoTipAccount } from '../utils/get_jito_tip_account'
 import { getPriorityFees } from '../utils/get_priority_fees'
 import { getCuLimit } from '../utils/get_cu_limit'
-import dotenv from 'dotenv'
 
-////// TO CONFIGURE //////
-dotenv.config()
-const connection = new web3.Connection("https://api.mainnet-beta.solana.com") // or use https://api.mainnet-beta.solana.com
-const SOL_USDC_POOL = new web3.PublicKey('BVRbyLjjfSBcoyiYFuxbgKYnWuiFaF9CSXEa5vdSZ9Hh') // info can be fetched from block explorer'
-const TRUMP_USDC_POOL = new web3.PublicKey('A8nPhpCJqtqHdqUk35Uj9Hy2YsGXFkCZGuNwvkD3k7VC')
-const JITO_TIP = 1000 // Jito tip amount in lamports (1 SOL = 1e9 lamports)
-const SWAP_AMOUNT = new BN(100);
-////// TO CONFIGURE //////
 
-async function createDlmm(){
+const connection = new web3.Connection("https://api.mainnet-beta.solana.com")
 
-    const dlmmPool = DLMM.create(connection, TRUMP_USDC_POOL); // your pool
+async function createDlmm(pool: web3.PublicKey){
+
+    const dlmmPool = DLMM.create(connection, pool); // your pool
     
     return dlmmPool
 
 }
 
-async function swapQuote(pool: any){
+async function swapQuote(pool: any, swapAmount: typeof BN){
 
     const swapYtoX = true;
     const binArrays = await pool.getBinArrayForSwap(swapYtoX);
     const swapQuote = await pool.swapQuote(
-    SWAP_AMOUNT,
+    swapAmount,
     swapYtoX,
     new BN(10),
     binArrays
@@ -38,13 +31,13 @@ async function swapQuote(pool: any){
     return swapQuote
 }
 
-async function swapIxGetter(pool:any, swapQuote: any, trader: web3.PublicKey){
+async function swapIxGetter(pool:any, swapQuote: any, trader: web3.PublicKey, swapAmount: typeof BN){
 
     // Create swap Tx
     const swapTx = await pool.swap({
         inToken: pool.tokenX.publicKey,
         binArraysPubkey: swapQuote.binArraysPubkey,
-        inAmount: SWAP_AMOUNT,
+        inAmount: swapAmount,
         lbPair: pool.pubkey,
         user: trader,
         minOutAmount: swapQuote.minOutAmount,
@@ -55,29 +48,29 @@ async function swapIxGetter(pool:any, swapQuote: any, trader: web3.PublicKey){
     return swapTx.instructions
 }
 
-export async function createMeteoraSwapTx(vaultId: string, fordefiSolanaVaultAddress: string){
+export async function createMeteoraSwapTx(vaultId: string, fordefiSolanaVaultAddress: string, swapConfig: any){
 
     // Define trader 
     const trader = new web3.PublicKey(fordefiSolanaVaultAddress)
 
     // Invoke Meteora pool
-    const getdlmmPool =  await createDlmm()
+    const getdlmmPool =  await createDlmm(swapConfig.pool)
 
     // Get swap quote from Meteora
-    const getQuote = await swapQuote(getdlmmPool)
+    const getQuote = await swapQuote(getdlmmPool, swapConfig.swapAmount)
     
     // Create Jito client instance
     const client = jito.searcher.searcherClient("frankfurt.mainnet.block-engine.jito.wtf") // can customize the client enpoint based on location
 
     // Get Jito Tip Account
     const jitoTipAccount = await getJitoTipAccount(client)
-    console.log(`Tip amount -> ${JITO_TIP}`)
+    console.log(`Tip amount -> ${swapConfig.jitoTip}`)
 
     // Get Priority fee
     const priorityFee = await getPriorityFees() // OR set a custom number in lamports
 
     // Get Meteora-specific swap instructions
-    const swapIx =  await swapIxGetter(getdlmmPool, getQuote, trader)
+    const swapIx =  await swapIxGetter(getdlmmPool, getQuote, trader, swapConfig.swapAmount)
 
     // Create Tx
     const swapTx = new web3.Transaction()
@@ -88,7 +81,7 @@ export async function createMeteoraSwapTx(vaultId: string, fordefiSolanaVaultAdd
         web3.SystemProgram.transfer({
             fromPubkey: trader,
             toPubkey: jitoTipAccount,
-            lamports: JITO_TIP, 
+            lamports: swapConfig.jitoTip, 
         })
     )
     .add(
