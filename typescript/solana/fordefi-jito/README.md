@@ -6,7 +6,6 @@ A tool for creating and broadcasting Solana transactions with Jito's Block Engin
 
 - Fordefi API user token and API Signer set up ([link to tutorial](https://docs.fordefi.com/developers/program-overview))
 - Solana Vault in Foredefi
-- Python 3.x installed
 - OPTIONAL: RPC token (Quicknode, Helius, etc.) if you do not want to use Solana's public RPC endpoint
 
 ## Setup
