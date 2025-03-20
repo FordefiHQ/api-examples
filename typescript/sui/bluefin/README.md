@@ -43,10 +43,10 @@ A tool for swapping and creating pools on Bluefin on Sui with your Fordefi Vault
 2. In `pool.ts`, configure the `liquidityParams`, for example:
 ```typescript
   const liquidityParams = {
-    fix_amount_a: true, 
-    coinAmount: "1000", // Amount of the fixed token
-    tokenMaxA: "1000", // Max amount of token A to use (if fix_amount_a is false)
-    tokenMaxB: "1000",  // Max amount of token B to use (if fix_amount_a is true)
+    fix_amount_a: true, // We cap the maximum amount of token A (here SUI) to provide to the pool 
+    coinAmount: "1000", // Amount of the fixed token (SUI)
+    tokenMaxA: "1000",  // Max amount of token A (SUI) to use (if fix_amount_a is false) -> expressed in MIST
+    tokenMaxB: "1000",  // Max amount of token B (USDC) to use (if fix_amount_a is true) -> expressed in USDC
     lowerTick: -100000,
     upperTick: 100000
   };

@@ -7,7 +7,8 @@ export async function createAndSignTx(
   timestamp: number,
   requestBody: string
 ): Promise<AxiosResponse> {
-  const url = `https://api.fordefi.com${path}`;
+  const fordefiApiUrl = "https://api.fordefi.com";  // Added semicolon here
+  const url = `${fordefiApiUrl}${path}`;
 
   try {
     const respTx = await axios.post(url, requestBody, {
