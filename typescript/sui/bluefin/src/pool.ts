@@ -10,6 +10,14 @@ const client = new SuiClient({
   url: getFullnodeUrl("mainnet"),
 });
 
+// We check the env are set
+const requiredEnvVars = ['FORDEFI_API_USER_TOKEN', 'VAULT_ID', 'VAULT_ADDRESS'];
+for (const envVar of requiredEnvVars) {
+  if (!process.env[envVar]) {
+    throw new Error(`Missing required environment variable: ${envVar}`);
+  }
+}
+
 const fordefiConfig = {
   accessToken: process.env.FORDEFI_API_USER_TOKEN ?? "",
   privateKeyPath: "./fordefi_secret/private.pem",
@@ -20,7 +28,7 @@ const fordefiConfig = {
 
 async function main() {
 
-  // Liquidity params
+  // Liquidity params with example values
   const liquidityParams = {
     fix_amount_a: true, 
     coinAmount: "1000", // Amount of the fixed token
