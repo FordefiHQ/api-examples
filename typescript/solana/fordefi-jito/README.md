@@ -1,13 +1,12 @@
-# Solana Transaction Sender with Fordefi Integration
+# Swapping SPL Tokens on Jupiter or Meteora from your Fordefi Vault
 
-A tool for creating and broadcasting Solana transactions with Jito's Block Engine integration and the Fordefi API.
+Helper code for creating and broadcasting Solana swaps with Jupiter, Meteora and Jito's Block Engine for improved landing rate.
 
 ## Prerequisites
 
 - Fordefi API user token and API Signer set up ([link to tutorial](https://docs.fordefi.com/developers/program-overview))
 - Solana Vault in Foredefi
-- Python 3.x installed
-- OPTIONAL: RPC token (Quicknode, Helius, etc.) if you do not want to use Solana's public RPC endpoint
+- OPTIONAL: RPC API token (Quicknode, Helius, etc.) if you do not want to use Solana's public RPC endpoint
 
 ## Setup
 
@@ -17,9 +16,9 @@ A tool for creating and broadcasting Solana transactions with Jito's Block Engin
 4. Run `npm install` to install all the dependencies.
 5. Create a `.env` file in the root directory with the following variable:
    ```typescript
-   FORDEFI_API_TOKEN="<your_api_token>" // Your Fordefi API User JWT
-   VAULT_ID="<you_Fordefi_Solana_Vault_ID>"
-   VAULT_ADDRESS="<you_Fordefi_Solana_Vault_address>"
+   FORDEFI_API_TOKEN="<your_api_user_token>" // Your Fordefi API User JWT
+   VAULT_ID="<your_fordefi_solana_vault_id>"
+   VAULT_ADDRESS="<your_fordefi_solana_vault_address>"
    ```
 6. Create a `/secret` folder at the root of the `fordefi-jito` project and place your API User's `private.pem` private key file in the folder.
 7. Create an empty `txs` at the root of the `fordefi-jito` project.
@@ -46,8 +45,8 @@ const swapConfig = {
   jitoTip: 1000, // Jito tip amount in lamports (1 SOL = 1e9 lamports)
   swapAmount: '1000000', // in lamports
   slippage: '50', // in bps
-  inputToken: '<address_of_input_token>', 
-  outputToken: '<address_of_output_token>'
+  inputToken: '<mint_address_of_input_token>', 
+  outputToken: '<mint_address_of_output_token>'
 }
 ```
 3. Run `npm run jupiter_swap`. The script will create and sign a swap transaction with your Fordefi Vault and send the transaction to Jito's Block Engine.
