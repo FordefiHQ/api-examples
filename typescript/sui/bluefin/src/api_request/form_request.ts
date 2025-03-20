@@ -1,7 +1,5 @@
-export async function formRequest(vault_id: string, signatureDataB64: any){
-
+export async function createRequest(vault_id: string, signatureDataB64: string) {
     const requestJson =  {
-
         vault_id: vault_id,
         note: 'Testing SUI',
         signer_type: 'api_signer',
@@ -13,8 +11,7 @@ export async function formRequest(vault_id: string, signatureDataB64: any){
           data: signatureDataB64,
         },
         wait_for_state: 'signed'
-        
-    }
+    };
 
     return requestJson
 }

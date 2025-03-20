@@ -2,7 +2,7 @@ import { QueryChain } from "@firefly-exchange/library-sui/dist/src/spot";
 import { Transaction } from "@mysten/sui/transactions";
 import { signWithApiSigner } from "../api_request/signer";
 import { SuiClient } from "@firefly-exchange/library-sui";
-import { formRequest } from "../api_request/form_request";
+import { createRequest } from "../api_request/form_request";
 import { createAndSignTx } from "../api_request/pushToApi";
 
 // Selects coins for gas and swap operation
@@ -50,8 +50,8 @@ function prepareSwapArguments(tx: Transaction, poolState: any, swapParams: any, 
   let coinBArg;
   
   if (swapParams.aToB) {
-    // For A→B swap: Use our SUI coin for A, create empty B coin to receive
-    coinAArg = coinForSwap;
+    // For A→B swap
+    coinAArg = tx.object(coinForSwap.coinObjectId);
     coinBArg = tx.moveCall({
       package: "0x2",
       module: "coin",
@@ -59,9 +59,8 @@ function prepareSwapArguments(tx: Transaction, poolState: any, swapParams: any, 
       typeArguments: [coinB],
       arguments: [],
     });
-    console.log("Coin B arguments -> ", coinBArg);
   } else {
-    // For B→A swap: Create empty A coin to receive, use our SUI coin for B
+    // For B→A swap
     coinAArg = tx.moveCall({
       package: "0x2",
       module: "coin",
@@ -69,7 +68,7 @@ function prepareSwapArguments(tx: Transaction, poolState: any, swapParams: any, 
       typeArguments: [coinA],
       arguments: [],
     });
-    coinBArg = coinForSwap;
+    coinBArg = tx.object(coinForSwap.coinObjectId);
   }
   
   return { coinA, coinB, coinAArg, coinBArg };
@@ -80,11 +79,13 @@ function buildSwapTransaction(
   tx: Transaction,
   swapParams: any,
   config: any,
-  coinA: string,
-  coinB: string,
+  coinA: any,
+  coinB: any,
   coinAArg: any,
   coinBArg: any
 ) {
+  console.log("CoinA Args ->", coinAArg)
+  console.log("CoinB Args ->", coinBArg)
   tx.moveCall({
     // Bluefin DEX package ID
     package: config.CurrentPackage,
@@ -124,7 +125,7 @@ async function submitTransactionToFordefi(
   const bcsData = await tx.build({ client });
   const base64TxData = Buffer.from(bcsData).toString("base64");
 
-  const requestBody = JSON.stringify(await formRequest(vault_id, base64TxData));
+  const requestBody = JSON.stringify(await createRequest(vault_id, base64TxData));
   const pathEndpoint = "/api/v1/transactions/create-and-wait";
   const timestamp = new Date().getTime();
   const payload = `${pathEndpoint}|${timestamp}|${requestBody}`;
@@ -145,10 +146,10 @@ export async function swapAssets(
 ) {
   // 1. Build the transaction
   const tx = new Transaction();
-  tx.setSender(senderAddress);
-  tx.setGasOwner(senderAddress);
-  tx.setGasBudget(10_000_000);
-  tx.setGasPrice(1000);
+  tx.setSender(senderAddress);    // The address initiating the transaction
+  tx.setGasOwner(senderAddress);  // The address paying for gas
+  tx.setGasBudget(10_000_000);    // Maximum gas allowed for this transaction in MIST
+  tx.setGasPrice(1000);           // Price in MIST for 1 unit of gas
 
   // 2. Select and prepare coins
   const { coinForGas, coinForSwap } = await selectCoins(client, senderAddress, swapParams.amount, tx);
@@ -168,7 +169,8 @@ export async function swapAssets(
   const { coinA, coinB, coinAArg, coinBArg } = prepareSwapArguments(tx, poolState, swapParams, coinForSwap);
 
   // 5. Build the swap transaction
-  buildSwapTransaction(tx, swapParams, config, coinA, coinB, coinAArg, coinBArg);
+  const builtTx  = buildSwapTransaction(tx, swapParams, config, coinA, coinB, coinAArg, coinBArg);
+  console.log(builtTx)
   
   // 6. Submit transaction to Fordefi
   const fordDefiResult = await submitTransactionToFordefi(client, tx, vault_id, accessToken);
