@@ -51,7 +51,7 @@ function prepareSwapArguments(tx: Transaction, poolState: any, swapParams: any, 
   
   if (swapParams.aToB) {
     // For A→B swap
-    coinAArg = tx.object(coinForSwap.coinObjectId); // <-- pass a transaction reference
+    coinAArg = tx.object(coinForSwap.coinObjectId);
     coinBArg = tx.moveCall({
       package: "0x2",
       module: "coin",
