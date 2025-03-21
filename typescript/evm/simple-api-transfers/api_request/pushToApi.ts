@@ -7,7 +7,7 @@ export async function createAndSignTx(
   timestamp: number,
   requestBody: string
 ): Promise<AxiosResponse> {
-  const fordefiApiUrl = "https://api.fordefi.com";  // Added semicolon here
+  const fordefiApiUrl = "https://api.fordefi.com";
   const url = `${fordefiApiUrl}${path}`;
 
   try {
@@ -35,7 +35,7 @@ export async function createAndSignTx(
     };
 
     return respTx;
-    
+
   } catch (error: any) {
     // If we have an Axios error with a response, parse it
     if (error.response) {
