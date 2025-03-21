@@ -12,7 +12,7 @@ export async function createRequest(vault_id: string, evm_chain: string, to: str
         "gas": {
           "gas_limit": "21000",
           "type": "priority",
-          "priority_level": "low"
+          "priority_level": "medium"
         },
         "fail_on_prediction_failure": true,
         "skip_prediction": false,
@@ -22,7 +22,7 @@ export async function createRequest(vault_id: string, evm_chain: string, to: str
         "to": to,
         "value": amount
       }
-    }
+    };
 
     return requestJson
 }

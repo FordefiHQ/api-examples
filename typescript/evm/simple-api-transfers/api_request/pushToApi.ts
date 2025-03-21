@@ -32,9 +32,10 @@ export async function createAndSignTx(
         errorMessage += `\nRaw response: ${respTx.data}`;
       }
       throw new Error(errorMessage);
-    }
+    };
 
     return respTx;
+    
   } catch (error: any) {
     // If we have an Axios error with a response, parse it
     if (error.response) {
@@ -46,7 +47,7 @@ export async function createAndSignTx(
         errorMessage += `\nRaw response: ${error.response.data}`;
       }
       throw new Error(errorMessage);
-    }
+    };
 
     // Otherwise, it's a network or unknown error
     throw new Error(`Network error occurred: ${error.message ?? error}`);

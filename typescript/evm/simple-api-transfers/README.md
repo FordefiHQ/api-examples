@@ -1,4 +1,4 @@
-# Fordefi Transaction Script
+# Programmatic EVM Transfer with Fordefi
 
 A simple script for creating programmatic EVM transfers through the Fordefi API.
 
@@ -40,7 +40,7 @@ The script contains two main configuration objects:
 1. `fordefiConfig`: API connection settings
    - Loads credentials from environment variables
    - Specifies network and endpoint paths
-   For example:
+   - For example:
    ```typescript
    const fordefiConfig = {
       accessToken: process.env.FORDEFI_API_USER_TOKEN ?? "",
@@ -55,7 +55,7 @@ The script contains two main configuration objects:
    - `evmChain`: The EVM blockchain network (for example: "bsc", "arbitrum", "ethereum", etc)
    - `to`: Recipient address
    - `amount`: Transaction amount (in wei)
-   For example:
+   - For example:
    ```typescript
    const txParams = {
       evmChain: "bsc", // Binance Smart Chain (BNB Chain)

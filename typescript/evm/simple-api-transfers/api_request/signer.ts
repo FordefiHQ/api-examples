@@ -1,8 +1,6 @@
 import fs from 'fs';
 import * as crypto from 'crypto';
 
-// const privateKeyPem = fs.readFileSync('./secret/private.pem', 'utf8');
-
 export async  function signWithApiSigner(privateKeyPath: string , payload: string): Promise<string> {
   const privateKeyPem = fs.readFileSync(privateKeyPath, 'utf8');
   const privateKey = crypto.createPrivateKey(privateKeyPem);
