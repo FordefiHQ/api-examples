@@ -1,0 +1,21 @@
+{
+  "name": "simple-api-transfers",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "tx": "tsx tx.ts"
+  },
+  "author": "dan jaheny",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^20.17.25",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7"
+  }
+}
