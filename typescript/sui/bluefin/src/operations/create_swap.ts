@@ -20,7 +20,7 @@ async function selectCoins(
 
   // We sort by descending balance
   allCoins.sort((a, b) => Number(b.balance) - Number(a.balance));
-  console.log("All SUI coins:", allCoins);
+  console.log("My coins 🪙🪙 -> ", allCoins);
 
   if (allCoins.length === 0) {
     throw new Error("No SUI coins in the wallet 💸💸");
