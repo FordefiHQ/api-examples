@@ -44,9 +44,9 @@ The script contains two main configuration objects:
    ```typescript
    const fordefiConfig = {
       accessToken: process.env.FORDEFI_API_USER_TOKEN ?? "",
-      privateKeyPath: "./secret/private.pem",
       vaultId: process.env.VAULT_ID || "", // Your Fordefi EVM Vault ID
       senderAddress:process.env.VAULT_ADDRESS || "", // Your Fordefi EVM Vault address
+      privateKeyPath: "./secret/private.pem",
       pathEndpoint:  "/api/v1/transactions"
    };
    ```
@@ -61,7 +61,7 @@ The script contains two main configuration objects:
       evmChain: "bsc", // Binance Smart Chain (BNB Chain)
       to: "0xF659feEE62120Ce669A5C45Eb6616319D552dD93", // third-party EVM address
       amount: "100000" // in wei (1 BNB is equal to 10^18 wei)
-   }
+   };
    ```
 
 ## Usage

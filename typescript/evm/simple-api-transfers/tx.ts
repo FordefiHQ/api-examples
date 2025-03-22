@@ -20,6 +20,7 @@ const txParams = {
 };
 
 async function main(): Promise<void> {
+  // Check .env variables are set
   if (!fordefiConfig.accessToken || !fordefiConfig.vaultId || !fordefiConfig.senderAddress) {
     console.error('Error: Missing required configuration:');
     if (!fordefiConfig.accessToken) console.error('- FORDEFI_API_USER_TOKEN environment variable is not set');
@@ -28,26 +29,26 @@ async function main(): Promise<void> {
     return;
   };
 
-    try {
-      // 1. Prepare request body for Fordefi custody service
-      const requestBody = JSON.stringify(await createRequest(fordefiConfig.vaultId, txParams.evmChain, txParams.to, txParams.amount ));
+  try {
+    // 1. Create json payload for transaction
+    const requestBody = JSON.stringify(await createRequest(fordefiConfig.vaultId, txParams.evmChain, txParams.to, txParams.amount ));
 
-      // 2. Create signature for Fordefi API authentication
-      const timestamp = new Date().getTime();
-      const payload = `${fordefiConfig.pathEndpoint}|${timestamp}|${requestBody}`;
-      const signature = await signWithApiSigner(fordefiConfig.privateKeyPath, payload);
+    // 2. Sign with Fordefi API Signer
+    const timestamp = new Date().getTime();
+    const payload = `${fordefiConfig.pathEndpoint}|${timestamp}|${requestBody}`;
+    const signature = await signWithApiSigner(fordefiConfig.privateKeyPath, payload);
 
-      // 3. Submit the transaction to Fordefi API and wait for result
-      const response = await createAndSignTx(fordefiConfig.pathEndpoint, fordefiConfig.accessToken, signature, timestamp, requestBody);
-      const fordDefiResult = response.data;
-      console.log(fordDefiResult);
-      
-  
-    } catch (error: any) {
-      console.error(`Failed to sign the transaction: ${error.message}`);
-    };
+    // 3. Submit the transaction to Fordefi API and wait for result
+    const response = await createAndSignTx(fordefiConfig.pathEndpoint, fordefiConfig.accessToken, signature, timestamp, requestBody);
+    const fordDefiResult = response.data;
+    console.log(fordDefiResult);
+    
+
+  } catch (error: any) {
+    console.error(`Failed to sign the transaction: ${error.message}`);
   };
+};
   
-  if (require.main === module) {
+if (require.main === module) {
     main();
 }
