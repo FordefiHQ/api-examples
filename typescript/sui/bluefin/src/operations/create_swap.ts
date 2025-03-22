@@ -46,8 +46,10 @@ async function selectCoins(
 
   const swapAmountNum = Number(swapAmount);
   const secondCoinBalance = secondCoin ? Number(secondCoin.balance) : 0;
+  let caseA: boolean | undefined = undefined;
 
   if (allCoins.length >= 2 && secondCoinBalance >= swapAmountNum) {
+    caseA = true
     // CASE A: no splitting needed
     console.log("Two coins are available and second coin is large enough for the swap.");
     coinForGas = largestCoin;
@@ -55,6 +57,7 @@ async function selectCoins(
 
   } else if (allCoins.length >= 2) {
     // CASE B: second coin is too small, we must do ephemeral splitting from largest
+    caseA = false
     console.log("Second coin not sufficient let's split the largest coin inside this transaction 🪓🪓");
 
     // CASE B - 1) We set the gas payment to the largest coin
@@ -74,6 +77,7 @@ async function selectCoins(
 
   } else {
     // CASE C: only 1 coin in total -> split we must
+    caseA = false
     console.log("Only one coin in the wallet. We'll split it for swap + gas 🪓🪓🪓🪓");
 
     // CASE C - 1) We set the gas payment to that single coin
@@ -93,12 +97,12 @@ async function selectCoins(
   }
 
   // Return the coinForSwap references to the caller (can be either a normal coin object or an ephemeral reference)
-  return { coinForSwap };
+  return { coinForSwap, caseA };
 }
 
 
 // Prepares arguments for the swap based on direction
-function prepareSwapArguments(tx: Transaction, poolState: any, swapParams: any, coinForSwap: any) {
+function prepareSwapArguments(tx: Transaction, poolState: any, swapParams: any, coinForSwap: any, caseA: boolean) {
   const coinA = poolState.coin_a.address;
   const coinB = poolState.coin_b.address;
   
@@ -107,7 +111,7 @@ function prepareSwapArguments(tx: Transaction, poolState: any, swapParams: any, 
   
   if (swapParams.aToB) {
     // For A→B swap
-    coinAArg = coinForSwap
+    coinAArg = caseA ? tx.object(coinForSwap.coinObjectId) : coinForSwap;
     coinBArg = tx.moveCall({
       package: "0x2",
       module: "coin",
@@ -124,7 +128,7 @@ function prepareSwapArguments(tx: Transaction, poolState: any, swapParams: any, 
       typeArguments: [coinA],
       arguments: [],
     });
-    coinBArg = coinForSwap
+    coinBArg = caseA ? tx.object(coinForSwap.coinObjectId) : coinForSwap;
   }
   
   return { coinA, coinB, coinAArg, coinBArg };
@@ -208,14 +212,14 @@ export async function swapAssets(
   tx.setGasPrice(1000);           // Price in MIST for 1 unit of gas
 
   // 2. Select and prepare coins
-  const { coinForSwap } = await selectCoins(client, senderAddress, swapParams.amount, tx);
+  const { coinForSwap, caseA } = await selectCoins(client, senderAddress, swapParams.amount, tx);
 
   // 3. Query the pool details
   const qc = new QueryChain(client);
   const poolState = await qc.getPool(swapParams.poolId);
 
   // 4. Prepare arguments for the swap
-  const { coinA, coinB, coinAArg, coinBArg } = prepareSwapArguments(tx, poolState, swapParams, coinForSwap);
+  const { coinA, coinB, coinAArg, coinBArg } = prepareSwapArguments(tx, poolState, swapParams, coinForSwap, caseA);
 
   // 5. Build the swap transaction
   const builtTx  = buildSwapTransaction(tx, swapParams, config, coinA, coinB, coinAArg, coinBArg);
