@@ -41,6 +41,7 @@ async function main(): Promise<void> {
       const response = await createAndSignTx(fordefiConfig.pathEndpoint, fordefiConfig.accessToken, signature, timestamp, requestBody);
       const fordDefiResult = response.data;
       console.log(fordDefiResult);
+      
   
     } catch (error: any) {
       console.error(`Failed to sign the transaction: ${error.message}`);

@@ -31,7 +31,7 @@ async function main() {
   // Swap parameters with example values
   const swapParams = {
     poolId: config.Pools[4].id,    // Bluefin Pool ID for SUI/USDC
-    amount: 10_000_000,             // Amount to swap in MIST (1 SUI = 1_000_000_000 MIST)
+    amount: 10_000_000,            // Amount to swap in MIST (1 SUI = 1_000_000_000 MIST)
     aToB: true,                    // Direction: true = SUI to USDC
     byAmountIn: true,              // byAmountIn: true = amount specified is the input amount
     slippageProtection: 1_000,     // Minimum amount to receive (slippage protection)
