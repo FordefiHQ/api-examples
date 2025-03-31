@@ -31,11 +31,13 @@ async function main() {
   // Swap parameters with example values
   const swapParams = {
     poolId: config.Pools[4].id,    // Bluefin Pool ID for SUI/USDC
-    amount: 10_000_000,             // Amount to swap in MIST (1 SUI = 1_000_000_000 MIST)
+    amount: 10_000_000,            // Amount to swap in MIST (1 SUI = 1_000_000_000 MIST)
     aToB: true,                    // Direction: true = SUI to USDC
     byAmountIn: true,              // byAmountIn: true = amount specified is the input amount
     slippageProtection: 1_000,     // Minimum amount to receive (slippage protection)
-    maximumSqrt: "5295032834"      // Maximum allowed square root price after the swap (price impact protection) - For aToB swaps, this should be **lower** than current sqrt price
+    maximumSqrt: "5295032834",     // Maximum allowed square root price after the swap (price impact protection) - For aToB swaps, this should be **lower** than current sqrt price
+    gasBudget: 10_000_000,         // Maximum gas allowed for this transaction in MIST (1 SUI = 1_000_000_000 MIST)
+    gasPrice: 1_000                // Price in MIST for 1 unit of gas
   };
 
   try {
