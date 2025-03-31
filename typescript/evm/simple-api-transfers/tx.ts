@@ -16,7 +16,7 @@ const fordefiConfig = {
 const txParams = {
   evmChain: "bsc",
   to: "0xF659feEE62120Ce669A5C45Eb6616319D552dD93",
-  amount: "100000" // in wei
+  amount: "100000" // in WEI (10^18 WEI = 1 ETH)
 };
 
 async function main(): Promise<void> {

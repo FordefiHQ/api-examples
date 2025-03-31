@@ -24,5 +24,5 @@ export async function createRequest(vault_id: string, evm_chain: string, to: str
       }
     };
 
-    return requestJson
+    return requestJson;
 }

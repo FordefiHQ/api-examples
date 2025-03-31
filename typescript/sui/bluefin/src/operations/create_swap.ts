@@ -4,6 +4,7 @@ import { signWithApiSigner } from "../api_request/signer";
 import { SuiClient } from "@firefly-exchange/library-sui";
 import { createRequest } from "../api_request/form_request";
 import { createAndSignTx } from "../api_request/pushToApi";
+import { SwapParams } from '../interfaces/swapParams';
 
 
 async function selectCoins(
@@ -30,7 +31,6 @@ async function selectCoins(
   const largestCoin = allCoins[0];
   const secondCoin = allCoins.length >= 2 ? allCoins[1] : null;
 
-
   let coinForGas;
   let coinForSwap;
 
@@ -46,20 +46,18 @@ async function selectCoins(
 
   const swapAmountNum = Number(swapAmount);
   const secondCoinBalance = secondCoin ? Number(secondCoin.balance) : 0;
-  let caseA: boolean | undefined = undefined;
+  let isCaseA: boolean | undefined = undefined;
 
   if (allCoins.length >= 2 && secondCoinBalance >= swapAmountNum) {
-    caseA = true
+    isCaseA = true
     // CASE A: no splitting needed
     console.log("Two coins are available and second coin is large enough for the swap.");
     coinForGas = largestCoin;
     coinForSwap = secondCoin;
-
   } else if (allCoins.length >= 2) {
     // CASE B: second coin is too small, we must do ephemeral splitting from largest
-    caseA = false
+    isCaseA = false
     console.log("Second coin not sufficient let's split the largest coin inside this transaction 🪓🪓");
-
     // CASE B - 1) We set the gas payment to the largest coin
     tx.setGasPayment([
       {
@@ -68,16 +66,14 @@ async function selectCoins(
         version: largestCoin.version,
       },
     ]);
-
     // CASE B - 2) We create an ephemeral reference 
     const [splitCoinForSwap] = tx.splitCoins(tx.gas, [swapAmountNum]);
     // and we'll assign it for the swap
     coinForSwap = splitCoinForSwap;
     coinForGas = largestCoin; 
-
   } else {
     // CASE C: only 1 coin in total -> split we must
-    caseA = false
+    isCaseA = false
     console.log("Only one coin in the wallet. We'll split it for swap + gas 🪓🪓🪓🪓");
 
     // CASE C - 1) We set the gas payment to that single coin
@@ -95,14 +91,15 @@ async function selectCoins(
     coinForGas = largestCoin; 
     coinForSwap = splitCoinForSwap; // that's our ephemeral reference
   }
+  console.log("Coin for Swap", coinForSwap)
 
   // Return the coinForSwap references to the caller (can be either a normal coin object or an ephemeral reference)
-  return { coinForSwap, caseA };
+  return { coinForSwap, isCaseA };
 }
 
 
 // Prepares arguments for the swap based on direction
-function prepareSwapArguments(tx: Transaction, poolState: any, swapParams: any, coinForSwap: any, caseA: boolean) {
+function prepareSwapArguments(tx: Transaction, poolState: any, swapParams: SwapParams, coinForSwap: any, isCaseA: boolean) {
   const coinA = poolState.coin_a.address;
   const coinB = poolState.coin_b.address;
   
@@ -111,7 +108,7 @@ function prepareSwapArguments(tx: Transaction, poolState: any, swapParams: any, 
   
   if (swapParams.aToB) {
     // For A→B swap
-    coinAArg = caseA ? tx.object(coinForSwap.coinObjectId) : coinForSwap;
+    coinAArg = isCaseA ? tx.object(coinForSwap.coinObjectId) : coinForSwap;
     coinBArg = tx.moveCall({
       package: "0x2",
       module: "coin",
@@ -128,9 +125,8 @@ function prepareSwapArguments(tx: Transaction, poolState: any, swapParams: any, 
       typeArguments: [coinA],
       arguments: [],
     });
-    coinBArg = caseA ? tx.object(coinForSwap.coinObjectId) : coinForSwap;
+    coinBArg = isCaseA ? tx.object(coinForSwap.coinObjectId) : coinForSwap;
   }
-  
   return { coinA, coinB, coinAArg, coinBArg };
 }
 
@@ -206,20 +202,20 @@ export async function swapAssets(
 ) {
   // 1. Build the transaction
   const tx = new Transaction();
-  tx.setSender(senderAddress);    // The address initiating the transaction
-  tx.setGasOwner(senderAddress);  // The address paying for gas
-  tx.setGasBudget(10_000_000);    // Maximum gas allowed for this transaction in MIST
-  tx.setGasPrice(1000);           // Price in MIST for 1 unit of gas
+  tx.setSender(senderAddress);            // The address initiating the transaction
+  tx.setGasOwner(senderAddress);          // The address paying for gas
+  tx.setGasBudget(swapParams.gasBudget);  
+  tx.setGasPrice(swapParams.gasPrice);           
 
   // 2. Select and prepare coins
-  const { coinForSwap, caseA } = await selectCoins(client, senderAddress, swapParams.amount, tx);
+  const { coinForSwap, isCaseA } = await selectCoins(client, senderAddress, swapParams.amount, tx);
 
   // 3. Query the pool details
   const qc = new QueryChain(client);
   const poolState = await qc.getPool(swapParams.poolId);
 
   // 4. Prepare arguments for the swap
-  const { coinA, coinB, coinAArg, coinBArg } = prepareSwapArguments(tx, poolState, swapParams, coinForSwap, caseA);
+  const { coinA, coinB, coinAArg, coinBArg } = prepareSwapArguments(tx, poolState, swapParams, coinForSwap, isCaseA);
 
   // 5. Build the swap transaction
   const builtTx  = buildSwapTransaction(tx, swapParams, config, coinA, coinB, coinAArg, coinBArg);
