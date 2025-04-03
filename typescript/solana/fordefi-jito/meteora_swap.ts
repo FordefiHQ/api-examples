@@ -19,9 +19,10 @@ const fordefiConfig = {
 };
 
 const swapConfig = {
+  swapAmount: new BN(100), // in lamports (1 SOL = 1e9 lamports)
+  pool: new PublicKey('A8nPhpCJqtqHdqUk35Uj9Hy2YsGXFkCZGuNwvkD3k7VC'), // TRUMP_USDC_POOL
+  useJito: true, // if true we'll use Jito instead of Fordefi to broadcast the signed transaction
   jitoTip: 1000, // Jito tip amount in lamports (1 SOL = 1e9 lamports)
-  swapAmount: new BN(100), // in lamports
-  pool: new PublicKey('A8nPhpCJqtqHdqUk35Uj9Hy2YsGXFkCZGuNwvkD3k7VC') // TRUMP_USDC_POOL
 }
 
 
@@ -30,7 +31,7 @@ async function main(): Promise<void> {
     console.error('Error: FORDEFI_API_TOKEN environment variable is not set');
     return;
   }
-  // We create the tx (In this case we're using Jupiter)
+  // We create the tx
   const jsonBody = await createMeteoraSwapTx(fordefiConfig.vaultId, fordefiConfig.fordefiSolanaVaultAddress, swapConfig)
 
   // Fetch serialized tx from json file
@@ -47,24 +48,22 @@ async function main(): Promise<void> {
     // Send signed payload to Fordefi for MPC signature
     const response = await createAndSignTx(fordefiConfig.apiPathEndpoint, fordefiConfig.accessToken, signature, timestamp, requestBody);
     const data = response.data;
+    console.log(data)
 
-    // FOR DEBUGGING
-    // console.log(JSON.stringify(data, null, 2));
-    // // Save signed tx to file
-    // fs.writeFileSync('./txs/tx_to_broadcast.json', JSON.stringify(data, null, 2), 'utf-8');
-    // console.log("Data has been saved to './txs/tx_to_broadcast.json'");
-
-    try {
-
-      const transaction_id = data.id
-      console.log(`Transaction ID -> ${transaction_id}`)
-
-      await pushToJito(transaction_id, fordefiConfig.accessToken, fordefiConfig.privateKeyPem)
-
-    } catch (error: any){
-      console.error(`Failed to push the transaction to Jito: ${error.message}`)
+    if(swapConfig.useJito){
+      try {
+        const transaction_id = data.id
+        console.log(`Transaction ID -> ${transaction_id}`)
+  
+        await pushToJito(transaction_id, fordefiConfig.accessToken, fordefiConfig.privateKeyPem)
+  
+      } catch (error: any){
+        console.error(`Failed to push the transaction to Meteora: ${error.message}`)
+      }
+    } else {
+      console.log("Transaction submitted to Fordefi for broadcast ✅")
+      console.log(`Transaction ID: ${data.id}`)
     }
-
 
   } catch (error: any) {
     console.error(`Failed to sign the transaction: ${error.message}`);

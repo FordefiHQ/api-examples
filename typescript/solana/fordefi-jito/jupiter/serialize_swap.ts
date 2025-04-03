@@ -68,6 +68,24 @@ async function getSwapTxIx(quote: any, user: PublicKey) {
     ];
 }
 
+async function createJitoInstructions(fordefiSolanaVaultAddress: string, jitoTip: number): Promise<web3.TransactionInstruction[]> {
+    // Create Jito client instance
+    const client = jito.searcher.searcherClient("frankfurt.mainnet.block-engine.jito.wtf")
+
+    // Get Jito Tip Account
+    const jitoTipAccount = await getJitoTipAccount(client)
+    console.log(`Tip amount -> ${jitoTip}`)
+
+    // Create and return Jito tip instruction
+    return [
+        web3.SystemProgram.transfer({
+            fromPubkey: new web3.PublicKey(fordefiSolanaVaultAddress),
+            toPubkey: jitoTipAccount,
+            lamports: jitoTip,
+        })
+    ];
+}
+
 export async function createJupiterSwapTx(vaultId: string, fordefiSolanaVaultAddress: string, swapConfig: any){
 
     console.log("SwapConfig", swapConfig)
@@ -86,22 +104,9 @@ export async function createJupiterSwapTx(vaultId: string, fordefiSolanaVaultAdd
         throw new Error("Lookup table not found");
     }
 
-    // Create Jito client instance
-    const client = jito.searcher.searcherClient("frankfurt.mainnet.block-engine.jito.wtf") // can customize the client enpoint based on location
-
-    // Get Jito Tip Account
-    const jitoTipAccount = await getJitoTipAccount(client)
-    console.log(`Tip amount -> ${swapConfig.jitoTip}`)
-
-    // Create all instructions including Jito tip
-    const swapTxIx = [
-        web3.SystemProgram.transfer({
-            fromPubkey: new web3.PublicKey(fordefiSolanaVaultAddress),
-            toPubkey: jitoTipAccount,
-            lamports: swapConfig.jitoTip,
-        }),
-        ...jupiterSwapTxIx
-    ];
+    const swapTxIx = swapConfig.useJito 
+    ? [...(await createJitoInstructions(fordefiSolanaVaultAddress, swapConfig.jitoTip)), ...jupiterSwapTxIx]
+    : [...jupiterSwapTxIx];
 
     // Get latest blockhash
     const { blockhash } = await connection.getLatestBlockhash();
@@ -119,16 +124,17 @@ export async function createJupiterSwapTx(vaultId: string, fordefiSolanaVaultAdd
     const serializedMessage = Buffer.from(
         messageV0.message.serialize()
     ).toString('base64');
-
+    
     // We create a JSON
+    const pushMode = swapConfig.useJito ? "manual" : "auto";
     const jsonBody = {
-        "vault_id": vaultId, // Replace with your vault ID
+        "vault_id": vaultId,
         "signer_type": "api_signer",
         "sign_mode": "auto", // IMPORTANT
         "type": "solana_transaction",
         "details": {
             "type": "solana_serialized_transaction_message",
-            "push_mode": "manual", // IMPORTANT,
+            "push_mode": pushMode, // IMPORTANT,
             "data": serializedMessage,  // For legacy transactions, use `serializedLegacyMessage`
             "chain": "solana_mainnet"
         },

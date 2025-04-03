@@ -48,7 +48,27 @@ async function swapIxGetter(pool:any, swapQuote: any, trader: web3.PublicKey, sw
     return swapTx.instructions
 }
 
+async function createJitoInstructions(fordefiSolanaVaultAddress: string, jitoTip: number): Promise<web3.TransactionInstruction[]> {
+    // Create Jito client instance
+    const client = jito.searcher.searcherClient("frankfurt.mainnet.block-engine.jito.wtf")
+
+    // Get Jito Tip Account
+    const jitoTipAccount = await getJitoTipAccount(client)
+    console.log(`Tip amount -> ${jitoTip}`)
+
+    // Create and return Jito tip instruction
+    return [
+        web3.SystemProgram.transfer({
+            fromPubkey: new web3.PublicKey(fordefiSolanaVaultAddress),
+            toPubkey: jitoTipAccount,
+            lamports: jitoTip,
+        })
+    ];
+}
+
 export async function createMeteoraSwapTx(vaultId: string, fordefiSolanaVaultAddress: string, swapConfig: any){
+
+    console.log("SwapConfig", swapConfig)
 
     // Define trader 
     const trader = new web3.PublicKey(fordefiSolanaVaultAddress)
@@ -59,13 +79,6 @@ export async function createMeteoraSwapTx(vaultId: string, fordefiSolanaVaultAdd
     // Get swap quote from Meteora
     const getQuote = await swapQuote(getdlmmPool, swapConfig.swapAmount)
     
-    // Create Jito client instance
-    const client = jito.searcher.searcherClient("frankfurt.mainnet.block-engine.jito.wtf") // can customize the client enpoint based on location
-
-    // Get Jito Tip Account
-    const jitoTipAccount = await getJitoTipAccount(client)
-    console.log(`Tip amount -> ${swapConfig.jitoTip}`)
-
     // Get Priority fee
     const priorityFee = await getPriorityFees() // OR set a custom number in lamports
 
@@ -75,16 +88,12 @@ export async function createMeteoraSwapTx(vaultId: string, fordefiSolanaVaultAdd
     // Create Tx
     const swapTx = new web3.Transaction()
 
-    // Add instructions
-    swapTx
-    .add(
-        web3.SystemProgram.transfer({
-            fromPubkey: trader,
-            toPubkey: jitoTipAccount,
-            lamports: swapConfig.jitoTip, 
-        })
-    )
-    .add(
+    // Add instructions to TX
+    if (swapConfig.useJito) {
+        const jitoInstructions = await createJitoInstructions(fordefiSolanaVaultAddress, swapConfig.jitoTip)
+        swapTx.add(...jitoInstructions)
+    }
+    swapTx.add(
         web3.ComputeBudgetProgram.setComputeUnitPrice({
             microLamports: priorityFee, 
         })
@@ -107,15 +116,6 @@ export async function createMeteoraSwapTx(vaultId: string, fordefiSolanaVaultAdd
     swapTx.recentBlockhash = blockhash;
     swapTx.feePayer = trader;
 
-    // INSPECT TX - FOR DEBUGGING ONLY
-    // console.log("Tx instructions:");
-    // swapTx.instructions.forEach((ix, idx) => {
-    // console.log(`Instruction #${idx}:`);
-    // console.log("  ProgramID:", ix.programId.toBase58());
-    // console.log("  Keys:", ix.keys.map(k => k.pubkey.toBase58()));
-    // console.log("  Data:", ix.data.toString("hex"));
-    // });
-
     // Compile + serialize the swap tx
     const compiledSwapTx = swapTx.compileMessage();
     const serializedV0Message = Buffer.from(
@@ -123,6 +123,7 @@ export async function createMeteoraSwapTx(vaultId: string, fordefiSolanaVaultAdd
     ).toString('base64');
 
     // Create JSON
+    const pushMode = swapConfig.useJito ? "manual" : "auto";
     const jsonBody = {
 
         "vault_id": vaultId, // Replace with your vault ID
@@ -131,7 +132,7 @@ export async function createMeteoraSwapTx(vaultId: string, fordefiSolanaVaultAdd
         "type": "solana_transaction",
         "details": {
             "type": "solana_serialized_transaction_message",
-            "push_mode": "manual", // IMPORTANT,
+            "push_mode": pushMode, // IMPORTANT,
             "data": serializedV0Message,  // For legacy transactions, use `serializedLegacyMessage`
             "chain": "solana_mainnet"
         },

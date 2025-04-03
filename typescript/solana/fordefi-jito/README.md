@@ -1,6 +1,6 @@
 # Swapping SPL Tokens on Jupiter or Meteora from your Fordefi Vault
 
-Helper code for creating and broadcasting Solana swaps with Jupiter, Meteora and Jito's Block Engine for improved landing rate.
+Helper code for creating and broadcasting Solana swaps with Jupiter, Meteora with the option to broadcast the transaction through Jito's Block Engine for improved landing rate.
 
 ## Prerequisites
 
@@ -29,6 +29,7 @@ Helper code for creating and broadcasting Solana swaps with Jupiter, Meteora and
 2. In `meteora_swap.ts`, configure the `swapConfig`:
 ```typescript
 const swapConfig = {
+  useJito: true, // set to true if you want to use Jito to broadcast your transaction instead of Fordefi's integrated RPC provider
   jitoTip: 1000, // Jito tip amount in lamports (1 SOL = 1e9 lamports)
   swapAmount: new BN(100), // in lamports
   pool: new PublicKey('<pool_address>')
@@ -42,6 +43,7 @@ const swapConfig = {
 2. In `jupiter_swap.ts`, configure the `swapConfig`:
 ```typescript
 const swapConfig = {
+  useJito: true, // set to true if you want to use Jito to broadcast your transaction instead of Fordefi's integrated RPC provider
   jitoTip: 1000, // Jito tip amount in lamports (1 SOL = 1e9 lamports)
   swapAmount: '1000000', // in lamports
   slippage: '50', // in bps
@@ -49,4 +51,4 @@ const swapConfig = {
   outputToken: '<mint_address_of_output_token>'
 }
 ```
-3. Run `npm run jupiter_swap`. The script will create and sign a swap transaction with your Fordefi Vault and send the transaction to Jito's Block Engine.
+3. Run `npm run jupiter_swap`. The script will create and sign a swap transaction with your Fordefi Vault and optionally send the transaction to Jito's Block Engine.
