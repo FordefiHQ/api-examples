@@ -88,7 +88,7 @@ export async function createMeteoraSwapTx(vaultId: string, fordefiSolanaVaultAdd
     // Create Tx
     const swapTx = new web3.Transaction()
 
-    // Add instructions to TX
+    // Add instructions to Tx
     if (swapConfig.useJito) {
         const jitoInstructions = await createJitoInstructions(fordefiSolanaVaultAddress, swapConfig.jitoTip)
         swapTx.add(...jitoInstructions)
