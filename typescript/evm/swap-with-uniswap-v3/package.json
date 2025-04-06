@@ -1,0 +1,27 @@
+{
+  "name": "fordefi-swap-with-uniswap-v3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "swap": "npx ts-node src/uniSwap.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/node": "^22.13.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@fordefi/web3-provider": "^0.2.5",
+    "@uniswap/sdk-core": "^7.7.2",
+    "@uniswap/smart-order-router": "^4.20.10",
+    "@uniswap/v3-sdk": "^3.25.2",
+    "axios": "^1.8.4",
+    "dotenv": "^16.4.7",
+    "ethers": "^5.7.2"
+  }
+}
