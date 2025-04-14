@@ -104,7 +104,7 @@ async function main(){
 4. Run the deposit command:
 
 ```bash
-npm run hl
+npm run hyperliquid
 ```
 
 The deposit process uses USDC's permit functionality to approve and deposit in a single transaction. The function will:
