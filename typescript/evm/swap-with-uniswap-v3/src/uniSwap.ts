@@ -61,19 +61,19 @@ async function main() {
   );
 
   // DEBUG LOGS
-  console.log("=== TRANSACTION DETAILS ===");
-  console.log("Transaction to:", V3_SWAP_ROUTER_ADDRESS);
-  console.log("Transaction data:", route?.methodParameters?.calldata);
-  console.log("Transaction value:", route?.methodParameters?.value);
-  console.log("Sender address:", fordefiConfig.address);
+  console.debug("=== TRANSACTION DETAILS ===");
+  console.debug("Transaction to:", V3_SWAP_ROUTER_ADDRESS);
+  console.debug("Transaction data:", route?.methodParameters?.calldata);
+  console.debug("Transaction value:", route?.methodParameters?.value);
+  console.debug("Sender address:", fordefiConfig.address);
   
   // DEBUG LOGS
-  console.log("=== CURRENT NETWORK GAS ===");
+  console.debug("=== CURRENT NETWORK GAS ===");
   const feeData = await provider.getFeeData();
-  console.log ("Fee Data -> ", feeData)
-  console.log("Current baseFeePerGas:", feeData.lastBaseFeePerGas?.toString(), "wei =", 
+  console.debug ("Fee Data -> ", feeData)
+  console.debug("Current baseFeePerGas:", feeData.lastBaseFeePerGas?.toString(), "wei =", 
   ethers.utils.formatUnits(feeData.lastBaseFeePerGas || 0, 9), "Gwei");
-  console.log("Suggested gasPrice:", feeData.gasPrice?.toString(), "wei =", 
+  console.debug("Suggested gasPrice:", feeData.gasPrice?.toString(), "wei =", 
   ethers.utils.formatUnits(feeData.gasPrice || 0, 9), "Gwei");
 
   const providedBaseFeePerGas = await feeData.lastBaseFeePerGas

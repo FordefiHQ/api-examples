@@ -4,7 +4,7 @@ import { ethers } from 'ethers';
 
 // Define provider
 let fordefiProvider: FordefiWeb3Provider | null = null;
-let provider: ethers.providers.Web3Provider | null = null;
+let provider: ethers.providers.JsonRpcProvider | null = null;
 
 // Function to get/create the provider
 export async function getProvider() {
@@ -17,7 +17,7 @@ export async function getProvider() {
                     fordefiProvider?.removeListener('connect', onFirstConnect);
                     console.log("Successfully removed the listener")
                 } catch (e) {
-                    console.log("The listener couln't be removed: ", e)
+                    console.error("The listener couln't be removed: ", e)
                 }
                 console.log(`Connected to chain: ${result.chainId}`);
             };

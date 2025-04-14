@@ -1,6 +1,7 @@
 import { HyperliquidConfig, fordefiConfig } from './config'
 import { getProvider } from './get-provider';
 import * as hl from "@nktkas/hyperliquid";
+import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
 
 export async function usdSend(hlConfig: HyperliquidConfig) {
     if (!hlConfig) {
@@ -20,9 +21,9 @@ export async function usdSend(hlConfig: HyperliquidConfig) {
         const customSigner = {
             getAddress: async () => fordefiConfig.address,
             signTypedData: async (
-                domain:any, 
-                types:any, 
-                value:any
+                domain: TypedDataDomain, 
+                types: Record<string, Array<TypedDataField>>,
+                value: Record<string, any> 
             ) => 
                 {
                     const modifiedDomain = {
@@ -44,11 +45,18 @@ export async function usdSend(hlConfig: HyperliquidConfig) {
             transport 
         });
         console.log("Wallet client created successfully");
-
-        // Account clearinghouse state
+        // Validate amount is not empty
+        if (!hlConfig.amount) {
+            throw new Error("Amount is required and cannot be empty");
+        }
+        // Validate destination address format
+        if (!hlConfig.destination || !hlConfig.destination.startsWith('0x')) {
+            throw new Error("Destination must be a valid Ethereum address starting with '0x'");
+        }
+        // Perform USDC transfer
         const result = await client.usdSend({
-            destination: hlConfig.destination as `0x${string}`,
-            amount: String(hlConfig.amount || '1'),
+            destination: hlConfig.destination,
+            amount: String(hlConfig.amount),
         });
         console.log("USDC transfer successful: ", result);
         

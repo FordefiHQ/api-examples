@@ -55,6 +55,6 @@ export const WETH_ABI = [
 ];
 
 // Transactions
-export const MAX_FEE_PER_GAS = 100000000 // 0.1 gwei in wei
-export const MAX_PRIORITY_FEE_PER_GAS = 100000000 // 0.1 gwei in wei
-export const TOKEN_AMOUNT_TO_APPROVE_FOR_TRANSFER = 10000
+export const MAX_FEE_PER_GAS = 100000000; // 0.1 gwei in wei
+export const MAX_PRIORITY_FEE_PER_GAS = 100000000; // 0.1 gwei in wei
+export const TOKEN_AMOUNT_TO_APPROVE_FOR_TRANSFER = 10000;

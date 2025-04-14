@@ -1,11 +1,10 @@
 {
-  "name": "fordefi-hyperliquid",
+  "name": "@fordefi/hyperliquid",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "deposit": "npx ts-node src/deposit.ts",
-    "hl": "npx ts-node src/run.ts"
+    "hyperliquid": "npx ts-node src/run.ts"
   },
   "keywords": [],
   "author": "",

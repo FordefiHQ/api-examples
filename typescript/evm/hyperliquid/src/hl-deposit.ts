@@ -11,14 +11,14 @@ interface PermitPayload {
 };
 
 // Function to split signature into r, s, v components
-function splitSig(signature: string): { r: string; s: string; v: number } {
+function splitSignatures(signature: string): { r: string; s: string; v: number } {
     const r = signature.slice(0, 66);
     const s = "0x" + signature.slice(66, 130);
     const v = parseInt(signature.slice(130, 132), 16);
     return { r, s, v };
 };
 
-export async function deposit(hyperliquidConfig?: HyperliquidConfig ) {
+export async function deposit(hyperliquidConfig?: HyperliquidConfig) {
     // Get the singleton provider
     const provider = await getProvider();
     if (!provider) {
@@ -94,7 +94,7 @@ export async function deposit(hyperliquidConfig?: HyperliquidConfig ) {
     
     // Fetch signature
     console.log('Signature:', signature);
-    const splitSignature = splitSig(signature);
+    const splitSignature = splitSignatures(signature);
     console.log('Split signature:', splitSignature);
 
     // Instanciate Hyperliquid's Bridge ABI

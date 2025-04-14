@@ -1,5 +1,5 @@
 {
-  "name": "fordefi-swap-with-uniswap-v3",
+  "name": "@fordefi/swap-with-uniswap-v3",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
