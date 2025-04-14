@@ -1,4 +1,4 @@
-# CowSwap Token Swapper with Fordefi
+# CowSwap Token Swap with Fordefi
 
 A script to perform token swaps on CowSwap (CoW Protocol) using Fordefi as the signer.
 
