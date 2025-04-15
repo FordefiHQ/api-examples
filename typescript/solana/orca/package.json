@@ -8,7 +8,8 @@
     "open-position": "ts-node --project tsconfig.json orca_open_position.ts",
     "harvest-position": "ts-node --project tsconfig.json orca_harvest_position.ts",
     "close-position": "ts-node --project tsconfig.json orca_close_position.ts",
-    "remove-liquidity": "ts-node --project tsconfig.json orca_remove_liquidity.ts"
+    "remove-liquidity": "ts-node --project tsconfig.json orca_remove_liquidity.ts",
+    "increase-liquidity": "ts-node --project tsconfig.json orca_increase_liquidity.ts"
   },
   "keywords": [],
   "author": "",

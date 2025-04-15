@@ -8,6 +8,7 @@ This helper code allows you to interact with Orca DEX on Solana through your For
 - **Open liquidity positions** in Orca concentrated liquidity pools
 - **Harvest rewards** from existing positions
 - **Remove liquidity** from positions
+- **Increase liquidity** from positions
 - **Close positions** completely
 - **Transaction broadcasting** options:
   - Standard Fordefi broadcasting
@@ -64,7 +65,7 @@ Edit the `swapConfig` in `orca_swap.ts` to specify:
 
 Then run:
 ```bash
-npx ts-node orca_swap.ts
+npm run swap
 ```
 
 ### Opening a New Position
@@ -77,7 +78,7 @@ Edit the `openPositionConfig` in `orca_open_position.ts` to specify:
 
 Then run:
 ```bash
-npx ts-node orca_open_position.ts
+npm run open-position
 ```
 
 ### Harvesting Rewards
@@ -86,20 +87,33 @@ Set your position's mint address in the `.env` file or directly in `harvestPosit
 
 Then run:
 ```bash
-npx ts-node orca_harvest_position.ts
+npm run harvest-position
 ```
 
 ### Removing Liquidity
 
 Edit the `removeLiquidityConfig` in `orca_remove_liquidity.ts` to specify:
 - `positionMint`: NFT mint address of your position
-- `tokenAAmount`: Amount of token A to withdraw fromthe pool
+- `tokenAAmount`: Amount of token A to withdraw from the pool
 - `useJito`: Whether to use Jito's Block Engine to broadcast the transaction
 - `jitoTip`: If using Jito, tip amount for Jito (in lamports)
 
 Then run:
 ```bash
-npx ts-node orca_remove_liquidity.ts
+npm run remove-liquidity
+```
+
+### Adding Liquidity
+
+Edit the `increaseLiquidityConfig` in `orca_increase_liquidity.ts` to specify:
+- `positionMint`: NFT mint address of your position
+- `tokenAAmount`: Amount of token A to add to the pool
+- `useJito`: Whether to use Jito's Block Engine to broadcast the transaction
+- `jitoTip`: If using Jito, tip amount for Jito (in lamports)
+
+Then run:
+```bash
+npm run increase-liquidity
 ```
 
 ### Closing a Position
@@ -108,7 +122,7 @@ Set your position's mint address in `.env` or directly in `closePositionConfig` 
 
 Then run:
 ```bash
-npx ts-node orca_close_position.ts
+npm run increase-liquidity
 ```
 
 ## Configuration Details

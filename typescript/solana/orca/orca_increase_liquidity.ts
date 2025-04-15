@@ -1,5 +1,5 @@
 import { signWithApiSigner } from './signer';
-import { swapWithOrca } from './serializers/serialize_swap'
+import { increaseLiquidityWithOrca } from './serializers/serialize_increase_liquidity'
 import { createAndSignTx } from './utils/process_tx'
 import { pushToJito } from './push_to_jito'
 import dotenv from 'dotenv'
@@ -13,10 +13,9 @@ export interface FordefiSolanaConfig {
   apiPathEndpoint: string;
 };
 
-export interface OrcaSwapConfig {
-  orcaPool: string;
-  mintAddress: string;
-  swapAmount: bigint;
+export interface OrcaIncreaseLiquidityConfig {
+  positionMint: string;
+  tokenAAmount: bigint;
   useJito: boolean;
   jitoTip: number;
 }
@@ -31,12 +30,11 @@ export const fordefiConfig: FordefiSolanaConfig = {
   apiPathEndpoint: '/api/v1/transactions/create-and-wait'
 };
 
-export const swapConfig: OrcaSwapConfig = {
-  orcaPool: "Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE", // SOL/USDC pool
-  mintAddress: "So11111111111111111111111111111111111111112", // the input token in the swap, SOL in this case
-  swapAmount: 1_000n, // in lamports
-  useJito: true, // if true we'll use Jito instead of Fordefi to broadcast the signed transaction
-  jitoTip: 1000, // Jito tip amount in lamports (1 SOL = 1e9 lamports)
+export const removeLiquidityConfig: OrcaIncreaseLiquidityConfig = {
+  positionMint: process.env.ORCA_POSITION_MINT_ADDRESS || "", // CHANGE to the mint address of the NFT representing your position
+  tokenAAmount: 10n, // the amount of token A to add to the pool 
+  useJito: false, // if true we'll use Jito instead of Fordefi to broadcast the signed transaction
+  jitoTip: 1000, // Jito tip amount in lamports
 };
 
 
@@ -46,7 +44,7 @@ async function main(): Promise<void> {
     return;
   }
   // We create the tx
-  const jsonBody = await swapWithOrca(fordefiConfig, swapConfig)
+  const jsonBody = await increaseLiquidityWithOrca(fordefiConfig, removeLiquidityConfig)
   console.log("JSON request: ", jsonBody)
 
   // Fetch serialized tx from json file
@@ -65,7 +63,7 @@ async function main(): Promise<void> {
     const data = response.data;
     console.log(data)
 
-    if(swapConfig.useJito){
+    if(removeLiquidityConfig.useJito){
       try {
         const transaction_id = data.id
         console.log(`Transaction ID -> ${transaction_id}`)
