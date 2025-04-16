@@ -90,7 +90,7 @@ SOL_VAULT_ID = os.getenv("SOL_VAULT_ID")
 path = "/api/v1/transactions"
 destination = "9BgxwZMyNzGUgp6hYXMyRKv3kSkyYZAMPGisqJgnXCFS" # CHANGE
 custom_note = "hello!"
-value = "1"
+value = "1" 
 token_address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
 
 ## Building transaction

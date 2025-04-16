@@ -87,7 +87,7 @@ SOL_VAULT_ID = os.getenv("SOL_VAULT_ID")
 path = "/api/v1/transactions"
 destination = "9BgxwZMyNzGUgp6hYXMyRKv3kSkyYZAMPGisqJgnXCFS" # CHANGE
 custom_note = "hello!"
-value = "100" # SOL in lamports
+value = "1" # SOL in lamports
 
 ## Building transaction
 request_json = sol_tx_native(vault_id=SOL_VAULT_ID, destination=destination, custom_note=custom_note, value=value)
