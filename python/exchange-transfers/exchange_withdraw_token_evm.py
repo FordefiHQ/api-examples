@@ -84,7 +84,7 @@ COINBASE_EXCHANGE_VAULT_ID = os.getenv("COINBASE_EXCHANGE_VAULT_ID")
 path = "/api/v1/transactions"
 destination = "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73" # CHANGE to your destination address
 custom_note = "hello!"
-value = str(1 * 10**18) # Amount represents 1 USDC (using 18-decimal precision required by Fordefi API, regardless of asset's native decimals)
+value = "1000000000000000000"# Amount represents 1 USDC (using 18-decimal precision required by Fordefi API, regardless of asset's native decimals)
 exchange_name = "coinbase_international"
 
 ## Building transaction
