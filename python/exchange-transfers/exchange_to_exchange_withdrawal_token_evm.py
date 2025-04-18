@@ -37,28 +37,31 @@ def broadcast_tx(path, access_token, signature, timestamp, request_body):
         raise RuntimeError(f"Network error occurred: {str(e)}")
 
 
-def sol_tx_native(vault_id, destination, custom_note, value):
+def sol_tx_native(vault_id, destination, custom_note, value, exchange):
 
     request_json = {
         "signer_type": "api_signer",
-        "type": "solana_transaction",
-        "vault_id": vault_id,
-        "note": custom_note,
+        "type": "exchange_transaction",
         "details": {
-            "type": "solana_transfer",
-            "to": destination,
             "asset_identifier": {
-                "type": "solana",
-                "details": {
-                    "type": "native",
-                    "chain": "solana_mainnet"
-            }
+                "asset_symbol": "USDC",
+                "exchange_type": exchange,
+                "type": "exchange"
             },
+            "chain": "evm_ethereum_mainnet",
+            "to": {
+                "vault_id": destination,
+                "type": "vault"
+            },
+            "type": "external_withdraw",
             "value": {
+                "is_net_amount": True,
                 "type": "value",
                 "value": value
             }
-        }
+        },
+        "vault_id": vault_id,
+        "note": custom_note
     }
     
     return request_json
@@ -75,18 +78,18 @@ def sign(payload):
 
     return signature
 
-
 ## CONFIG
 USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-FORDEFI_SOLANA_VAULT_ID = os.getenv("FORDEFI_SOLANA_VAULT_ID")
+COINBASE_EXCHANGE_VAULT_ID = os.getenv("COINBASE_EXCHANGE_VAULT_ID")
 BINANCE_EXCHANGE_VAULT_ID = os.getenv("BINANCE_EXCHANGE_VAULT_ID")
 path = "/api/v1/transactions"
+destination = "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73" # CHANGE to your destination address
 custom_note = "hello!"
-value = "10000" # Amount represents 0.00001 SOL (using the native 9-decimal precision)
-exchange_name = "binance"
+value = "1000000000000000000"# Amount represents 1 USDC (using 18-decimal precision required by Fordefi API, regardless of asset's native decimals)
+exchange_name = "coinbase_international"
 
 ## Building transaction
-request_json = sol_tx_native(vault_id=FORDEFI_SOLANA_VAULT_ID, destination=BINANCE_EXCHANGE_VAULT_ID, custom_note=custom_note, value=value)
+request_json = sol_tx_native(vault_id=COINBASE_EXCHANGE_VAULT_ID, destination=BINANCE_EXCHANGE_VAULT_ID, custom_note=custom_note, value=value, exchange=exchange_name)
 request_body = json.dumps(request_json)
 timestamp = datetime.datetime.now().strftime("%s")
 payload = f"{path}|{timestamp}|{request_body}"

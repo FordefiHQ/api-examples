@@ -65,9 +65,9 @@ value = "10000" # 0.00001 in SOL (using its NATIVE 9-decimal precision)
 uv run exchange_withdraw_native_solana.py
 ```
 
-### Withdraw Native SOL from Binance
+### Withdraw Native SOL from Binance to a Regular Fordefi Vault or an External Address
 
-The `exchange_withdraw_native_solana.py` script demonstrates withdrawing SOL from your Binance Exchange Vault to a Solana wallet address (for example, your Fordefi Solana Vault address).
+The `exchange_withdraw_native_solana.py` script demonstrates withdrawing SOL from your Binance Exchange Vault to a Solana wallet address (for example, your Fordefi EVM Vault address or an external address).
 
 1. Modify the destination address and amount in the script:
 ```python
@@ -80,9 +80,9 @@ value = "1000000000000000000"  # Amount in SOL (using 18-decimal precision)
 uv run exchange_withdraw_native_solana.py
 ```
 
-### Withdraw USDC from Coinbase International
+### Withdraw USDC from Coinbase International to a Regular Fordefi Vault or an External Address
 
-The `exchange_withdraw_token_evm.py` script demonstrates withdrawing USDC from your Coinbase International Exchange Vault to an Ethereum wallet address (for example, your Fordefi EVM Vault address).
+The `exchange_withdraw_token_evm.py` script demonstrates withdrawing USDC from your Coinbase International Exchange Vault to an Ethereum wallet address (for example, your Fordefi EVM Vault address or an external address).
 
 1. Modify the destination address and amount in the script:
 ```python
@@ -93,6 +93,27 @@ value = "1000000000000000000"  # Amount in USDC (using 18-decimal precision)
 2. Run the script:
 ```bash
 uv run exchange_withdraw_token_evm.py
+```
+
+### Withdraw USDC from Coinbase International to a Fordefi Binance Exchange Vault:
+
+The `exchange_withdraw_token_evm.py` script demonstrates withdrawing USDC from your Coinbase International Exchange Vault to your Binance Exchange Vault
+
+1. Modify the `to` field in the json request as follow:
+```python
+"to": {
+    "vault_id": "YOUR_FORDEFI_BINANCE_EXCHANGE_VAULT_ID",
+    "type": "vault"
+},
+```
+2. Modify the value:
+```python
+value = "1000000000000000000"  # Amount in USDC (using 18-decimal precision)
+```
+
+3. Run the script:
+```bash
+uv run exchange_to_exchange_withdrawal_token_evm.py
 ```
 
 ---
