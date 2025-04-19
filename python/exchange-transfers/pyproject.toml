@@ -1,0 +1,14 @@
+[project]
+name = "exchange-transfers"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "ecdsa>=0.19.0",
+    "python-dotenv>=1.0.1",
+    "requests>=2.32.3",
+    "solana>=0.36.6",
+    "solders>=0.26.0",
+    "update>=0.0.1",
+]

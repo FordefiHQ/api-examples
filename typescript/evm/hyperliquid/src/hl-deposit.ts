@@ -1,6 +1,7 @@
 import { HyperliquidConfig, fordefiConfig } from './config'
 import { getProvider } from './get-provider';
 import { ethers } from 'ethers';
+import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
 
 interface PermitPayload {
     owner: string;

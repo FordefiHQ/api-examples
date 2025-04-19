@@ -1,43 +1,12 @@
 import os
-import ecdsa
-import hashlib
-import requests
-import base64
 import json
 import datetime
+from utils.broadcast import broadcast_tx
+from utils.sign_payload import sign
 from decimal import Decimal
 from dotenv import load_dotenv
+
 load_dotenv()
-
-### FUNCTIONS
-
-def broadcast_tx(path, access_token, signature, timestamp, request_body):
-
-    try:
-        resp_tx = requests.post(
-            f"https://api.fordefi.com{path}",
-            headers={
-                "Authorization": f"Bearer {access_token}",
-                "x-signature": base64.b64encode(signature),
-                "x-timestamp": timestamp.encode(),
-            },
-            data=request_body,
-        )
-        resp_tx.raise_for_status()
-        return resp_tx
-
-    except requests.exceptions.HTTPError as e:
-        error_message = f"HTTP error occurred: {str(e)}"
-        if resp_tx.text:
-            try:
-                error_detail = resp_tx.json()
-                error_message += f"\nError details: {error_detail}"
-            except json.JSONDecodeError:
-                error_message += f"\nRaw response: {resp_tx.text}"
-        raise RuntimeError(error_message)
-    except requests.exceptions.RequestException as e:
-        raise RuntimeError(f"Network error occurred: {str(e)}")
-
 
 def evm_tx_tokens(evm_chain, vault_id, destination, custom_note, value, token):
 
@@ -90,24 +59,7 @@ def evm_tx_tokens(evm_chain, vault_id, destination, custom_note, value, token):
 
     return request_json
 
-
-def sign(payload):
-
-
-    ## LOCAL USE
-    PRIVATE_KEY_FILE = "./secret/private.pem"
-    with open(PRIVATE_KEY_FILE, "r") as f:
-        signing_key = ecdsa.SigningKey.from_pem(f.read())
-
-    signature = signing_key.sign(
-        data=payload.encode(), hashfunc=hashlib.sha256, sigencode=ecdsa.util.sigencode_der
-    )
-
-    return signature
-
-### CORE LOGIC
-
-## CONFIG
+## Fordefi configuration
 USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
 EVM_VAULT_ID = os.getenv("EVM_VAULT_ID")
 evm_chain = "bsc"
@@ -116,7 +68,6 @@ destination = "0xF659feEE62120Ce669A5C45Eb6616319D552dD93" # CHANGE
 custom_note = "hello!"
 value = "0.0001"
 token_ticker = "usdt"
-## CONFIG
 
 ## Building transaction
 request_json = evm_tx_tokens(evm_chain=evm_chain, vault_id=EVM_VAULT_ID, destination=destination, custom_note=custom_note, value=value, token=token_ticker)
@@ -128,5 +79,5 @@ payload = f"{path}|{timestamp}|{request_body}"
 signature = sign(payload=payload)
 
 ## Broadcasting transaction
-resp_tx = broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
+broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
 print("✅ Transaction submitted successfully!")
