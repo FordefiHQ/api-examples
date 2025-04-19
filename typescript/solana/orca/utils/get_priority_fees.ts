@@ -23,4 +23,4 @@ export async function getPriorityFees(): Promise<number> {
     console.log(`Priority fee -> ${finalFee}`)
 
     return finalFee;
-};
+}

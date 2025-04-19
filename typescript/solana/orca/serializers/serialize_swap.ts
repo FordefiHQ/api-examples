@@ -60,6 +60,5 @@ export async function swapWithOrca(fordefiConfig: FordefiSolanaConfig, swapConfi
         "wait_for_state": "signed" // only for create-and-wait
     };
 
-    return jsonBody
-
+    return jsonBody;
 }

@@ -65,6 +65,5 @@ export async function openPositionWithOrca(fordefiConfig: FordefiSolanaConfig, o
         "wait_for_state": "signed" // only for create-and-wait
     };
 
-    return jsonBody
-
+    return jsonBody;
 }

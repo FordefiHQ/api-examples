@@ -57,7 +57,7 @@ The `exchange_deposit_native_solana.py` script demonstrates depositing SOL from 
 1. Modify the destination address and amount in the script:
 ```python
 destination = "BINANCE_EXCHANGE_VAULT_ID"  # Note we're using the Fordefi Exchange Vault ID and not the Solana address
-value = "10000" # 0.00001 in SOL (using its NATIVE 9-decimal precision)
+value = "10000" # 0.00001 SOL (using its NATIVE 9-decimal precision)
 ```
 
 2. Run the script:
@@ -72,7 +72,7 @@ The `exchange_withdraw_native_solana.py` script demonstrates withdrawing SOL fro
 1. Modify the destination address and amount in the script:
 ```python
 destination = "YOUR_SOLANA_WALLET_ADDRESS"  # Change to your destination address
-value = "1000000000000000000"  # Amount in SOL (using 18-decimal precision)
+value = "1000000000000000000"  # 1 SOL (using 18-decimal precision)
 ```
 
 2. Run the script:
@@ -87,7 +87,7 @@ The `exchange_withdraw_token_evm.py` script demonstrates withdrawing USDC from y
 1. Modify the destination address and amount in the script:
 ```python
 destination = "YOUR_ETHEREUM_WALLET_ADDRESS"  # Change to your destination address
-value = "1000000000000000000"  # Amount in USDC (using 18-decimal precision)
+value = "1000000000000000000"  # 1 USDC (using 18-decimal precision)
 ```
 
 2. Run the script:

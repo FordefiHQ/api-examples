@@ -64,6 +64,5 @@ export async function increaseLiquidityWithOrca(fordefiConfig: FordefiSolanaConf
         "wait_for_state": "signed" // only for create-and-wait
     };
 
-    return jsonBody
-
+    return jsonBody;
 }

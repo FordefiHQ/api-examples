@@ -13,5 +13,5 @@ export async function getJitoTipAccount(client: SearcherClient){
    console.log(`Tip account (index ${randomIndex}) -> ${jitoTipAccount}`);
 
 
-    return jitoTipAccount
+    return jitoTipAccount;
 }

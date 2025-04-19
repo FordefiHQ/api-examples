@@ -16,7 +16,7 @@ export const fordefiConfig: FordefiProviderConfig = {
     apiUserToken: process.env.FORDEFI_API_USER_TOKEN ?? (() => { throw new Error('FORDEFI_API_USER_TOKEN is not set'); })(), 
     apiPayloadSignKey: fs.readFileSync('./fordefi_secret/private.pem', 'utf8') ?? (() => { throw new Error('PEM_PRIVATE_KEY is not set'); })(),
     rpcUrl: 'https://arbitrum-one-rpc.publicnode.com',
-    // skipPrediction: false 
+    skipPrediction: false 
 };
 
 export const hyperliquidConfig: HyperliquidConfig = {

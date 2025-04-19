@@ -5,6 +5,8 @@ import { pushToJito } from './push_to_jito'
 import dotenv from 'dotenv'
 import fs from 'fs'
 
+dotenv.config()
+
 export interface FordefiSolanaConfig {
   accessToken: string;
   vaultId: string;
@@ -20,7 +22,6 @@ export interface OrcaHarvestPositionConfig {
 };
 
 // Fordefi Config to configure
-dotenv.config()
 export const fordefiConfig: FordefiSolanaConfig = {
   accessToken: process.env.FORDEFI_API_TOKEN || "",
   vaultId: process.env.VAULT_ID || "",

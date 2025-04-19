@@ -96,4 +96,4 @@ export async function get_tx(
     // Otherwise, it's a network or unknown error
     throw new Error(`Network error occurred: ${error.message ?? error}`);
   }
-};
+}

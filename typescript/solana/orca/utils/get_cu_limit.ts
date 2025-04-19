@@ -10,5 +10,5 @@ export async function getCuLimit(tippingTx : Transaction, connection: Connection
     const targetComputeUnitsAmount = simulation.value.unitsConsumed;
     console.log(`Target compute unit limit -> ${targetComputeUnitsAmount}`)
 
-    return targetComputeUnitsAmount
-};
+    return targetComputeUnitsAmount;
+}
