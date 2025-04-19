@@ -1,8 +1,4 @@
 import os
-import ecdsa
-import hashlib
-import requests
-import base64
 import json
 import datetime
 from utils.broadcast import broadcast_tx
