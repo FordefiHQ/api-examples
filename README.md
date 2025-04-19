@@ -23,11 +23,11 @@ Code examples for using the Fordefi API in Python and TypeScript.
 * On Solana:
   * Programmatic token swaps using Jupiter
   * Programmatic token swaps using Meteora
-  * Programmatic deposits, withdrawals and USDC transfers 
+  * Programmatic token swaps and pool management using Orca
 * On Sui:
   * Programmatic token swaps and pool creation using the Bluefin API
 * On Hyperliquid L1:
-  * Programmatic deposit, withdrawals and USDC transfers
+  * Programmatic deposits, withdrawals and USDC transfers
 
 ## Getting Started
 1. Clone this repository
