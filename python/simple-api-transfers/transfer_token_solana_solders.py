@@ -1,6 +1,7 @@
 import os
 import base64
 import json
+import asyncio
 import datetime
 from utils.broadcast import broadcast_tx
 from utils.sign_payload import sign
@@ -12,7 +13,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def sol_tx_native(vault_id, custom_note, msg):
+async def sol_tx_native(vault_id, custom_note, msg):
 
     request_json = {
         "signer_type": "api_signer",
@@ -42,44 +43,51 @@ USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"  # USDC mint address 
 USDC_DECIMALS = 6 
 amount = 1 * 10**USDC_DECIMALS  # 1 USDC
 
-# Derive PubKeys
-sender = Pubkey.from_string(FORDEFI_SOLANA_VAULT_ADDRESS)
-recipient = Pubkey.from_string(destination)
-mint = Pubkey.from_string(USDC_MINT)
+async def main():
+    try:
+        # Derive PubKeys
+        sender = Pubkey.from_string(FORDEFI_SOLANA_VAULT_ADDRESS)
+        recipient = Pubkey.from_string(destination)
+        mint = Pubkey.from_string(USDC_MINT)
 
-# Derive ATAs
-sender_token_address = get_associated_token_address(sender, mint)
-recipient_token_address = get_associated_token_address(recipient, mint)
+        # Derive ATAs
+        sender_token_address = get_associated_token_address(sender, mint)
+        recipient_token_address = get_associated_token_address(recipient, mint)
 
-# Create a transfer instruction for SPL token
-ixs = []
-ixs.append(
-    transfer_checked(
-        TransferCheckedParams(
-            source=sender_token_address,
-            dest=recipient_token_address,
-            owner=sender,
-            mint=mint,
-            amount=amount,
-            decimals=USDC_DECIMALS,
-            program_id=TOKEN_PROGRAM_ID
+        # Create a transfer instruction for SPL token
+        ixs = []
+        ixs.append(
+            transfer_checked(
+                TransferCheckedParams(
+                    source=sender_token_address,
+                    dest=recipient_token_address,
+                    owner=sender,
+                    mint=mint,
+                    amount=amount,
+                    decimals=USDC_DECIMALS,
+                    program_id=TOKEN_PROGRAM_ID
+                )
+            )
         )
-    )
-)
 
-# Compile the message for a v0 transaction
-# Replace with MessageV0() for v0 message
-msg = Message(ixs, sender)
+        # Compile the message for a v0 transaction
+        # Replace with MessageV0() for v0 message
+        msg = Message(ixs, sender)
 
-# Preparing payload
-request_json = sol_tx_native(vault_id=FORDEFI_SOLANA_VAULT_ID, custom_note=custom_note, msg=msg)
-request_body = json.dumps(request_json)
-timestamp = datetime.datetime.now().strftime("%s")
-payload = f"{path}|{timestamp}|{request_body}"
+        # Preparing payload
+        request_json = await sol_tx_native(vault_id=FORDEFI_SOLANA_VAULT_ID, custom_note=custom_note, msg=msg)
+        request_body = json.dumps(request_json)
+        timestamp = datetime.datetime.now().strftime("%s")
+        payload = f"{path}|{timestamp}|{request_body}"
 
-## Signing transaction with API Signer 
-signature = sign(payload=payload)
+        ## Signing transaction with API Signer 
+        signature = await sign(payload=payload)
 
-## Broadcasting tx
-broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
-print("✅ Transaction submitted successfully!")
+        ## Broadcasting tx
+        await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
+        print("✅ Transaction submitted successfully!")
+    except Exception as e:
+        print(f"❌ Transaction failed: {str(e)}")
+
+if __name__ == "__main__":
+    asyncio.run(main())

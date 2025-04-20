@@ -1,5 +1,6 @@
 import os
 import json
+import asyncio
 import datetime
 from utils.broadcast import broadcast_tx
 from utils.sign_payload import sign
@@ -7,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def evm_tx_native(evm_chain, vault_id, destination, custom_note, value):
+async def evm_tx_native(evm_chain, vault_id, destination, custom_note, value):
 
     value_in_wei = str(int(float(value) * 10**18))
     print(f"⚙️ Preparing tx for {value}!")
@@ -54,15 +55,22 @@ destination = "0xF659feEE62120Ce669A5C45Eb6616319D552dD93" # CHANGE
 custom_note = "hello!"
 value = "0.0001" # BNB or ETH
 
-## Building transaction
-request_json = evm_tx_native(evm_chain=evm_chain, vault_id=EVM_VAULT_ID, destination=destination, custom_note=custom_note, value=value)
-request_body = json.dumps(request_json)
-timestamp = datetime.datetime.now().strftime("%s")
-payload = f"{path}|{timestamp}|{request_body}"
+async def main():
+    try:
+        ## Building transaction
+        request_json = await evm_tx_native(evm_chain=evm_chain, vault_id=EVM_VAULT_ID, destination=destination, custom_note=custom_note, value=value)
+        request_body = json.dumps(request_json)
+        timestamp = datetime.datetime.now().strftime("%s")
+        payload = f"{path}|{timestamp}|{request_body}"
 
-## Signing transaction with API Signer
-signature = sign(payload=payload)
+        ## Signing transaction with API Signer
+        signature = await sign(payload=payload)
 
-## Broadcasting tx
-resp_tx = broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
-print("✅ Transaction submitted successfully!")
+        ## Broadcasting tx
+        await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
+        print("✅ Transaction submitted successfully!")
+    except Exception as e:
+        print(f"❌ Transaction failed: {str(e)}")
+
+if __name__ == "__main__":
+    asyncio.run(main())

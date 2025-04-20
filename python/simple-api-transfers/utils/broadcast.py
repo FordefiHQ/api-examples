@@ -2,7 +2,7 @@ import requests
 import base64
 import json
 
-def broadcast_tx(
+async def broadcast_tx(
     path: str, 
     access_token: str, 
     signature: bytes, 

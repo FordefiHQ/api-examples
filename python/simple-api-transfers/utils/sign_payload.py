@@ -4,7 +4,7 @@ from pathlib import Path
 
 PRIVATE_KEY_PEM_FILE = Path("./secret/private.pem")
 
-def sign(payload: str) -> bytes:
+async def sign(payload: str) -> bytes:
 
     print('Signing the payload 🖋️')
     with open(PRIVATE_KEY_PEM_FILE, "r") as f:

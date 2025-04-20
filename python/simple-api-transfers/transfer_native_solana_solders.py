@@ -1,6 +1,7 @@
 import os
 import base64
 import json
+import asyncio
 import datetime
 from utils.broadcast import broadcast_tx
 from utils.sign_payload import sign
@@ -11,7 +12,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def sol_tx_native(vault_id, custom_note, msg):
+async def sol_tx_native(vault_id, custom_note, msg):
 
     request_json = {
         "signer_type": "api_signer",
@@ -37,34 +38,41 @@ destination = "9BgxwZMyNzGUgp6hYXMyRKv3kSkyYZAMPGisqJgnXCFS" # Change to your Fo
 custom_note = "hello!" # Optional note
 amount = 1 # SOL in lamports
 
-sender = Pubkey.from_string(FORDEFI_SOLANA_VAULT_ADDRESS)
-recipient = Pubkey.from_string(destination)
+async def main():
+    try:
+        sender = Pubkey.from_string(FORDEFI_SOLANA_VAULT_ADDRESS)
+        recipient = Pubkey.from_string(destination)
 
-# Create a transfer instruction of 1 lamport
-ixs = []
-ixs.append( 
-    transfer(
-        TransferParams(
-            from_pubkey=sender,
-            to_pubkey=recipient,
-            lamports=amount
+        # Create a transfer instruction of 1 lamport
+        ixs = []
+        ixs.append( 
+            transfer(
+                TransferParams(
+                    from_pubkey=sender,
+                    to_pubkey=recipient,
+                    lamports=amount
+                )
+            )
         )
-    )
-)
 
-# Compile the message for a v0 transaction
-# Replace with MessageV0() for v0 message
-msg = Message(ixs, sender) 
+        # Compile the message for a v0 transaction
+        # Replace with MessageV0() for v0 message
+        msg = Message(ixs, sender) 
 
-## Preparing payload
-request_json = sol_tx_native(vault_id=FORDEFI_SOLANA_VAULT_ID, custom_note=custom_note, msg=msg)
-request_body = json.dumps(request_json)
-timestamp = datetime.datetime.now().strftime("%s")
-payload = f"{path}|{timestamp}|{request_body}"
+        ## Preparing payload
+        request_json = await sol_tx_native(vault_id=FORDEFI_SOLANA_VAULT_ID, custom_note=custom_note, msg=msg)
+        request_body = json.dumps(request_json)
+        timestamp = datetime.datetime.now().strftime("%s")
+        payload = f"{path}|{timestamp}|{request_body}"
 
-## Signing transaction with API Signer 
-signature = sign(payload=payload)
+        ## Signing transaction with API Signer 
+        signature = await sign(payload=payload)
 
-## Broadcasting tx
-resp_tx = broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
-print("✅ Transaction submitted successfully!")
+        ## Broadcasting tx
+        await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
+        print("✅ Transaction submitted successfully!")
+    except Exception as e:
+        print(f"❌ Transaction failed: {str(e)}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
