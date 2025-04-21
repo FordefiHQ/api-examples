@@ -48,7 +48,7 @@ EVM_VAULT_ID = os.getenv("EVM_VAULT_ID")
 evm_chain = "bsc"
 path = "/api/v1/transactions"
 destination = "0xF659feEE62120Ce669A5C45Eb6616319D552dD93" # CHANGE
-custom_note = "hello!"
+custom_note = "hello!" # Optional note
 token_contract_address = "0x55d398326f99059fF775485246999027B3197955" # USDT on Binance Smart Chain
 value = str(100_000_0000_000_000_000) # 1 USDT
 

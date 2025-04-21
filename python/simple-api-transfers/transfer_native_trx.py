@@ -43,7 +43,7 @@ TRON_VAULT_ID = os.getenv("TRON_VAULT_ID")
 evm_chain = "bsc"
 path = "/api/v1/transactions"
 destination = "THpczdekw3n93u48ZCbdpimcFVW8Rx9jrj" # CHANGE to your Tron destination address
-custom_note = "hello Tron!"
+custom_note = "hello Tron!" # Optional note
 value = str(1_000_000) #  1 TRX (1 TRX = 1_000_000 suns)
 
 async def main():
