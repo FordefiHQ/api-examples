@@ -44,7 +44,7 @@ SOL_VAULT_ID = os.getenv("SOL_VAULT_ID")
 path = "/api/v1/transactions"
 destination = "9BgxwZMyNzGUgp6hYXMyRKv3kSkyYZAMPGisqJgnXCFS" # Change to your destination address
 custom_note = "hello!"
-value = "1"  # in lamports
+value = str(1)  # in lamports (1 lamport = 0.000000001 SOL)
 token_address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
 
 async def main():

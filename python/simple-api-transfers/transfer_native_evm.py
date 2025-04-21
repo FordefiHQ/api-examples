@@ -10,14 +10,6 @@ load_dotenv()
 
 async def evm_tx_native(evm_chain, vault_id, destination, custom_note, value):
 
-    value_in_wei = str(int(float(value) * 10**18))
-    print(f"⚙️ Preparing tx for {value}!")
-
-    """
-    Native ETH or BNB transfer
-
-    """
-
     request_json = {
         "signer_type": "api_signer",
         "vault_id": vault_id,
@@ -39,7 +31,7 @@ async def evm_tx_native(evm_chain, vault_id, destination, custom_note, value):
             },
             "value": {
                 "type": "value",
-                "value": value_in_wei
+                "value": value
             }
         }
     }
@@ -51,9 +43,9 @@ USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
 EVM_VAULT_ID = os.getenv("EVM_VAULT_ID")
 evm_chain = "bsc"
 path = "/api/v1/transactions" # CHANGE
-destination = "0xF659feEE62120Ce669A5C45Eb6616319D552dD93" # CHANGE
+destination = "0xF659feEE62120Ce669A5C45Eb6616319D552dD93" # CHANGE to your EVM address
 custom_note = "hello!"
-value = "0.0001" # BNB or ETH
+value = str(1_000_000_0000_000) # 0.00001 BNB (1 BNB = 0.000000000000000001 wei)
 
 async def main():
     try:

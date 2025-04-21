@@ -36,7 +36,7 @@ FORDEFI_SOLANA_VAULT_ADDRESS = os.getenv("FORDEFI_SOLANA_VAULT_ADDRESS")
 path = "/api/v1/transactions"
 destination = "9BgxwZMyNzGUgp6hYXMyRKv3kSkyYZAMPGisqJgnXCFS" # Change to your Fordefi Solana Vault
 custom_note = "hello!" # Optional note
-amount = 1 # SOL in lamports
+amount = 1 # in lamports (1 lamport = 0.000000001 SOL)
 
 async def main():
     try:

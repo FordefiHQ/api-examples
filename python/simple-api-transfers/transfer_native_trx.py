@@ -8,44 +8,48 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-async def sol_tx_native(vault_id, destination, custom_note, value):
+async def evm_tx_native(vault_id, destination, custom_note, value):
 
     request_json = {
         "signer_type": "api_signer",
-        "type": "solana_transaction",
+        "vault_id": vault_id,
+        "note": custom_note,
+        "type": "tron_transaction",
         "details": {
-            "type": "solana_transfer",
-            "to": destination,
+            "type": "tron_transfer",
+            "to":{
+                "type": "hex",
+                "address": destination
+            },
+            "asset_identifier": {
+                "type": "tron",
+                "details": {
+                    "type": "native",
+                    "chain": "tron_mainnet"
+                }
+            },
             "value": {
                 "type": "value",
                 "value": value
-            },
-            "asset_identifier": {
-                "type": "solana",
-                "details": {
-                    "type": "native",
-                    "chain": "solana_mainnet"
-                }
             }
-        },
-        "note": custom_note,
-        "vault_id": vault_id
+        }
     }
     
     return request_json
 
 ## Fordefi configuration
 USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-SOL_VAULT_ID = os.getenv("SOL_VAULT_ID")
+TRON_VAULT_ID = os.getenv("TRON_VAULT_ID")
+evm_chain = "bsc"
 path = "/api/v1/transactions"
-destination = "9BgxwZMyNzGUgp6hYXMyRKv3kSkyYZAMPGisqJgnXCFS" # CHANGE to your destination address
-custom_note = "hello!"
-value = str(1) # in lamports (1 lamport = 0.000000001 SOL)
+destination = "THpczdekw3n93u48ZCbdpimcFVW8Rx9jrj" # CHANGE to your Tron destination address
+custom_note = "hello Tron!"
+value = str(1_000_000) #  1 TRX (1 TRX = 1_000_000 suns)
 
 async def main():
     try:
         ## Building transaction
-        request_json = await sol_tx_native(vault_id=SOL_VAULT_ID, destination=destination, custom_note=custom_note, value=value)
+        request_json = await evm_tx_native(vault_id=TRON_VAULT_ID, destination=destination, custom_note=custom_note, value=value)
         request_body = json.dumps(request_json)
         timestamp = datetime.datetime.now().strftime("%s")
         payload = f"{path}|{timestamp}|{request_body}"

@@ -39,9 +39,9 @@ destination = "9BgxwZMyNzGUgp6hYXMyRKv3kSkyYZAMPGisqJgnXCFS"  # Change to your d
 custom_note = "USDC transfer"
 
 # USDC specific configuration
-USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"  # USDC mint address on Solana mainnet
-USDC_DECIMALS = 6 
-amount = 1 * 10**USDC_DECIMALS  # 1 USDC
+USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" 
+USDC_DECIMALS = 6 # USDC mint address on Solana mainnet
+amount = 1_000_000  # 1 USDC
 
 async def main():
     try:

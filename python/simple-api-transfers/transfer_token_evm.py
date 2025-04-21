@@ -4,59 +4,41 @@ import asyncio
 import datetime
 from utils.broadcast import broadcast_tx
 from utils.sign_payload import sign
-from decimal import Decimal
 from dotenv import load_dotenv
 
 load_dotenv()
 
-async def evm_tx_tokens(evm_chain, vault_id, destination, custom_note, value, token):
+async def evm_tx_tokens(evm_chain, vault_id, destination, custom_note, value, token_contract):
 
-    if evm_chain == "bsc":
-        if token == "usdt":
-            contract_address = "0x55d398326f99059fF775485246999027B3197955"
-            value = str(int(Decimal(value) * Decimal('1000000000000000000'))) # 18 decimals
-        else:
-            raise ValueError(f"Token '{token}' is not supported for chain '{evm_chain}'") 
-    elif evm_chain == "ethereum":
-        if token == "usdt":
-            contract_address = "0xdAC17F958D2ee523a2206206994597C13D831ec7"
-            value = str(int(Decimal(value) * Decimal('1000000')))  # 6 decimals
-        elif token == "pepe":
-            contract_address = "0x6982508145454Ce325dDbE47a25d4ec3d2311933"
-            value = str(int(Decimal(value) * Decimal('1000000000000000000'))) # 18 decimals
-        else:
-            raise ValueError(f"Token '{token}' is not supported for chain '{evm_chain}'") 
-    else:
-        raise ValueError(f"Token '{token}' is not supported for chain '{evm_chain}'")
 
     request_json =  {
-    "signer_type": "api_signer",
-    "type": "evm_transaction",
-    "details": {
-        "type": "evm_transfer",
-        "gas": {
-          "type": "priority",
-          "priority_level": "medium"
+        "signer_type": "api_signer",
+        "type": "evm_transaction",
+        "details": {
+            "type": "evm_transfer",
+            "gas": {
+            "type": "priority",
+            "priority_level": "medium"
+            },
+            "to": destination,
+            "value": {
+            "type": "value",
+            "value": value
+            },
+            "asset_identifier": {
+                "type": "evm",
+                "details": {
+                    "type": "erc20",
+                    "token": {
+                        "chain": f"evm_{evm_chain}_mainnet",
+                        "hex_repr": token_contract
+                    }
+                }
+            }
         },
-        "to": destination,
-        "value": {
-           "type": "value",
-           "value": value
-        },
-        "asset_identifier": {
-             "type": "evm",
-             "details": {
-                 "type": "erc20",
-                 "token": {
-                     "chain": f"evm_{evm_chain}_mainnet",
-                     "hex_repr": contract_address
-                 }
-             }
-        }
-    },
-    "note": custom_note,
-    "vault_id": vault_id
-}
+        "note": custom_note,
+        "vault_id": vault_id
+    }
 
     return request_json
 
@@ -67,14 +49,14 @@ evm_chain = "bsc"
 path = "/api/v1/transactions"
 destination = "0xF659feEE62120Ce669A5C45Eb6616319D552dD93" # CHANGE
 custom_note = "hello!"
-value = "0.0001"
-token_ticker = "usdt"
+token_contract_address = "0x55d398326f99059fF775485246999027B3197955" # USDT on Binance Smart Chain
+value = str(100_000_0000_000_000_000) # 1 USDT
 
 async def main():
     try:
         ## Building transaction
         request_json = await evm_tx_tokens(evm_chain=evm_chain, vault_id=EVM_VAULT_ID, destination=destination, 
-                                          custom_note=custom_note, value=value, token=token_ticker)
+                                          custom_note=custom_note, value=value, token_contract=token_contract_address)
         request_body = json.dumps(request_json)
         timestamp = datetime.datetime.now().strftime("%s")
         payload = f"{path}|{timestamp}|{request_body}"
