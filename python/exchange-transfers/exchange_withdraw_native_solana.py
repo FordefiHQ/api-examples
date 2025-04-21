@@ -43,7 +43,7 @@ BINANCE_EXCHANGE_VAULT_ID = os.getenv("BINANCE_EXCHANGE_VAULT_ID")
 path = "/api/v1/transactions"
 destination = "9BgxwZMyNzGUgp6hYXMyRKv3kSkyYZAMPGisqJgnXCFS" # CHANGE to your destination address
 custom_note = "hello!"
-value = "1000000000000000000" # Amount represents 1 SOL (using 18-decimal precision required by Fordefi API, regardless of asset's native decimals)
+value = str(1_000_000_000_000_000_000) # Amount represents 1 SOL (using 18-decimal precision required by Fordefi API, regardless of asset's native decimals)
 exchange_name = "binance"
 
 async def main():

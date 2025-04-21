@@ -40,7 +40,7 @@ FORDEFI_SOLANA_VAULT_ID = os.getenv("FORDEFI_SOLANA_VAULT_ID")
 BINANCE_EXCHANGE_VAULT_ID = os.getenv("BINANCE_EXCHANGE_VAULT_ID")
 path = "/api/v1/transactions"
 custom_note = "hello!"
-value = "10000" # Amount represents 0.00001 SOL (using the native 9-decimal precision)
+value = str(10_000) # Amount represents 0.00001 SOL (using the native 9-decimal precision)
 
 async def main():
 

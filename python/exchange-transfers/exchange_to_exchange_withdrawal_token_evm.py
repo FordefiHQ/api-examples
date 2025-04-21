@@ -43,7 +43,7 @@ COINBASE_EXCHANGE_VAULT_ID = os.getenv("COINBASE_EXCHANGE_VAULT_ID")
 BINANCE_EXCHANGE_VAULT_ID = os.getenv("BINANCE_EXCHANGE_VAULT_ID")
 path = "/api/v1/transactions"
 custom_note = "hello!"
-value = "1000000000000000000"# Amount represents 1 USDC (using 18-decimal precision required by Fordefi API, regardless of asset's native decimals)
+value = str(1_000_000_000_000_000_000)# Amount represents 1 USDC (using 18-decimal precision required by Fordefi API, regardless of asset's native decimals)
 exchange_name = "coinbase_international"
 
 async def main():
