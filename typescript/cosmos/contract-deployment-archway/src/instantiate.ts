@@ -17,14 +17,10 @@ async function main(): Promise<void> {
     // 1. Create json payload for instantiate transaction
     const requestBody = JSON.stringify(
       await createInstantiateRequest(
-        fordefiConfig.vaultId, 
-        fordefiConfig.senderAddress,
-        fordefiConfig.compressedPubKey, 
+        fordefiConfig,
         codeId,
         contractLabel,
         msgString,
-        fordefiConfig.gasPrice,
-        fordefiConfig.gasLimit
       )
     );
 

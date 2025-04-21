@@ -2,6 +2,17 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
+export interface FordefiConfig {
+  accessToken: string;
+  vaultId: string;
+  senderAddress: string;
+  compressedPubKey: string;
+  privateKeyPath: string;
+  pathEndpoint: string;
+  gasPrice: bigint;
+  gasLimit: bigint;
+}
+
 export const fordefiConfig = {
   accessToken: process.env.FORDEFI_API_USER_TOKEN ?? "",
   vaultId: process.env.FORDEFI_COSMOS_VAULT_ID || "",

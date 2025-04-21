@@ -1,17 +1,18 @@
 import { toBase64, fromBase64 } from '@cosmjs/encoding';
 import { getSequence } from "./getSequence";
+import { FordefiConfig } from '../src/config'; 
 import { TxBody, AuthInfo } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { SignMode } from 'cosmjs-types/cosmos/tx/signing/v1beta1/signing';
 import { MsgStoreCode } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
 import { PubKey } from 'cosmjs-types/cosmos/crypto/secp256k1/keys';
 
-export async function createRequest(vault_id: string, sender: string, compressedPubKey: string, binary: Uint8Array, gasPrice: bigint, gasLimit: bigint) {
+export async function createStoreRequest(fordefiConfig: FordefiConfig, binary: Uint8Array) {
 
-  const feeAmount = (gasPrice * gasLimit).toString();
+  const feeAmount = (fordefiConfig.gasPrice * fordefiConfig.gasLimit).toString();
 
   // 1. Create the MsgStoreCode message
   const storeCodeMsg = MsgStoreCode.fromPartial({
-     sender: sender,
+     sender: fordefiConfig.senderAddress,
      wasmByteCode: binary,
      instantiatePermission: undefined
   });
@@ -29,12 +30,12 @@ export async function createRequest(vault_id: string, sender: string, compressed
   const bodyBase64 = toBase64(bodyBytes);
   
   // 3. Create and encode the auth info
-  const publicKeyBytes = fromBase64(compressedPubKey);
+  const publicKeyBytes = fromBase64(fordefiConfig.compressedPubKey);
   const pubKey = PubKey.fromPartial({
     key: publicKeyBytes
   });
 
-  const nextSequence = await getSequence(sender);
+  const nextSequence = await getSequence(fordefiConfig.senderAddress);
   console.log(`Next sequence: ${nextSequence}`);
   
   const authInfo = AuthInfo.fromPartial({
@@ -55,17 +56,16 @@ export async function createRequest(vault_id: string, sender: string, compressed
         denom: "aarch",
         amount: feeAmount
       }],
-      gasLimit: BigInt(gasLimit)
+      gasLimit: BigInt(fordefiConfig.gasLimit)
     }
   });
-  console.log(authInfo.fee?.amount)
   
   const authInfoBytes = AuthInfo.encode(authInfo).finish();
   const authInfoBase64 = toBase64(authInfoBytes);
   
   // 4. Construct the request with direct format
   const requestJson = {
-    "vault_id": vault_id,
+    "vault_id": fordefiConfig.vaultId,
     "signer_type": "api_signer",
     "type": "cosmos_transaction",
     "details": {
@@ -77,7 +77,7 @@ export async function createRequest(vault_id: string, sender: string, compressed
         "auth_info": authInfoBase64
       }
     }
-  }
+  };
   
   return requestJson;
 }

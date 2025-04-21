@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { fordefiConfig } from './config'; 
 import { signWithApiSigner } from "../api_request/signer";
-import { createRequest } from "../api_request/formStoreRequestDirect";
+import { createStoreRequest } from "../api_request/formStoreRequestDirect";
 import { createAndSignTx } from "../api_request/pushToApi";
 
 
@@ -12,7 +12,7 @@ async function main(): Promise<void> {
   
     try {
       // 1. Create json payload for transaction
-      const requestBody = JSON.stringify(await createRequest(fordefiConfig.vaultId, fordefiConfig.senderAddress, fordefiConfig.compressedPubKey, wasmBinary, fordefiConfig.gasPrice, fordefiConfig.gasLimit));
+      const requestBody = JSON.stringify(await createStoreRequest(fordefiConfig, wasmBinary));
 
       // 2. Sign with Fordefi API Signer
       const timestamp = new Date().getTime();

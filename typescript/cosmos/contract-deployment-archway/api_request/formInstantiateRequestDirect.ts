@@ -1,17 +1,18 @@
 import { toBase64, fromBase64 } from '@cosmjs/encoding';
 import { getSequence } from "./getSequence";
+import { FordefiConfig } from '../src/config';
 import { TxBody, AuthInfo } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { SignMode } from 'cosmjs-types/cosmos/tx/signing/v1beta1/signing';
 import { MsgInstantiateContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
 import { PubKey } from 'cosmjs-types/cosmos/crypto/secp256k1/keys';
 
-export async function createInstantiateRequest(vault_id: string, sender: string, compressedPubKey: string, code_id: number, label: string, msgString: string, gasPrice: bigint, gasLimit: bigint) {
+export async function createInstantiateRequest(fordefiConfig: FordefiConfig, code_id: number, label: string, msgString: string) {
   
-  const feeAmount = (gasPrice * gasLimit).toString();
+  const feeAmount = (fordefiConfig.gasPrice * fordefiConfig.gasLimit).toString();
 
   // 1. Create the MsgInstantiateContract message
   const instantiateContractMsg = MsgInstantiateContract.fromPartial({
-    sender: sender,
+    sender: fordefiConfig.senderAddress,
     admin: "", // Empty string means no admin
     codeId: BigInt(code_id),
     label: label,
@@ -32,12 +33,12 @@ export async function createInstantiateRequest(vault_id: string, sender: string,
   const bodyBase64 = toBase64(bodyBytes);
   
   // 3. Create and encode the auth info
-  const publicKeyBytes = fromBase64(compressedPubKey);
+  const publicKeyBytes = fromBase64(fordefiConfig.compressedPubKey);
   const pubKey = PubKey.fromPartial({
     key: publicKeyBytes
   });
 
-  const nextSequence = await getSequence(sender);
+  const nextSequence = await getSequence(fordefiConfig.senderAddress);
   console.log(`Next sequence: ${nextSequence}`);
   
   const authInfo = AuthInfo.fromPartial({
@@ -58,7 +59,7 @@ export async function createInstantiateRequest(vault_id: string, sender: string,
         denom: "aarch",
         amount: feeAmount
       }],
-      gasLimit: BigInt(gasLimit)
+      gasLimit: BigInt(fordefiConfig.gasLimit)
     }
   });
   
@@ -67,7 +68,7 @@ export async function createInstantiateRequest(vault_id: string, sender: string,
   
   // 4. Construct the request with direct format
   const requestJson = {
-    "vault_id": vault_id,
+    "vault_id": fordefiConfig.vaultId,
     "signer_type": "api_signer",
     "type": "cosmos_transaction",
     "details": {
@@ -79,7 +80,7 @@ export async function createInstantiateRequest(vault_id: string, sender: string,
         "auth_info": authInfoBase64
       }
     }
-  }
+  };
   
   return requestJson;
 }
