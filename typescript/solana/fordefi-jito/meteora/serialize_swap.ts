@@ -13,7 +13,7 @@ async function createDlmm(pool: web3.PublicKey){
 
     const dlmmPool = DLMM.create(connection, pool); // your pool
     
-    return dlmmPool
+    return dlmmPool;
 
 }
 
@@ -28,7 +28,7 @@ async function swapQuote(pool: any, swapAmount: typeof BN){
     binArrays
     );
 
-    return swapQuote
+    return swapQuote;
 }
 
 async function swapIxGetter(pool:any, swapQuote: any, trader: web3.PublicKey, swapAmount: typeof BN){
@@ -45,7 +45,7 @@ async function swapIxGetter(pool:any, swapQuote: any, trader: web3.PublicKey, sw
     });
 
     // return only the instructions
-    return swapTx.instructions
+    return swapTx.instructions;
 }
 
 async function createJitoInstructions(fordefiSolanaVaultAddress: string, jitoTip: number): Promise<web3.TransactionInstruction[]> {
@@ -140,12 +140,5 @@ export async function createMeteoraSwapTx(vaultId: string, fordefiSolanaVaultAdd
         
     };
 
-    // // DEBUG - Write json body to file
-    // fs.writeFileSync(
-    //     './txs/serialized_tx.json',
-    //     JSON.stringify(jsonBody, null, 2), 
-    //     'utf8'
-    // );
-    // console.log("Tx data written to .txs/serialized_tx.json");
-    return jsonBody
+    return jsonBody;
 }

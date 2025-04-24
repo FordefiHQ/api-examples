@@ -141,15 +141,6 @@ export async function createJupiterSwapTx(vaultId: string, fordefiSolanaVaultAdd
         "wait_for_state": "signed" // only for create-and-wait
     };
 
-    // // For debugging - write json body to file
-    // fs.writeFileSync(
-    //     './txs/serialized_tx.json',
-    //     JSON.stringify(jsonBody, null, 2), 
-    //     'utf8'
-    // );
-    // console.log("Tx data written to .txs/serialized_tx.json");
-
-    return jsonBody
-
+    return jsonBody;
 
 }
