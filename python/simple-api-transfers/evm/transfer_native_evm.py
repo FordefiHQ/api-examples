@@ -8,8 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-async def evm_tx_native(evm_chain, vault_id, destination, custom_note, value):
-
+async def evm_tx_native(evm_chain: str, vault_id: str, destination: str, custom_note: str, value: str):
     request_json = {
         "signer_type": "api_signer",
         "vault_id": vault_id,
@@ -54,10 +53,8 @@ async def main():
         request_body = json.dumps(request_json)
         timestamp = datetime.datetime.now().strftime("%s")
         payload = f"{path}|{timestamp}|{request_body}"
-
         ## Signing transaction with API Signer
         signature = await sign(payload=payload)
-
         ## Broadcasting tx
         await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
         print("✅ Transaction submitted successfully!")

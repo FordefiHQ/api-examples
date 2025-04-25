@@ -13,8 +13,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-async def sol_tx_native(vault_id, custom_note, msg):
-
+async def sol_tx_native(vault_id: str, custom_note: str, msg: Message):
     request_json = {
         "signer_type": "api_signer",
         "type": "solana_transaction",
@@ -49,11 +48,9 @@ async def main():
         sender = Pubkey.from_string(FORDEFI_SOLANA_VAULT_ADDRESS)
         recipient = Pubkey.from_string(destination)
         mint = Pubkey.from_string(USDC_MINT)
-
         # Derive ATAs
         sender_token_address = get_associated_token_address(sender, mint)
         recipient_token_address = get_associated_token_address(recipient, mint)
-
         # Create a transfer instruction for SPL token
         ixs = []
         ixs.append(
@@ -69,20 +66,16 @@ async def main():
                 )
             )
         )
-
         # Compile the message for a v0 transaction
         # Replace with MessageV0() for v0 message
         msg = Message(ixs, sender)
-
         # Preparing payload
         request_json = await sol_tx_native(vault_id=FORDEFI_SOLANA_VAULT_ID, custom_note=custom_note, msg=msg)
         request_body = json.dumps(request_json)
         timestamp = datetime.datetime.now().strftime("%s")
         payload = f"{path}|{timestamp}|{request_body}"
-
         ## Signing transaction with API Signer 
         signature = await sign(payload=payload)
-
         ## Broadcasting tx
         await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
         print("✅ Transaction submitted successfully!")

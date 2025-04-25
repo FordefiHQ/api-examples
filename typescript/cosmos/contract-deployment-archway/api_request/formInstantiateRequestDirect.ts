@@ -1,13 +1,10 @@
-import { toBase64, fromBase64 } from '@cosmjs/encoding';
-import { getSequence } from "./getSequence";
+import { toBase64 } from '@cosmjs/encoding';
 import { FordefiConfig } from '../src/config';
-import { TxBody, AuthInfo } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
-import { SignMode } from 'cosmjs-types/cosmos/tx/signing/v1beta1/signing';
+import { TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { MsgInstantiateContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
-import { PubKey } from 'cosmjs-types/cosmos/crypto/secp256k1/keys';
+import { getAuthInfo } from './getAuthInfo';
 
-export async function createInstantiateRequest(fordefiConfig: FordefiConfig, code_id: number, label: string, msgString: string) {
-  
+export async function createInstantiateRequest(fordefiConfig: FordefiConfig, code_id: number, label: string, msgString: string) {  
   const feeAmount = (fordefiConfig.gasPrice * fordefiConfig.gasLimit).toString();
 
   // 1. Create the MsgInstantiateContract message
@@ -33,38 +30,7 @@ export async function createInstantiateRequest(fordefiConfig: FordefiConfig, cod
   const bodyBase64 = toBase64(bodyBytes);
   
   // 3. Create and encode the auth info
-  const publicKeyBytes = fromBase64(fordefiConfig.compressedPubKey);
-  const pubKey = PubKey.fromPartial({
-    key: publicKeyBytes
-  });
-
-  const nextSequence = await getSequence(fordefiConfig.senderAddress);
-  console.log(`Next sequence: ${nextSequence}`);
-  
-  const authInfo = AuthInfo.fromPartial({
-    signerInfos: [{
-      publicKey: {
-        typeUrl: "/cosmos.crypto.secp256k1.PubKey",
-        value: PubKey.encode(pubKey).finish()
-      },
-      modeInfo: {
-        single: {
-          mode: SignMode.SIGN_MODE_DIRECT
-        }
-      },
-      sequence: BigInt(nextSequence)
-    }],
-    fee: {
-      amount: [{
-        denom: "aarch",
-        amount: feeAmount
-      }],
-      gasLimit: BigInt(fordefiConfig.gasLimit)
-    }
-  });
-  
-  const authInfoBytes = AuthInfo.encode(authInfo).finish();
-  const authInfoBase64 = toBase64(authInfoBytes);
+  const authInfoBase64 = await getAuthInfo(fordefiConfig, feeAmount);
   
   // 4. Construct the request with direct format
   const requestJson = {

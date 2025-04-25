@@ -8,8 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-async def sol_tx_native(vault_id, destination, custom_note, value):
-
+async def sol_tx_native(vault_id: str, destination: str, custom_note: str, value: str):
     request_json = {
         "signer_type": "api_signer",
         "type": "solana_transaction",
@@ -43,16 +42,13 @@ custom_note = "hello!"
 value = str(10_000) # Amount represents 0.00001 SOL (using the native 9-decimal precision)
 
 async def main():
-
     ## Building transaction
     request_json = await sol_tx_native(vault_id=FORDEFI_SOLANA_VAULT_ID, destination=BINANCE_EXCHANGE_VAULT_ID, custom_note=custom_note, value=value)
     request_body = json.dumps(request_json)
     timestamp = datetime.datetime.now().strftime("%s")
     payload = f"{path}|{timestamp}|{request_body}"
-
     ## Signing transaction with API Signer (local)
     signature = await sign(payload=payload)
-
     ## Broadcasting tx
     await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
     print("✅ Transaction submitted successfully!")

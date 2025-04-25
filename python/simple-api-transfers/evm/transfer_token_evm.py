@@ -8,9 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-async def evm_tx_tokens(evm_chain, vault_id, destination, custom_note, value, token_contract):
-
-
+async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, custom_note: str, value: str, token_contract: str):
     request_json =  {
         "signer_type": "api_signer",
         "type": "evm_transaction",
@@ -55,15 +53,17 @@ value = str(100_000_0000_000_000_000) # 1 USDT
 async def main():
     try:
         ## Building transaction
-        request_json = await evm_tx_tokens(evm_chain=evm_chain, vault_id=EVM_VAULT_ID, destination=destination, 
-                                          custom_note=custom_note, value=value, token_contract=token_contract_address)
+        request_json = await evm_tx_tokens(evm_chain=evm_chain, 
+                                           vault_id=EVM_VAULT_ID, 
+                                           destination=destination, 
+                                           custom_note=custom_note, 
+                                           value=value, 
+                                           token_contract=token_contract_address)
         request_body = json.dumps(request_json)
         timestamp = datetime.datetime.now().strftime("%s")
         payload = f"{path}|{timestamp}|{request_body}"
-
         ## Signing transaction with API Signer
         signature = await sign(payload=payload)
-
         ## Broadcasting transaction
         await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
         print("✅ Transaction submitted successfully!")

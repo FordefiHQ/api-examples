@@ -12,8 +12,7 @@ export async function getSequence(address: string): Promise<bigint> {
     }
     
     const sequence = response.data.account.sequence;
-    console.log(response.data.account);
-    
+        
     return BigInt(sequence);
   } catch (error) {
     if (axios.isAxiosError(error)) {
