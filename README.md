@@ -15,6 +15,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
   * Solana SOL & SPL transfers with Solders
   * Tron TRX transfers
   * Tron TRC20 transfers
+  * Native APT and MOVE transfers on Aptos and Movement 
 * Exchange transfers
 * Setting up Fordefi Webhooks
 * Signing EIP-712 typed messages with an EVM Fordefi vault
@@ -32,6 +33,8 @@ Code examples for using the Fordefi API in Python and TypeScript.
   * Programmatic token swaps and pool creation using the Bluefin API
 * On Hyperliquid L1 (HyperCore):
   * Programmatic deposits, withdrawals and USDC transfers
+* On Cosmos:
+  * Programmatic smart contract deployments on Archway
 
 ## Getting Started
 1. Clone this repository
