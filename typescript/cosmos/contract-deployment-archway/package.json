@@ -1,0 +1,26 @@
+{
+  "name": "@fordefi/cosmos-contract-deployment-archway",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "store": "npx ts-node src/store.ts",
+    "instantiate": "npx ts-node src/instantiate.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@cosmjs/encoding": "^0.33.1",
+    "axios": "^1.8.4",
+    "cosmjs-types": "^0.9.0",
+    "dotenv": "^16.4.7",
+    "long": "^5.3.1"
+  }
+}
