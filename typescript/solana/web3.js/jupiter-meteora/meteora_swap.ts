@@ -1,15 +1,14 @@
 import { signWithApiSigner } from './signer';
 import { createAndSignTx } from './utils/process_tx'
 import { pushToJito } from './push_to_jito'
-import { createMeteoraSwapTx } from './meteora/serialize_swap'
+import { createMeteoraSwapTx } from './serializers/serialize_swap_meteora'
 import { PublicKey } from '@solana/web3.js'
 import { BN } from 'bn.js'
 import dotenv from 'dotenv'
 import fs from 'fs'
 
-
-// Fordefi Config to configure
 dotenv.config()
+
 const fordefiConfig = {
   accessToken: process.env.FORDEFI_API_TOKEN || "",
   vaultId: process.env.VAULT_ID || "",
@@ -23,7 +22,7 @@ const swapConfig = {
   pool: new PublicKey('A8nPhpCJqtqHdqUk35Uj9Hy2YsGXFkCZGuNwvkD3k7VC'), // TRUMP_USDC_POOL
   useJito: true, // if true we'll use Jito instead of Fordefi to broadcast the signed transaction
   jitoTip: 1000, // Jito tip amount in lamports (1 SOL = 1e9 lamports)
-}
+};
 
 
 async function main(): Promise<void> {
@@ -32,7 +31,7 @@ async function main(): Promise<void> {
     return;
   }
   // We create the tx
-  const jsonBody = await createMeteoraSwapTx(fordefiConfig.vaultId, fordefiConfig.fordefiSolanaVaultAddress, swapConfig)
+  const jsonBody = await createMeteoraSwapTx(fordefiConfig.vaultId, fordefiConfig.fordefiSolanaVaultAddress, swapConfig);
 
   // Fetch serialized tx from json file
   const requestBody = JSON.stringify(jsonBody);
@@ -55,7 +54,7 @@ async function main(): Promise<void> {
         const transaction_id = data.id
         console.log(`Transaction ID -> ${transaction_id}`)
   
-        await pushToJito(transaction_id, fordefiConfig.accessToken, fordefiConfig.privateKeyPem)
+        await pushToJito(transaction_id, fordefiConfig.accessToken)
   
       } catch (error: any){
         console.error(`Failed to push the transaction to Meteora: ${error.message}`)

@@ -4,9 +4,8 @@ import { get_tx } from './utils/process_tx'
 
 dotenv.config()
 
-export async function pushToJito(transaction_id: string, accessToken:string, privateKeyPem: string): Promise<void> {
+export async function pushToJito(transaction_id: string, accessToken:string): Promise<void> {
   try {
-
     // 1. Prep variables
     const path = `/api/v1/transactions/${transaction_id}`;
 

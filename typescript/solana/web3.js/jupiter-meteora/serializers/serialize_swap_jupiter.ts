@@ -4,12 +4,10 @@ import * as jito from 'jito-ts'
 import { PublicKey } from '@solana/web3.js';
 import { getJitoTipAccount } from '../utils/get_jito_tip_account'
 
-
 const connection = new web3.Connection("https://api.mainnet-beta.solana.com")
 
 // Get quote from Jupiter
 async function getSwapQuote(swap_amount: string, slippage: string, input_token: string, output_token: string): Promise<any> {
-
     console.log("Input token", input_token )
     console.log("Output token", output_token )
 
@@ -28,7 +26,6 @@ async function getSwapQuote(swap_amount: string, slippage: string, input_token: 
 }
 
 async function getSwapTxIx(quote: any, user: PublicKey) {
-
     // We get a series of instructions and a lookup table from the API
     const response = await axios.post('https://api.jup.ag/swap/v1/swap-instructions', {
         quoteResponse: quote,
@@ -60,8 +57,7 @@ async function getSwapTxIx(quote: any, user: PublicKey) {
             data: Buffer.from(ix.data, 'base64')
         };
     });
-
-    // We return the instructions and the lookuptable
+        // We return the instructions and the lookuptable
     return [
         instructions, 
         lookUpTable  
