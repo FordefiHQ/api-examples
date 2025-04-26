@@ -21,7 +21,6 @@ Helper code for creating and broadcasting Solana swaps with Jupiter, Meteora wit
    VAULT_ADDRESS="<your_fordefi_solana_vault_address>"
    ```
 6. Create a `/secret` folder at the root of the `fordefi-jito` project and place your API User's `private.pem` private key file in the folder.
-7. Create an empty `txs` at the root of the `fordefi-jito` project.
 
 ## Example usage for a swap on Meteora
 
