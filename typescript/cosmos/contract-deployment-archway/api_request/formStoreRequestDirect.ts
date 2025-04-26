@@ -1,8 +1,7 @@
-import { toBase64, fromBase64 } from '@cosmjs/encoding';
-import { FordefiConfig } from '../src/config'; 
-import { TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { FordefiConfig } from '../src/config';
 import { MsgStoreCode } from 'cosmjs-types/cosmwasm/wasm/v1/tx';
 import { getAuthInfo } from './getAuthInfo';
+import { encodeTxBody } from './encodeTxBody'
 
 export async function createStoreRequest(fordefiConfig: FordefiConfig, binary: Uint8Array) {
   const feeAmount = (fordefiConfig.gasPrice * fordefiConfig.gasLimit).toString();
@@ -15,16 +14,9 @@ export async function createStoreRequest(fordefiConfig: FordefiConfig, binary: U
   });
   
   // 2. Create and encode the transaction body
-  const txBody = TxBody.fromPartial({
-    messages: [{
-      typeUrl: "/cosmwasm.wasm.v1.MsgStoreCode",
-      value: MsgStoreCode.encode(storeCodeMsg).finish()
-    }],
-    memo: ""
-  });
-  
-  const bodyBytes = TxBody.encode(txBody).finish();
-  const bodyBase64 = toBase64(bodyBytes);
+  const typeUrl = "/cosmwasm.wasm.v1.MsgStoreCode"
+  const value = MsgStoreCode.encode(storeCodeMsg).finish()
+  const bodyBase64 = await encodeTxBody(typeUrl, value)
   
   // 3. Create and encode the auth info
   const authInfoBase64 = await getAuthInfo(fordefiConfig, feeAmount);
