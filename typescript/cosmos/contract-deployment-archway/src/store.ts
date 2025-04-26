@@ -24,7 +24,6 @@ async function main(): Promise<void> {
       const fordDefiResult = response.data;
       console.log(fordDefiResult);
       
-  
     } catch (error: any) {
       console.error(`Failed to sign the transaction: ${error.message}`);
     }

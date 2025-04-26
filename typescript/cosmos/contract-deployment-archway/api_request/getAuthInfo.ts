@@ -6,11 +6,7 @@ import { AuthInfo } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { SignMode } from 'cosmjs-types/cosmos/tx/signing/v1beta1/signing';
 import { PubKey } from 'cosmjs-types/cosmos/crypto/secp256k1/keys';
 
-export async function getAuthInfo(
-  fordefiConfig: FordefiConfig,
-  feeAmount: string
-): Promise<string> {
-
+export async function getAuthInfo(fordefiConfig: FordefiConfig, feeAmount: string): Promise<string> {
   const publicKeyBytes = fromBase64(fordefiConfig.compressedPubKey);
   const pubKey = PubKey.fromPartial({
     key: publicKeyBytes

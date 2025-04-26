@@ -1,8 +1,7 @@
 import { TxBody } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { toBase64 } from '@cosmjs/encoding';
 
-export async function encodeTxBody(typeUrl: string, messageValue: Uint8Array ) {
-
+export async function encodeTxBody(typeUrl: string, messageValue: Uint8Array): Promise<string> {
     const txBody = TxBody.fromPartial({
         messages: [{
           typeUrl: typeUrl,

@@ -1,7 +1,6 @@
 import axios from "axios";
 
 export async function getSequence(address: string): Promise<bigint> {
-
   const apiEndpoint = `https://api-archway.mzonder.com/cosmos/auth/v1beta1/accounts/${address}`;
 
   try {
