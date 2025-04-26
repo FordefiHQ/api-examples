@@ -26,9 +26,10 @@ Code examples for using the Fordefi API in Python and TypeScript.
   * Swapping tokens programmatically with CowSwap from a Fordefi EVM vault
   * Programmatic EVM transfers using the Fordefi API
 * On Solana:
-  * Programmatic token swaps using Jupiter
-  * Programmatic token swaps using Meteora
-  * Programmatic token swaps and pool management using Orca
+  * Programmatic token swaps using Jupiter (@solana/web3.js)
+  * Programmatic token swaps using Meteora (@solana/web3.js)
+  * Programmatic token swaps and pool management using Raydium (@solana/web3.js)
+  * Programmatic token swaps and pool management using Orca (@solana/kit)
 * On Sui:
   * Programmatic token swaps and pool creation using the Bluefin API
 * On Hyperliquid L1 (HyperCore):

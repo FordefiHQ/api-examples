@@ -1,5 +1,6 @@
 import { signWithApiSigner } from './signer';
-import { swapWithOrca } from './serializers/serialize_swap'
+import { Connection } from '@solana/web3.js'
+import { openPositionWithRaydium } from './serializers/serialize_raydium_open_position'
 import { createAndSignTx } from './utils/process_tx'
 import { pushToJito } from './push_to_jito'
 import dotenv from 'dotenv'
@@ -15,10 +16,13 @@ export interface FordefiSolanaConfig {
   apiPathEndpoint: string;
 };
 
-export interface OrcaSwapConfig {
-  orcaPool: string;
-  mintAddress: string;
-  swapAmount: bigint;
+export interface RaydiumOpenPositionConfig {
+  raydiumPool: string;
+  inputAmount: number;
+  startPrice: number;
+  endPrice: number;
+  txVersion: string;
+  cuLimit: number;
   useJito: boolean;
   jitoTip: number;
 };
@@ -32,14 +36,18 @@ export const fordefiConfig: FordefiSolanaConfig = {
   apiPathEndpoint: '/api/v1/transactions/create-and-wait'
 };
 
-export const swapConfig: OrcaSwapConfig = {
-  orcaPool: "Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE", // SOL/USDC pool
-  mintAddress: "So11111111111111111111111111111111111111112", // the input token in the swap, SOL in this case
-  swapAmount: 1_000n, // in lamports
-  useJito: true, // if true we'll use Jito instead of Fordefi to broadcast the signed transaction
+export const openPositionConfig: RaydiumOpenPositionConfig = {
+  raydiumPool: "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj", // SOL/USDC pool
+  inputAmount: 0.001,   // (SOL)
+  startPrice: 151.74,   // (USDC per SOL)
+  endPrice: 151.80,     // (USDC per SOL)
+  txVersion: "V0",
+  cuLimit: 700_000,
+  useJito: false, // if true we'll use Jito instead of Fordefi to broadcast the signed transaction
   jitoTip: 1000, // Jito tip amount in lamports (1 SOL = 1e9 lamports)
 };
 
+export const connection = new Connection('https://api.mainnet-beta.solana.com')
 
 async function main(): Promise<void> {
   if (!fordefiConfig.accessToken) {
@@ -47,13 +55,13 @@ async function main(): Promise<void> {
     return;
   }
   // We create the tx
-  const jsonBody = await swapWithOrca(fordefiConfig, swapConfig)
+  const jsonBody = await openPositionWithRaydium(fordefiConfig, openPositionConfig, connection)
   console.log("JSON request: ", jsonBody)
 
   // Fetch serialized tx from json file
   const requestBody = JSON.stringify(jsonBody);
 
-  // Define endpoint and create timestamp
+  // Create payload
   const timestamp = new Date().getTime();
   const payload = `${fordefiConfig.apiPathEndpoint}|${timestamp}|${requestBody}`;
 
@@ -66,7 +74,7 @@ async function main(): Promise<void> {
     const data = response.data;
     console.log(data)
 
-    if(swapConfig.useJito){
+    if(openPositionConfig.useJito){
       try {
         const transaction_id = data.id
         console.log(`Transaction ID -> ${transaction_id}`)
@@ -74,7 +82,7 @@ async function main(): Promise<void> {
         await pushToJito(transaction_id, fordefiConfig.accessToken)
   
       } catch (error: any){
-        console.error(`Failed to push the transaction to Orca: ${error.message}`)
+        console.error(`Failed to push the transaction to Raydium: ${error.message}`)
       }
     } else {
       console.log("Transaction submitted to Fordefi for broadcast ✅")
@@ -88,4 +96,4 @@ async function main(): Promise<void> {
 
 if (require.main === module) {
   main();
-};
+}
