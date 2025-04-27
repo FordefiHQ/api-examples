@@ -2,8 +2,6 @@ import { VersionedTransaction, Transaction, Connection } from '@solana/web3.js'
 
 
 export async function getCuLimit(tippingTx : Transaction, connection: Connection){
-
-
     const versionedTx = new VersionedTransaction(
         tippingTx.compileMessage()
     );
@@ -13,5 +11,5 @@ export async function getCuLimit(tippingTx : Transaction, connection: Connection
     const targetComputeUnitsAmount = simulation.value.unitsConsumed;
     console.log(`Target compute unit limit -> ${targetComputeUnitsAmount}`)
 
-    return targetComputeUnitsAmount
+    return targetComputeUnitsAmount;
 }

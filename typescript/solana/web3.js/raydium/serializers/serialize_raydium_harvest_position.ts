@@ -1,6 +1,7 @@
 import { VersionedTransaction, Connection, PublicKey, TransactionMessage, Transaction } from '@solana/web3.js'
 import { ApiV3PoolInfoConcentratedItem, CLMM_PROGRAM_ID, ClmmPositionLayout } from '@raydium-io/raydium-sdk-v2'
 import { FordefiSolanaConfig, RaydiumHarvestPositionConfig } from '../raydium_harvest_position'
+import { getJitoTipAccount } from '../utils/get_jito_tip_account'
 import { getPriorityFees } from '../utils/get_priority_fees'
 import { initSdk } from '../raydium_sdk_loader'
 import { Buffer } from 'buffer'; 
@@ -49,9 +50,9 @@ export async function harvestPositionWithRaydium(fordefiConfig: FordefiSolanaCon
           units: harvestPositionConfig.cuLimit,
           microLamports: await getPriorityFees(),
         },
-        // optional: set if useJito=treu
+        // optional: set if useJito=true
         // txTipConfig: {
-        //   address: new PublicKey('96gYZGLnJYVFmbjzopPSU6QiEV5fGqZNyN9nmNhvrZU5'), // Jitp tip account
+        //   address: await getJitoTipAccount(), // Jitp tip account
         //   amount: new BN(harvestPositionConfig.jitoTip),
         // },
       })

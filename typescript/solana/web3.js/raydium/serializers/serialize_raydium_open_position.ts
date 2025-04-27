@@ -2,6 +2,7 @@ import { VersionedTransaction, Connection, PublicKey } from '@solana/web3.js'
 import { ApiV3PoolInfoConcentratedItem, TickUtils, PoolUtils, ClmmKeys, TxVersion } from '@raydium-io/raydium-sdk-v2'
 import { FordefiSolanaConfig, RaydiumOpenPositionConfig } from '../raydium_open_position'
 import { isValidClmm } from '../utils/is_valid_cllm'
+import { getJitoTipAccount } from '../utils/get_jito_tip_account'
 import { getPriorityFees } from '../utils/get_priority_fees'
 import { initSdk } from '../raydium_sdk_loader'
 import Decimal from 'decimal.js'
@@ -76,9 +77,9 @@ export async function openPositionWithRaydium(fordefiConfig: FordefiSolanaConfig
         units: openPositionConfig.cuLimit || 600000,
         microLamports: await getPriorityFees(),
       },
-      // optional: set if useJito=treu
+      // optional: set if useJito=true
       // txTipConfig: {
-      //   address: new PublicKey('96gYZGLnJYVFmbjzopPSU6QiEV5fGqZNyN9nmNhvrZU5'), // Jitp tip account
+      //   address: await getJitoTipAccount(), // Jitp tip account
       //   amount: new BN(openPositionConfig.jitoTip)
       // }
     })

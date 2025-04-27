@@ -1,6 +1,7 @@
 import { VersionedTransaction, Connection, PublicKey } from '@solana/web3.js'
 import { ApiV3PoolInfoConcentratedItem, ClmmKeys } from '@raydium-io/raydium-sdk-v2'
 import { FordefiSolanaConfig, RaydiumRemoveLiquidityConfig } from '../raydium_remove_liquidity'
+import { getJitoTipAccount } from '../utils/get_jito_tip_account'
 import { getPriorityFees } from '../utils/get_priority_fees'
 import { isValidClmm } from '../utils/is_valid_cllm'
 import { initSdk } from '../raydium_sdk_loader'
@@ -53,9 +54,9 @@ export async function removeLiquidityFromRaydiumPool(fordefiConfig: FordefiSolan
           units: removeLiquidityConfig.cuLimit,
           microLamports: await getPriorityFees()
         },
-        // optional: set if useJito=treu
+        // optional: set if useJito=true
         // txTipConfig: {
-        //   address: new PublicKey('96gYZGLnJYVFmbjzopPSU6QiEV5fGqZNyN9nmNhvrZU5'), // Jitp tip account
+        //   address: await getJitoTipAccount(), // Jitp tip account
         //   amount: new BN(removeLiquidityConfig.jitoTip)
         // }
       })
