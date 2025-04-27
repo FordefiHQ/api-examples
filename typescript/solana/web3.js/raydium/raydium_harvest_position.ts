@@ -1,6 +1,7 @@
 import { signWithApiSigner } from './signer';
+import { Connection } from '@solana/web3.js'
 import { TxVersion } from '@raydium-io/raydium-sdk-v2'
-import { swapWithRaydium } from './serializers/serialize_raydium_swap'
+import { harvestPositionWithRaydium } from './serializers/serialize_raydium_harvest_position'
 import { createAndSignTx } from './utils/process_tx'
 import { pushToJito } from './push_to_jito'
 import dotenv from 'dotenv'
@@ -16,15 +17,10 @@ export interface FordefiSolanaConfig {
   apiPathEndpoint: string;
 };
 
-export interface RaydiumSwapConfig {
+export interface RaydiumHarvestPositionConfig {
   raydiumPool: string;
-  inputMint: string;
-  isInputSol: boolean;
-  isOutputSol: boolean;
-  outputMint: string;
-  swapAmount: bigint;
-  slippage: number;
-  txVersion: string;
+  txVersion: TxVersion;
+  cuLimit: number,
   useJito: boolean;
   jitoTip: number;
 };
@@ -38,19 +34,15 @@ export const fordefiConfig: FordefiSolanaConfig = {
   apiPathEndpoint: '/api/v1/transactions/create-and-wait'
 };
 
-export const swapConfig: RaydiumSwapConfig = {
-  raydiumPool: "FdjBRWXzieV1Qtn8FLDWWk2HK1HSQWYduo8y4F1e8GWu", // SOL/Fartcoin pool
-  inputMint: "So11111111111111111111111111111111111111112", // the input token in the swap, SOL in this case
-  isInputSol: true,
-  outputMint: "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
-  isOutputSol: false,
-  swapAmount: 10_000n, // in lamports
-  slippage: 1, // in % (1 = 100 pbs)
-  txVersion: 'V0',
+export const harvestPositionConfig: RaydiumHarvestPositionConfig = {
+  raydiumPool: "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj", // SOL/USDC pool
+  txVersion: TxVersion.V0,
+  cuLimit: 700_000,
   useJito: false, // if true we'll use Jito instead of Fordefi to broadcast the signed transaction
   jitoTip: 1000, // Jito tip amount in lamports (1 SOL = 1e9 lamports)
 };
 
+export const connection = new Connection('https://api.mainnet-beta.solana.com')
 
 async function main(): Promise<void> {
   if (!fordefiConfig.accessToken) {
@@ -58,13 +50,13 @@ async function main(): Promise<void> {
     return;
   }
   // We create the tx
-  const jsonBody = await swapWithRaydium(fordefiConfig, swapConfig)
+  const jsonBody = await harvestPositionWithRaydium(fordefiConfig, harvestPositionConfig, connection)
   console.log("JSON request: ", jsonBody)
 
   // Fetch serialized tx from json file
   const requestBody = JSON.stringify(jsonBody);
 
-  // Define endpoint and create timestamp
+  // Create payload
   const timestamp = new Date().getTime();
   const payload = `${fordefiConfig.apiPathEndpoint}|${timestamp}|${requestBody}`;
 
@@ -77,7 +69,7 @@ async function main(): Promise<void> {
     const data = response.data;
     console.log(data)
 
-    if(swapConfig.useJito){
+    if(harvestPositionConfig.useJito){
       try {
         const transaction_id = data.id
         console.log(`Transaction ID -> ${transaction_id}`)

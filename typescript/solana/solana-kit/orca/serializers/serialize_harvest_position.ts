@@ -5,7 +5,6 @@ import { FordefiSolanaConfig, OrcaHarvestPositionConfig } from '../orca_harvest_
 const mainnetRpc = kit.createSolanaRpc('https://api.mainnet-beta.solana.com');
 
 export async function harvestPositionWithOrca(fordefiConfig: FordefiSolanaConfig, harvestPositionConfig: OrcaHarvestPositionConfig){
-
     await setWhirlpoolsConfig('solanaMainnet');
 
     const positionNFTMint = kit.address(harvestPositionConfig.positionMint)

@@ -5,7 +5,6 @@ import { FordefiSolanaConfig, OrcaClosePositionConfig } from '../orca_close_posi
 const mainnetRpc = kit.createSolanaRpc('https://api.mainnet-beta.solana.com');
 
 export async function closePositionWithOrca(fordefiConfig: FordefiSolanaConfig, closePositionConfig: OrcaClosePositionConfig){
-
     await setWhirlpoolsConfig('solanaMainnet');
 
     const positionNFTMint = kit.address(closePositionConfig.positionMint)

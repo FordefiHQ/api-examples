@@ -47,7 +47,7 @@ export async function swapWithRaydium(fordefiConfig: FordefiSolanaConfig, swapCo
         : (allTransactions[0] as Transaction).serializeMessage()
     ).toString('base64');
 
-    // Create JSON
+    // Create payload
     const pushMode = swapConfig.useJito ? "manual" : "auto";
     const jsonBody = {
         "vault_id": fordefiConfig.vaultId, // Replace with your vault ID
@@ -57,7 +57,7 @@ export async function swapWithRaydium(fordefiConfig: FordefiSolanaConfig, swapCo
         "details": {
             "type": "solana_serialized_transaction_message",
             "push_mode": pushMode,
-            "data": serializedTxData,  // For legacy transactions, use `serializedLegacyMessage`
+            "data": serializedTxData,
             "chain": "solana_mainnet"
         },
         "wait_for_state": "signed" // only for create-and-wait    

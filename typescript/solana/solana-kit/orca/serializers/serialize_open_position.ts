@@ -5,7 +5,6 @@ import { FordefiSolanaConfig, OrcaOpenPositionConfig } from '../orca_open_positi
 const mainnetRpc = kit.createSolanaRpc('https://api.mainnet-beta.solana.com');
 
 export async function openPositionWithOrca(fordefiConfig: FordefiSolanaConfig, openPositionConfig: OrcaOpenPositionConfig){
-
     const whirlpoolAddress = kit.address(openPositionConfig.orcaPool)
     const vaultPubKey = kit.address(fordefiConfig.fordefiSolanaVaultAddress)
     const txSigner = kit.createNoopSigner(vaultPubKey)

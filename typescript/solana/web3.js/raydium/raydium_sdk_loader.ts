@@ -14,5 +14,5 @@ export const initSdk = async (vault: PublicKey, connection: Connection, params?:
     blockhashCommitment: 'finalized',
   })
   
-  return raydium
+  return raydium;
 }

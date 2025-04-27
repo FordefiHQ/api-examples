@@ -5,7 +5,6 @@ import * as kit from '@solana/kit';
 const mainnetRpc = kit.createSolanaRpc('https://api.mainnet-beta.solana.com');
 
 export async function swapWithOrca(fordefiConfig: FordefiSolanaConfig, swapConfig: OrcaSwapConfig){
-
     const whirlpoolAddress = kit.address(swapConfig.orcaPool)
     const vaultPubKey = kit.address(fordefiConfig.fordefiSolanaVaultAddress)
     const txSigner = kit.createNoopSigner(vaultPubKey)

@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "swap": "ts-node --project tsconfig.json raydium_swap.ts",
-    "open-position": "ts-node --project tsconfig.json raydium_open_position.ts"
+    "open-position": "ts-node --project tsconfig.json raydium_open_position.ts",
+    "harvest": "ts-node --project tsconfig.json raydium_harvest_position.ts",
+    "remove-liquidity": "ts-node --project tsconfig.json raydium_remove_liquidity.ts"
   },
   "keywords": [],
   "author": "",

@@ -5,7 +5,6 @@ import { FordefiSolanaConfig, OrcaRemoveLiquidityConfig } from '../orca_remove_l
 const mainnetRpc = kit.createSolanaRpc('https://api.mainnet-beta.solana.com');
 
 export async function increaseLiquidityWithOrca(fordefiConfig: FordefiSolanaConfig, removeLiquidityConfig: OrcaRemoveLiquidityConfig){
-
     await setWhirlpoolsConfig('solanaMainnet');
 
     const positionNFTMint = kit.address(removeLiquidityConfig.positionMint)

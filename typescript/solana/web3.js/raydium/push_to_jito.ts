@@ -3,10 +3,8 @@ import { get_tx } from './utils/process_tx'
 
 export async function pushToJito(transaction_id: string, accessToken:string): Promise<void> {
   try {
-
     // Prep path
     const path = `/api/v1/transactions/${transaction_id}`;
-
     // Fetch raw signature from tx object
     const fetchRawSignature = await get_tx(path, accessToken);
     const rawTransactionBase64 = (await fetchRawSignature.raw_transaction);
@@ -20,7 +18,6 @@ export async function pushToJito(transaction_id: string, accessToken:string): Pr
       method: 'sendTransaction',
       params: [rawTransactionBase64, { encoding: 'base64' }],
     };
-
     // Push tx to Jito's Block Engine
     const headers = { 'Content-Type': 'application/json' };
     const response = await axios.post(
