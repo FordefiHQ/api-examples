@@ -76,6 +76,11 @@ export async function openPositionWithRaydium(fordefiConfig: FordefiSolanaConfig
         units: openPositionConfig.cuLimit || 600000,
         microLamports: await getPriorityFees(),
       },
+      // optional: set if useJito=treu
+      // txTipConfig: {
+      //   address: new PublicKey('96gYZGLnJYVFmbjzopPSU6QiEV5fGqZNyN9nmNhvrZU5'), // Jitp tip account
+      //   amount: new BN(openPositionConfig.jitoTip)
+      // }
     })
     console.log('extInfo', extInfo);
 

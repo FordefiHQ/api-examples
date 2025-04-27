@@ -5,6 +5,7 @@ import { removeLiquidityFromRaydiumPool } from './serializers/serialize_raydium_
 import { createAndSignTx } from './utils/process_tx'
 import { pushToJito } from './push_to_jito'
 import dotenv from 'dotenv'
+import BN from 'bn.js'
 import fs from 'fs'
 
 dotenv.config()
@@ -19,10 +20,13 @@ export interface FordefiSolanaConfig {
 
 export interface RaydiumRemoveLiquidityConfig {
   raydiumPool: string;
+  closePosition: boolean;
+  amountMinA: BN,
+  amountMinB: BN,
   txVersion: TxVersion;
   cuLimit: number;
   useJito: boolean;
-  jitoTip: number;
+  jitoTip: number
 };
 
 // Fordefi Config to configure
@@ -36,6 +40,9 @@ export const fordefiConfig: FordefiSolanaConfig = {
 
 export const removeLiquidityConfig: RaydiumRemoveLiquidityConfig = {
   raydiumPool: "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj", // SOL/USDC pool
+  closePosition: true, // set to false for partial liquidity decrease
+  amountMinA: new BN(0), // set if closePosition=true
+  amountMinB: new BN(0), // set if closePosition=true
   txVersion: TxVersion.V0,
   cuLimit: 700_000,
   useJito: false, // if true we'll use Jito instead of Fordefi to broadcast the signed transaction

@@ -44,7 +44,7 @@ export const openPositionConfig: RaydiumOpenPositionConfig = {
   txVersion: "V0",
   cuLimit: 700_000,
   useJito: false, // if true we'll use Jito instead of Fordefi to broadcast the signed transaction
-  jitoTip: 1000, // Jito tip amount in lamports (1 SOL = 1e9 lamports)
+  jitoTip: 1000, // Jito tip amount in lamports (0.000001 SOL)
 };
 
 export const connection = new Connection('https://api.mainnet-beta.solana.com')

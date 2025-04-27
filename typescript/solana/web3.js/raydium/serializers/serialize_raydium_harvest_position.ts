@@ -4,6 +4,7 @@ import { FordefiSolanaConfig, RaydiumHarvestPositionConfig } from '../raydium_ha
 import { getPriorityFees } from '../utils/get_priority_fees'
 import { initSdk } from '../raydium_sdk_loader'
 import { Buffer } from 'buffer'; 
+import BN from 'bn.js'
 
 
 export async function harvestPositionWithRaydium(fordefiConfig: FordefiSolanaConfig, harvestPositionConfig: RaydiumHarvestPositionConfig, connection: Connection){
@@ -48,6 +49,11 @@ export async function harvestPositionWithRaydium(fordefiConfig: FordefiSolanaCon
           units: harvestPositionConfig.cuLimit,
           microLamports: await getPriorityFees(),
         },
+        // optional: set if useJito=treu
+        // txTipConfig: {
+        //   address: new PublicKey('96gYZGLnJYVFmbjzopPSU6QiEV5fGqZNyN9nmNhvrZU5'), // Jitp tip account
+        //   amount: new BN(harvestPositionConfig.jitoTip),
+        // },
       })
 
       const instructions = builder.allInstructions;   // legacy+v0 agnostic

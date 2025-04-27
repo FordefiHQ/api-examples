@@ -42,8 +42,7 @@ export async function removeLiquidityFromRaydiumPool(fordefiConfig: FordefiSolan
         ownerPosition: position,
         ownerInfo: {
           useSOLBalance: true,
-          // if liquidity wants to decrease doesn't equal to position liquidity, set closePosition to false
-          closePosition: true,
+          closePosition: removeLiquidityConfig.closePosition
         },
         liquidity: position.liquidity,
         amountMinA: new BN(0),
@@ -52,13 +51,13 @@ export async function removeLiquidityFromRaydiumPool(fordefiConfig: FordefiSolan
         // optional: set up priority fee here
         computeBudgetConfig: {
           units: removeLiquidityConfig.cuLimit,
-          microLamports: await getPriorityFees(),
+          microLamports: await getPriorityFees()
         },
-        // optional: add transfer sol to tip account instruction. e.g sent tip to jito
+        // optional: set if useJito=treu
         // txTipConfig: {
-        //   address: new PublicKey('96gYZGLnJYVFmbjzopPSU6QiEV5fGqZNyN9nmNhvrZU5'),
-        //   amount: new BN(10000000), // 0.01 sol
-        // },
+        //   address: new PublicKey('96gYZGLnJYVFmbjzopPSU6QiEV5fGqZNyN9nmNhvrZU5'), // Jitp tip account
+        //   amount: new BN(removeLiquidityConfig.jitoTip)
+        // }
       })
 
     const instructions = builder.allInstructions;   // legacy+v0 agnostic
