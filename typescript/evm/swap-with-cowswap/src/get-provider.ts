@@ -25,4 +25,4 @@ export async function getProvider() {
     }
     
     return provider;
-};
+}

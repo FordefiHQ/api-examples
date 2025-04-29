@@ -8,16 +8,19 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, custom_note: str, value: str, token_contract: str):
+async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, custom_note: str, value: str, token_contract: str, funder: str):
+    print(f"Funder -> {funder}")
     request_json =  {
         "signer_type": "api_signer",
         "type": "evm_transaction",
         "details": {
+            "funder": funder,
             "type": "evm_transfer",
             "gas": {
             "type": "priority",
             "priority_level": "medium"
             },
+            "fail_on_prediction_failure": False,
             "to": destination,
             "value": {
             "type": "value",
@@ -43,12 +46,13 @@ async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, custom_
 ## Fordefi configuration
 USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
 EVM_VAULT_ID = os.getenv("EVM_VAULT_ID")
-evm_chain = "bsc"
+FUNDER_VAULT_ID = os.getenv("FUNDER_VAULT_ID")
+evm_chain = "base"
 path = "/api/v1/transactions"
-destination = "0xF659feEE62120Ce669A5C45Eb6616319D552dD93" # CHANGE
+destination = "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73" # CHANGE
 custom_note = "hello!" # Optional note
-token_contract_address = "0x55d398326f99059fF775485246999027B3197955" # USDT on Binance Smart Chain
-value = str(1_000_000_000_000_000_000) # 1 USDT
+token_contract_address = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913" # USDC on Base
+value = str(1_000_000) # 1 USDC
 
 async def main():
     try:
@@ -58,7 +62,8 @@ async def main():
                                            destination=destination, 
                                            custom_note=custom_note, 
                                            value=value, 
-                                           token_contract=token_contract_address)
+                                           token_contract=token_contract_address,
+                                           funder=FUNDER_VAULT_ID)
         request_body = json.dumps(request_json)
         timestamp = datetime.datetime.now().strftime("%s")
         payload = f"{path}|{timestamp}|{request_body}"

@@ -5,7 +5,7 @@ import { createAndSignTx } from "../api_request/pushToApi";
 
 
 // Contract specific variables
-const codeId = 856; // Replace with the actual code ID from the Archway explorer on Mintscan
+const codeId = 857; // Replace with the actual code ID from the Archway explorer on Mintscan
 const contractLabel = "Fordefi Deployed Contract!";
 const instantiateMsg = {
   count: 42
