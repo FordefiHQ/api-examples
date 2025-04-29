@@ -18,7 +18,7 @@ async function main() {
   const signer = provider.getSigner();
 
   // Approve GPv2VaultRelayer to spend tokens
-  // await approveGPv2VaultRelayer(signer, quoteRequest.sellToken, GPv2VaultRelayer );
+  await approveGPv2VaultRelayer(signer, quoteRequest.sellToken, GPv2VaultRelayer );
 
   // Request quote from CowSwap
   const { quote } = await orderBookApi.getQuote(quoteRequest)

@@ -18,7 +18,7 @@ export const quoteRequest: OrderQuoteRequest = {
     buyToken: '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT token
     from: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
     receiver: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
-    sellAmountBeforeFee: (1_000_000).toString(), // 1 USDC = 1_000_000
+    sellAmountBeforeFee: (4_000_000).toString(), // 1 USDC = 1_000_000
     kind: OrderQuoteSideKindSell.SELL,
     signingScheme: SigningScheme.EIP712
   }
