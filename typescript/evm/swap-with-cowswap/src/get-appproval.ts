@@ -5,7 +5,6 @@ const ERC20_ABI = [
     'function allowance(address owner, address spender) view returns (uint256)'
   ];
 
-
 export async function approveGPv2VaultRelayer(signer: ethers.providers.JsonRpcSigner, tokenAddress: string, approvedContract: string) {
     console.log(`Approving ${approvedContract} to spend token (${tokenAddress})`);
     
