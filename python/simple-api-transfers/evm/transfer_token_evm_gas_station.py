@@ -20,6 +20,7 @@ async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, custom_
             "type": "priority",
             "priority_level": "medium"
             },
+            "fail_on_prediction_failure": False,
             "to": destination,
             "value": {
             "type": "value",

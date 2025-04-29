@@ -8,12 +8,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-async def move_tx_native(vault_id: str, destination: str, custom_note: str, value: str):
+async def sui_tx_native(vault_id: str, destination: str, custom_note: str, value: str):
     request_json = {
         "signer_type": "api_signer",
-        "type": "aptos_transaction",
+        "type": "sui_transaction",
         "details": {
-            "type": "aptos_transfer",
+            "type": "sui_transfer",
             "to": {
                 "type": "hex",
                 "address": destination
@@ -23,10 +23,10 @@ async def move_tx_native(vault_id: str, destination: str, custom_note: str, valu
                 "value": value
             },
             "asset_identifier": {
-                "type": "aptos",
+                "type": "sui",
                 "details": {
                     "type": "native",
-                    "chain": "aptos_movement_mainnet"
+                    "chain":"sui_mainnet"
                 }
             }
         },
@@ -38,16 +38,16 @@ async def move_tx_native(vault_id: str, destination: str, custom_note: str, valu
 
 ## Fordefi configuration
 USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-APTOS_VAULT_ID = os.getenv("APTOS_VAULT_ID")
+SUI_VAULT_ID = os.getenv("SUI_VAULT_ID")
 path = "/api/v1/transactions"
-destination = "0x448692f73804b89ed750284286aaa023165539f3a20858eeb65622cab6224557" # CHANGE to your destination address
-custom_note = "hello Movement!" # Optional note
-value = str(100_000_000) # 1 MOVE
+destination = "0x20f2b0d2fe3ca33deba567a660d156b500ef7711d50be36aef71e5216d460b82" # CHANGE to your destination address
+custom_note = "hello Sui!" # Optional note
+value = str(100) # 1 SUI = 1_000_000_000 Mists
 
 async def main():
     try:
         ## Building transaction
-        request_json = await move_tx_native(vault_id=APTOS_VAULT_ID, destination=destination, custom_note=custom_note, value=value)
+        request_json = await sui_tx_native(vault_id=SUI_VAULT_ID, destination=destination, custom_note=custom_note, value=value)
         request_body = json.dumps(request_json)
         timestamp = datetime.datetime.now().strftime("%s")
         payload = f"{path}|{timestamp}|{request_body}"

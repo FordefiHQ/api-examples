@@ -1,4 +1,4 @@
-import { FordefiWeb3Provider } from '@fordefi/web3-provider';
+import { getProvider } from './get-provider';
 import { ChainId, CurrencyAmount, TradeType, Percent } from '@uniswap/sdk-core'
 import { CurrentConfig, fordefiConfig } from './config'
 import { ethers } from 'ethers';
@@ -7,11 +7,14 @@ import { ERC20_ABI, V3_SWAP_ROUTER_ADDRESS } from './constants';
 import { AlphaRouter, SwapOptionsSwapRouter02, SwapType } from '@uniswap/smart-order-router'
 import JSBI from 'jsbi';
 
-// Instanciate Fordefi provider from config
-const fordefiProvider = new FordefiWeb3Provider(fordefiConfig);
-const provider = new ethers.providers.Web3Provider(fordefiProvider);
+
 
 async function main() {
+
+  const provider = await getProvider();
+  if (!provider) {
+      throw new Error("Failed to initialize provider");
+  }
   // Check what tokens we're swapping
   console.log("Token in -> ", CurrentConfig.tokens.in.address)
   console.log("Token out -> ", CurrentConfig.tokens.out.address)

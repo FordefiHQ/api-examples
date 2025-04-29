@@ -17,9 +17,9 @@ export async function createInstantiateRequest(fordefiConfig: FordefiConfig, cod
   });
 
   // 2. Create and encode the transaction body
-  const typeUrl = "/cosmwasm.wasm.v1.MsgInstantiateContract"
-  const value = MsgInstantiateContract.encode(instantiateContractMsg).finish()
-  const bodyBase64 = await encodeTxBody(typeUrl, value)
+  const typeUrl = "/cosmwasm.wasm.v1.MsgInstantiateContract";
+  const value = MsgInstantiateContract.encode(instantiateContractMsg).finish();
+  const bodyBase64 = await encodeTxBody(typeUrl, value);
   
   // 3. Create and encode the auth info
   const authInfoBase64 = await getAuthInfo(fordefiConfig, feeAmount);

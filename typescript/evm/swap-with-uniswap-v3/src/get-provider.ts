@@ -2,11 +2,9 @@ import { FordefiWeb3Provider } from '@fordefi/web3-provider';
 import { fordefiConfig } from './config'
 import { ethers } from 'ethers';
 
-// Define provider
 let fordefiProvider: FordefiWeb3Provider | null = null;
 let provider: ethers.providers.JsonRpcProvider | null = null;
 
-// Function to get/create the provider
 export async function getProvider() {
     if (!fordefiProvider) {
         fordefiProvider = new FordefiWeb3Provider(fordefiConfig);
@@ -26,5 +24,5 @@ export async function getProvider() {
         provider = new ethers.providers.Web3Provider(fordefiProvider);
     }
     
-    return provider
-};
+    return provider;
+}

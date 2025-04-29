@@ -12,6 +12,5 @@ export async function encodeTxBody(typeUrl: string, messageValue: Uint8Array): P
       
     const bodyBytes = TxBody.encode(txBody).finish();
     const bodyBase64 = toBase64(bodyBytes);
-
-    return bodyBase64
+    return bodyBase64;
 }

@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-async def sol_tx_native(vault_id: str, destination: str, custom_note: str, value: str):
+async def apt_tx_native(vault_id: str, destination: str, custom_note: str, value: str):
     request_json = {
         "signer_type": "api_signer",
         "type": "aptos_transaction",
@@ -47,7 +47,7 @@ value = str(10_000_000) # 0.1 MOVE
 async def main():
     try:
         ## Building transaction
-        request_json = await sol_tx_native(vault_id=APTOS_VAULT_ID, destination=destination, custom_note=custom_note, value=value)
+        request_json = await apt_tx_native(vault_id=APTOS_VAULT_ID, destination=destination, custom_note=custom_note, value=value)
         request_body = json.dumps(request_json)
         timestamp = datetime.datetime.now().strftime("%s")
         payload = f"{path}|{timestamp}|{request_body}"

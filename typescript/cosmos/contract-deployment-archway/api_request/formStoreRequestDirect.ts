@@ -14,9 +14,9 @@ export async function createStoreRequest(fordefiConfig: FordefiConfig, binary: U
   });
   
   // 2. Create and encode the transaction body
-  const typeUrl = "/cosmwasm.wasm.v1.MsgStoreCode"
-  const value = MsgStoreCode.encode(storeCodeMsg).finish()
-  const bodyBase64 = await encodeTxBody(typeUrl, value)
+  const typeUrl = "/cosmwasm.wasm.v1.MsgStoreCode";
+  const value = MsgStoreCode.encode(storeCodeMsg).finish();
+  const bodyBase64 = await encodeTxBody(typeUrl, value);
   
   // 3. Create and encode the auth info
   const authInfoBase64 = await getAuthInfo(fordefiConfig, feeAmount);
