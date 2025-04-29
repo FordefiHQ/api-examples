@@ -21,4 +21,4 @@ export const quoteRequest: OrderQuoteRequest = {
     sellAmountBeforeFee: (4_000_000).toString(), // 1 USDC = 1_000_000
     kind: OrderQuoteSideKindSell.SELL,
     signingScheme: SigningScheme.EIP712
-  }
+};

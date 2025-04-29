@@ -16,6 +16,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
   * Tron TRX transfers
   * Tron TRC20 transfers
   * Native APT and MOVE transfers on Aptos and Movement 
+  * Native SUI transfers
 * Exchange transfers
 * Setting up Fordefi Webhooks
 * Signing EIP-712 typed messages with an EVM Fordefi vault
@@ -23,7 +24,8 @@ Code examples for using the Fordefi API in Python and TypeScript.
 ## TypeScript Examples 🟦
 * On EVM chains (Ethereum, Base, Arbitrum, etc.):
   * Deploying EVM smart contracts from your Fordefi vault using Hardhat or Foundry
-  * Swapping tokens programmatically with CowSwap from a Fordefi EVM vault
+  * Swapping tokens programmatically with CowSwap
+  * Swapping tokens programmatically with Uniswap v3
   * Programmatic EVM transfers using the Fordefi API
 * On Solana:
   * Programmatic token swaps using Jupiter (@solana/web3.js)

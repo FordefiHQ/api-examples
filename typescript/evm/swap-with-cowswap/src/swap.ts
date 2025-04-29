@@ -4,11 +4,9 @@ import { approveGPv2VaultRelayer } from './get-appproval'
 import { getProvider } from './get-provider';
 import { fordefiConfig, quoteRequest } from './config'
 
-
 // Init CowSwap orderbook
-const orderBookApi = new OrderBookApi({ chainId: EvmChainId.NUMBER_1 })
-const GPv2VaultRelayer = "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110"
-
+const orderBookApi = new OrderBookApi({ chainId: EvmChainId.NUMBER_1 });
+const GPv2VaultRelayer = "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110";
 
 async function main() {
   const provider = await getProvider();
@@ -47,7 +45,7 @@ async function main() {
   const orderId = await orderBookApi.sendOrder(orderCreation);
   console.log("Your order is", orderCreation);
 
-  const order = await orderBookApi.getOrder(orderId)
+  const order = await orderBookApi.getOrder(orderId);
   console.log("Order on chain:", order)
 }
 
