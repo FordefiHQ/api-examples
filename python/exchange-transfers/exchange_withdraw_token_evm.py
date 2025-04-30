@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-async def sol_tx_native(vault_id: str, destination: str, custom_note: str, value: str, exchange: str):
+async def buildRequest(vault_id: str, destination: str, custom_note: str, value: str, exchange: str):
     request_json = {
         "signer_type": "api_signer",
         "type": "exchange_transaction",
@@ -47,7 +47,7 @@ exchange_name = "coinbase_international"
 
 async def main():
     ## Building transaction
-    request_json = await sol_tx_native(vault_id=COINBASE_EXCHANGE_VAULT_ID, destination=destination, custom_note=custom_note, value=value, exchange=exchange_name)
+    request_json = await buildRequest(vault_id=COINBASE_EXCHANGE_VAULT_ID, destination=destination, custom_note=custom_note, value=value, exchange=exchange_name)
     request_body = json.dumps(request_json)
     timestamp = datetime.datetime.now().strftime("%s")
     payload = f"{path}|{timestamp}|{request_body}"

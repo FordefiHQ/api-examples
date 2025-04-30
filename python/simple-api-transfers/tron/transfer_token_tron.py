@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-async def evm_tx_native(vault_id: str, destination: str, custom_note: str, value: str, token_contract: str):
+async def build_request(vault_id: str, destination: str, custom_note: str, value: str, token_contract: str):
     request_json = {
         "signer_type": "api_signer",
         "vault_id": vault_id,
@@ -52,7 +52,7 @@ value = str(1_000_000) # 1 USDT
 async def main():
     try:
         ## Building transaction
-        request_json = await evm_tx_native(vault_id=TRON_VAULT_ID, destination=destination, custom_note=custom_note, value=value, token_contract=token_contract_address)
+        request_json = await build_request(vault_id=TRON_VAULT_ID, destination=destination, custom_note=custom_note, value=value, token_contract=token_contract_address)
         request_body = json.dumps(request_json)
         timestamp = datetime.datetime.now().strftime("%s")
         payload = f"{path}|{timestamp}|{request_body}"
