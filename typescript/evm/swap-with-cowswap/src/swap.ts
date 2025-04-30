@@ -1,12 +1,13 @@
-import { OrderBookApi, OrderSigningUtils, SigningScheme } from '@cowprotocol/cow-sdk'
+import { OrderBookApi, OrderSigningUtils, SigningScheme, UnsignedOrder } from '@cowprotocol/cow-sdk'
 import { EvmChainId } from '@fordefi/web3-provider';
 import { approveGPv2VaultRelayer } from './get-appproval'
 import { getProvider } from './get-provider';
-import { fordefiConfig, quoteRequest } from './config'
+import { fordefiConfig, quoteRequest, vaultRelayers } from './config'
 
 // Init CowSwap orderbook
-const orderBookApi = new OrderBookApi({ chainId: EvmChainId.NUMBER_1 });
-const GPv2VaultRelayer = "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110";
+const evmChainId = EvmChainId.NUMBER_8453
+const orderBookApi = new OrderBookApi({ chainId: evmChainId }); // Base
+const GPv2VaultRelayer = vaultRelayers.base;
 
 async function main() {
   const provider = await getProvider();
@@ -22,28 +23,25 @@ async function main() {
   const { quote } = await orderBookApi.getQuote(quoteRequest)
   console.log("Your quote is", quote);
   
-  const unsignedQuote = {
+  // NOTE: We override the feeAmount to 0 before signing the order to avoid 'Fee must be zero' errors from the CowSwap API
+  const unsignedQuote: UnsignedOrder = {
     ...quote,
+    sellAmount: quote.sellAmount,
+    feeAmount: '0',
     receiver: quote.receiver || fordefiConfig.address, 
   };
-  
   // Sign quote with Fordefi
-  const signedQuote = await OrderSigningUtils.signOrder(unsignedQuote, EvmChainId.NUMBER_1, signer);
+  const signedQuote = await OrderSigningUtils.signOrder(unsignedQuote, evmChainId, signer);
   console.log("Your signed quote is", signedQuote);
 
-  // Created swap order
-  const orderCreation = {
+  const orderId = await orderBookApi.sendOrder({
     ...quote,
-    signature: signedQuote.signature,
-    signingScheme: signedQuote.signingScheme as unknown as SigningScheme,
-  };
-  // Override the feeAmount to 0 before sending the order to avoid 'Fee must be zero' errors from the CowSwap API
-  orderCreation.feeAmount = '0';
-  console.log("Modified order with zero fee:", orderCreation);
-
-  // Send order to CowSwap for execution
-  const orderId = await orderBookApi.sendOrder(orderCreation);
-  console.log("Your order is", orderCreation);
+    ...signedQuote,
+    sellAmount: unsignedQuote.sellAmount, // replace quote sellAmount with signed order sellAmount, which is equal to original sellAmount
+    feeAmount: unsignedQuote.feeAmount, // replace quote feeAmount with signed order feeAmount, which is 0
+    signingScheme: signedQuote.signingScheme as unknown as SigningScheme
+  })
+  console.log("Your order is", orderId);
 
   const order = await orderBookApi.getOrder(orderId);
   console.log("Order on chain:", order)
