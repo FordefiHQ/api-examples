@@ -1,6 +1,6 @@
 # Orca DeFi Operations with Fordefi
 
-This helper code allows you to interact with Orca DEX on Solana through your Fordefi Solana Vault. It supports swapping tokens, opening positions, managing liquidity, and harvesting pool rewards.
+This helper code allows you to programmatically interact with Orca DEX on Solana through your Fordefi Solana Vault. It supports swapping tokens, opening positions, managing liquidity, and harvesting pool rewards.
 
 ## Features
 
@@ -54,7 +54,13 @@ This helper code allows you to interact with Orca DEX on Solana through your For
 
 ## Usage
 
-### Swapping Tokens
+First ensure that your API Signer is running:
+
+```bash
+docker run --rm --log-driver local --mount source=vol,destination=/storage -it fordefi.jfrog.io/fordefi/api-signer:latest
+```
+
+### Token Swaps
 
 Edit the `swapConfig` in `orca_swap.ts` to specify:
 - `orcaPool`: Address of the Orca pool to use
