@@ -1,12 +1,12 @@
 import { OrderBookApi, OrderSigningUtils, SigningScheme, UnsignedOrder } from '@cowprotocol/cow-sdk'
-import { EvmChainId } from '@fordefi/web3-provider';
-import { approveGPv2VaultRelayer } from './get-appproval'
-import { getProvider } from './get-provider';
 import { fordefiConfig, quoteRequest, vaultRelayers } from './config'
+import { approveGPv2VaultRelayer } from './get-appproval'
+import { EvmChainId } from '@fordefi/web3-provider';
+import { getProvider } from './get-provider';
 
 // Init CowSwap orderbook
-const evmChainId = EvmChainId.NUMBER_8453
-const orderBookApi = new OrderBookApi({ chainId: evmChainId }); // Base
+const evmChainId = EvmChainId.NUMBER_8453 // Base
+const orderBookApi = new OrderBookApi({ chainId: evmChainId });
 const GPv2VaultRelayer = vaultRelayers.base;
 
 async function main() {
@@ -30,6 +30,7 @@ async function main() {
     feeAmount: '0',
     receiver: quote.receiver || fordefiConfig.address, 
   };
+  
   // Sign quote with Fordefi
   const signedQuote = await OrderSigningUtils.signOrder(unsignedQuote, evmChainId, signer);
   console.log("Your signed quote is", signedQuote);
