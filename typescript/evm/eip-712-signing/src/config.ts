@@ -1,5 +1,8 @@
 import { EvmChainId, FordefiProviderConfig } from '@fordefi/web3-provider';
+import dotenv from 'dotenv';
 import fs from 'fs'
+
+dotenv.config();
 
 export const fordefiConfig: FordefiProviderConfig = {
     chainId: EvmChainId.NUMBER_8453, // Base

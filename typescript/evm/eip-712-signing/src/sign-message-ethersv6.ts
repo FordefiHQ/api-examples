@@ -1,11 +1,7 @@
 import { getProvider } from './get-provider-v6';
 import { fordefiConfig } from './config'
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 // Define your EIP-712 domain
-//    Adjust these fields to match your project’s requirements.
 const domain = {
   name: 'HelloDapp',                                                // Human-readable name of your domain
   version: '1',                                                     // Version of your domain
@@ -14,7 +10,6 @@ const domain = {
 };
 
 // Define your typed data structure
-//    Example struct: MyStruct with two fields.
 const eip712Types = {
   MyStruct: [
     { name: 'someValue', type: 'uint256' },
@@ -22,23 +17,11 @@ const eip712Types = {
   ],
 };
 
-// This function prepares the typed data payload
-function prepareTypedData(data: any) {
-  return {
-    domain,
-    types: {
-      EIP712Domain: [
-        { name: 'name', type: 'string' },
-        { name: 'version', type: 'string' },
-        { name: 'chainId', type: 'uint256' },
-        { name: 'verifyingContract', type: 'address' },
-      ],
-      ...eip712Types,
-    },
-    primaryType: 'MyStruct',
-    message: data,
-  };
-}
+// The data you want to sign
+const myData = {
+  someValue: '12345',
+  someString: 'Go go Fordefi!',
+};
 
 async function main() {
   const provider = await getProvider();
@@ -46,24 +29,12 @@ async function main() {
       throw new Error("Failed to initialize provider");
   }
   const signer = await provider.getSigner();
-
-  // The data you want to sign
-  const myData = {
-    someValue: '12345',
-    someString: 'Go go Fordefi!',
-  };
-
-  // Prepare the data for EIP-712 signing
-  const typedData = prepareTypedData(myData);
-
-  // Sign the typed data:
   const signature = await signer.signTypedData(
-    typedData.domain,
+    domain,
     { MyStruct: eip712Types.MyStruct },
-    typedData.message
+    myData
   );
   console.log('Signature:', signature);
-
 }
 
 main().catch(console.error);
