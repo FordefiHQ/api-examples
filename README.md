@@ -10,6 +10,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
 * Simple API Transfers:
   * Native EVM assets (ETH, BNB, etc.) transfers
   * ERC20 token transfers
+  * ERC20 transfers with delegated gas payment from another vault ("gas station")
   * Solana SOL transfers
   * Solana SPL token transfers
   * Solana SOL & SPL transfers with Solders
@@ -32,6 +33,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
   * Programmatic token swaps using Meteora (@solana/web3.js)
   * Programmatic token swaps and pool management using Raydium (@solana/web3.js)
   * Programmatic token swaps and pool management using Orca (@solana/kit)
+  * Programmatic SPL token transfers (@solana/kit)
 * On Sui:
   * Programmatic token swaps and pool creation using the Bluefin API
 * On Hyperliquid L1 (HyperCore):

@@ -20,7 +20,6 @@ async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, custom_
             "type": "priority",
             "priority_level": "medium"
             },
-            "fail_on_prediction_failure": False,
             "to": destination,
             "value": {
             "type": "value",
@@ -47,12 +46,12 @@ async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, custom_
 USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
 EVM_VAULT_ID = os.getenv("EVM_VAULT_ID")
 FUNDER_VAULT_ID = os.getenv("FUNDER_VAULT_ID")
-evm_chain = "base"
+evm_chain = "ethereum"
 path = "/api/v1/transactions"
 destination = "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73" # CHANGE
 custom_note = "hello!" # Optional note
-token_contract_address = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913" # USDC on Base
-value = str(1_000_000) # 1 USDC
+token_contract_address = "0xdAC17F958D2ee523a2206206994597C13D831ec7" # USDT on Ethereum
+value = str(1_000_000) # 1 USDT
 
 async def main():
     try:
