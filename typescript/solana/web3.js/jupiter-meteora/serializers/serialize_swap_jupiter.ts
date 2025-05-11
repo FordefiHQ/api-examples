@@ -88,6 +88,7 @@ export async function createJupiterSwapTx(vaultId: string, fordefiSolanaVaultAdd
 
     // We generate a quote from Jupiter
     const quote = await getSwapQuote(swapConfig.swapAmount, swapConfig.slippage, swapConfig.inputToken, swapConfig.outputToken)
+    console.log("Quote", quote)
 
     // We grab the instructions and the lookup table
     const [jupiterSwapTxIx, lookupTableAddress] = await getSwapTxIx(quote, new web3.PublicKey(fordefiSolanaVaultAddress))

@@ -4,8 +4,7 @@
   "main": "index.js",
   "scripts": {
     "jupiter_swap": "ts-node --project tsconfig.json jupiter_swap.ts",
-    "meteora_swap": "ts-node --project tsconfig.json meteora_swap.ts",
-    "test-orca": "ts-node --project tsconfig.json ./orca/serialize_swap.ts"
+    "meteora_swap": "ts-node --project tsconfig.json meteora_swap.ts"
   },
   "keywords": [],
   "author": "",
