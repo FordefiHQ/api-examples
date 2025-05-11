@@ -1,21 +1,12 @@
 import * as kit from '@solana/kit';
-import { FordefiSolanaConfig } from './tx-spl'
-import {
-  TOKEN_PROGRAM_ADDRESS,
-  findAssociatedTokenPda,
-  getTransferCheckedInstruction,
-} from '@solana-program/token';
+import { FordefiSolanaConfig, TransferConfig } from './tx-spl'
+import { TOKEN_PROGRAM_ADDRESS, findAssociatedTokenPda, getTransferCheckedInstruction } from '@solana-program/token';
 
-const mainnetRpc = kit.createSolanaRpc('https://api.mainnet-beta.solana.com');
-const USDC_MINT        = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-const DECIMALS         = 6n;                                            
-const AMOUNT           = 1n * 10n ** DECIMALS;  
-
-export async function createTx(fordefiConfig: FordefiSolanaConfig){
+export async function createTx(fordefiConfig: FordefiSolanaConfig, transferConfig: TransferConfig){
+    const mainnetRpc = kit.createSolanaRpc(transferConfig.mainnetRpc);
     const sourceVault = kit.address(fordefiConfig.originAddress)
     const destVault = kit.address(fordefiConfig.destAddress)
-    const feePayer = kit.address(fordefiConfig.feePayer)
-    const usdcMint = kit.address(USDC_MINT)
+    const usdcMint = kit.address(transferConfig.mint)
 
     const [sourceAta] = await findAssociatedTokenPda({
       owner:      sourceVault,
@@ -39,8 +30,8 @@ export async function createTx(fordefiConfig: FordefiSolanaConfig){
         destination: destAta,
         mint:        usdcMint,
         authority:   sourceVault,       
-        amount:      AMOUNT,
-        decimals:    Number(DECIMALS)
+        amount:      transferConfig.amount,
+        decimals:    Number(transferConfig.decimals)
       })
     );
 
@@ -60,15 +51,10 @@ export async function createTx(fordefiConfig: FordefiSolanaConfig){
     const signedTx = await kit.partiallySignTransactionMessageWithSigners(txMessage)
     console.log("Signed transaction: ", signedTx)
 
-    const signatures = Object.values(signedTx.signatures);
-    const firstSignature = signatures[0] ? Buffer.from(signatures[0]).toString('base64') : null;
-    console.log("First signature", firstSignature)
-    const secondSignature = signatures[1] ? Buffer.from(signatures[1]).toString('base64') : null;
-    console.log("Second signature", secondSignature)
-
     const base64EncodedData = Buffer.from(signedTx.messageBytes).toString('base64');
     console.debug("Raw data ->", base64EncodedData)
 
+    const pushMode = transferConfig.useJito ? "manual" : "auto";
     const jsonBody = {
         "vault_id": fordefiConfig.originVault,
         "signer_type": "api_signer",
@@ -76,14 +62,11 @@ export async function createTx(fordefiConfig: FordefiSolanaConfig){
         "type": "solana_transaction",
         "details": {
             "type": "solana_serialized_transaction_message",
-            "push_mode": "auto",
+            "push_mode": pushMode,
             "chain": "solana_mainnet",
-            "data": base64EncodedData,
-            "signatures":[
-              {data: firstSignature}
-            ]
+            "data": base64EncodedData
         },
-        "wait_for_state": "signed" // only for create-and-wait
+        "wait_for_state": "signed" // only use this field for create-and-wait
     };
 
     return jsonBody;
