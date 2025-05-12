@@ -25,5 +25,5 @@ export const fordefiConfig: FordefiSolanaConfig = {
 };
 
 export const stakeWithMarinade: StakeWithMarinade = {
-  solAmount: new BN('60000000'), // in lamports - must be at least 2282880 lamports
+  solAmount: new BN('2282880'), // in lamports - must be at least 2282880 lamports
 };

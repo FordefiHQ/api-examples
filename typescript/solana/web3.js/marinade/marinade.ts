@@ -1,4 +1,4 @@
-import { fordefiConfig, stakeWithMarinade } from "./config";
+import { fordefiConfig } from "./config";
 import { serializeMarinadeTx } from './utils/marinade-serialize'
 import { createAndSignTx } from "./utils/process_tx";
 import { signWithApiSigner } from "./utils/signer";
