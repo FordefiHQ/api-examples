@@ -2,11 +2,7 @@ import { NativeStakingConfig, NativeStakingSDK } from '@marinade.finance/native-
 import { FordefiSolanaConfig, stakeWithMarinade } from "../config";
 import * as web3 from '@solana/web3.js';
 
-const connection = new web3.Connection("https://api.mainnet-beta.solana.com");
-const config = new NativeStakingConfig({ connection: connection});
-const sdk = new NativeStakingSDK(config);
-
-export async function serializeMarinadeTx(fordefiConfig: FordefiSolanaConfig){  
+export async function serializeStakeTx(fordefiConfig: FordefiSolanaConfig, connection: web3.Connection, sdk: NativeStakingSDK){     
     const fordefiVaultPubKey = new web3.PublicKey(fordefiConfig.fordefiSolanaVaultAddress);
     const { createAuthorizedStake, stakeKeypair } = sdk.buildCreateAuthorizedStakeInstructions(fordefiVaultPubKey, stakeWithMarinade.solAmount);
 
@@ -45,4 +41,36 @@ export async function serializeMarinadeTx(fordefiConfig: FordefiSolanaConfig){
     };
 
     return jsonBody;
+}
+
+export async function serializeUnstakeTx(fordefiConfig: FordefiSolanaConfig, connection: web3.Connection, sdk: NativeStakingSDK){  
+    const fordefiVaultPubKey = new web3.PublicKey(fordefiConfig.fordefiSolanaVaultAddress);
+    const { payFees, onPaid } = await sdk.initPrepareForRevoke(fordefiVaultPubKey, stakeWithMarinade.solAmount) // pass `null` instead of `amount` to prepare everything for unstake
+
+    const { blockhash } = await connection.getLatestBlockhash()
+    const tx = new web3.VersionedTransaction(new web3.TransactionMessage({
+        payerKey: fordefiVaultPubKey,
+        recentBlockhash: blockhash,
+        instructions: payFees,
+    }).compileToV0Message());
+
+    const serializedMessage = Buffer.from(
+        tx.message.serialize()
+    ).toString('base64');
+    
+    const jsonBody = {
+        "vault_id": fordefiConfig.vaultId,
+        "signer_type": "api_signer",
+        "sign_mode": "auto",
+        "type": "solana_transaction",
+        "details": {
+            "type": "solana_serialized_transaction_message",
+            "push_mode": "auto",
+            "data": serializedMessage,
+            "chain": "solana_mainnet"
+        },
+        "wait_for_state": "signed" // only for create-and-wait
+    };
+
+    return [jsonBody, onPaid];;
 }

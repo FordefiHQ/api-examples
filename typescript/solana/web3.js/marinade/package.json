@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "stake": "ts-node --project tsconfig.json marinade.ts",
+    "marinade": "ts-node --project tsconfig.json marinade.ts",
     "check": "ts-node --project tsconfig.json check-rewards.ts"
   },
   "keywords": [],

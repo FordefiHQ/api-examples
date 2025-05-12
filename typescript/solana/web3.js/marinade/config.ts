@@ -13,7 +13,8 @@ export interface FordefiSolanaConfig {
 };
 
 export interface StakeWithMarinade {
-  solAmount: BN
+  solAmount: BN;
+  direction: string
 };
 
 export const fordefiConfig: FordefiSolanaConfig = {
@@ -26,4 +27,5 @@ export const fordefiConfig: FordefiSolanaConfig = {
 
 export const stakeWithMarinade: StakeWithMarinade = {
   solAmount: new BN('2282880'), // in lamports - must be at least 2282880 lamports
+  direction: "stake" // or unstake
 };
