@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "swap-v3": "npx ts-node src/uniSwapV3.ts"
+    "swap-v3": "npx ts-node src/uniswap-v3.ts"
   },
   "keywords": [],
   "author": "",
