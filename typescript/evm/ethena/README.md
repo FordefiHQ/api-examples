@@ -2,7 +2,7 @@
 
 Helper code for minting and redeeming USDe stablecoin using the Ethena protocol and your Fordefi EVM vault.
 
-⚠️ Your Fordefi EVM vault address MUST be whitelisted by Ethena. If not, request whitelisting through [Ethena's Discord](https://docs.ethena.fi/)
+⚠️ Your Fordefi EVM vault address MUST be whitelisted by Ethena for mint/redeem operations. If not, request whitelisting through [Ethena's Discord](https://docs.ethena.fi/)
 
 ## Overview
 
@@ -12,7 +12,7 @@ This tool automates the process of minting or redeeming USDe tokens through Ethe
 - Creating and formatting mint/redeem orders
 - Checking and handling token allowances
 - Signing orders with your Fordefi vault
-- Submitting transactions to the Ethereum network
+- Submitting transactions to the Ethereum network through Fordefi
 
 ## Prerequisites
 
@@ -61,7 +61,7 @@ The `fordefiConfig` object in `config.ts` contains your Fordefi wallet configura
 
 ```typescript
 export const fordefiConfig: FordefiProviderConfig = {
-  address: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73", // Your Fordefi EVM Vault address
+  address: "0xabcd1234...", // Your Fordefi EVM Vault address
   apiUserToken: process.env.FORDEFI_API_USER_TOKEN || "",  // From .env file
   apiPayloadSignKey: fs.readFileSync('./fordefi_secret/private.pem', 'utf8'), // Your private key
   chainId: EvmChainId.NUMBER_1, // Mainnet
@@ -80,7 +80,7 @@ Edit the `mintOrder` object in `config.ts` to customize your mint/redeem operati
 
 ```typescript
 export const mintOrder: MintOrder = {
-  amount: 10000,                        // Amount in token units
+  amount: 10000,                        // Amount in token units (1 = 1 USDC/USDT)
   collateralAsset: "USDT",              // "USDT" or "USDC"
   benefactor: checksumAddress(
     fordefiConfig.address
