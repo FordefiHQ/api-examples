@@ -1,7 +1,7 @@
-import { SearcherClient } from 'jito-ts/dist/sdk/block-engine/searcher';
+import * as jito from 'jito-ts';
 import { PublicKey } from '@solana/web3.js'
 
-export async function getJitoTipAccount(client: SearcherClient){
+export async function getJitoTipAccount(client: jito.searcher.SearcherClient){
     const tipAccountsResult = await client.getTipAccounts();
     if (!tipAccountsResult.ok) {
         throw new Error(`Failed to get tip accounts: ${tipAccountsResult.error}`);

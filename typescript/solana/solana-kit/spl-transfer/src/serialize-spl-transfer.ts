@@ -4,16 +4,16 @@ import { TOKEN_PROGRAM_ADDRESS, findAssociatedTokenPda, getTransferCheckedInstru
 
 export async function createTx(fordefiConfig: FordefiSolanaConfig, transferConfig: TransferConfig){
     const mainnetRpc = kit.createSolanaRpc(transferConfig.mainnetRpc);
-    const sourceVault = kit.address(fordefiConfig.originAddress)
-    const destVault = kit.address(fordefiConfig.destAddress)
-    const usdcMint = kit.address(transferConfig.mint)
+    const sourceVault = kit.address(fordefiConfig.originAddress);
+    const destVault = kit.address(fordefiConfig.destAddress);
+    const usdcMint = kit.address(transferConfig.mint);
 
     const [sourceAta] = await findAssociatedTokenPda({
       owner:      sourceVault,
       mint:       usdcMint,
       tokenProgram: TOKEN_PROGRAM_ADDRESS,
     });
-    console.debug("Source ATA", sourceAta)
+    console.debug("Source ATA", sourceAta)  
     
     const [destAta] = await findAssociatedTokenPda({
       owner:        destVault,

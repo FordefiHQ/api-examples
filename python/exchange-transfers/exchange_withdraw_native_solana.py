@@ -2,39 +2,12 @@ import os
 import json
 import asyncio
 import datetime
+from utils.tx_builders import format_withdraw_native_sol
 from utils.broadcast import broadcast_tx
 from utils.sign_payload import sign
 from dotenv import load_dotenv
 
 load_dotenv()
-
-async def buildRequest(vault_id: str, destination: str, custom_note: str, value: str, exchange: str):
-    request_json = {
-        "signer_type": "api_signer",
-        "type": "exchange_transaction",
-        "details": {
-            "asset_identifier": {
-                "asset_symbol": "SOL",
-                "exchange_type": exchange,
-                "type": "exchange"
-            },
-            "chain": "solana_mainnet",
-            "to": {
-                "address": destination,
-                "type": "address"
-            },
-            "type": "external_withdraw",
-            "value": {
-                "is_net_amount": True,
-                "type": "value",
-                "value": value
-            }
-        },
-        "vault_id": vault_id,
-        "note": custom_note
-    }
-    
-    return request_json
 
 ## CONFIG
 USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
@@ -47,7 +20,7 @@ exchange_name = "binance"
 
 async def main():
     ## Building transaction
-    request_json = await buildRequest(vault_id=BINANCE_EXCHANGE_VAULT_ID, destination=destination, custom_note=custom_note, value=value, exchange=exchange_name)
+    request_json = await format_withdraw_native_sol(vault_id=BINANCE_EXCHANGE_VAULT_ID, destination=destination, custom_note=custom_note, value=value, exchange=exchange_name)
     request_body = json.dumps(request_json)
     timestamp = datetime.datetime.now().strftime("%s")
     payload = f"{path}|{timestamp}|{request_body}"

@@ -19,7 +19,7 @@
   "dependencies": {
     "@fordefi/web3-provider": "^0.2.5",
     "dotenv": "^16.4.7",
-    "ethers": "^5.8.0",
+    "ethers": "^6.14.1",
     "moment": "^2.30.1"
   }
 }

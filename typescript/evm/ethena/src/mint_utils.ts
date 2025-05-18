@@ -43,7 +43,7 @@ export async function createMintOrder(
   beneficiary: Address,
   collateralAsset: Address
 ): Promise<OrderSending> {
-  const expiry = Math.floor(Date.now() / 1000) + 60;
+  const expiry = Math.floor(Date.now() / 1000) + 60; // set the expiration date to 1 minute after the order creation
 
   return {
     order_id: rfqData.rfq_id,

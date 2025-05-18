@@ -54,7 +54,7 @@ async function main(): Promise<void> {
   console.log("JSON request: ", jsonBody)
 
   // Fetch serialized tx from json file
-  const  requestBody = JSON.stringify(jsonBody);
+  const requestBody = JSON.stringify(jsonBody);
 
   // Define endpoint and create timestamp
   const timestamp = new Date().getTime();
@@ -81,8 +81,8 @@ async function main(): Promise<void> {
         console.error(`Failed to push the transaction to Orca: ${error.message}`)
       }
     } else {
-    console.log("Transaction signed by source vault and submitted to network ✅")
-    console.log(`Final transaction ID: ${data.id}`)
+      console.log("Transaction signed by source vault and submitted to network ✅")
+      console.log(`Final transaction ID: ${data.id}`)
     }
 
   } catch (error: any) {

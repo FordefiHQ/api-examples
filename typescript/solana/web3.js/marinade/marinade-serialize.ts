@@ -1,5 +1,5 @@
-import { NativeStakingConfig, NativeStakingSDK } from '@marinade.finance/native-staking-sdk';
-import { FordefiSolanaConfig, stakeWithMarinade } from "../config";
+import { NativeStakingSDK } from '@marinade.finance/native-staking-sdk';
+import { FordefiSolanaConfig, stakeWithMarinade } from "./config";
 import * as web3 from '@solana/web3.js';
 
 export async function serializeStakeTx(fordefiConfig: FordefiSolanaConfig, connection: web3.Connection, sdk: NativeStakingSDK){     

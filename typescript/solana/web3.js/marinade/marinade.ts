@@ -1,5 +1,5 @@
 import { fordefiConfig, stakeWithMarinade } from "./config";
-import { serializeStakeTx, serializeUnstakeTx } from './utils/marinade-serialize'
+import { serializeStakeTx, serializeUnstakeTx } from './marinade-serialize'
 import { NativeStakingConfig, NativeStakingSDK } from '@marinade.finance/native-staking-sdk';
 import { createAndSignTx } from "./utils/process_tx";
 import { signWithApiSigner } from "./utils/signer";
@@ -53,7 +53,7 @@ async function main(): Promise<void> {
         console.error("Failed to receive transaction data from Fordefi")
       }
     } catch (error: any) {
-      console.error(`Failed to sign the transaction: ${error.message}`);
+        console.error(`Failed to sign the transaction: ${error.message}`);
     }
   }
   if (require.main === module) {

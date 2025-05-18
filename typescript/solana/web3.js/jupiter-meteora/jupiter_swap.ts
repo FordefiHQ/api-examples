@@ -16,7 +16,7 @@ const fordefiConfig = {
 };
 
 const swapConfig = {
-  swapAmount: '1000', // in lamports (1 SOL = 1e9 lamports)
+  swapAmount: '10000', // in lamports (1 SOL = 1e9 lamports)
   slippage: '50', // in bps
   inputToken: 'So11111111111111111111111111111111111111112', // SOL
   outputToken: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // USDC Mint Address

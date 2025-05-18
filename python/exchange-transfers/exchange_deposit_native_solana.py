@@ -2,36 +2,12 @@ import os
 import json
 import asyncio
 import datetime
+from utils.tx_builders import format_deposit_native_sol
 from utils.broadcast import broadcast_tx
 from utils.sign_payload import sign
 from dotenv import load_dotenv
 
 load_dotenv()
-
-async def buildRequest(vault_id: str, destination: str, custom_note: str, value: str):
-    request_json = {
-        "signer_type": "api_signer",
-        "type": "solana_transaction",
-        "vault_id": vault_id,
-        "note": custom_note,
-        "details": {
-            "type": "solana_transfer",
-            "to": destination,
-            "asset_identifier": {
-                "type": "solana",
-                "details": {
-                    "type": "native",
-                    "chain": "solana_mainnet"
-            }
-            },
-            "value": {
-                "type": "value",
-                "value": value
-            }
-        }
-    }
-    
-    return request_json
 
 ## CONFIG
 USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
@@ -42,8 +18,8 @@ custom_note = "hello!"
 value = str(10_000) # Amount represents 0.00001 SOL (using the native 9-decimal precision)
 
 async def main():
-    ## Building transaction
-    request_json = await buildRequest(vault_id=FORDEFI_SOLANA_VAULT_ID, destination=BINANCE_EXCHANGE_VAULT_ID, custom_note=custom_note, value=value)
+    ## Building transaction payload
+    request_json = await format_deposit_native_sol(vault_id=FORDEFI_SOLANA_VAULT_ID, destination=BINANCE_EXCHANGE_VAULT_ID, custom_note=custom_note, value=value)
     request_body = json.dumps(request_json)
     timestamp = datetime.datetime.now().strftime("%s")
     payload = f"{path}|{timestamp}|{request_body}"

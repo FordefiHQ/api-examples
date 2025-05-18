@@ -27,11 +27,11 @@ npm install
 ```
 3.Install your chosen version ethers:
 ```bash
-npm install ethers@^6.x.x
+npm install ethers@^6.x.x # for example 6.14.1
 ```
 or 
 ```bash
-npm install ethers@^5.x.x
+npm install ethers@^5.x.x # for example 5.8.0
 ```
 4. Create a `.env` file in the root directory with your Fordefi API user token:
 ```bash
