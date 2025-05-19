@@ -5,7 +5,7 @@ Helper code for creating and broadcasting Solana swaps with Jupiter, Meteora wit
 ## Prerequisites
 
 - Fordefi API user token and API Signer set up ([link to tutorial](https://docs.fordefi.com/developers/program-overview))
-- Solana Vault in Foredefi
+- Solana Vault in Fordefi
 - OPTIONAL: RPC API token (Quicknode, Helius, etc.) if you do not want to use Solana's public RPC endpoint
 
 ## Setup

@@ -15,7 +15,7 @@ This helper code allows you to programmatically interact with Raydium DEX on Sol
 - Node.js (v14+)
 - Fordefi vault account and API credentials
 - Private key for API request signing
-- Solana tokens in your Fordefi custody wallet
+- Solana SPL tokens and SOL in your Fordefi Solana Vault
 
 ## Setup
 

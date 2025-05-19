@@ -1,10 +1,11 @@
 {
-  "name": "@fordefi/cow-swap",
+  "name": "message-signing",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "swap": "npx ts-node src/swap.ts"
+    "sign-v5": "npx ts-node src/sign-message-ethersv5.ts",
+    "sign-v6": "npx ts-node src/sign-message-ethersv6.ts"
   },
   "keywords": [],
   "author": "",
@@ -16,11 +17,9 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
-    "@cowprotocol/cow-sdk": "^5.10.0",
     "@fordefi/web3-provider": "^0.2.5",
-    "cross-fetch": "^4.1.0",
     "dotenv": "^16.4.7",
-    "ethers": "^5.7.2",
-    "hardhat": "^2.22.18"
+    "ethers": "^6.14.1",
+    "moment": "^2.30.1"
   }
 }

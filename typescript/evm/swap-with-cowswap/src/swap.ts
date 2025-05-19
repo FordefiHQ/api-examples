@@ -32,8 +32,14 @@ async function main() {
   };
   
   // Sign quote with Fordefi
-  const signedQuote = await OrderSigningUtils.signOrder(unsignedQuote, evmChainId, signer);
-  console.log("Your signed quote is", signedQuote);
+  let signedQuote;
+  try {
+    signedQuote = await OrderSigningUtils.signOrder(unsignedQuote, evmChainId, signer);
+  } catch (err) {
+    console.error('❌  OrderSigningUtils.signOrder threw:', err);
+    throw err;
+  }
+  console.log('Your signed quote is', signedQuote);
 
   const orderId = await orderBookApi.sendOrder({
     ...quote,

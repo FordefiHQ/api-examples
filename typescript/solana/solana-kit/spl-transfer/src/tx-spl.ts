@@ -1,36 +1,57 @@
+import { createAndSignTx } from '../utils/process_tx'
+import { createTx } from './serialize-spl-transfer'
+import { pushToJito } from '../utils/push_to_jito';
 import { signWithApiSigner } from './signer';
-import { createAndSignTx } from './utils/process_tx'
-import { pushToJito } from './push_to_jito'
-import { createJupiterSwapTx } from './serializers/serialize_swap_jupiter'
 import dotenv from 'dotenv'
 import fs from 'fs'
 
 dotenv.config()
 
-const fordefiConfig = {
+export interface FordefiSolanaConfig {
+  accessToken: string;
+  originVault: string;
+  originAddress: string;
+  destAddress: string;
+  privateKeyPem: string;
+  apiPathEndpoint: string
+}
+
+export interface TransferConfig {
+  mainnetRpc: string;
+  mint: string;
+  decimals: number;
+  amount: number;
+  useJito: boolean;
+  jitoTip: number
+}
+
+export const fordefiConfig: FordefiSolanaConfig = {
   accessToken: process.env.FORDEFI_API_TOKEN || "",
-  vaultId: process.env.VAULT_ID || "",
-  fordefiSolanaVaultAddress: process.env.VAULT_ADDRESS || "",
+  originVault: process.env.ORIGIN_VAULT || "",
+  originAddress: process.env.ORIGIN_ADDRESS || "",
+  destAddress: process.env.DESTINATION_ADDRES || "",
   privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
   apiPathEndpoint: '/api/v1/transactions/create-and-wait'
 };
 
-const swapConfig = {
-  swapAmount: '10000', // in lamports (1 SOL = 1e9 lamports)
-  slippage: '50', // in bps
-  inputToken: 'So11111111111111111111111111111111111111112', // SOL
-  outputToken: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // USDC Mint Address
-  useJito: true, // if true we'll use Jito instead of Fordefi to broadcast the signed transaction
-  jitoTip: 1000 // Jito tip amount in lamports (1 SOL = 1e9 lamports)
+export const transferConfig: TransferConfig = {
+  mainnetRpc: 'https://api.mainnet-beta.solana.com',
+  mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+  decimals: 6,                                            
+  amount: 100, // 1 USDC = 1_000_000
+  useJito: false,
+  jitoTip: 1000  
 };
+
 
 async function main(): Promise<void> {
   if (!fordefiConfig.accessToken) {
     console.error('Error: FORDEFI_API_TOKEN environment variable is not set');
-    return
+    return;
   }
   // We create the tx
-  const jsonBody = await createJupiterSwapTx(fordefiConfig.vaultId, fordefiConfig.fordefiSolanaVaultAddress, swapConfig);
+  const jsonBody = await createTx(fordefiConfig, transferConfig);
+  console.log("JSON request: ", jsonBody)
 
   // Fetch serialized tx from json file
   const requestBody = JSON.stringify(jsonBody);
@@ -48,19 +69,20 @@ async function main(): Promise<void> {
     const data = response.data;
     console.log(data)
 
-    if(swapConfig.useJito){
+    // Optional push to Jito
+    if(transferConfig.useJito){
       try {
-        const transaction_id = data.id
+        const transaction_id = data.id;
         console.log(`Transaction ID -> ${transaction_id}`)
   
         await pushToJito(transaction_id, fordefiConfig.accessToken)
   
       } catch (error: any){
-        console.error(`Failed to push the transaction to Jito: ${error.message}`)
+        console.error(`Failed to push the transaction to Orca: ${error.message}`)
       }
     } else {
-      console.log("Transaction submitted to Fordefi for broadcast ✅")
-      console.log(`Transaction ID: ${data.id}`)
+      console.log("Transaction signed by source vault and submitted to network ✅")
+      console.log(`Final transaction ID: ${data.id}`)
     }
 
   } catch (error: any) {

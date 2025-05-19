@@ -1,5 +1,5 @@
-import { PublicKey } from '@solana/web3.js'
 import * as jito from 'jito-ts';
+import { PublicKey } from '@solana/web3.js'
 
 export async function getJitoTipAccount(client: jito.searcher.SearcherClient){
     const tipAccountsResult = await client.getTipAccounts();
