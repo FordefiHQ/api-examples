@@ -38,8 +38,8 @@ export const transferConfig: TransferConfig = {
   mainnetRpc: 'https://api.mainnet-beta.solana.com',
   mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
   decimals: 6,                                            
-  amount: 1_000_000,
-  useJito: true,
+  amount: 100, // 1 USDC = 1_000_000
+  useJito: false,
   jitoTip: 1000  
 };
 

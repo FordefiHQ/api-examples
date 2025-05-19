@@ -79,6 +79,34 @@ async def format_withdraw_native_sol(vault_id: str, destination: str, custom_not
     
     return request_json
 
+async def format_withdraw_native_ethereum(vault_id: str, destination: str, custom_note: str, value: str, exchange: str):
+    request_json = {
+        "signer_type": "api_signer",
+        "type": "exchange_transaction",
+        "details": {
+            "asset_identifier": {
+                "asset_symbol": "ETH",
+                "exchange_type": exchange,
+                "type": "exchange"
+            },
+            "chain": "evm_ethereum_mainnet",
+            "to": {
+                "address": destination,
+                "type": "address"
+            },
+            "type": "external_withdraw",
+            "value": {
+                "is_net_amount": True,
+                "type": "value",
+                "value": value
+            }
+        },
+        "vault_id": vault_id,
+        "note": custom_note
+    }
+    
+    return request_json
+
 async def format_withdraw_token_evm(vault_id: str, destination: str, custom_note: str, value: str, exchange: str):
     request_json = {
         "signer_type": "api_signer",
