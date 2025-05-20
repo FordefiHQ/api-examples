@@ -1,9 +1,8 @@
-// scripts/deploy.ts
-import { parseEther } from "viem";
 import hre from "hardhat";
+import { parseEther } from "viem";
 import "@nomicfoundation/hardhat-ethers";
 import { HttpNetworkUserConfig } from "hardhat/types";
-import { EvmChainId, FordefiWeb3Provider } from "@fordefi/web3-provider";
+import { FordefiWeb3Provider } from "@fordefi/web3-provider";
 
 // FORDEFI secrets
 import fs from 'fs'
@@ -26,7 +25,7 @@ async function main() {
       address: "0x...", // Your Fordefi EVM Vault address
       apiUserToken: FORDEFI_API_USER_TOKEN,
       apiPayloadSignKey: PEM_PRIVATE_KEY,
-      chainId: networkConfig.chainId as EvmChainId,
+      chainId: networkConfig.chainId as number,
       rpcUrl: networkConfig.url,
     });
     const provider = new hre.ethers.BrowserProvider(fordefiProvider);

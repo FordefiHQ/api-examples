@@ -16,7 +16,7 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
-    "@fordefi/web3-provider": "^0.2.5",
+    "@fordefi/web3-provider": "^0.2.7",
     "dotenv": "^16.4.7",
     "ethers": "^5.7.2"
   }
