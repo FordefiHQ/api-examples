@@ -64,7 +64,7 @@ export const fordefiConfig: FordefiProviderConfig = {
   address: "0xabcd1234...", // Your Fordefi EVM Vault address
   apiUserToken: process.env.FORDEFI_API_USER_TOKEN || "",  // From .env file
   apiPayloadSignKey: fs.readFileSync('./fordefi_secret/private.pem', 'utf8'), // Your private key
-  chainId: EvmChainId.NUMBER_1, // Mainnet
+  chainId: 1, // Mainnet
   rpcUrl: "https://eth.llamarpc.com" // backup RPC endpoint
 };
 ```
