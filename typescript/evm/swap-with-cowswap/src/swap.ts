@@ -1,11 +1,10 @@
 import { OrderBookApi, OrderSigningUtils, SigningScheme, UnsignedOrder } from '@cowprotocol/cow-sdk'
 import { fordefiConfig, quoteRequest, vaultRelayers } from './config'
 import { approveGPv2VaultRelayer } from './get-appproval'
-import { EvmChainId } from '@fordefi/web3-provider';
 import { getProvider } from './get-provider';
 
 // Init CowSwap orderbook
-const evmChainId = EvmChainId.NUMBER_8453 // Base
+const evmChainId = 8453 // Base
 const orderBookApi = new OrderBookApi({ chainId: evmChainId });
 const GPv2VaultRelayer = vaultRelayers.base;
 

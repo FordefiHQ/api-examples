@@ -14,7 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@fordefi/web3-provider": "^0.2.5",
+    "@fordefi/web3-provider": "^0.2.7",
     "dotenv": "^16.4.7",
     "ethers": "^6.13.5",
     "viem": "^2.22.16"

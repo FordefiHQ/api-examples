@@ -48,7 +48,7 @@ To modify parameters, update the `fordefiConfig` object in `config.ts`:
 
 ```typescript
 export const fordefiConfig: FordefiProviderConfig = {
-    chainId: EvmChainId.NUMBER_8453, // Base
+    chainId: 8453, // Base
     address: '0x1234', // The Fordefi EVM Vault that will sign the message
     apiUserToken: process.env.FORDEFI_API_USER_TOKEN ?? (() => { throw new Error('FORDEFI_API_USER_TOKEN is not set'); })(), // your Fordefi API User Access Token 
     apiPayloadSignKey: fs.readFileSync('./fordefi_secret/private.pem', 'utf8') ?? (() => { throw new Error('PEM_PRIVATE_KEY is not set'); })(), // your Fordefi API User Private Key 

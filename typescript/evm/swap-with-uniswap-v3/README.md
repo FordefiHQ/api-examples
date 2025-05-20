@@ -34,7 +34,7 @@ The script uses the following main configurations found in `config.ts`:
 
 ```typescript
 export const fordefiConfig: FordefiProviderConfig = {
-  chainId: EvmChainId.NUMBER_1, // Mainet
+  chainId: 1, // Mainet
   address: '0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73', // The Fordefi EVM Vault that will sign the message
   apiUserToken: process.env.FORDEFI_API_USER_TOKEN  
   apiPayloadSignKey: fs.readFileSync('./fordefi_secret/private.pem', 'utf8'),

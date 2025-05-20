@@ -1,7 +1,8 @@
+import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
 import { HyperliquidConfig, fordefiConfig } from './config'
 import { getProvider } from './get-provider';
 import * as hl from "@nktkas/hyperliquid";
-import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
+
 
 export async function withdraw3(hlConfig: HyperliquidConfig) {
     if (!hlConfig) {

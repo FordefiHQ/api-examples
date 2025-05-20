@@ -16,7 +16,7 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
-    "@fordefi/web3-provider": "^0.2.5",
+    "@fordefi/web3-provider": "^0.2.7",
     "@nktkas/hyperliquid": "^0.17.1",
     "axios": "^1.8.4",
     "dotenv": "^16.4.7",
