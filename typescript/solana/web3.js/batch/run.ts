@@ -1,12 +1,13 @@
 import { signWithApiSigner } from './signer';
 import { Connection, PublicKey } from '@solana/web3.js';
-import { createAndSignTx } from './utils/process_tx'
-import { pushToJito } from './utils/push_to_jito'
-import { createAlt } from './helpers'
+import { createAndSignTx } from './process_tx'
+import { createAlt, extendAlt, doBatch } from './helpers'
 import dotenv from 'dotenv'
 import fs from 'fs'
 
 dotenv.config()
+
+const connection = new Connection('https://api.mainnet-beta.solana.com');
 
 export interface FordefiSolanaConfig {
   accessToken: string;
@@ -25,21 +26,23 @@ export const fordefiConfig: FordefiSolanaConfig = {
   apiPathEndpoint: '/api/v1/transactions/create-and-wait'
 };
 
-const connection = new Connection('https://api.mainnet-beta.solana.com');
 const fordefiVault =  new PublicKey(fordefiConfig.fordefiSolanaVaultAddress)
 const alice = new PublicKey("9BgxwZMyNzGUgp6hYXMyRKv3kSkyYZAMPGisqJgnXCFS");
 const bob = new PublicKey("FEwZdEBick94iFJcuVQS2gZyqhSDunSs82FTZgk26RpD");
-const recipients: PublicKey[] = [alice, bob];
-const lamportsPerRecipient : bigint = 1_000n
-const useJito = false
+const charlie = new PublicKey("GAPpdNzX3BnsHYJvRH2MiaTqKhDd7QFnwWskxtTLJsbf")
+const recipients: PublicKey[] = [alice, bob, charlie];
+const amountPerRecipient : bigint = 1_000n
+const tableAddress = new PublicKey('9sZtLMvmg6Jnxr6Sr1TcgJP9YcGY39yMug76FNfN4Azf')  // // https://solscan.io/account/9sZtLMvmg6Jnxr6Sr1TcgJP9YcGY39yMug76FNfN4Azf
 
 async function main(): Promise<void> {
   if (!fordefiConfig.accessToken) {
     console.error('Error: FORDEFI_API_TOKEN environment variable is not set');
     return;
   }
-  // We create the tx
-  const jsonBody = await createAlt(connection, fordefiVault, fordefiConfig, recipients, lamportsPerRecipient)
+  // Choose your action
+  const jsonBody = await createAlt(connection, fordefiVault, fordefiConfig)
+  //const jsonBody = await extendAlt(connection, fordefiVault, fordefiConfig, tableAddress, recipients)
+  //const jsonBody = await doBatch(connection, fordefiVault, fordefiConfig, tableAddress, recipients, amountPerRecipient)
   console.log("JSON request: ", jsonBody)
 
   // Fetch serialized tx from json file
@@ -57,21 +60,8 @@ async function main(): Promise<void> {
     const response = await createAndSignTx(fordefiConfig.apiPathEndpoint, fordefiConfig.accessToken, signature, timestamp, requestBody);
     const data = response.data;
     console.log(data)
-
-    if(useJito){
-      try {
-        const transaction_id = data.id
-        console.log(`Transaction ID -> ${transaction_id}`)
-  
-        await pushToJito(transaction_id, fordefiConfig.accessToken)
-  
-      } catch (error: any){
-        console.error(`Failed to push the transaction to Raydium: ${error.message}`)
-      }
-    } else {
-      console.log("Transaction submitted to Fordefi for broadcast ✅")
-      console.log(`Transaction ID: ${data.id}`)
-    }
+    console.log("Transaction submitted to Fordefi for broadcast ✅")
+    console.log(`Transaction ID: ${data.id}`)
 
   } catch (error: any) {
     console.error(`Failed to sign the transaction: ${error.message}`);
