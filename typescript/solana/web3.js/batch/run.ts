@@ -32,23 +32,33 @@ const bob = new PublicKey("FEwZdEBick94iFJcuVQS2gZyqhSDunSs82FTZgk26RpD");
 const charlie = new PublicKey("GAPpdNzX3BnsHYJvRH2MiaTqKhDd7QFnwWskxtTLJsbf")
 const recipients: PublicKey[] = [alice, bob, charlie];
 const amountPerRecipient : bigint = 1_000n
-const tableAddress = new PublicKey('9sZtLMvmg6Jnxr6Sr1TcgJP9YcGY39yMug76FNfN4Azf')  // // https://solscan.io/account/9sZtLMvmg6Jnxr6Sr1TcgJP9YcGY39yMug76FNfN4Azf
+const tableAddress = new PublicKey('2wFMVudMk2dCWcf16SMyxQ7TnQVLpvhH7nLNWyJyjrzL')  // // https://solscan.io/account/9sZtLMvmg6Jnxr6Sr1TcgJP9YcGY39yMug76FNfN4Azf
+const action: string = "batch" // create, extend or batch
 
 async function main(): Promise<void> {
   if (!fordefiConfig.accessToken) {
     console.error('Error: FORDEFI_API_TOKEN environment variable is not set');
     return;
   }
-  // Choose your action
-  const jsonBody = await createAlt(connection, fordefiVault, fordefiConfig)
-  //const jsonBody = await extendAlt(connection, fordefiVault, fordefiConfig, tableAddress, recipients)
-  //const jsonBody = await doBatch(connection, fordefiVault, fordefiConfig, tableAddress, recipients, amountPerRecipient)
+
+  // Prepare request body for tx payload
+  let jsonBody;
+  if (action === "create") {
+    jsonBody = await createAlt(connection, fordefiVault, fordefiConfig);
+  } else if (action === "extend") {
+    jsonBody = await extendAlt(connection, fordefiVault, fordefiConfig, tableAddress, recipients);
+  } else if (action === "batch") {
+    jsonBody = await doBatch(connection, fordefiVault, fordefiConfig, tableAddress, recipients, amountPerRecipient);
+  } else {
+    console.error('Error: Invalid action specified');
+    return;
+  }
   console.log("JSON request: ", jsonBody)
 
   // Fetch serialized tx from json file
   const requestBody = JSON.stringify(jsonBody);
 
-  // Define endpoint and create timestamp
+  // Finalize tx payload for API Signer
   const timestamp = new Date().getTime();
   const payload = `${fordefiConfig.apiPathEndpoint}|${timestamp}|${requestBody}`;
 
