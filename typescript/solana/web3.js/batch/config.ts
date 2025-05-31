@@ -23,7 +23,7 @@ export const batchConfig: BatchConfig = {
     new PublicKey("GAPpdNzX3BnsHYJvRH2MiaTqKhDd7QFnwWskxtTLJsbf")
   ],
   amountPerRecipient: 100n, // in smallest unit of SOL or SPL token
-  tableAddress: new PublicKey('ajV9hzrrguLgXRGXufh1ik9kjSLTHyrwNVuXEUDvsMR'), // update with your ALT
+  tableAddress: new PublicKey('Aa42pWo31dHzgeh7WsfkSz14tgYqqfLVw9cGHCTwibBe'), // update with your ALT
   action: "create", // create, extend or batch
   isSplBatch: false // set to true for SPL token transfers, set to false for SOL transfers
 };

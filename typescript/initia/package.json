@@ -1,0 +1,29 @@
+{
+  "name": "@fordefi/marinade",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "transfer": "npx ts-node src/initia-transfer.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@cosmjs/encoding": "^0.33.1",
+    "@fordefi/web3-provider": "^0.2.8",
+    "@initia/initia.js": "^1.0.9",
+    "axios": "^1.9.0",
+    "bech32-converting": "^1.0.9",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.5.0",
+    "ethers": "^6.14.1"
+  },
+  "devDependencies": {
+    "@types/bn.js": "^5.1.6",
+    "@types/node": "^22.15.21",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
