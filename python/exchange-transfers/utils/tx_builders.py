@@ -107,7 +107,7 @@ async def format_withdraw_native_ethereum(vault_id: str, destination: str, custo
     
     return request_json
 
-async def format_withdraw_token_evm(vault_id: str, destination: str, custom_note: str, value: str, exchange: str):
+async def format_withdraw_token_evm(vault_id: str, destination: str, custom_note: str, value: str, exchange: str, chain: str):
     request_json = {
         "signer_type": "api_signer",
         "type": "exchange_transaction",
@@ -117,7 +117,7 @@ async def format_withdraw_token_evm(vault_id: str, destination: str, custom_note
                 "exchange_type": exchange,
                 "type": "exchange"
             },
-            "chain": "evm_ethereum_mainnet",
+            "chain": f"evm_{chain}_mainnet",
             "to": {
                 "address": destination,
                 "type": "address"
