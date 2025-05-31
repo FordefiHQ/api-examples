@@ -1,58 +1,86 @@
-import { signWithApiSigner } from './signer';
+import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { createAlt, extendAlt, doBatch, doSplBatch } from './helpers';
+import { fordefiConfig, batchConfig, TOKEN_MINT } from './config';
 import { Connection, PublicKey } from '@solana/web3.js';
-import { createAndSignTx } from './process_tx'
-import { createAlt, extendAlt, doBatch } from './helpers'
-import dotenv from 'dotenv'
-import fs from 'fs'
-
-dotenv.config()
+import { createAndSignTx } from './process_tx';
+import { signWithApiSigner } from './signer';
 
 const connection = new Connection('https://api.mainnet-beta.solana.com');
 
-export interface FordefiSolanaConfig {
-  accessToken: string;
-  vaultId: string;
-  fordefiSolanaVaultAddress: string;
-  privateKeyPem: string;
-  apiPathEndpoint: string;
-};
-
-// Fordefi Config to configure
-export const fordefiConfig: FordefiSolanaConfig = {
-  accessToken: process.env.FORDEFI_API_TOKEN || "",
-  vaultId: process.env.VAULT_ID || "",
-  fordefiSolanaVaultAddress: process.env.VAULT_ADDRESS || "",
-  privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
-  apiPathEndpoint: '/api/v1/transactions/create-and-wait'
-};
-
-const fordefiVault =  new PublicKey(fordefiConfig.fordefiSolanaVaultAddress)
-const alice = new PublicKey("9BgxwZMyNzGUgp6hYXMyRKv3kSkyYZAMPGisqJgnXCFS");
-const bob = new PublicKey("FEwZdEBick94iFJcuVQS2gZyqhSDunSs82FTZgk26RpD");
-const charlie = new PublicKey("GAPpdNzX3BnsHYJvRH2MiaTqKhDd7QFnwWskxtTLJsbf")
-const recipients: PublicKey[] = [alice, bob, charlie];
-const amountPerRecipient : bigint = 1_000n
-const tableAddress = new PublicKey('2wFMVudMk2dCWcf16SMyxQ7TnQVLpvhH7nLNWyJyjrzL')  // // https://solscan.io/account/9sZtLMvmg6Jnxr6Sr1TcgJP9YcGY39yMug76FNfN4Azf
-const action: string = "batch" // create, extend or batch
+async function deriveTokenRecipientList(recipientsList: PublicKey[], mint: string): Promise<PublicKey[]> {
+  const mintPubKey = new PublicKey(mint);
+  const tokenRecipients = [];
+  
+  for (const wallet of recipientsList) {
+    const ata = await getAssociatedTokenAddress(
+      mintPubKey,
+      wallet,
+      false,
+      TOKEN_PROGRAM_ID,
+      ASSOCIATED_TOKEN_PROGRAM_ID
+    );
+    tokenRecipients.push(ata);
+  }
+  
+  return tokenRecipients;
+}
 
 async function main(): Promise<void> {
   if (!fordefiConfig.accessToken) {
     console.error('Error: FORDEFI_API_TOKEN environment variable is not set');
     return;
   }
-
+  
   // Prepare request body for tx payload
   let jsonBody;
-  if (action === "create") {
-    jsonBody = await createAlt(connection, fordefiVault, fordefiConfig);
-  } else if (action === "extend") {
-    jsonBody = await extendAlt(connection, fordefiVault, fordefiConfig, tableAddress, recipients);
-  } else if (action === "batch") {
-    jsonBody = await doBatch(connection, fordefiVault, fordefiConfig, tableAddress, recipients, amountPerRecipient);
+  if (batchConfig.action === "create") {
+    jsonBody = await createAlt(connection, batchConfig.fordefiVault, fordefiConfig);
+  } else if (batchConfig.action === "extend") {
+    let recipientsToExtend: PublicKey[];
+    
+    if (batchConfig.isSplBatch) {
+      // For SPL tokens we first derive the ATA addresses
+      recipientsToExtend = await deriveTokenRecipientList(batchConfig.recipientsList, TOKEN_MINT);
+    } else {
+      // For SOL transfers we use the wallet addresses directly
+      recipientsToExtend = batchConfig.recipientsList;
+    }
+    
+    jsonBody = await extendAlt(
+      connection, 
+      batchConfig.fordefiVault, 
+      fordefiConfig, 
+      batchConfig.tableAddress, 
+      recipientsToExtend
+    );
+  } else if (batchConfig.action === "batch") {
+    if (batchConfig.isSplBatch) {
+      // For SPL batch, the doSplBatch func will derive ATAs internally
+      jsonBody = await doSplBatch(
+        connection, 
+        batchConfig.fordefiVault, 
+        fordefiConfig, 
+        batchConfig.tableAddress, 
+        batchConfig.recipientsList,
+        batchConfig.amountPerRecipient, 
+        TOKEN_MINT
+      );
+    } else {
+      // For SOL batch
+      jsonBody = await doBatch(
+        connection, 
+        batchConfig.fordefiVault, 
+        fordefiConfig, 
+        batchConfig.tableAddress, 
+        batchConfig.recipientsList, 
+        batchConfig.amountPerRecipient
+      );
+    }
   } else {
     console.error('Error: Invalid action specified');
     return;
   }
+  
   console.log("JSON request: ", jsonBody)
 
   // Fetch serialized tx from json file

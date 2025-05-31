@@ -1,30 +1,12 @@
-import { Connection, PublicKey, SystemProgram, AddressLookupTableProgram, TransactionMessage, VersionedTransaction } from '@solana/web3.js';
-import { FordefiSolanaConfig } from './run';
-  
-export async function createAlt( 
-  connection: Connection,
-  fordefiVault: PublicKey,
-  fordefiConfig: FordefiSolanaConfig
+import { Connection, PublicKey, SystemProgram, AddressLookupTableProgram, TransactionMessage, VersionedTransaction, AddressLookupTableAccount } from '@solana/web3.js';
+import { getAssociatedTokenAddress, ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, createTransferInstruction, createAssociatedTokenAccountInstruction } from '@solana/spl-token';
+import { FordefiSolanaConfig } from './interfaces';
+
+function buildFordefiRequestBody(
+  fordefiConfig: FordefiSolanaConfig,
+  serializedMessage: string
 ) {
-  const recentSlot = await connection.getSlot();
-  const [createIx, tableAddress] =
-    AddressLookupTableProgram.createLookupTable({
-      authority: fordefiVault,
-      payer:     fordefiVault,
-      recentSlot
-    });
-  const createTx = new VersionedTransaction(
-    new TransactionMessage({
-      payerKey: fordefiVault,
-      recentBlockhash: (await connection.getLatestBlockhash()).blockhash,
-      instructions: [createIx],
-    }).compileToV0Message()
-  );
-  console.debug(`Your ALT will be created at https://solscan.io/account/${tableAddress}`)
-
-  const serializedCreateMessage = Buffer.from(createTx.message.serialize()).toString('base64');
-
-  const jsonBody = {
+  return {
     "vault_id": fordefiConfig.vaultId,
     "signer_type": "api_signer",
     "sign_mode": "auto",
@@ -36,14 +18,71 @@ export async function createAlt(
       },
       "type": "solana_serialized_transaction_message",
       "push_mode": "auto",
-      "data": serializedCreateMessage,
+      "data": serializedMessage,
       "chain": "solana_mainnet"
     },
     "wait_for_state": "signed"
   };
-  
-  return jsonBody;
+}
 
+async function createAndSerializeTransaction(
+  connection: Connection,
+  payerKey: PublicKey,
+  instructions: any[],
+  lookupTables: AddressLookupTableAccount[] = []
+): Promise<string> {
+  const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+  
+  const messageV0 = new TransactionMessage({
+    payerKey,
+    recentBlockhash,
+    instructions,
+  }).compileToV0Message(lookupTables);
+  
+  const tx = new VersionedTransaction(messageV0);
+  console.debug(tx);
+  
+  return Buffer.from(tx.message.serialize()).toString('base64');
+}
+
+export async function deriveATA(recipient: string, mint_address: string) {
+  const mint = new PublicKey(mint_address);
+  const walletAddress = new PublicKey(recipient);
+  
+  const ata = await getAssociatedTokenAddress(
+    mint,        
+    walletAddress,    
+    false,           
+    TOKEN_PROGRAM_ID, 
+    ASSOCIATED_TOKEN_PROGRAM_ID 
+  );
+  
+  console.log('ATA:', ata.toString());
+  
+  return ata;
+}
+
+export async function createAlt( 
+  connection: Connection,
+  fordefiVault: PublicKey,
+  fordefiConfig: FordefiSolanaConfig
+) {
+  const recentSlot = await connection.getSlot();
+  const [createIx, tableAddress] = AddressLookupTableProgram.createLookupTable({
+    authority: fordefiVault,
+    payer: fordefiVault,
+    recentSlot
+  });
+  
+  console.debug(`Your ALT will be created at https://solscan.io/account/${tableAddress}`);
+  
+  const serializedMessage = await createAndSerializeTransaction(
+    connection,
+    fordefiVault,
+    [createIx]
+  );
+  
+  return buildFordefiRequestBody(fordefiConfig, serializedMessage);
 }
 
 export async function extendAlt(
@@ -54,42 +93,19 @@ export async function extendAlt(
   recipients: PublicKey[]
 ) {
   const extendIx = AddressLookupTableProgram.extendLookupTable({
-    payer:      fordefiVault,
-    authority:  fordefiVault,
+    payer: fordefiVault,
+    authority: fordefiVault,
     lookupTable: tableAddress,
-    addresses:   recipients,
+    addresses: recipients,
   });
-  const extendTx = new VersionedTransaction(
-    new TransactionMessage({
-      payerKey: fordefiVault,
-      recentBlockhash: (await connection.getLatestBlockhash()).blockhash,
-      instructions: [extendIx],
-    }).compileToV0Message()
+  
+  const serializedMessage = await createAndSerializeTransaction(
+    connection,
+    fordefiVault,
+    [extendIx]
   );
   
-  console.debug(extendTx);
-
-  const serializedExtendMessage = Buffer.from(extendTx.message.serialize()).toString('base64');
-
-  const jsonBody = {
-    "vault_id": fordefiConfig.vaultId,
-    "signer_type": "api_signer",
-    "sign_mode": "auto",
-    "type": "solana_transaction",
-    "details": {
-      "fee": {
-        "type": "priority",
-        "priority_level": "medium"
-      },
-      "type": "solana_serialized_transaction_message",
-      "push_mode": "auto",
-      "data": serializedExtendMessage,
-      "chain": "solana_mainnet"
-    },
-    "wait_for_state": "signed"
-  };
-
-  return jsonBody;
+  return buildFordefiRequestBody(fordefiConfig, serializedMessage);
 }
 
 export async function doBatch(
@@ -100,44 +116,107 @@ export async function doBatch(
   recipients: PublicKey[],
   amountPerRecipient: bigint
 ) {
-
   const batchIxs = recipients.map(dest =>
     SystemProgram.transfer({
       fromPubkey: fordefiVault,
-      toPubkey:   dest,
-      lamports:   amountPerRecipient,
+      toPubkey: dest,
+      lamports: amountPerRecipient,
     })
   );
   
   const tableAccount = (await connection.getAddressLookupTable(tableAddress)).value!;
-  const messageV0 = new TransactionMessage({
-    payerKey: fordefiVault,
-    recentBlockhash: (await connection.getLatestBlockhash()).blockhash,
-    instructions: batchIxs,
-  }).compileToV0Message([tableAccount]); 
   
-  const batchTx = new VersionedTransaction(messageV0);
-  console.debug(batchTx);
+  const serializedMessage = await createAndSerializeTransaction(
+    connection,
+    fordefiVault,
+    batchIxs,
+    [tableAccount]
+  );
+  
+  return buildFordefiRequestBody(fordefiConfig, serializedMessage);
+}
 
-  const serializedBatchMessage = Buffer.from(batchTx.message.serialize()).toString('base64');
+export async function doSplBatch(
+  connection: Connection,
+  fordefiVault: PublicKey,
+  fordefiConfig: FordefiSolanaConfig,
+  tableAddress: PublicKey,
+  walletAddresses: PublicKey[],
+  amountPerRecipient: bigint,
+  mint: string,
+) {
+  const mintPubKey = new PublicKey(mint);
+  const sourceATA = await getAssociatedTokenAddress(
+    mintPubKey,
+    fordefiVault,
+    false,
+    TOKEN_PROGRAM_ID,
+    ASSOCIATED_TOKEN_PROGRAM_ID
+  );
 
-  const jsonBody = {
-    "vault_id": fordefiConfig.vaultId,
-    "signer_type": "api_signer",
-    "sign_mode": "auto",
-    "type": "solana_transaction",
-    "details": {
-      "fee": {
-        "type": "priority",
-        "priority_level": "medium"
-      },
-      "type": "solana_serialized_transaction_message",
-      "push_mode": "auto",
-      "data": serializedBatchMessage,
-      "chain": "solana_mainnet"
-    },
-    "wait_for_state": "signed"
-  };
+  const createAtaIxs = [];
+  const recipientATAs = [];
+  
+  for (let i = 0; i < walletAddresses.length; i++) {
+    const walletAddress = walletAddresses[i];
+    
+    const ata = await getAssociatedTokenAddress(
+      mintPubKey,
+      walletAddress,
+      false,
+      TOKEN_PROGRAM_ID,
+      ASSOCIATED_TOKEN_PROGRAM_ID
+    );
+    
+    recipientATAs.push(ata);
+    
+    try {
+      const account = await connection.getAccountInfo(ata);
+      if (!account) {
+        createAtaIxs.push(
+          createAssociatedTokenAccountInstruction(
+            fordefiVault,    // payer
+            ata,             // ATA address to create
+            walletAddress,   // owner (wallet address)
+            mintPubKey       // mint
+          )
+        );
+        console.log(`Will create ATA ${ata.toString()} for wallet ${walletAddress.toString()}`);
+      } else {
+        console.log(`ATA ${ata.toString()} already exists for wallet ${walletAddress.toString()}`);
+      }
+    } catch (error) {
+      console.log(`Error checking account ${ata.toString()}: ${error}`);
+      createAtaIxs.push(
+        createAssociatedTokenAccountInstruction(
+          fordefiVault,    // payer
+          ata,             // ATA address to create
+          walletAddress,   // owner (wallet address)
+          mintPubKey       // mint
+        )
+      );
+    }
+  }
 
-  return jsonBody;
+  const transferIxs = recipientATAs.map(recipientATA =>
+    createTransferInstruction(
+      sourceATA,           // source ATA
+      recipientATA,        // destination ATA
+      fordefiVault,        // authority
+      amountPerRecipient   // amount
+    )
+  );
+
+  const allInstructions = [...createAtaIxs, ...transferIxs];
+
+  const tableAccount = (await connection.getAddressLookupTable(tableAddress)).value!;
+
+  const serializedMessage = await createAndSerializeTransaction(
+    connection,
+    fordefiVault,
+    allInstructions,
+    [tableAccount]
+  );
+
+  return buildFordefiRequestBody(fordefiConfig, serializedMessage);
 }

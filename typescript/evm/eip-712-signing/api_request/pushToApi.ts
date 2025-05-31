@@ -7,7 +7,8 @@ export async function createAndSignTx(
   timestamp: number,
   requestBody: string
 ): Promise<AxiosResponse> {
-  const url = `https://api.fordefi.com${path}`;
+  const fordefiApiUrl = "https://api.fordefi.com";
+  const url = `${fordefiApiUrl}${path}`;
 
   try {
     const respTx = await axios.post(url, requestBody, {
@@ -22,17 +23,21 @@ export async function createAndSignTx(
 
     if (respTx.status < 200 || respTx.status >= 300) {
       let errorMessage = `HTTP error occurred: status = ${respTx.status}`;
+      // Attempt to parse the response body for additional error info
       try {
         const errorDetail = respTx.data;
         errorMessage += `\nError details: ${JSON.stringify(errorDetail)}`;
       } catch {
+        // If not JSON, include raw text
         errorMessage += `\nRaw response: ${respTx.data}`;
       }
       throw new Error(errorMessage);
-    }
+    };
 
     return respTx;
+
   } catch (error: any) {
+    // If we have an Axios error with a response, parse it
     if (error.response) {
       let errorMessage = `HTTP error occurred: status = ${error.response.status}`;
       try {
@@ -42,7 +47,9 @@ export async function createAndSignTx(
         errorMessage += `\nRaw response: ${error.response.data}`;
       }
       throw new Error(errorMessage);
-    }
+    };
+
+    // Otherwise, it's a network or unknown error
     throw new Error(`Network error occurred: ${error.message ?? error}`);
   }
-};
+}
