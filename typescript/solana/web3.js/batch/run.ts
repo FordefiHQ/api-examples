@@ -1,5 +1,4 @@
-import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import { createAlt, extendAlt, doBatch, doSplBatch } from './helpers';
+import { createAlt, extendAlt, doBatch, doSplBatch, deriveTokenRecipientList } from './helpers';
 import { fordefiConfig, batchConfig, TOKEN_MINT } from './config';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { createAndSignTx } from './process_tx';
@@ -7,30 +6,11 @@ import { signWithApiSigner } from './signer';
 
 const connection = new Connection('https://api.mainnet-beta.solana.com');
 
-async function deriveTokenRecipientList(recipientsList: PublicKey[], mint: string): Promise<PublicKey[]> {
-  const mintPubKey = new PublicKey(mint);
-  const tokenRecipients = [];
-  
-  for (const wallet of recipientsList) {
-    const ata = await getAssociatedTokenAddress(
-      mintPubKey,
-      wallet,
-      false,
-      TOKEN_PROGRAM_ID,
-      ASSOCIATED_TOKEN_PROGRAM_ID
-    );
-    tokenRecipients.push(ata);
-  }
-  
-  return tokenRecipients;
-}
-
 async function main(): Promise<void> {
   if (!fordefiConfig.accessToken) {
     console.error('Error: FORDEFI_API_TOKEN environment variable is not set');
     return;
   }
-  
   // Prepare request body for tx payload
   let jsonBody;
   if (batchConfig.action === "create") {
