@@ -62,8 +62,8 @@ async def fordefi_webhook(request: Request):
             detail="Invalid signature"
         )
 
-    received_event = raw_body.decode()
-    print("Received event:", received_event)
+    print("\n📝 Received event:")
+    print(json.dumps(json.loads(raw_body.decode()), indent=2))
 
     # 4. Parse the JSON body into a dictionary
     try:
@@ -94,7 +94,8 @@ async def fordefi_webhook(request: Request):
         print("transaction_id field not found in the event data.")
 
     if not transaction_data:
-        # If we don't get any transaction data, there's nothing more to do
-        return {"message": "Webhook processed; no transaction data found."}
+        print("No transaction data")
+    
+    return transaction_data
 
 # uvicorn app:app --host 0.0.0.0 --port 8080 --reload

@@ -62,7 +62,7 @@ This helper code enables sending transactions on the Initia blockchain using For
 
 Run the transfer script:
 ```bash
-npx ts-node transfer.ts
+npm run transfer
 ```
 
 ### What the Script Does

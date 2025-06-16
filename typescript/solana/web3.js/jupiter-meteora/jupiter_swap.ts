@@ -54,7 +54,7 @@ async function main(): Promise<void> {
         console.log(`Transaction ID -> ${transaction_id}`)
   
         await pushToJito(transaction_id, fordefiConfig.accessToken)
-  
+
       } catch (error: any){
         console.error(`Failed to push the transaction to Jito: ${error.message}`)
       }

@@ -18,10 +18,11 @@ custom_note = "hello!"
 value = str(1_000_000_000_000_000_000) # Amount represents 1 USDC (using 18-decimal precision required by Fordefi API, regardless of asset's native decimals)
 exchange_name = "coinbase_international"
 chain =  "ethereum"
+asset =  "USDC"
 
 async def main():
     ## Building transaction
-    request_json = await format_withdraw_token_evm(vault_id=COINBASE_EXCHANGE_VAULT_ID, destination=destination, custom_note=custom_note, value=value, exchange=exchange_name, chain=chain)
+    request_json = await format_withdraw_token_evm(vault_id=COINBASE_EXCHANGE_VAULT_ID, destination=destination, custom_note=custom_note, value=value, exchange=exchange_name, chain=chain, asset=asset)
     request_body = json.dumps(request_json)
     timestamp = datetime.datetime.now().strftime("%s")
     payload = f"{path}|{timestamp}|{request_body}"

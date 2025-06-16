@@ -135,6 +135,6 @@ For deposits into an Exchange Vault however, you must use the NATIVE decimal pla
 
 ## Additional Resources
 
-- [Fordefi API Reference](https://docs.fordefi.com/developers/api-reference)
+- [Fordefi API Reference](https://docs.fordefi.com/api/openapi)
 - [Fordefi Exchange Integration Guide](https://docs.fordefi.com/user-guide/integrate-exchanges)
 - [API Signer Documentation](https://docs.fordefi.com/developers/getting-started/set-up-an-api-signer)
