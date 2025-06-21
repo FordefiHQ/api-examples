@@ -39,6 +39,44 @@ Ensure you have the following set up before running the script:
      - Unlock date: January 1st, 2030
      - Value: 0.001 ETH (1 Gwei)
 
+## Build and Compile
+
+Before deploying, you need to compile your smart contracts:
+
+1. **Compile the contracts:**
+   ```sh
+   npx hardhat compile
+   ```
+   This will:
+   - Compile the Solidity contracts in the `contracts/` directory
+   - Generate artifacts in the `artifacts/` directory
+   - Generate TypeScript types in the `typechain-types/` directory
+
+2. **Verify compilation:**
+   - Check that `artifacts/` directory contains the compiled contract artifacts
+   - Check that `typechain-types/` directory contains TypeScript type definitions
+
+## Build Scripts
+
+You can also add these convenient scripts to your `package.json`:
+
+```json
+{
+  "scripts": {
+    "compile": "hardhat compile",
+    "clean": "hardhat clean",
+    "deploy:polygon": "hardhat run --network polygon scripts/deploy.ts",
+    "deploy:hyperevm": "hardhat run --network hyperevm scripts/deploy.ts"
+  }
+}
+```
+
+Then you can run:
+```sh
+npm run compile
+npm run deploy:polygon
+```
+
 ## Deployment
 
 Deploy the contract to your chosen network:

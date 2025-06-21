@@ -13,6 +13,8 @@ const FORDEFI_API_USER_TOKEN = process.env.FORDEFI_API_USER_TOKEN ??
 const privateKeyFilePath = './fordefi_secret/private.pem';
 const PEM_PRIVATE_KEY = fs.readFileSync(privateKeyFilePath, 'utf8') ??
   (() => { throw new Error('PEM_PRIVATE_KEY is not set') })();
+const FORDEFI_EVM_VAULT_ADDRESS = process.env.FORDEFI_EVM_VAULT_ADDRESS ?? 
+(() => { throw new Error('FORDEFI_EVM_VAULT_ADDRESS is not set') })();
 
 // Some vars for your contract
 const JAN_1ST_2030 = 1893456000;
@@ -22,7 +24,7 @@ const ONE_GWEI: bigint = parseEther("0.001");
 async function main() {
     const networkConfig = hre.network.config as HttpNetworkUserConfig;
     const fordefiProvider = new FordefiWeb3Provider({
-      address: "0x...", // Your Fordefi EVM Vault address
+      address: FORDEFI_EVM_VAULT_ADDRESS as `0x${string}`, // Your Fordefi EVM Vault address
       apiUserToken: FORDEFI_API_USER_TOKEN,
       apiPayloadSignKey: PEM_PRIVATE_KEY,
       chainId: networkConfig.chainId as number,

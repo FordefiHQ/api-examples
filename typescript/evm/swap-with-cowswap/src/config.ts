@@ -14,7 +14,7 @@ export const fordefiConfig: FordefiProviderConfig = {
   address: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
   apiUserToken: process.env.FORDEFI_API_USER_TOKEN  || "",
   apiPayloadSignKey: fs.readFileSync('./fordefi_secret/private.pem', 'utf8'),
-  chainId: 1, // Base
+  chainId: 8453, // Base
   rpcUrl: "https://base.llamarpc.com"
 };
 

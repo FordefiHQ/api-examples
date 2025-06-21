@@ -1,10 +1,10 @@
-import { OrderBookApi, OrderSigningUtils, SigningScheme, UnsignedOrder } from '@cowprotocol/cow-sdk'
+import { OrderBookApi, OrderSigningUtils, SigningScheme, UnsignedOrder, SupportedChainId} from '@cowprotocol/cow-sdk'
 import { fordefiConfig, quoteRequest, vaultRelayers } from './config'
 import { approveGPv2VaultRelayer } from './get-appproval'
 import { getProvider } from './get-provider';
 
 // Init CowSwap orderbook
-const evmChainId = 8453 // Base
+const evmChainId = fordefiConfig.chainId as SupportedChainId // Base
 const orderBookApi = new OrderBookApi({ chainId: evmChainId });
 const GPv2VaultRelayer = vaultRelayers.base;
 
@@ -16,7 +16,7 @@ async function main() {
   const signer = provider.getSigner();
 
   // Approve GPv2VaultRelayer to spend tokens
-  await approveGPv2VaultRelayer(signer, quoteRequest.sellToken, GPv2VaultRelayer );
+  await approveGPv2VaultRelayer(provider, signer, quoteRequest.sellToken, GPv2VaultRelayer );
 
   // Request quote from CowSwap
   const { quote } = await orderBookApi.getQuote(quoteRequest)
