@@ -6,8 +6,7 @@
   "scripts": {
     "sign-v5": "npx ts-node src/sign-message-ethersv5.ts",
     "sign-v6": "npx ts-node src/sign-message-ethersv6.ts",
-    "sign-personal-v6": "npx ts-node src/sign-personal-message-ethersv6.ts",
-    "call": "npx ts-node src/raw_contract_call.ts"
+    "sign-personal-v6": "npx ts-node src/sign-personal-message-ethersv6.ts"
   },
   "keywords": [],
   "author": "",
