@@ -62,6 +62,24 @@ export async function deriveATA(recipient: string, mint_address: string) {
   return ata;
 }
 
+export async function deriveTokenRecipientList(recipientsList: PublicKey[], mint: string): Promise<PublicKey[]> {
+  const mintPubKey = new PublicKey(mint);
+  const tokenRecipients = [];
+  
+  for (const wallet of recipientsList) {
+    const ata = await getAssociatedTokenAddress(
+      mintPubKey,
+      wallet,
+      false,
+      TOKEN_PROGRAM_ID,
+      ASSOCIATED_TOKEN_PROGRAM_ID
+    );
+    tokenRecipients.push(ata);
+  }
+  
+  return tokenRecipients;
+}
+
 export async function createAlt( 
   connection: Connection,
   fordefiVault: PublicKey,

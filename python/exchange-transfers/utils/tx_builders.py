@@ -23,13 +23,13 @@ async def format_deposit_native_sol(vault_id: str, destination: str, custom_note
     
     return request_json
 
-async def format_ex_to_ex_withdrawal_token_evm(vault_id: str, destination: str, custom_note: str, value: str, exchange: str):
+async def format_ex_to_ex_withdrawal_token_evm(vault_id: str, destination: str, custom_note: str, value: str, exchange: str, asset: str):
     request_json = {
         "signer_type": "api_signer",
         "type": "exchange_transaction",
         "details": {
             "asset_identifier": {
-                "asset_symbol": "USDC",
+                "asset_symbol": asset,
                 "exchange_type": exchange,
                 "type": "exchange"
             },
@@ -51,13 +51,13 @@ async def format_ex_to_ex_withdrawal_token_evm(vault_id: str, destination: str, 
     
     return request_json
 
-async def format_withdraw_native_sol(vault_id: str, destination: str, custom_note: str, value: str, exchange: str):
+async def format_withdraw_native_sol(vault_id: str, destination: str, custom_note: str, value: str, exchange: str, asset: str):
     request_json = {
         "signer_type": "api_signer",
         "type": "exchange_transaction",
         "details": {
             "asset_identifier": {
-                "asset_symbol": "SOL",
+                "asset_symbol": asset,
                 "exchange_type": exchange,
                 "type": "exchange"
             },
@@ -79,13 +79,13 @@ async def format_withdraw_native_sol(vault_id: str, destination: str, custom_not
     
     return request_json
 
-async def format_withdraw_native_ethereum(vault_id: str, destination: str, custom_note: str, value: str, exchange: str):
+async def format_withdraw_native_ethereum(vault_id: str, destination: str, custom_note: str, value: str, exchange: str, asset: str):
     request_json = {
         "signer_type": "api_signer",
         "type": "exchange_transaction",
         "details": {
             "asset_identifier": {
-                "asset_symbol": "ETH",
+                "asset_symbol": asset,
                 "exchange_type": exchange,
                 "type": "exchange"
             },
@@ -107,17 +107,45 @@ async def format_withdraw_native_ethereum(vault_id: str, destination: str, custo
     
     return request_json
 
-async def format_withdraw_token_evm(vault_id: str, destination: str, custom_note: str, value: str, exchange: str, chain: str):
+async def format_withdraw_token_evm(vault_id: str, destination: str, custom_note: str, value: str, exchange: str, chain: str, asset: str):
     request_json = {
         "signer_type": "api_signer",
         "type": "exchange_transaction",
         "details": {
             "asset_identifier": {
-                "asset_symbol": "USDC",
+                "asset_symbol": asset,
                 "exchange_type": exchange,
                 "type": "exchange"
             },
             "chain": f"evm_{chain}_mainnet",
+            "to": {
+                "address": destination,
+                "type": "address"
+            },
+            "type": "external_withdraw",
+            "value": {
+                "is_net_amount": True,
+                "type": "value",
+                "value": value
+            }
+        },
+        "vault_id": vault_id,
+        "note": custom_note
+    }
+    
+    return request_json
+
+async def format_withdraw_trc20(vault_id: str, destination: str, custom_note: str, value: str, exchange: str, chain: str, asset: str):
+    request_json = {
+        "signer_type": "api_signer",
+        "type": "exchange_transaction",
+        "details": {
+            "asset_identifier": {
+                "asset_symbol": asset,
+                "exchange_type": exchange,
+                "type": "exchange"
+            },
+            "chain": f"{chain}_mainnet",
             "to": {
                 "address": destination,
                 "type": "address"

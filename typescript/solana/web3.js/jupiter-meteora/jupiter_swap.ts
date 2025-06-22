@@ -20,7 +20,7 @@ const swapConfig = {
   slippage: '50', // in bps
   inputToken: 'So11111111111111111111111111111111111111112', // SOL
   outputToken: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // USDC Mint Address
-  useJito: true, // if true we'll use Jito instead of Fordefi to broadcast the signed transaction
+  useJito: false, // if true we'll use Jito instead of Fordefi to broadcast the signed transaction
   jitoTip: 1000 // Jito tip amount in lamports (1 SOL = 1e9 lamports)
 };
 
@@ -54,7 +54,7 @@ async function main(): Promise<void> {
         console.log(`Transaction ID -> ${transaction_id}`)
   
         await pushToJito(transaction_id, fordefiConfig.accessToken)
-  
+
       } catch (error: any){
         console.error(`Failed to push the transaction to Jito: ${error.message}`)
       }

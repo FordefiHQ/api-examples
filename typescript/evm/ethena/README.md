@@ -112,9 +112,6 @@ npm run ethena
 ## Troubleshooting
 
 Common issues:
-## Troubleshooting
-
-Common issues:
 - **Insufficient balance**: Ensure you have enough tokens in your Fordefi vault
 - **RFQ errors**: Check that the Ethena API is available and your requested amount is within limits
 - **BenefactorNotWhitelisted**: Ethena will reject mint/redeem operations if your address is not whitelisted. Open a ticket on the Ethena Discord to request whitelisting for your address.

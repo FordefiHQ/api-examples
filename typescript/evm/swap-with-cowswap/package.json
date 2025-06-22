@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@cowprotocol/cow-sdk": "^5.10.0",
-    "@fordefi/web3-provider": "^0.2.7",
+    "@fordefi/web3-provider": "^0.3.0",
     "cross-fetch": "^4.1.0",
     "dotenv": "^16.4.7",
     "ethers": "^5.7.2",

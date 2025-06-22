@@ -7,6 +7,10 @@ const config: HardhatUserConfig = {
     polygon: { 
       url: "https://polygon.llamarpc.com", // Fallback JSON-RPC URL
       chainId: 137, // Decimal value of the chain id
+    },
+    hyperevm: { 
+      url: "https://rpc.purroofgroup.com/", // Fallback JSON-RPC URL
+      chainId: 999, // Decimal value of the chain id
     }
   }
 };

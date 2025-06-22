@@ -13,7 +13,7 @@
   "description": "A script for deploying EVM contracts using Fordefi",
   "main": "index.js",
   "dependencies": {
-    "@fordefi/web3-provider": "^0.2.7",
+    "@fordefi/web3-provider": "^0.3.0",
     "acorn": "^8.14.0",
     "acorn-walk": "^8.3.4",
     "arg": "^4.1.3",

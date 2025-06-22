@@ -6,8 +6,7 @@
   "scripts": {
     "sign-v5": "npx ts-node src/sign-message-ethersv5.ts",
     "sign-v6": "npx ts-node src/sign-message-ethersv6.ts",
-    "sign-personal-v6": "npx ts-node src/sign-personal-message-ethersv6.ts",
-    "initia": "npx ts-node src/initiav2.ts"
+    "sign-personal-v6": "npx ts-node src/sign-personal-message-ethersv6.ts"
   },
   "keywords": [],
   "author": "",
@@ -19,7 +18,7 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
-    "@fordefi/web3-provider": "^0.2.7",
+    "@fordefi/web3-provider": "^0.3.0",
     "cosmjs-types": "^0.9.0",
     "dotenv": "^16.4.7",
     "ethers": "^6.14.1"

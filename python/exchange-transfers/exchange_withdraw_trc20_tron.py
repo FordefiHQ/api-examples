@@ -2,7 +2,7 @@ import os
 import json
 import asyncio
 import datetime
-from utils.tx_builders import format_ex_to_ex_withdrawal_token_evm
+from utils.tx_builders import format_withdraw_trc20
 from utils.broadcast import broadcast_tx
 from utils.sign_payload import sign
 from dotenv import load_dotenv
@@ -11,17 +11,18 @@ load_dotenv()
 
 ## CONFIG
 USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-COINBASE_EXCHANGE_VAULT_ID = os.getenv("COINBASE_EXCHANGE_VAULT_ID")
-BINANCE_EXCHANGE_VAULT_ID = os.getenv("BINANCE_EXCHANGE_VAULT_ID")
+BYBIT_EXCHANGE_VAULT_ID = os.getenv("BYBIT_EXCHANGE_VAULT_ID")
 path = "/api/v1/transactions"
+destination = "TEbpdRR6mefVBMUTLTFMBaGD7NxtywHpFD" # CHANGE to your destination address
 custom_note = "hello!"
-value = str(1_000_000_000_000_000_000)# Amount represents 1 USDC (using 18-decimal precision required by Fordefi API, regardless of asset's native decimals)
-exchange_name = "coinbase_international"
-asset = "USDC"
+value = str(1_000_000_000_000_000_000) # Amount represents 1 USDT (using 18-decimal precision required by Fordefi API, regardless of asset's native decimals)
+exchange_name = "bybit"
+chain =  "tron"
+asset = "USDT"
 
 async def main():
     ## Building transaction
-    request_json = await format_ex_to_ex_withdrawal_token_evm(vault_id=COINBASE_EXCHANGE_VAULT_ID, destination=BINANCE_EXCHANGE_VAULT_ID, custom_note=custom_note, value=value, exchange=exchange_name, asset=asset)
+    request_json = await format_withdraw_trc20(vault_id=BYBIT_EXCHANGE_VAULT_ID, destination=destination, custom_note=custom_note, value=value, exchange=exchange_name, chain=chain, asset= asset)
     request_body = json.dumps(request_json)
     timestamp = datetime.datetime.now().strftime("%s")
     payload = f"{path}|{timestamp}|{request_body}"
