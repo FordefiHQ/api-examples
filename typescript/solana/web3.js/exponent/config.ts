@@ -1,4 +1,3 @@
-import { Connection } from '@solana/web3.js'
 import dotenv from 'dotenv'
 import fs from 'fs'
 
@@ -29,7 +28,7 @@ export const fordefiConfig: FordefiSolanaConfig = {
 export const exponentConfig: ExponentConfig = {
   market: "EJ4GPTCnNtemBVrT7QKhRfSKfM53aV2UJYGAC8gdVz5b", // fragSOL market, you can find more markets at https://web-api.exponent.finance/api/markets
   investAmount: 100n, // in smallest fragSOL units (9 decimals -> https://solscan.io/token/FRAGSEthVFL7fdqM8hxfxkfCZzUvmg21cqPJVvC1qdbo)
-  action: "sell", // buy -> to aquire PT tokens / sell -> to aquire fragSOL
+  action: "buy", // buy -> to aquire PT tokens / sell -> to aquire fragSOL
 };
 
-export const connection = new Connection('https://api.mainnet-beta.solana.com');
+export const solanaCluster: "mainnet-beta" | "testnet" | "devnet" = "mainnet-beta"

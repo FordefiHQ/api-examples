@@ -22,7 +22,6 @@ export async function createAndSignTx(
 
     if (respTx.status < 200 || respTx.status >= 300) {
       let errorMessage = `HTTP error occurred: status = ${respTx.status}`;
-      // Attempt to parse the response body for additional error info
       try {
         const errorDetail = respTx.data;
         errorMessage += `\nError details: ${JSON.stringify(errorDetail)}`;

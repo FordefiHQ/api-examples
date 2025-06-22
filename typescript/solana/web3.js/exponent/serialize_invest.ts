@@ -1,6 +1,7 @@
 import { Connection, PublicKey, TransactionInstruction, VersionedTransaction, AddressLookupTableAccount, TransactionMessage, ComputeBudgetProgram } from '@solana/web3.js';
 import { LOCAL_ENV, Market } from "@exponent-labs/exponent-sdk";
 import { FordefiSolanaConfig, ExponentConfig} from './config'
+import { getPriorityFees } from './utils/get_priority_fees'
 import { createAndSignTx } from './utils/process_tx'
 import { signWithApiSigner } from './signer';
 import * as dotenv from 'dotenv';
@@ -9,9 +10,8 @@ dotenv.config();
 
 let marketSdk: Market | null = null;
 
-export async function getMarketSdk(marketAddress: string): Promise<Market> {
+export async function getMarketSdk(marketAddress: string, connection: Connection): Promise<Market> {
   if (!marketSdk) {
-    const connection = new Connection('https://api.mainnet-beta.solana.com');
     const market = new PublicKey(marketAddress);
     marketSdk = await Market.load(LOCAL_ENV, connection, market);
   }
@@ -68,7 +68,7 @@ async function createAndSerializeTransaction(
     units: 600_000, // it's a complex tx, we need a lot of CU!
   });
   const setComputeUnitPriceIx = ComputeBudgetProgram.setComputeUnitPrice({
-    microLamports: 10_000, // Set a small priority fee
+    microLamports: await getPriorityFees(instructions, connection),
   });
   
   const messageV0 = new TransactionMessage({
@@ -106,8 +106,8 @@ export async function waitForLookupTable(connection: Connection, lookupTableAddr
 }
 
 // Get current market information
-export async function getMarketInfo(marketAddress: string) {
-  const sdk = await getMarketSdk(marketAddress);
+export async function getMarketInfo(marketAddress: string, connection: Connection) {
+  const sdk = await getMarketSdk(marketAddress, connection);
   console.log('--- Market Info ---');
   console.log('Current SY exchange rate:', sdk.currentSyExchangeRate.toString());
   console.log('Current PT discount:', sdk.ptDiscount.toString());
@@ -128,9 +128,9 @@ export async function getMarketInfo(marketAddress: string) {
 }
 
 // Simulate buying PT with base asset
-export async function simulateBuyPt(marketAddress: string, baseAssetAmount: number) {
+export async function simulateBuyPt(marketAddress: string, baseAssetAmount: number, connection: Connection) {
   try {
-    const sdk = await getMarketSdk(marketAddress);
+    const sdk = await getMarketSdk(marketAddress, connection);
     const estimatedPt = sdk.marketCalculator().estimateNetPtForExactNetAsset(-baseAssetAmount);
     if (estimatedPt === null) {
       console.log(`No PT estimate available for ${baseAssetAmount} base asset`);
@@ -145,9 +145,9 @@ export async function simulateBuyPt(marketAddress: string, baseAssetAmount: numb
 }
 
 // Simulate selling PT for base asset
-export async function simulateSellPt(marketAddress: string, ptInAmount: number) {
+export async function simulateSellPt(marketAddress: string, ptInAmount: number, connection: Connection) {
   try {
-    const sdk = await getMarketSdk(marketAddress);
+    const sdk = await getMarketSdk(marketAddress, connection);
     const estimatedBaseAsset = sdk.marketCalculator().calcTradePt(-ptInAmount);
     console.log(`Estimated base asset for selling ${ptInAmount} PT:`, estimatedBaseAsset);
     
@@ -168,10 +168,11 @@ export async function createSellPtInstruction(
   marketAddress: string,
   owner: PublicKey, 
   ptAmount: bigint, 
-  minBaseOut: bigint
+  minBaseOut: bigint,
+  connection: Connection
 ): Promise<{ setupIxs: TransactionInstruction[]; ixs: TransactionInstruction[] }> {
   try {
-    const sdk = await getMarketSdk(marketAddress);
+    const sdk = await getMarketSdk(marketAddress, connection);
     const sellPtIx = await sdk.ixWrapperSellPt({
       owner,
       amount: ptAmount,
@@ -191,10 +192,11 @@ export async function createBuyPtInstruction(
   marketAddress: string, 
   owner: PublicKey, 
   ptOut: bigint, 
-  maxBaseIn: bigint
+  maxBaseIn: bigint,
+  connection: Connection
 ): Promise<{ setupIxs: TransactionInstruction[]; ixs: TransactionInstruction[] }> {
   try {
-    const sdk = await getMarketSdk(marketAddress);
+    const sdk = await getMarketSdk(marketAddress, connection);
     const buyPtIx = await sdk.ixWrapperBuyPt({
       owner,
       ptOut,
@@ -272,13 +274,13 @@ export async function createInvestPayload(
   return buildFordefiRequestBody(fordefiConfig, serializedMessage);
 }
 
-export async function getInstructions(owner: PublicKey, exponentConfig: ExponentConfig) {
-  const sdk = await getMarketSdk(exponentConfig.market);
+export async function getInstructions(owner: PublicKey, exponentConfig: ExponentConfig, connection: Connection) {
+  const sdk = await getMarketSdk(exponentConfig.market, connection);
 
   switch (exponentConfig.action) {
     case 'buy':
       const investAmountInBaseAsset = BigInt(Math.floor(Number(exponentConfig.investAmount) * sdk.currentSyExchangeRate));
-      const estimatedPt = await simulateBuyPt(exponentConfig.market, Number(investAmountInBaseAsset));
+      const estimatedPt = await simulateBuyPt(exponentConfig.market, Number(investAmountInBaseAsset), connection);
       if (!estimatedPt) {
         throw new Error('Could not estimate PT amount for buy');
       }
@@ -289,11 +291,12 @@ export async function getInstructions(owner: PublicKey, exponentConfig: Exponent
         exponentConfig.market,
         owner,
         ptOut,
-        investAmountInBaseAsset
+        investAmountInBaseAsset,
+        connection
       );
       
     case 'sell':
-      const estimatedBase = await simulateSellPt(exponentConfig.market, Number(exponentConfig.investAmount));
+      const estimatedBase = await simulateSellPt(exponentConfig.market, Number(exponentConfig.investAmount), connection);
       if (!estimatedBase) {
         throw new Error('Could not estimate base amount for sell');
       }
@@ -305,7 +308,8 @@ export async function getInstructions(owner: PublicKey, exponentConfig: Exponent
         exponentConfig.market,
         owner,
         ptAmount,
-        minBaseOut
+        minBaseOut,
+        connection
       );
       
     default:

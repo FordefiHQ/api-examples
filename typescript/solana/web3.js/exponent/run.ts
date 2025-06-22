@@ -7,8 +7,8 @@ import {
   sendPayloadToFordefi,
   getInstructions
 } from './serialize_invest';
-import { fordefiConfig, exponentConfig, connection } from './config';
-import { PublicKey } from '@solana/web3.js';
+import { fordefiConfig, exponentConfig, solanaCluster } from './config';
+import { PublicKey, Connection, clusterApiUrl } from '@solana/web3.js';
 
 async function main(): Promise<void> {
   if (!fordefiConfig.accessToken || !fordefiConfig.vaultId || !fordefiConfig.fordefiSolanaVaultAddress) {
@@ -16,12 +16,15 @@ async function main(): Promise<void> {
     return;
   }
 
+  // Connect to Solana cluster
+  let connection = new Connection(clusterApiUrl(solanaCluster as any), "confirmed");
+
   // Log market info at the start
-  await getMarketInfo(exponentConfig.market);
+  await getMarketInfo(exponentConfig.market, connection);
   const fordefiVault = new PublicKey(fordefiConfig.fordefiSolanaVaultAddress)
 
   console.log('--- Fetching market data to get Address Lookup Table ---');
-  const marketSdk = await getMarketSdk(exponentConfig.market);
+  const marketSdk = await getMarketSdk(exponentConfig.market, connection);
   const lookupTableAddress = marketSdk.addressLookupTable;
   
   if (!lookupTableAddress) {
@@ -30,7 +33,7 @@ async function main(): Promise<void> {
   }
   console.log(`--- Using Address Lookup Table: ${lookupTableAddress.toBase58()} ---`);
   
-  const { setupIxs, ixs } = await getInstructions(fordefiVault, exponentConfig);
+  const { setupIxs, ixs } = await getInstructions(fordefiVault, exponentConfig, connection);
 
   // --- Step 1: Execute the ATA Setup Transaction ---
   console.log('\n--- Step 1: Executing the ATA Setup Transaction ---');
