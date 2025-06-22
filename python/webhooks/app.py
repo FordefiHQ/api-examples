@@ -87,7 +87,7 @@ async def fordefi_webhook(request: Request):
             response = requests.get(fordefi_url, headers=headers)
             response.raise_for_status()
             transaction_data = response.json()
-            # print("Transaction data:", json.dumps(transaction_data, indent=2))
+            print("Transaction data:", json.dumps(transaction_data, indent=2))
         except requests.exceptions.RequestException as e:
             print(f"Error fetching transaction data: {e}")
     else:

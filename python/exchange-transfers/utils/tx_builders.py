@@ -23,14 +23,14 @@ async def format_deposit_native_sol(vault_id: str, destination: str, custom_note
     
     return request_json
 
-async def format_ex_to_ex_withdrawal_token_evm(vault_id: str, destination: str, custom_note: str, value: str, exchange: str, asset: str):
+async def format_ex_to_ex_withdrawal_token_evm(vault_id: str, destination: str, custom_note: str, value: str, origin_exchange: str, asset: str):
     request_json = {
         "signer_type": "api_signer",
         "type": "exchange_transaction",
         "details": {
             "asset_identifier": {
                 "asset_symbol": asset,
-                "exchange_type": exchange,
+                "exchange_type": origin_exchange,
                 "type": "exchange"
             },
             "chain": "evm_ethereum_mainnet",
