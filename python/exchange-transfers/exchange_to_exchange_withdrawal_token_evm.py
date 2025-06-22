@@ -16,12 +16,12 @@ BINANCE_EXCHANGE_VAULT_ID = os.getenv("BINANCE_EXCHANGE_VAULT_ID")
 path = "/api/v1/transactions"
 custom_note = "hello!"
 value = str(1_000_000_000_000_000_000)# Amount represents 1 USDC (using 18-decimal precision required by Fordefi API, regardless of asset's native decimals)
-exchange_name = "coinbase_international"
+origin_exchange_name = "coinbase_international"
 asset = "USDC"
 
 async def main():
     ## Building transaction
-    request_json = await format_ex_to_ex_withdrawal_token_evm(vault_id=COINBASE_EXCHANGE_VAULT_ID, destination=BINANCE_EXCHANGE_VAULT_ID, custom_note=custom_note, value=value, exchange=exchange_name, asset=asset)
+    request_json = await format_ex_to_ex_withdrawal_token_evm(vault_id=COINBASE_EXCHANGE_VAULT_ID, destination=BINANCE_EXCHANGE_VAULT_ID, custom_note=custom_note, value=value, origin_exchange=origin_exchange_name, asset=asset)
     request_body = json.dumps(request_json)
     timestamp = datetime.datetime.now().strftime("%s")
     payload = f"{path}|{timestamp}|{request_body}"
