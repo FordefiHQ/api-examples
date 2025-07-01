@@ -1,0 +1,22 @@
+{
+  "name": "@fordefi/deployer",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "publish": "tsx ./deploy.ts"
+  },
+  "dependencies": {
+    "@mysten/sui": "^1.34.0",
+    "axios": "^1.10.0",
+    "dotenv": "^17.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.7",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}

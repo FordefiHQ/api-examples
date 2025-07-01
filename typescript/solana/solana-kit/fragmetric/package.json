@@ -1,0 +1,25 @@
+{
+  "name": "@fordefi/fragmetric",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "restake": "npx ts-node --project tsconfig.json run.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/bn.js": "^5.1.6",
+    "@types/node": "^22.14.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@fragmetric-labs/sdk": "^2.4.14",
+    "@solana/kit": "^2.1.1",
+    "axios": "^1.8.4",
+    "dotenv": "^16.5.0"
+  }
+}

@@ -6,5 +6,5 @@ export async  function signWithApiSigner(payload: string, privateKeyPem: string)
   const signature = sign.sign(privateKey, 'base64');
   console.log("Payload signed 🖋️✅ -> ", signature)
 
-  return signature
+  return signature;
 }

@@ -1,0 +1,43 @@
+{
+    "modules": [
+        "oRzrCwYAAAAIAQAGAgYIAw4PBR0LByhBCGlgBskBDwzYARIABAEFAgYBAAcAAgECAAADAAEAAAIBAgABBwMCAAEHCAEAAQgAAQoCBlN0cmluZwlUeENvbnRleHQMZ2V0X2dyZWV0aW5nBHBpbmcGcGluZ2VyBnN0cmluZwp0eF9jb250ZXh0BHV0ZjgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIKAgwLR28gRm9yZGVmaSEAAQQAAQECAQEAAAEDBwARAgIA"
+    ],
+    "dependencies": [
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        "0x0000000000000000000000000000000000000000000000000000000000000002"
+    ],
+    "digest": [
+        186,
+        134,
+        109,
+        225,
+        140,
+        226,
+        193,
+        204,
+        80,
+        9,
+        21,
+        242,
+        51,
+        128,
+        168,
+        192,
+        205,
+        193,
+        212,
+        153,
+        105,
+        193,
+        194,
+        69,
+        191,
+        204,
+        248,
+        160,
+        31,
+        40,
+        4,
+        92
+    ]
+}
