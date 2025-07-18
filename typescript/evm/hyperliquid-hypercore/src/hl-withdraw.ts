@@ -1,51 +1,33 @@
-import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
+import { ethers, parseUnits, formatUnits } from 'ethers';
 import { HyperliquidConfig, fordefiConfig } from './config'
 import { getProvider } from './get-provider';
 import * as hl from "@nktkas/hyperliquid";
-
+import { FordefiWalletAdapter } from './wallet-adapter';
 
 export async function withdraw3(hlConfig: HyperliquidConfig) {
     if (!hlConfig) {
         throw new Error("Config required!");
     }
     try {
-        // Get the singleton provider
-        const provider = await getProvider();
+        let provider = await getProvider(fordefiConfig);
         if (!provider) {
-            throw new Error("Failed to initialize provider");
-        };
+          throw new Error("Failed to initialize provider");
+        }
+        let web3Provider = new ethers.BrowserProvider(provider); 
+        const signer = await web3Provider.getSigner();
 
-        // Instanciate transport
+        // Create custom wallet adapter
+        const wallet = new FordefiWalletAdapter(signer, fordefiConfig.address);
+
+        // Instantiate transport
         const transport = new hl.HttpTransport();
 
-        // This custom signer ensures we're using the correct chainId to construct the message we'll sign
-        const customSigner = {
-            getAddress: async () => fordefiConfig.address,
-            signTypedData: async (
-                domain: TypedDataDomain, 
-                types: Record<string, Array<TypedDataField>>,
-                value: Record<string, any> 
-            ) => 
-                {
-                    const modifiedDomain = {
-                        ...domain,
-                        chainId: fordefiConfig.chainId
-                    };
-                    const signer = await provider.getSigner();
-                    return signer._signTypedData(
-                        modifiedDomain,
-                        types,
-                        value
-                    );
-                }
-        };
-
-        // Create a Hyperliquid wallet client using the Fordefi provider
-        const client = new hl.WalletClient({ 
-            wallet: customSigner, 
+        // Create ExchangeClient with the custom wallet
+        const exchClient = new hl.ExchangeClient({ 
+            wallet, 
             transport 
         });
-        console.log("Wallet client created successfully");
+        console.log("Exchange client created successfully");
 
         // Validate amount is not empty
         if (!hlConfig.amount) {
@@ -56,7 +38,7 @@ export async function withdraw3(hlConfig: HyperliquidConfig) {
             throw new Error("Destination must be a valid Ethereum address starting with '0x'");
         }
         // Account clearinghouse state
-        const result = await client.withdraw3({
+        const result = await exchClient.withdraw3({
             destination: hlConfig.destination, // Withdraw funds to your Fordefi EVM vault
             amount: String(hlConfig.amount),
         });

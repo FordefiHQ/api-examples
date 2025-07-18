@@ -5,11 +5,16 @@ import { deposit } from "./hl-deposit";
 
 async function main() {
     try {
-        await withdraw3(hyperliquidConfig) // change the command as needed
+        if (hyperliquidConfig.action == "deposit"){
+            await deposit(hyperliquidConfig)
+        } else if (hyperliquidConfig.action == "withdraw"){
+            await withdraw3(hyperliquidConfig)
+        } else {
+            await usdSend(hyperliquidConfig)
+        }
     } catch (error) {
         console.error("Oops, an error occured: ", error)
     }
-
 } 
 
 main().catch(error => {

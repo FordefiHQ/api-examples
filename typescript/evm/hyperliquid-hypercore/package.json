@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "hyperliquid": "npx ts-node src/run.ts"
+    "action": "npx ts-node src/run.ts"
   },
   "keywords": [],
   "author": "",
@@ -17,9 +17,10 @@
   },
   "dependencies": {
     "@fordefi/web3-provider": "^0.3.0",
-    "@nktkas/hyperliquid": "^0.17.1",
+    "@msgpack/msgpack": "^3.1.2",
+    "@nktkas/hyperliquid": "0.23.1",
     "axios": "^1.8.4",
-    "dotenv": "^16.4.7",
-    "ethers": "^5.7"
+    "dotenv": "^16.6.1",
+    "ethers": "6.15"
   }
 }

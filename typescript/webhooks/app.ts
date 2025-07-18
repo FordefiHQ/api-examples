@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
 import dotenv from 'dotenv';
+import { p256 } from '@noble/curves/p256';
 import express, { Request, Response } from 'express';
 
 dotenv.config();
@@ -39,57 +40,11 @@ interface TransactionData {
 }
 
 /**
- * Parse DER-encoded signature to extract r and s values
- * DER format: 0x30 [total-length] 0x02 [R-length] [R] 0x02 [S-length] [S]
+ * Parse and convert from DER format to IEEE P1363
  */
-function parseDERSignature(derSignature: Uint8Array): Uint8Array {
-  const view = new DataView(derSignature.buffer);
-  let offset = 0;
-  
-  // Check DER sequence tag (0x30)
-  if (view.getUint8(offset++) !== 0x30) {
-    throw new Error('Invalid DER signature: missing sequence tag');
-  }
-  
-  // Skip total length
-  const totalLength = view.getUint8(offset++);
-  
-  // Parse R value
-  if (view.getUint8(offset++) !== 0x02) {
-    throw new Error('Invalid DER signature: missing R integer tag');
-  }
-  
-  const rLength = view.getUint8(offset++);
-  let r = new Uint8Array(derSignature.slice(offset, offset + rLength));
-  offset += rLength;
-  
-  // Parse S value  
-  if (view.getUint8(offset++) !== 0x02) {
-    throw new Error('Invalid DER signature: missing S integer tag');
-  }
-  
-  const sLength = view.getUint8(offset++);
-  let s = new Uint8Array(derSignature.slice(offset, offset + sLength));
-  
-  // Remove leading zero bytes if present (DER padding)
-  if (r[0] === 0x00 && r.length > 32) {
-    r = r.slice(1);
-  }
-  if (s[0] === 0x00 && s.length > 32) {
-    s = s.slice(1);
-  }
-  
-  // Pad to 32 bytes if needed (P-256 curve)
-  const paddedR = new Uint8Array(32);
-  const paddedS = new Uint8Array(32);
-  paddedR.set(r, 32 - r.length);
-  paddedS.set(s, 32 - s.length);
-  
-  // Concatenate r and s for IEEE P1363 format
-  const signature = new Uint8Array(64);
-  signature.set(paddedR, 0);
-  signature.set(paddedS, 32);
-  
+function derToP1363(derSig: Uint8Array): Uint8Array {
+  const signature = p256.Signature.fromDER(derSig).toCompactRawBytes();
+
   return signature;
 }
 
@@ -132,7 +87,7 @@ async function verifySignature(signature: string, body: Buffer): Promise<boolean
     });
 
     // Convert DER signature to IEEE P1363 format
-    const ieeeSignature = parseDERSignature(derSignatureBytes);
+    const ieeeSignature = derToP1363(derSignatureBytes);
 
     // Verify using IEEE P1363 format signature
     const isValid = await crypto.subtle.verify(
@@ -219,29 +174,45 @@ app.post('/', async (req: Request, res: Response): Promise<void> => {
     const eventData: WebhookEvent = JSON.parse(rawBody.toString());
     console.log(JSON.stringify(eventData, null, 2));
 
-    // 4. Extract the transaction_id from the data (if present)
-    const transactionId = eventData.event?.transaction_id;
-    let transactionData: TransactionData | null = null;
-
-    if (transactionId) {
-      console.log('Transaction ID:', transactionId);
-      transactionData = await fetchTransactionData(transactionId);
+    // OPTIONAL: Write event data to file
+    try {
+      const eventFilePath = path.join(__dirname, 'v2_event_examples.json');
+      const eventEntry = {
+        timestamp: new Date().toISOString(),
+        event: eventData
+      };
       
-      if (transactionData) {
-        console.log('Transaction data fetched successfully');
-        // Uncomment to log full transaction data
-        // console.log('Transaction data:', JSON.stringify(transactionData, null, 2));
-      }
-    } else {
-      console.log('transaction_id field not found in the event data.');
+      // Append the event to the file (one JSON object per line)
+      fs.appendFileSync(eventFilePath, JSON.stringify(eventEntry) + '\n');
+      console.log('Event saved to v2_event_examples.json');
+    } catch (error) {
+      console.error('Error writing event to file:', error);
     }
 
-    if (!transactionData) {
-      console.log('No transaction data available');
-    }
+    // THIS IS THE LEGACY WORKFLOW, APPLICABLE FOR WEBHOOK V1 ONLY
+    // 4. Extract the transaction_id from the data (if present)
+    // const transactionId = eventData.event?.transaction_id;
+    // let transactionData: TransactionData | null = null;
 
-    // 5. Return the transaction data
-    res.json(transactionData || { message: 'Event processed successfully' });
+    // if (transactionId) {
+    //   console.log('Transaction ID:', transactionId);
+    //   transactionData = await fetchTransactionData(transactionId);
+      
+    //   if (transactionData) {
+    //     console.log('Transaction data fetched successfully');
+    //     // Uncomment to log full transaction data
+    //     // console.log('Transaction data:', JSON.stringify(transactionData, null, 2));
+    //   }
+    // } else {
+    //   console.log('transaction_id field not found in the event data.');
+    // }
+
+    // if (!transactionData) {
+    //   console.log('No transaction data available');
+    // }
+
+    // // 5. Return the transaction data
+    // res.json(transactionData || { message: 'Event processed successfully' });
 
   } catch (error) {
     console.error('Error processing webhook:', error);

@@ -1,7 +1,7 @@
+import { error } from 'console';
 import { HyperliquidConfig, fordefiConfig } from './config'
 import { getProvider } from './get-provider';
-import { ethers } from 'ethers';
-import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
+import { ethers, parseUnits, formatUnits } from 'ethers';
 
 interface PermitPayload {
     owner: string;
@@ -19,23 +19,24 @@ function splitSignatures(signature: string): { r: string; s: string; v: number }
     return { r, s, v };
 };
 
-export async function deposit(hyperliquidConfig?: HyperliquidConfig) {
-    // Get the singleton provider
-    const provider = await getProvider();
+export async function deposit(hyperliquidConfig: HyperliquidConfig) {
+    let provider = await getProvider(fordefiConfig);
     if (!provider) {
-        throw new Error("Failed to initialize provider");
+      throw new Error("Failed to initialize provider");
     }
+    let web3Provider = new ethers.BrowserProvider(provider); 
+    const signer = await web3Provider.getSigner();
     
     // Get the USDC contract to fetch the nonce
     const usdcAddress = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"; // Arbitrum USDC
     const usdcAbi = ["function nonces(address owner) view returns (uint256)"]; // Minimal ABI for nonces
-    const usdcContract = new ethers.Contract(usdcAddress, usdcAbi, provider);
-    
+    const usdcContract = new ethers.Contract(usdcAddress, usdcAbi, signer);
+
     const fordefiVault = fordefiConfig.address;
     const hyperliquidBridgeAddress = "0x2df1c51e09aecf9cacb7bc98cb1742757f163df7"; // Mainnet bridge contract
     
     // Get the current nonce for the vault address
-    const nonce = (await usdcContract.nonces(fordefiVault)).toString();
+    const nonce = await (usdcContract as any).nonces(fordefiVault);
     
     // Validate the amount is at least 5 USDC
     const minAmount = 5; // Minimum 5 USDC required
@@ -48,7 +49,7 @@ export async function deposit(hyperliquidConfig?: HyperliquidConfig) {
     }
 
     // Convert amount to smallest units (for example -> 1 USDC = 1000000)
-    const value = ethers.utils.parseUnits(amount.toString(), 6).toString();
+    const value = parseUnits(amount.toString(), 6).toString();
     
     const deadline = Math.floor(Date.now() / 1000 + 3600).toString(); // 1 hour from now
     
@@ -60,8 +61,13 @@ export async function deposit(hyperliquidConfig?: HyperliquidConfig) {
         deadline
     };
     
-    const isMainnet = true;
-    
+    let isMainnet
+    if (hyperliquidConfig.isTestnet){
+        isMainnet = false
+    } else{
+        isMainnet = true
+    }
+
     const domain = {
         name: isMainnet ? "USD Coin" : "USDC2",
         version: isMainnet ? "2" : "1",
@@ -87,7 +93,7 @@ export async function deposit(hyperliquidConfig?: HyperliquidConfig) {
     } as const;
     
     // Sign message
-    const signature = await provider.getSigner()._signTypedData(
+    const signature = await signer.signTypedData(
         dataToSign.domain,
         { Permit: dataToSign.types.Permit },
         dataToSign.message
@@ -104,10 +110,10 @@ export async function deposit(hyperliquidConfig?: HyperliquidConfig) {
     ];
     
     // Create bridge contract instance
-    const bridgeContract = new ethers.Contract(
+    const bridgeContract = await new ethers.Contract(
         hyperliquidBridgeAddress,
         bridgeAbi,
-        provider.getSigner()
+        signer
     );
     
     // Format signature for the contract call
@@ -125,10 +131,10 @@ export async function deposit(hyperliquidConfig?: HyperliquidConfig) {
         signature: signatureStruct
     }];
     
-    console.log(`Depositing ${ethers.utils.formatUnits(value, 6)} USDC to Hyperliquid bridge...`);
+    console.log(`Depositing ${formatUnits(value, 6)} USDC to Hyperliquid bridge...`);
     
     // Call batchedDepositWithPermit function with the deposit struct
-    const tx = await bridgeContract.batchedDepositWithPermit(depositStruct);
+    const tx = await (bridgeContract as any).batchedDepositWithPermit(depositStruct);
     
     console.log(`Transaction submitted: ${tx.hash}`);
     console.log("Waiting for confirmation...");
@@ -140,7 +146,7 @@ export async function deposit(hyperliquidConfig?: HyperliquidConfig) {
     return {
         transactionHash: tx.hash,
         blockNumber: receipt.blockNumber,
-        amount: ethers.utils.formatUnits(value, 6),
+        amount: formatUnits(value, 6),
         user: fordefiVault
     };
 };
