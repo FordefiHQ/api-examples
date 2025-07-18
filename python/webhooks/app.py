@@ -74,28 +74,29 @@ async def fordefi_webhook(request: Request):
             detail="Invalid JSON in request body"
         )
 
-    # 5. Extract the transaction_id from the data (if present)
-    transaction_id = data.get("event", {}).get("transaction_id")
-    transaction_data = None
+    # THIS IS THE LEGACY WORKFLOW, APPLICABLE FOR WEBHOOK V1 ONLY 
+    # Extract the transaction_id from the data (if present)
+    # transaction_id = data.get("event", {}).get("transaction_id")
+    # transaction_data = None
 
-    if transaction_id:
-        print("Transaction ID:", transaction_id)
-        fordefi_url = f"https://api.fordefi.com/api/v1/transactions/{transaction_id}"
-        headers = {"Authorization": f"Bearer {FORDEFI_API_USER_TOKEN}"}
+    # if transaction_id:
+    #     print("Transaction ID:", transaction_id)
+    #     fordefi_url = f"https://api.fordefi.com/api/v1/transactions/{transaction_id}"
+    #     headers = {"Authorization": f"Bearer {FORDEFI_API_USER_TOKEN}"}
 
-        try:
-            response = requests.get(fordefi_url, headers=headers)
-            response.raise_for_status()
-            transaction_data = response.json()
-            #print("Transaction data:", json.dumps(transaction_data, indent=2))
-        except requests.exceptions.RequestException as e:
-            print(f"Error fetching transaction data: {e}")
-    else:
-        print("transaction_id field not found in the event data.")
+    #     try:
+    #         response = requests.get(fordefi_url, headers=headers)
+    #         response.raise_for_status()
+    #         transaction_data = response.json()
+    #         #print("Transaction data:", json.dumps(transaction_data, indent=2))
+    #     except requests.exceptions.RequestException as e:
+    #         print(f"Error fetching transaction data: {e}")
+    # else:
+    #     print("transaction_id field not found in the event data.")
 
-    if not transaction_data:
+    if not data:
         print("No transaction data")
     
-    return transaction_data
+    return data
 
 # uvicorn app:app --host 0.0.0.0 --port 8080 --reload
