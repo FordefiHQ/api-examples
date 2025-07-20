@@ -1,0 +1,31 @@
+{
+    "name": "@fordefi/solana-gas-station",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "gas": "ts-node --project tsconfig.json ./src/run.ts"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "devDependencies": {
+        "@types/base-64": "^1.0.2",
+        "@types/bn.js": "^5.1.6",
+        "@types/jsonwebtoken": "^9.0.7",
+        "@types/node": "^22.10.2",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.7.2"
+    },
+    "dependencies": {
+        "@solana-program/compute-budget": "^0.7.0",
+        "@solana-program/system": "^0.7.0",
+        "@solana-program/token": "^0.5.1",
+        "@solana-program/token-2022": "^0.4.2",
+        "axios": "^1.7.9",
+        "base-64": "^1.0.0",
+        "bs58": "^6.0.0",
+        "dotenv": "^16.4.7",
+        "gill": "^0.10.2"
+    }
+}
