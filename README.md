@@ -42,6 +42,8 @@ Code examples for using the Fordefi API in Python and TypeScript.
     * Programmatic token swaps and pool management using Orca
     * Programmatic SPL token transfers
     * Programmatically restake SOL for fragSOL using Fragmetric
+  * With `@solana/kit` and `gill`:
+    * "Gas station" transaction for delegating gas fees payment to a different vault
 * On Sui:
   * Programmatic token swaps and pool creation using the Bluefin API
 * On Hyperliquid L1 (HyperCore):
