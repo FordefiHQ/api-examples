@@ -1,0 +1,25 @@
+{
+  "name": "@fordefi/spl-transfer",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "spl": "ts-node --project tsconfig.json ./src/run.ts"
+  },
+  "dependencies": {
+    "@solana-program/token": "^0.5.1",
+    "axios": "^1.11.0",
+    "dotenv": "^17.2.1",
+    "gill": "^0.10.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.2.0",
+    "install": "^0.13.0",
+    "npm": "^11.5.2",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.2"
+  }
+}
