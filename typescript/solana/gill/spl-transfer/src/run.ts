@@ -5,7 +5,7 @@ import { fordefiConfig, transferConfig } from './config';
 
 
 async function main(): Promise<void> {
-  // Build and sign the transaction payload
+  console.log("Building the transaction payload 🏗️")
   const requestBody = JSON.stringify(await createTx(fordefiConfig, transferConfig));
   const timestamp = new Date().getTime();
   const feePayerVaultPayload = `${fordefiConfig.apiPathEndpoint}|${timestamp}|${requestBody}`;
@@ -20,7 +20,7 @@ async function main(): Promise<void> {
     timestamp, 
     requestBody
   );
-  if (response){
+  if (response.data){
       console.log("Transaction fully signed and submitted to network ✅");
       console.log(`Final transaction ID: ${response.data.id}`);
       const fullySignedTx = await get_tx(fordefiConfig.apiPathEndpoint, fordefiConfig.accessToken,response.data.id)

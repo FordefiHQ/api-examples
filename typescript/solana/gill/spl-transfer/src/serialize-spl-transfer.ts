@@ -22,14 +22,11 @@ export async function createTx(fordefiConfig: FordefiSolanaConfig, transferConfi
       destination: destVault,
       tokenProgram: TOKEN_PROGRAM_ADDRESS,
     });
-    console.log("Tx message: ", transferTokensTx);
-    console.log("Tx instructions detailed:", JSON.stringify(transferTokensTx.instructions, null, 2));
 
-    const signedTx = await gill.partiallySignTransactionMessageWithSigners(transferTokensTx);
-    console.log("Signed transaction: ", signedTx);
+    const signedTx = await gill.compileTransaction(transferTokensTx);
 
     const base64EncodedData = Buffer.from(signedTx.messageBytes).toString('base64');
-    console.debug("Raw data ->", base64EncodedData)
+    console.log("Base64-encoded transaction bytes: ", base64EncodedData)
 
     const jsonBody = {
         vault_id: fordefiConfig.originVault,
