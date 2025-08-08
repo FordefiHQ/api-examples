@@ -1,6 +1,6 @@
 import { createTx } from './serialize-spl-transfer';
 import { createAndSignTx, get_tx } from './process_tx';
-import { signWithPrivateKey } from './signer';
+import { signWithApiUserPrivateKey } from './signer';
 import { fordefiConfig, transferConfig } from './config';
 
 
@@ -9,7 +9,7 @@ async function main(): Promise<void> {
   const requestBody = JSON.stringify(await createTx(fordefiConfig, transferConfig));
   const timestamp = new Date().getTime();
   const feePayerVaultPayload = `${fordefiConfig.apiPathEndpoint}|${timestamp}|${requestBody}`;
-  const signedPayloadOne = await signWithPrivateKey(feePayerVaultPayload, fordefiConfig.privateKeyPem);
+  const signedPayloadOne = await signWithApiUserPrivateKey(feePayerVaultPayload, fordefiConfig.privateKeyPem);
 
   try {
   console.log("Submitting transaction to Fordefi for MPC signature 🔑")
