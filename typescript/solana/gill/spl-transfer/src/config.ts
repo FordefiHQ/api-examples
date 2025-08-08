@@ -23,7 +23,7 @@ export const fordefiConfig: FordefiSolanaConfig = {
   accessToken: process.env.FORDEFI_API_TOKEN || "",
   originVault: process.env.ORIGIN_VAULT || "",
   originAddress: process.env.ORIGIN_ADDRESS || "",
-  destAddress: process.env.DESTINATION_ADDRES || "",
+  destAddress: process.env.DESTINATION_ADDRESS || "",
   privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
   apiPathEndpoint: '/api/v1/transactions'
 };
