@@ -24,6 +24,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
 
 ## TypeScript Examples 🟦
 * Setting up Fordefi Webhooks (TypeScript)
+* Calling EVM contracts with a Fordefi vault
 * On EVM chains (Ethereum, Base, Arbitrum, etc.):
   * Deploying EVM smart contracts from your Fordefi vault using Hardhat or Foundry
   * Swapping tokens programmatically with CowSwap
@@ -42,8 +43,9 @@ Code examples for using the Fordefi API in Python and TypeScript.
     * Programmatic token swaps and pool management using Orca
     * Programmatic SPL token transfers
     * Programmatically restake SOL for fragSOL using Fragmetric
-  * With `@solana/kit` and `gill`:
-    * "Gas station" transaction for delegating gas fees payment to a different vault
+  * With `gill`:
+    * Sponsored transaction for delegating gas fees payment to a different Solana vault
+    * SPL token transfers
 * On Sui:
   * Programmatic token swaps and pool creation using the Bluefin API
 * On Hyperliquid L1 (HyperCore):
