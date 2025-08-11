@@ -8,18 +8,22 @@ This example shows two ways to call EVM contracts using a Fordefi vault as the s
 The code lives in this folder and uses `ethers` v6 with `@fordefi/web3-provider`.
 
 ### Prerequisites
-- Fordefi organization and EVM vault
-- Node.js and npm installed
-- Fordefi credentials: API User token, private key and API Signer set up ([documentation](https://docs.fordefi.com/developers/program-overview))
-- TypeScript setup:
-  ```bash
-  # Install TypeScript and type definitions
-  npm install typescript --save-dev
-  npm install @types/node --save-dev
-  npm install tsx --save-dev
-  
-  # Initialize a TypeScript configuration file (if not already done)
-  npx tsc --init
+- **Fordefi Setup:**
+  - Fordefi organization and Solana vault
+  - API User access token
+  - API User private key (PEM format)
+  - API Signer configured ([documentation](https://docs.fordefi.com/developers/program-overview))
+
+- **Development Environment:**
+  - Node.js and npm installed
+  - TypeScript setup:
+    ```bash
+    # Install dependencies
+    npm install
+    
+    # Install TypeScript globally (if not already installed)
+    npm install -g typescript
+    ```
 
 ### Install
 ```bash
