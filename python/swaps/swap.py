@@ -20,7 +20,7 @@ path = "/api/v1/swaps"
 sell_token_amount = str(1000000000000000) # in smallest unit, 1 ETH = 1000000000000000000 wei
 buy_token_address = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48" # USDC on Ethereum
 chain_type =  "evm"
-network =  "ethereum_mainnet"
+network =  "evm_ethereum_mainnet"
 slippage = "500" # in bps
 
 async def main():
@@ -52,8 +52,7 @@ async def main():
             sell_token_amount=sell_token_amount, 
             buy_token_address=buy_token_address, 
             providers=one_inch, 
-            slippage=slippage,
-            access_token=USER_API_TOKEN)
+            slippage=slippage)
         
         tx_payload_json = json.dumps(tx_payload) 
         timestamp = datetime.datetime.now().strftime("%s")
@@ -61,6 +60,7 @@ async def main():
 
         ## Signing transaction payload with API User's private key  
         signature = await sign(payload=payload, private_key_path=PRIVATE_KEY_PEM_FILE)
+
         ## Sending transaction to Fordefi for MPC signature and broadcast
         await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, tx_payload_json)
         print("✅ Transaction submitted successfully!")

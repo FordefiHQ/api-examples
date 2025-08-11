@@ -1,6 +1,7 @@
 import requests
+from typing import Dict, Any
 
-async def get_quote(vault_id: str, chain_type: str, network: str,  sell_token_amount: str, buy_token_address: str, providers: list, slippage: str, access_token: str):
+async def get_quote(vault_id: str, chain_type: str, network: str,  sell_token_amount: str, buy_token_address: str, providers: list, slippage: str, access_token: str) -> Dict[str, Any]:
     print(f"Getting quote from: {providers}")
     quote_data = {
       "vault_id": vault_id,
@@ -8,7 +9,7 @@ async def get_quote(vault_id: str, chain_type: str, network: str,  sell_token_am
         "type": chain_type,
         "details": {
           "type": "native",
-          "chain": f"evm_{network}"
+          "chain": network
         }
       },
       "output_asset_identifier": {
@@ -16,7 +17,7 @@ async def get_quote(vault_id: str, chain_type: str, network: str,  sell_token_am
         "details": {
           "type": "erc20",
           "token": {
-              "chain": f"evm_{network}",
+              "chain": network,
               "hex_repr": buy_token_address
           }
         }
@@ -34,5 +35,7 @@ async def get_quote(vault_id: str, chain_type: str, network: str,  sell_token_am
       },
       json=quote_data
     )
-
+    
+    quote.raise_for_status() 
+    
     return quote.json()
