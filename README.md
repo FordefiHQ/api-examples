@@ -7,6 +7,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
 - Python 3.9+ or Node.js (depending on example)
 
 ## Python Examples 🐍
+* Programmatic swaps using Fordefi's native Swap feature
 * Simple API Transfers:
   * Native EVM assets (ETH, BNB, etc.) transfers
   * ERC20 token transfers
@@ -21,6 +22,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
 * Exchange transfers
 * Setting up Fordefi Webhooks (Python)
 * Signing EIP-712 typed messages with an EVM Fordefi vault
+* Programmatically adding a contact address to your Fordefi organization's Address Book
 
 ## TypeScript Examples 🟦
 * Setting up Fordefi Webhooks (TypeScript)
