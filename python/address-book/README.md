@@ -7,11 +7,13 @@ Programmaticaly sdd contacts to your Fordefi Address Book using the API.
 - API User access token
 - API User private key (PEM format)
 - API Signer configured ([documentation](https://docs.fordefi.com/developers/program-overview))
+- UV installed ([learn more](https://docs.astral.sh/uv/guides/install-python/))
 
 ## Setup
 
 1. Install dependencies:
 ```bash
+uv init
 uv sync
 ```
 
@@ -26,7 +28,7 @@ EVM_VAULT_ID=your_vault_id_here
 ## Usage
 
 ```bash
-python add-contact.py
+uv run add-contact.py
 ```
 
 Edit the contact details in `add-contact.py`:
