@@ -4,11 +4,11 @@ A Python example demonstrating how to execute token swaps using the Fordefi API 
 
 ## Prerequisites
 
-- **Fordefi Setup:**
-  - Fordefi organization and EVM vault
-  - API User access token
-  - API User private key (PEM format)
-  - API Signer configured ([documentation](https://docs.fordefi.com/developers/program-overview))
+- Fordefi organization and EVM vault
+- API User access token
+- API User private key (PEM format)
+- API Signer configured ([documentation](https://docs.fordefi.com/developers/program-overview))
+- UV installed ([learn more](https://docs.astral.sh/uv/guides/install-python/))
 
 ## Setup
 
