@@ -1,5 +1,4 @@
 async def submit_quote(quote_id: str, vault_id: str, chain_type: str, network: str,  sell_token_amount: str, buy_token_address: str, providers: list, slippage: str) -> dict:
-    print(f"Getting quote from: {providers}")
     submit_response = {
         "quote_id": quote_id,
         "vault_id": vault_id,

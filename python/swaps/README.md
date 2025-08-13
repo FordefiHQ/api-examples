@@ -1,6 +1,6 @@
 # Fordefi Swaps API Example
 
-A Python example demonstrating how to execute token swaps using the Fordefi API and Fordefi's native Swap feature.
+Python helper code for demonstrating how to execute EVM token swaps using the Fordefi's native Swap API.
 
 ## Prerequisites
 
@@ -10,10 +10,13 @@ A Python example demonstrating how to execute token swaps using the Fordefi API 
 - API Signer configured ([documentation](https://docs.fordefi.com/developers/program-overview))
 - UV installed ([learn more](https://docs.astral.sh/uv/guides/install-python/))
 
+> **⚠️ Note:** If you want to use UniswapX as a quote provider, please contact Fordefi support to have this feature activated for your organization.
+
 ## Setup
 
 1. Install dependencies:
 ```bash
+uv init
 uv sync
 ```
 
@@ -42,10 +45,11 @@ uv run swap.py
 
 The script will:
 1. Get available swap providers
-2. Request a quote from 1inch
-3. Submit the quote to create a transaction
-4. Sign the payload with your API User's private key
-5. Broadcast the transaction via Fordefi
+2. Request quotes from all available providers
+3. Compare quotes and automatically select the best one
+4. Submit the best quote to create a transaction
+5. Sign the payload with your API User's private key
+6. Broadcast the transaction via Fordefi
 
 ## Files
 
