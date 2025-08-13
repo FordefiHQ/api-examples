@@ -25,14 +25,11 @@ slippage = "500" # in bps
 
 async def main():
     try:
-        # Get list of provider
+        # Getting list of providers
         provider_list  = await getSwapProviders(chain_type, USER_API_TOKEN)
         print(provider_list)
         
-        # Choose providers
-        my_providers = ["UniswapX"]
-
-                # Get quote from providers
+        # Getting quotes from providers
         quotes_response = await get_quote(
             vault_id=FOREFI_VAULT_ID, 
             chain_type=chain_type, 
@@ -43,12 +40,11 @@ async def main():
             slippage=slippage,
             access_token=USER_API_TOKEN)
         
-        # Check if there was an error
         if quotes_response.get("error"):
             print(f"❌ Error getting quotes: {quotes_response['details']}")
             return
         
-        # Extract the best quote
+        # Extracting the best quote
         best_quote = await get_best_quote(quotes_response)
         if not best_quote:
             print("❌ No valid quotes available")
@@ -56,7 +52,7 @@ async def main():
         
         print(f"Using quote ID: {best_quote['quote_id']} from {best_quote['provider_id']}")
 
-        # Create transaction payload using the best quote
+        # Creating transaction payload using the best quote
         tx_payload = await submit_quote(
             quote_id=best_quote["quote_id"],
             vault_id=FOREFI_VAULT_ID, 
@@ -64,7 +60,7 @@ async def main():
             network=network, 
             sell_token_amount=sell_token_amount, 
             buy_token_address=buy_token_address, 
-            providers=[best_quote["provider_id"]], # Use only the best provider
+            providers=[best_quote["provider_id"]],
             slippage=slippage)
         
         tx_payload_json = json.dumps(tx_payload) 
