@@ -2,7 +2,7 @@ import os
 import json
 import asyncio
 import datetime
-from get_quote import get_quote
+from get_quote import get_quote, get_best_quote
 from submit_quote import submit_quote
 from get_provider_list import getSwapProviders 
 from pathlib import Path
@@ -28,30 +28,43 @@ async def main():
         # Get list of provider
         provider_list  = await getSwapProviders(chain_type, USER_API_TOKEN)
         print(provider_list)
-        one_inch = ["1inch"]
+        
+        # Choose providers
+        my_providers = ["UniswapX"]
 
-        # Get quote from providers
-        quotes = await get_quote(
+                # Get quote from providers
+        quotes_response = await get_quote(
             vault_id=FOREFI_VAULT_ID, 
             chain_type=chain_type, 
             network=network, 
             sell_token_amount=sell_token_amount, 
             buy_token_address=buy_token_address, 
-            providers=one_inch, 
+            providers=provider_list, 
             slippage=slippage,
             access_token=USER_API_TOKEN)
-        one_inch_quote_id = quotes["providers_with_quote"][0]["quote"]["quote_id"]
-        print("1inch quote ID: ", one_inch_quote_id)
+        
+        # Check if there was an error
+        if quotes_response.get("error"):
+            print(f"❌ Error getting quotes: {quotes_response['details']}")
+            return
+        
+        # Extract the best quote
+        best_quote = await get_best_quote(quotes_response)
+        if not best_quote:
+            print("❌ No valid quotes available")
+            return
+        
+        print(f"Using quote ID: {best_quote['quote_id']} from {best_quote['provider_id']}")
 
-        # Create transaction payload
+        # Create transaction payload using the best quote
         tx_payload = await submit_quote(
-            quote_id=one_inch_quote_id,
+            quote_id=best_quote["quote_id"],
             vault_id=FOREFI_VAULT_ID, 
             chain_type=chain_type, 
             network=network, 
             sell_token_amount=sell_token_amount, 
             buy_token_address=buy_token_address, 
-            providers=one_inch, 
+            providers=[best_quote["provider_id"]], # Use only the best provider
             slippage=slippage)
         
         tx_payload_json = json.dumps(tx_payload) 

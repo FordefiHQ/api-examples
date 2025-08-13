@@ -11,7 +11,6 @@ load_dotenv()
 
 ## CONFIG
 USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-EVM_VAULT_ID = os.getenv("EVM_VAULT_ID")
 PRIVATE_KEY_PEM_FILE = Path("./secret/private.pem")
 name = "Pendle router"
 chain_type = "evm"
