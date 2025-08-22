@@ -57,7 +57,6 @@ def parse_args() -> argparse.Namespace:
 if __name__ == "__main__":  
 
     args = parse_args()  
-    # Use access token from args if provided, otherwise from .env variable
     access_token = args.access_token or os.getenv("FORDEFI_API_USER_TOKEN")
     if not access_token:
         raise ValueError("Access token must be provided either via --access-token or FORDEFI_API_USER_TOKEN environment variable")

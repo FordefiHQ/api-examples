@@ -99,16 +99,10 @@ async function verifySignature(signature: string, body: Buffer): Promise<boolean
   }
 }
 
-/**
- * Health check endpoint
- */
 app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-/**
- * Webhook endpoint that listens for Fordefi events
- */
 app.post('/', async (req: Request, res: Response): Promise<void> => {
     try {
       // 1. Get the signature from headers

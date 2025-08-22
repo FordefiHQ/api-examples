@@ -1,8 +1,8 @@
 import os
 import json
+import ecdsa
 import base64
 import hashlib
-import ecdsa
 from pathlib import Path 
 from http import HTTPStatus
 from dotenv import load_dotenv
