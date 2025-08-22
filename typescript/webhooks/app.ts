@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import axios from 'axios';
 import dotenv from 'dotenv';
 import { p256 } from '@noble/curves/p256';
 import express, { Request, Response } from 'express';
@@ -9,9 +8,6 @@ dotenv.config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 8080;
-
-const FORDEFI_API_USER_TOKEN = process.env.FORDEFI_API_USER_TOKEN;
-const FORDEFI_API_BASE = 'https://api.fordefi.com/api/v1';
 
 const publicKeyPath = path.join(__dirname, 'public_key.pem');
 let FORDEFI_PUBLIC_KEY: string;
@@ -23,7 +19,6 @@ try {
     process.exit(1);
   }
   
-
 app.use(express.raw({ type: 'application/json' }));
 
 interface WebhookEvent {
@@ -31,11 +26,6 @@ interface WebhookEvent {
     transaction_id?: string;
     [key: string]: any;
   };
-  [key: string]: any;
-}
-
-interface TransactionData {
-  id: string;
   [key: string]: any;
 }
 
@@ -110,36 +100,11 @@ async function verifySignature(signature: string, body: Buffer): Promise<boolean
 }
 
 /**
- * Fetch transaction data from Fordefi API
+ * Health check endpoint
  */
-async function fetchTransactionData(transactionId: string): Promise<TransactionData | null> {
-  if (!FORDEFI_API_USER_TOKEN) {
-    console.error('FORDEFI_API_USER_TOKEN not configured');
-    return null;
-  }
-
-  const fordefiUrl = `${FORDEFI_API_BASE}/transactions/${transactionId}`;
-  const headers = {
-    'Authorization': `Bearer ${FORDEFI_API_USER_TOKEN}`,
-    'Content-Type': 'application/json'
-  };
-
-  try {
-    console.log('Fetching transaction data for ID:', transactionId);
-    const response = await axios.get(fordefiUrl, { headers });
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error(`Error fetching transaction data: ${error.response?.status} - ${error.response?.statusText}`);
-      if (error.response?.data) {
-        console.error('Error details:', error.response.data);
-      }
-    } else {
-      console.error('Error fetching transaction data:', error);
-    }
-    return null;
-  }
-}
+app.get('/health', (req: Request, res: Response) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 /**
  * Webhook endpoint that listens for Fordefi events
@@ -174,45 +139,11 @@ app.post('/', async (req: Request, res: Response): Promise<void> => {
     const eventData: WebhookEvent = JSON.parse(rawBody.toString());
     console.log(JSON.stringify(eventData, null, 2));
 
-    // OPTIONAL: Write event data to file
-    try {
-      const eventFilePath = path.join(__dirname, 'v2_event_examples.json');
-      const eventEntry = {
-        timestamp: new Date().toISOString(),
-        event: eventData
-      };
-      
-      // Append the event to the file (one JSON object per line)
-      fs.appendFileSync(eventFilePath, JSON.stringify(eventEntry) + '\n');
-      console.log('Event saved to v2_event_examples.json');
-    } catch (error) {
-      console.error('Error writing event to file:', error);
-    }
-
-    // THIS IS THE LEGACY WORKFLOW, APPLICABLE FOR WEBHOOK V1 ONLY
-    // 4. Extract the transaction_id from the data (if present)
-    // const transactionId = eventData.event?.transaction_id;
-    // let transactionData: TransactionData | null = null;
-
-    // if (transactionId) {
-    //   console.log('Transaction ID:', transactionId);
-    //   transactionData = await fetchTransactionData(transactionId);
-      
-    //   if (transactionData) {
-    //     console.log('Transaction data fetched successfully');
-    //     // Uncomment to log full transaction data
-    //     // console.log('Transaction data:', JSON.stringify(transactionData, null, 2));
-    //   }
-    // } else {
-    //   console.log('transaction_id field not found in the event data.');
-    // }
-
-    // if (!transactionData) {
-    //   console.log('No transaction data available');
-    // }
-
-    // // 5. Return the transaction data
-    // res.json(transactionData || { message: 'Event processed successfully' });
+    // 4. Respond Ok
+    res.status(200).json({ 
+      status: 'success',
+      message: 'Webhook received and processed'
+    });
 
   } catch (error) {
     console.error('Error processing webhook:', error);
@@ -228,10 +159,6 @@ app.use((error: Error, req: Request, res: Response, next: any) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🪝 Fordefi webhook server running on http://0.0.0.0:${PORT}`);
   console.log(`📝 Webhook endpoint: http://0.0.0.0:${PORT}`);
-  
-  if (!FORDEFI_API_USER_TOKEN) {
-    console.warn('⚠️  Warning: FORDEFI_API_USER_TOKEN not configured');
-  }
 });
 
 export default app;

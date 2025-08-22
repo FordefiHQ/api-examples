@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "nodemon --exec ts-node app.ts",
     "build": "tsc",
-    "start": "node dist/app.js"
+    "start": "npx tsx app.ts"
   },
   "devDependencies": {
     "@types/node": "^24.0.8",
