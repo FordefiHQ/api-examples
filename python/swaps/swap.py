@@ -2,19 +2,19 @@ import os
 import json
 import asyncio
 import datetime
-from get_quote import get_quote, get_best_quote
-from submit_quote import submit_quote
-from get_provider_list import getSwapProviders 
 from pathlib import Path
 from sign_payload import sign
 from dotenv import load_dotenv
 from broadcast import broadcast_tx
+from submit_quote import submit_quote
+from get_provider_list import getSwapProviders 
+from get_quote import get_quote, get_best_quote
 
 load_dotenv()
 
 ## CONFIG
 USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-FOREFI_VAULT_ID = os.getenv("FOREFI_VAULT_ID")
+FORDEFI_VAULT_ID = os.getenv("FORDEFI_VAULT_ID")
 PRIVATE_KEY_PEM_FILE = Path("./secret/private.pem")
 path = "/api/v1/swaps"
 sell_token_amount = str(1000000000000000) # in smallest unit, 1 ETH = 1000000000000000000 wei
@@ -31,7 +31,7 @@ async def main():
         
         # Getting quotes from providers
         quotes_response = await get_quote(
-            vault_id=FOREFI_VAULT_ID, 
+            vault_id=FORDEFI_VAULT_ID, 
             chain_type=chain_type, 
             network=network, 
             sell_token_amount=sell_token_amount, 
@@ -55,7 +55,7 @@ async def main():
         # Creating transaction payload using the best quote
         tx_payload = await submit_quote(
             quote_id=best_quote["quote_id"],
-            vault_id=FOREFI_VAULT_ID, 
+            vault_id=FORDEFI_VAULT_ID, 
             chain_type=chain_type, 
             network=network, 
             sell_token_amount=sell_token_amount, 

@@ -1,7 +1,7 @@
-import http  
-import http.server  
+import http
 import json  
 import logging
+import http.server  
 
 PORT = 8080
 
