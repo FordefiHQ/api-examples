@@ -12,7 +12,7 @@ contract BatchTransfer {
     event BatchETHTransfer(address indexed sender, uint256 totalAmount, uint256 recipients);
     event BatchTokenTransfer(address indexed sender, address indexed token, uint256 totalAmount, uint256 recipients);
 
-    // Custom errors
+    // Errors
     error InvalidArrayLength();
     error ArrayLengthMismatch();
     error BatchSizeExceeded();
@@ -34,7 +34,6 @@ contract BatchTransfer {
         if (n == 0) revert InvalidArrayLength();
         if (n > MAX_BATCH_SIZE) revert BatchSizeExceeded();
 
-        // exact funding avoids refund branch
         uint256 total = amountPerRecipient * n;
         if (msg.value != total) revert InsufficientETH();
 
