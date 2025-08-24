@@ -6,7 +6,7 @@ import { getProvider } from "./get-provider"
 import { FordefiProviderConfig } from "@fordefi/web3-provider";
 
 
-// 1. Configure your Fordefi secrets
+// 1. Configure your Fordefi secrets (API User access token and API User private key)
 dotenv.config();
 const FORDEFI_API_USER_TOKEN = process.env.FORDEFI_API_USER_TOKEN ?? 
   (() => { throw new Error("FORDEFI_API_USER_TOKEN is not set"); })();
@@ -49,7 +49,7 @@ async function main() {
     bytecode = bytecode.object;
   }
 
-  // E) Deploy
+  // E) Deploy!
   const factory = new ethers.ContractFactory(abi, bytecode, signer);
   console.log("Deploying contract...");
   const lock = await factory.deploy();

@@ -3,6 +3,8 @@
 ## Overview
 This script deploys a smart contract using Foundry for compilation and TypeScript for deployment, with Fordefi as the RPC provider and a Fordefi vault as the signer and deployer address.
 
+⚠️ This smart contract has not been audited and should NOT be used in a production setting, use at your own risk!
+
 ## Prerequisites
 Ensure you have the following set up before running the script:
 
