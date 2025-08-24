@@ -1,15 +1,13 @@
 import fs from "fs";
 import path from "path";
 import dotenv from "dotenv";
-dotenv.config();
-import {
-  FordefiWeb3Provider,
-  FordefiProviderConfig
-} from "@fordefi/web3-provider";
 import { ethers } from "ethers";
+import { getProvider } from "./get-provider"
+import { FordefiProviderConfig } from "@fordefi/web3-provider";
 
 
 // 1. Configure your Fordefi secrets
+dotenv.config();
 const FORDEFI_API_USER_TOKEN = process.env.FORDEFI_API_USER_TOKEN ?? 
   (() => { throw new Error("FORDEFI_API_USER_TOKEN is not set"); })();
 const privateKeyFilePath = "./fordefi_secret/private.pem";
@@ -18,29 +16,30 @@ const PEM_PRIVATE_KEY = fs.readFileSync(privateKeyFilePath, "utf8") ??
 
 
 // 2. Chain ID configuration
-//    Example: deploying on Polygon Mainnet (chainId=137)
-const chainId = 137;
+//    Example: deploying on Base
+const chainId = 8453;
 
 
 // 3. Construct FordefiWeb3Provider config
 const config: FordefiProviderConfig = {
   chainId,
-  address: "0x...", // Your Fordefi EVM Vault address
+  address: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73", // Your Fordefi EVM Vault address
   apiUserToken: FORDEFI_API_USER_TOKEN,
   apiPayloadSignKey: PEM_PRIVATE_KEY,
-  rpcUrl: "https://polygon-rpc.com/" // Fallback RPC
+  rpcUrl: "https://base.llamarpc.com"
 };
 
 async function main() {
   // A) Create the Fordefi provider
-  const fordefiProvider = new FordefiWeb3Provider(config);
+  let provider = await getProvider(config);
+  if (!provider) throw new Error("Failed to initialize provider");
+  let web3Provider = new ethers.BrowserProvider(provider); 
 
   // B) Wrap the fordefiProvider with Ethers.js
-  const provider = new ethers.BrowserProvider(fordefiProvider);
-  const signer = await provider.getSigner();
+  const signer = await web3Provider.getSigner();
 
-  // C) Load the Foundry artifact from `out/Counter.sol/Counter.json`
-  const lockArtifactPath = path.join(__dirname, "..", "out", "Counter.sol", "Counter.json");
+  // C) Load the Foundry artifact
+  const lockArtifactPath = path.join(__dirname, "..", "out", "Batcher.sol", "BatchTransfer.json");
   const lockArtifact = JSON.parse(fs.readFileSync(lockArtifactPath, "utf8"));
 
   // D) Get Foundry bytecode from `artifact.bytecode.object`,
@@ -50,7 +49,7 @@ async function main() {
     bytecode = bytecode.object;
   }
 
-  // E) Deploy with Ethers
+  // E) Deploy
   const factory = new ethers.ContractFactory(abi, bytecode, signer);
   console.log("Deploying contract...");
   const lock = await factory.deploy();
@@ -64,5 +63,3 @@ main()
     console.error("Error deploying contract:", err);
     process.exit(1);
   });
-
-// Deploy command -> npx ts-node script/deploy.ts

@@ -1,7 +1,7 @@
 # Fordefi Foundry Contract Deployer
 
 ## Overview
-This script deploys a smart contract using Foundry for compilation and TypeScript for deployment, with Fordefi as the RPC provider and a Fordefi vault as the signer.
+This script deploys a smart contract using Foundry for compilation and TypeScript for deployment, with Fordefi as the RPC provider and a Fordefi vault as the signer and deployer address.
 
 ## Prerequisites
 Ensure you have the following set up before running the script:
@@ -25,9 +25,9 @@ Ensure you have the following set up before running the script:
 2. **Set up environment variables:**
    - Create a `.env` file in the project root:
      ```sh
-     FORDEFI_API_USER_TOKEN=your_token_here
+     FORDEFI_API_USER_TOKEN=your_access_token_here
      ```
-   - Place your Fordefi API Signer private key in `./fordefi_secret/private.pem`
+   - Place your Fordefi API User's private key in `./fordefi_secret/private.pem`
 
 3. **Configure your deployment:**
    - Update the vault address in `script/deploy.ts`:
@@ -50,7 +50,7 @@ Ensure you have the following set up before running the script:
 
 ## Network Configuration
 
-The deployment script is configured in `script/deploy.ts`. By default, it's set up for Polygon Mainnet (chainId: 137), but you can modify the following parameters for your target network:
+The deployment script is configured in `script/deploy.ts`. By default, it's set up for Base (chainId: 8453), but you can modify the following parameters for your target network:
 
 ```typescript
 const chainId = 137; // Change to your target network
