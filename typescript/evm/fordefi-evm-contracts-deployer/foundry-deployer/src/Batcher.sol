@@ -9,6 +9,9 @@ interface IERC20 {
 }
 
 contract BatchTransfer {
+    // Constants
+    uint256 public constant MAX_BATCH_SIZE = 500; // Reasonable limit to avoid gas issues
+    
     // Events (single, cheap summaries)
     event BatchETHTransfer(address indexed sender, uint256 totalAmount, uint256 recipients);
     event BatchTokenTransfer(address indexed sender, address indexed token, uint256 totalAmount, uint256 recipients);
@@ -16,12 +19,13 @@ contract BatchTransfer {
     // Custom errors
     error InvalidArrayLength();
     error ArrayLengthMismatch();
+    error BatchSizeExceeded();
     error ZeroAddress();
     error InsufficientETH();
+    error InsufficientAllowance();
     error ETHSendFailed();
     error ERC20PullFailed();
     error ERC20PushFailed();
-    // error FeeOnTransferNotSupported(); // uncomment if you add balance-delta check
 
     /*//////////////////////////////////////////////////////////////
                                 ETH
@@ -34,6 +38,7 @@ contract BatchTransfer {
     {
         uint256 n = recipients.length;
         if (n == 0) revert InvalidArrayLength();
+        if (n > MAX_BATCH_SIZE) revert BatchSizeExceeded();
 
         // exact funding avoids refund branch
         uint256 total = amountPerRecipient * n;
@@ -60,6 +65,7 @@ contract BatchTransfer {
         uint256 n = recipients.length;
         if (n == 0) revert InvalidArrayLength();
         if (n != amounts.length) revert ArrayLengthMismatch();
+        if (n > MAX_BATCH_SIZE) revert BatchSizeExceeded();
 
         uint256 total;
         for (uint256 i; i < n; ) {
@@ -93,16 +99,16 @@ contract BatchTransfer {
 
         uint256 n = recipients.length;
         if (n == 0) revert InvalidArrayLength();
+        if (n > MAX_BATCH_SIZE) revert BatchSizeExceeded();
 
         uint256 total = amountPerRecipient * n;
 
+        // Check allowance before attempting transfer
+        uint256 allowance = IERC20(token).allowance(msg.sender, address(this));
+        if (allowance < total) revert InsufficientAllowance();
+
         // Pull once from sender into this contract (one allowance update instead of N)
         _safeTransferFrom(token, msg.sender, address(this), total);
-
-        // If supporting fee-on-transfer, measure received vs expected and revert if mismatched:
-        // uint256 beforeBal = _balanceOf(token, address(this));
-        // _safeTransferFrom(token, msg.sender, address(this), total);
-        // if (_balanceOf(token, address(this)) - beforeBal != total) revert FeeOnTransferNotSupported();
 
         for (uint256 i; i < n; ) {
             address to = recipients[i];
@@ -127,6 +133,7 @@ contract BatchTransfer {
         uint256 n = recipients.length;
         if (n == 0) revert InvalidArrayLength();
         if (n != amounts.length) revert ArrayLengthMismatch();
+        if (n > MAX_BATCH_SIZE) revert BatchSizeExceeded();
 
         uint256 total;
         for (uint256 i; i < n; ) {
@@ -134,8 +141,10 @@ contract BatchTransfer {
             unchecked { ++i; }
         }
 
+        uint256 allowance = IERC20(token).allowance(msg.sender, address(this));
+        if (allowance < total) revert InsufficientAllowance();
+
         _safeTransferFrom(token, msg.sender, address(this), total);
-        // If fee-on-transfer support needed, add the balance-delta check here.
 
         for (uint256 i; i < n; ) {
             address to = recipients[i];
@@ -147,65 +156,6 @@ contract BatchTransfer {
         }
 
         emit BatchTokenTransfer(msg.sender, token, total, n);
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                            MIXED (ETH + TOKEN)
-    //////////////////////////////////////////////////////////////*/
-
-    /// @notice Send ETH and a single ERC20 in one tx (exact ETH funding required; token uses pull-then-push)
-    function batchSendMixed(
-        address[] calldata ethRecipients,
-        uint256[] calldata ethAmounts,
-        address token,
-        address[] calldata tokenRecipients,
-        uint256[] calldata tokenAmounts
-    ) external payable {
-        // ---- ETH ----
-        if (ethRecipients.length != 0) {
-            if (ethRecipients.length != ethAmounts.length) revert ArrayLengthMismatch();
-
-            uint256 ethTotal;
-            for (uint256 i; i < ethRecipients.length; ) {
-                ethTotal += ethAmounts[i];
-                unchecked { ++i; }
-            }
-            if (msg.value != ethTotal) revert InsufficientETH();
-
-            for (uint256 i; i < ethRecipients.length; ) {
-                address to = ethRecipients[i];
-                if (to == address(0)) revert ZeroAddress();
-                (bool ok, ) = to.call{value: ethAmounts[i]}("");
-                if (!ok) revert ETHSendFailed();
-                unchecked { ++i; }
-            }
-
-            emit BatchETHTransfer(msg.sender, ethTotal, ethRecipients.length);
-        }
-
-        // ---- TOKENS ----
-        if (tokenRecipients.length != 0) {
-            if (token == address(0)) revert ZeroAddress();
-            if (tokenRecipients.length != tokenAmounts.length) revert ArrayLengthMismatch();
-
-            uint256 totalTokens;
-            for (uint256 i; i < tokenRecipients.length; ) {
-                totalTokens += tokenAmounts[i];
-                unchecked { ++i; }
-            }
-
-            _safeTransferFrom(token, msg.sender, address(this), totalTokens);
-            // If fee-on-transfer support needed, add the balance-delta check here.
-
-            for (uint256 i; i < tokenRecipients.length; ) {
-                address to = tokenRecipients[i];
-                if (to == address(0)) revert ZeroAddress();
-                _safeTransfer(token, to, tokenAmounts[i]);
-                unchecked { ++i; }
-            }
-
-            emit BatchTokenTransfer(msg.sender, token, totalTokens, tokenRecipients.length);
-        }
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -224,15 +174,6 @@ contract BatchTransfer {
             token.call(abi.encodeWithSelector(IERC20.transfer.selector, to, amount));
         if (!ok || (data.length != 0 && !abi.decode(data, (bool)))) revert ERC20PushFailed();
     }
-
-    // If you decide to support fee-on-transfer detection, uncomment and use:
-    // function _balanceOf(address token, address account) private view returns (uint256) {
-    //     (bool ok, bytes memory data) = token.staticcall(
-    //         abi.encodeWithSelector(IERC20.balanceOf.selector, account)
-    //     );
-    //     require(ok && data.length >= 32, "balanceOf failed");
-    //     return abi.decode(data, (uint256));
-    // }
 
     receive() external payable {}
 }

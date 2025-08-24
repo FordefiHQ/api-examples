@@ -26,7 +26,7 @@ const config: FordefiProviderConfig = {
   address: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73", // Your Fordefi EVM Vault address
   apiUserToken: FORDEFI_API_USER_TOKEN,
   apiPayloadSignKey: PEM_PRIVATE_KEY,
-  rpcUrl: "https://base.llamarpc.com"
+  rpcUrl: "https://base-rpc.publicnode.com"
 };
 
 async function main() {
@@ -49,8 +49,24 @@ async function main() {
     bytecode = bytecode.object;
   }
 
-  // E) Deploy!
+  // E) Estimate gas cost
   const factory = new ethers.ContractFactory(abi, bytecode, signer);
+  console.log("Estimating deployment cost...");
+
+  // Get current gas price
+  const gasPrice = await web3Provider.getFeeData();
+  console.log("Current gas price: ", ethers.formatUnits(gasPrice.gasPrice || 0n, "gwei"), "gwei");
+
+  // Estimate deployment gas
+  const deployTx = await factory.getDeployTransaction();
+  const estimatedGas = await web3Provider.estimateGas(deployTx);
+  console.log("Estimated gas for deployment: ", estimatedGas.toString());
+
+  // Estimate deployment cost in ETH
+  const estimatedEthCost = estimatedGas * (gasPrice.gasPrice || 0n);
+  console.log("Estimated deployment cost", ethers.formatEther(estimatedEthCost), "ETH");
+
+  // F) Deploy!
   console.log("Deploying contract...");
   const lock = await factory.deploy();
 
