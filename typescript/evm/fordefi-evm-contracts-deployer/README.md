@@ -13,7 +13,7 @@ This repository helps you deploy smart contracts using either Foundry or Hardhat
 - An EVM smart contract
 - Fordefi organization and EVM vault
 - Foundry or Hardhat installed
-- Fordefi credentials: API User token and API Signer set up ([documentation](https://docs.fordefi.com/developers/program-overview))
+- Fordefi credentials: API User token, API User private key and API Signer set up ([documentation](https://docs.fordefi.com/developers/program-overview))
 
 ## Quick Start
 
