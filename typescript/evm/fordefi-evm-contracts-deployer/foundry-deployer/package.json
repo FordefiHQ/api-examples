@@ -8,7 +8,7 @@
     "test": "test"
   },
   "scripts": {
-    "deploy": "npx ts-node sript/deploy.ts"
+    "deploy": "npx ts-node script/deploy.ts"
   },
   "keywords": [],
   "author": "",
