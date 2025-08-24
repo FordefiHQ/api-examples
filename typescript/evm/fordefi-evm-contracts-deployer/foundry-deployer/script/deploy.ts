@@ -10,20 +10,19 @@ import { FordefiProviderConfig } from "@fordefi/web3-provider";
 dotenv.config();
 const FORDEFI_API_USER_TOKEN = process.env.FORDEFI_API_USER_TOKEN ?? 
   (() => { throw new Error("FORDEFI_API_USER_TOKEN is not set"); })();
-const privateKeyFilePath = "./fordefi_secret/private.pem";
-const PEM_PRIVATE_KEY = fs.readFileSync(privateKeyFilePath, "utf8") ??
+const PEM_PRIVATE_KEY = fs.readFileSync("./fordefi_secret/private.pem", "utf8") ??
   (() => { throw new Error("PEM_PRIVATE_KEY is not set"); })();
+const FORDEFI_EVM_VAULT_ADDRESS = process.env.FORDEFI_EVM_VAULT_ADDRESS ??
+  (() => { throw new Error("FORDEFI_EVM_VAULT_ADDRESS is not set"); })();
 
 
-// 2. Chain ID configuration
-//    Example: deploying on Base
+// 2. Chain ID configuration (here Base)
 const chainId = 8453;
-
 
 // 3. Construct FordefiWeb3Provider config
 const config: FordefiProviderConfig = {
   chainId,
-  address: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73", // Your Fordefi EVM Vault address
+  address: FORDEFI_EVM_VAULT_ADDRESS as `0x${string}`,
   apiUserToken: FORDEFI_API_USER_TOKEN,
   apiPayloadSignKey: PEM_PRIVATE_KEY,
   rpcUrl: "https://base-rpc.publicnode.com"
