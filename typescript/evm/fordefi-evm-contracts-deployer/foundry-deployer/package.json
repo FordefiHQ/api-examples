@@ -8,15 +8,15 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "deploy": "npx ts-node script/deploy.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@fordefi/web3-provider": "^0.2.7",
+    "@fordefi/web3-provider": "^0.3.0",
     "dotenv": "^16.4.7",
-    "ethers": "^6.13.5",
+    "ethers": "^6.15.0",
     "viem": "^2.22.16"
   },
   "devDependencies": {
