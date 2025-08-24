@@ -1,18 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-interface IERC20 {
-    function balanceOf(address) external view returns (uint256);
-    function allowance(address,address) external view returns (uint256);
-    function transfer(address,uint256) external returns (bool);
-    function transferFrom(address,address,uint256) external returns (bool);
-}
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract BatchTransfer {
-    // Constants
-    uint256 public constant MAX_BATCH_SIZE = 500; // Reasonable limit to avoid gas issues
+    using SafeERC20 for IERC20;
+    uint256 public constant MAX_BATCH_SIZE = 500;
     
-    // Events (single, cheap summaries)
+    // Events
     event BatchETHTransfer(address indexed sender, uint256 totalAmount, uint256 recipients);
     event BatchTokenTransfer(address indexed sender, address indexed token, uint256 totalAmount, uint256 recipients);
 
@@ -24,8 +20,6 @@ contract BatchTransfer {
     error InsufficientETH();
     error InsufficientAllowance();
     error ETHSendFailed();
-    error ERC20PullFailed();
-    error ERC20PushFailed();
 
     /*//////////////////////////////////////////////////////////////
                                 ETH
@@ -102,19 +96,22 @@ contract BatchTransfer {
         if (n > MAX_BATCH_SIZE) revert BatchSizeExceeded();
 
         uint256 total = amountPerRecipient * n;
+        IERC20 tokenContract = IERC20(token);
 
         // Check allowance before attempting transfer
-        uint256 allowance = IERC20(token).allowance(msg.sender, address(this));
-        if (allowance < total) revert InsufficientAllowance();
+        if (tokenContract.allowance(msg.sender, address(this)) < total) {
+            revert InsufficientAllowance();
+        }
 
-        // Pull once from sender into this contract (one allowance update instead of N)
-        _safeTransferFrom(token, msg.sender, address(this), total);
+        // Pull once from sender into this contract using SafeERC20
+        tokenContract.safeTransferFrom(msg.sender, address(this), total);
 
         for (uint256 i; i < n; ) {
             address to = recipients[i];
             if (to == address(0)) revert ZeroAddress();
 
-            _safeTransfer(token, to, amountPerRecipient);
+            // Push to recipients using SafeERC20
+            tokenContract.safeTransfer(to, amountPerRecipient);
 
             unchecked { ++i; }
         }
@@ -141,38 +138,27 @@ contract BatchTransfer {
             unchecked { ++i; }
         }
 
-        uint256 allowance = IERC20(token).allowance(msg.sender, address(this));
-        if (allowance < total) revert InsufficientAllowance();
+        IERC20 tokenContract = IERC20(token);
 
-        _safeTransferFrom(token, msg.sender, address(this), total);
+        // Check allowance before attempting transfer
+        if (tokenContract.allowance(msg.sender, address(this)) < total) {
+            revert InsufficientAllowance();
+        }
+
+        // Pull once from sender into this contract using SafeERC20
+        tokenContract.safeTransferFrom(msg.sender, address(this), total);
 
         for (uint256 i; i < n; ) {
             address to = recipients[i];
             if (to == address(0)) revert ZeroAddress();
 
-            _safeTransfer(token, to, amounts[i]);
+            // Push to recipients using SafeERC20
+            tokenContract.safeTransfer(to, amounts[i]);
 
             unchecked { ++i; }
         }
 
         emit BatchTokenTransfer(msg.sender, token, total, n);
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                        INTERNAL SAFE TOKEN HELPERS
-    //////////////////////////////////////////////////////////////*/
-
-    // Treat empty return data as success; revert on false or low-level failure.
-    function _safeTransferFrom(address token, address from, address to, uint256 amount) private {
-        (bool ok, bytes memory data) =
-            token.call(abi.encodeWithSelector(IERC20.transferFrom.selector, from, to, amount));
-        if (!ok || (data.length != 0 && !abi.decode(data, (bool)))) revert ERC20PullFailed();
-    }
-
-    function _safeTransfer(address token, address to, uint256 amount) private {
-        (bool ok, bytes memory data) =
-            token.call(abi.encodeWithSelector(IERC20.transfer.selector, to, amount));
-        if (!ok || (data.length != 0 && !abi.decode(data, (bool)))) revert ERC20PushFailed();
     }
 
     receive() external payable {}

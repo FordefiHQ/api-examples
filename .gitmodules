@@ -1,0 +1,3 @@
+[submodule "typescript/evm/fordefi-evm-contracts-deployer/foundry-deployer/lib/openzeppelin-contracts"]
+	path = typescript/evm/fordefi-evm-contracts-deployer/foundry-deployer/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
