@@ -33,7 +33,12 @@ def verify_signature(signature: str, body: bytes) -> bool:
 
 @app.post("/")
 async def fordefi_webhook(request: Request):
+    print("\n📋 Incoming webhook headers:")
+    for header_name, header_value in request.headers.items():
+        print(f"  {header_name}: {header_value}")
+
     signature = request.headers.get("X-Signature")
+
     if not signature:
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED, 

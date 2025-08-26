@@ -1,7 +1,6 @@
-import { FordefiProviderConfig } from '@fordefi/web3-provider';
 import fs from 'fs';
 import dotenv from 'dotenv';
-import { type } from 'os';
+import { FordefiProviderConfig } from '@fordefi/web3-provider';
 
 dotenv.config()
 
