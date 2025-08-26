@@ -9,7 +9,7 @@ dotenv.config();
 const app = express();
 const PORT = Number(process.env.PORT) || 8080;
 
-const publicKeyPath = path.join(__dirname, 'public_key.pem');
+const publicKeyPath = path.join(__dirname, 'keys', 'fordefi_public_key.pem')
 let FORDEFI_PUBLIC_KEY: string;
 
 try {
@@ -153,6 +153,7 @@ app.use((error: Error, req: Request, res: Response, next: any) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🪝 Fordefi webhook server running on http://0.0.0.0:${PORT}`);
   console.log(`📝 Webhook endpoint: http://0.0.0.0:${PORT}`);
+  console.log(`❤️ Health check endpoint: http://0.0.0.0:${PORT}/health`);
 });
 
 export default app;

@@ -62,9 +62,20 @@ const config = {
 };
 ```
 
-## Contract verification
+## Contract verification examples
 
-### On Etherscan:
+### On Etherscan
+```bash
+forge verify-contract \
+  --rpc-url https://ethereum.publicnode.com \
+  --verifier etherscan \
+  --verifier-url 'https://api.etherscan.io/api' \
+  --etherscan-api-key YOUR_ETHERSCAN_API_KEY \
+  CONTRACT_ADDRESS \
+  src/Batcher.sol:BatchTransfer
+```
+
+### On Basescan:
 ```bash
 forge verify-contract \
   --rpc-url https://mainnet-preconf.base.org \
@@ -74,7 +85,7 @@ forge verify-contract \
   CONTRACT_ADDRESS \
   src/Batcher.sol:BatchTransfer
 ```
-### On Blockscout:
+### On Blockscout (Base):
 ```bash
 forge verify-contract \
   --rpc-url https://mainnet-preconf.base.org \
