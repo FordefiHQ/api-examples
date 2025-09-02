@@ -1,7 +1,7 @@
 # Fordefi Hardhat Contract Deployer
 
 ## Overview
-This script deploys an example smart contract using Hardhat, with Fordefi as the RPC provider and a Fordefi vault as the signer.
+This script deploys an example smart contract using Hardhat, with Fordefi as the RPC provider and a Fordefi EVM vault as the signer.
 
 ## Prerequisites
 Ensure you have the following set up before running the script:
@@ -63,8 +63,7 @@ You can also add these convenient scripts to your `package.json`:
   "scripts": {
     "compile": "hardhat compile",
     "clean": "hardhat clean",
-    "deploy:polygon": "hardhat run --network polygon scripts/deploy.ts",
-    "deploy:hyperevm": "hardhat run --network hyperevm scripts/deploy.ts"
+    "deploy": "hardhat run --network hyperevm scripts/deploy.ts"
   }
 }
 ```
@@ -132,9 +131,4 @@ etherscan: {
 ### On Etherscan (Ethereum Mainnet)
 ```bash
 npx hardhat verify --network mainnet CONTRACT_ADDRESS
-```
-
-### On HyperEVM (Polygon)
-```bash
-npx hardhat verify --network polygon CONTRACT_ADDRESS
 ```

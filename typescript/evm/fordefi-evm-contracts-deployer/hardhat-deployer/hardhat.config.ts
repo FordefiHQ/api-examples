@@ -1,6 +1,9 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
-import "@nomiclabs/hardhat-etherscan";
+import "@nomicfoundation/hardhat-verify";
+import dotenv from 'dotenv';
+
+dotenv.config()
 
 const config: HardhatUserConfig = {
   solidity: "0.8.30",
@@ -11,7 +14,10 @@ const config: HardhatUserConfig = {
     }
   },
   etherscan: {
-    apiKey: "YOUR_API_KEY_HERE"
+    apiKey: process.env.ETHERSCAN_API_KEY
+  },
+  sourcify: {
+    enabled: true
   }
 };
 
