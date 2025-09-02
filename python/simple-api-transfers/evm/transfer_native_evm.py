@@ -53,9 +53,9 @@ async def main():
         request_body = json.dumps(request_json)
         timestamp = datetime.datetime.now().strftime("%s")
         payload = f"{path}|{timestamp}|{request_body}"
-        ## Signing transaction with API Signer
+        ## Signing transaction with API User private key
         signature = await sign(payload=payload)
-        ## Broadcasting tx
+        ## Push tx to Fordefi for MPC signing and broadcast to network
         await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
         print("✅ Transaction submitted successfully!")
     except Exception as e:

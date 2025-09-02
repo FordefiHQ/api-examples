@@ -15,8 +15,13 @@ async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, custom_
         "details": {
             "type": "evm_transfer",
             "gas": {
-            "type": "priority",
-            "priority_level": "medium"
+                    "gas_limit": "50000",
+                    "type": "custom",
+                    "details": {
+                        "type": "dynamic",
+                        "max_fee_per_gas": "1000000000", # 1 GWEI
+                        "max_priority_fee_per_gas": "100000000" # 0,1 GWEI
+                }
             },
             "to": destination,
             "value": {
@@ -47,8 +52,8 @@ evm_chain = "bsc"
 path = "/api/v1/transactions"
 destination = "0xF659feEE62120Ce669A5C45Eb6616319D552dD93" # CHANGE
 custom_note = "hello!" # Optional note
-token_contract_address = "0x55d398326f99059fF775485246999027B3197955" # USDT on Binance Smart Chain
-value = str(1_000_000_000_000_000_000) # 1 USDT
+token_contract_address = "0x55d398326f99059fF775485246999027B3197955" # USDT on BSC
+value = "100000" # 1 USDT = 1_000_000_000_000_000_000
 
 async def main():
     try:
@@ -62,9 +67,9 @@ async def main():
         request_body = json.dumps(request_json)
         timestamp = datetime.datetime.now().strftime("%s")
         payload = f"{path}|{timestamp}|{request_body}"
-        ## Signing transaction with API Signer
+        ## Signing transaction with API User private key
         signature = await sign(payload=payload)
-        ## Broadcasting transaction
+        ## Push tx to Fordefi for MPC signing and broadcast to network
         await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
         print("✅ Transaction submitted successfully!")
     except Exception as e:

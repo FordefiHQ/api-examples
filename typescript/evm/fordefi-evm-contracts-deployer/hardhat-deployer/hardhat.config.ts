@@ -1,17 +1,17 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+import "@nomiclabs/hardhat-etherscan";
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.28",
+  solidity: "0.8.30",
   networks: {
-    polygon: { 
-      url: "https://polygon.llamarpc.com", // Fallback JSON-RPC URL
-      chainId: 137, // Decimal value of the chain id
-    },
     hyperevm: { 
-      url: "https://rpc.purroofgroup.com/", // Fallback JSON-RPC URL
-      chainId: 999, // Decimal value of the chain id
+      url: " https://rpc.hyperlend.finance/archive",
+      chainId: 999,
     }
+  },
+  etherscan: {
+    apiKey: "YOUR_API_KEY_HERE"
   }
 };
 

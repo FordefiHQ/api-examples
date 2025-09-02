@@ -7,7 +7,7 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --exec ts-node webhooks_server.ts",
+    "dev": "nodemon --exec ts-node webhooks.ts",
     "build": "tsc",
     "server": "npx tsx webhooks_server.ts",
     "hypernative": "npx tsx webhooks_hypernative.ts"
