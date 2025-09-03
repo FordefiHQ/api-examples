@@ -8,42 +8,52 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-async def btc_tx_native(vault_id: str, destination: str, value: str):
+async def atom_tx_native(vault_id: str, chain: str, destination: str, amount: str, memo: str):
     request_json = {
     "vault_id": vault_id,
     "signer_type": "api_signer",
-    "type": "utxo_transaction",
+    "sign_mode": "auto",
+    "type": "cosmos_transaction",
     "details": {
-            "type": "utxo_transfer",
-            "outputs": [
-                {
-                    "to": {
-                        "type": "address",
-                        "address": destination
-                    },
-                    "value": value
-                }
-            ],
-            "fee_per_byte": {
-                "type": "priority",
-                "priority_level": "high"
-            }
-        }
+      "type": "cosmos_transfer",
+      "push_mode": "auto",
+      "to": {
+          "type": "address",
+          "address": {
+            "chain": chain,
+            "address": destination,
+          }
+      },
+      "asset_identifier":{
+        "type": "cosmos",
+        "details": {
+            "type": "native",
+            "chain": chain,
+        },
+      },
+      "value": {
+          "type": "value",
+          "value": amount
+      },
+      "memo": memo
     }
+  }
     
     return request_json
 
 ## Fordefi configuration
 USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-BTC_VAULT_ID = BTC_VAULT_ID = os.getenv("BTC_VAULT_ID")
-path = "/api/v1/transactions" # CHANGE
-destination = "bc1p4m94zze0tv9kp7usnpha7u98lpanemufhshgv9nae4c3myanc5csly8ayl" # CHANGE to your Bitcoin address
-value = str(500) # 0.00001 BTC = 10000 satoshis (1 BTC = 100,000,000 satoshis)
+COSMOS_VAULT_ID = os.getenv("COSMOS_VAULT_ID")
+path = "/api/v1/transactions"
+chain="cosmos_cosmoshub-4"
+destination = "cosmos1c8296f7cq4nvwjfvjq2x2jmrxnmw7wjyscxamy" # CHANGE to your destination address OR Vault ID
+memo = "1234" # Optional memo
+amount = str(100) # 1 ATOM = 1_000_000 uatom
 
 async def main():
     try:
         ## Building transaction
-        request_json = await btc_tx_native(vault_id=BTC_VAULT_ID, destination=destination, value=value)
+        request_json = await atom_tx_native(vault_id=COSMOS_VAULT_ID, chain=chain, destination=destination, amount=amount, memo=memo)
         request_body = json.dumps(request_json)
         timestamp = datetime.datetime.now().strftime("%s")
         payload = f"{path}|{timestamp}|{request_body}"

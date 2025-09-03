@@ -1,17 +1,33 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+import "@nomicfoundation/hardhat-verify";
+import dotenv from 'dotenv';
+
+dotenv.config()
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.28",
+  solidity: "0.8.30",
   networks: {
-    polygon: { 
-      url: "https://polygon.llamarpc.com", // Fallback JSON-RPC URL
-      chainId: 137, // Decimal value of the chain id
-    },
-    hyperevm: { 
-      url: "https://rpc.purroofgroup.com/", // Fallback JSON-RPC URL
-      chainId: 999, // Decimal value of the chain id
+    base: { 
+      url: "https://mainnet.base.org",
+      chainId: 8453,
     }
+  },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY,
+    customChains: [
+      {
+        network: "base",
+        chainId: 8453,
+        urls: {
+          apiURL: "https://api.basescan.org/api",
+          browserURL: "https://basescan.org"
+        }
+      }
+    ]
+  },
+  sourcify: {
+    enabled: true
   }
 };
 

@@ -1,7 +1,7 @@
 # Fordefi Hardhat Contract Deployer
 
 ## Overview
-This script deploys an example smart contract using Hardhat, with Fordefi as the RPC provider and a Fordefi vault as the signer.
+This script deploys an example smart contract using Hardhat, with Fordefi as the RPC provider and a Fordefi EVM vault as the signer.
 
 ## Prerequisites
 Ensure you have the following set up before running the script:
@@ -35,9 +35,7 @@ Ensure you have the following set up before running the script:
      ```typescript
      address: "0x...", // Replace with your Fordefi EVM Vault address
      ```
-   - The script is configured to deploy an example "Lock" contract with:
-     - Unlock date: January 1st, 2030
-     - Value: 0.001 ETH (1 Gwei)
+   - The script is configured to deploy the example "Greeter" contract
 
 ## Build and Compile
 
@@ -65,8 +63,7 @@ You can also add these convenient scripts to your `package.json`:
   "scripts": {
     "compile": "hardhat compile",
     "clean": "hardhat clean",
-    "deploy:polygon": "hardhat run --network polygon scripts/deploy.ts",
-    "deploy:hyperevm": "hardhat run --network hyperevm scripts/deploy.ts"
+    "deploy": "hardhat run --network hyperevm scripts/deploy.ts"
   }
 }
 ```
@@ -74,14 +71,7 @@ You can also add these convenient scripts to your `package.json`:
 Then you can run:
 ```sh
 npm run compile
-npm run deploy:polygon
-```
-
-## Deployment
-
-Deploy the contract to your chosen network:
-```sh
-npx hardhat run --network polygon scripts/deploy.ts
+npm run deploy
 ```
 
 ## Network Configuration
@@ -89,17 +79,50 @@ npx hardhat run --network polygon scripts/deploy.ts
 Ensure your `hardhat.config.ts` includes the network configuration for your target chain. Example:
 ```typescript
 networks: {
-  polygon: {
+  hyperevm: {
     url: "FALLBACK_RPC_URL", // This is a fallback RPC provider
-    chainId: 137 // Change depending on your target network for deployment
+    chainId: 8453 // Change depending on your target network for deployment
   }
 }
 ```
 
-## Troubleshooting
+## The Greeter Contract
 
-If you encounter errors:
-1. Verify all environment variables are properly set
-2. Ensure your Fordefi vault has sufficient funds for deployment
-3. Check that your private key file is correctly formatted and accessible
-4. Verify network configuration matches your target chain
+The example contract (`contracts/Greeter.sol`) is a simple demonstration contract that:
+
+- Contains a single function `sayHello(string memory h)` that accepts a string parameter
+- Validates that the input string exactly matches "hello Fordefi!" (case-sensitive)
+- Returns "hello!" if the validation passes
+- Reverts with the message "must say hello Fordefi!" if the input doesn't match
+
+**Example Usage:**
+```javascript
+// This will succeed and return "hello!"
+await greeterContract.sayHello("hello Fordefi!");
+
+// This will revert with "must say hello Fordefi!"
+await greeterContract.sayHello("hello world!");
+```
+
+## Contract Verification Examples
+
+After deploying your contract, you can verify it on block explorers using Hardhat's verification plugin. First, install the verification plugin:
+
+```sh
+npm install --save-dev @nomiclabs/hardhat-etherscan
+```
+
+Add it to your `hardhat.config.ts`:
+```typescript
+import "@nomiclabs/hardhat-etherscan";
+
+// Add to your config
+etherscan: {
+  apiKey: "YOUR_V2_API_KEY_HERE"  // see here how to register a V2 API Key: https://docs.etherscan.io/etherscan-v2/getting-an-api-key
+}
+```
+
+### For example on Base:
+```bash
+npx hardhat verify --network base CONTRACT_ADDRESS
+```

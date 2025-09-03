@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import dotenv from "dotenv";
 import { ethers } from "ethers";
-import { getProvider } from "./get-provider"
+import { getProvider } from "./get-provider";
 import { FordefiProviderConfig } from "@fordefi/web3-provider";
 
 
