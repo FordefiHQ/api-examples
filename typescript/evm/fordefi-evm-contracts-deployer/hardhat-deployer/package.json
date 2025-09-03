@@ -27,10 +27,10 @@
         "yn": "^3.1.1"
     },
     "scripts": {
-        "compile": "npx hardhat compile",
+        "build": "npx hardhat compile",
         "clean": "npx hardhat clean",
-        "deploy": "hardhat run --network hyperevm scripts/deploy.ts",
-        "verify": "npx hardhat verify --network hyperevm 0x129E2e0c373E83f7Bc45A7F66FE8f18DfA2CBB89"
+        "deploy": "hardhat run --network base scripts/deploy.ts",
+        "verify": "npx hardhat verify --network base 0xb6c7941B3fFfBDB450B274e1C9660Ab7D0A335AC"
     },
     "keywords": [],
     "author": "",

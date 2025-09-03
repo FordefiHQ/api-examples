@@ -8,13 +8,23 @@ dotenv.config()
 const config: HardhatUserConfig = {
   solidity: "0.8.30",
   networks: {
-    hyperevm: { 
-      url: " https://rpc.hyperlend.finance/archive",
-      chainId: 999,
+    base: { 
+      url: "https://mainnet.base.org",
+      chainId: 8453,
     }
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY
+    apiKey: process.env.ETHERSCAN_API_KEY,
+    customChains: [
+      {
+        network: "base",
+        chainId: 8453,
+        urls: {
+          apiURL: "https://api.basescan.org/api",
+          browserURL: "https://basescan.org"
+        }
+      }
+    ]
   },
   sourcify: {
     enabled: true

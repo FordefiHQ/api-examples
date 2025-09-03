@@ -81,7 +81,7 @@ Ensure your `hardhat.config.ts` includes the network configuration for your targ
 networks: {
   hyperevm: {
     url: "FALLBACK_RPC_URL", // This is a fallback RPC provider
-    chainId: 999 // Change depending on your target network for deployment
+    chainId: 8453 // Change depending on your target network for deployment
   }
 }
 ```
@@ -94,12 +94,6 @@ The example contract (`contracts/Greeter.sol`) is a simple demonstration contrac
 - Validates that the input string exactly matches "hello Fordefi!" (case-sensitive)
 - Returns "hello!" if the validation passes
 - Reverts with the message "must say hello Fordefi!" if the input doesn't match
-
-This contract demonstrates:
-- Basic Solidity syntax and structure
-- Input validation using `require()`
-- String comparison using `keccak256` hashing
-- Pure functions (no state modification)
 
 **Example Usage:**
 ```javascript
@@ -124,11 +118,11 @@ import "@nomiclabs/hardhat-etherscan";
 
 // Add to your config
 etherscan: {
-  apiKey: "YOUR_API_KEY_HERE"
+  apiKey: "YOUR_V2_API_KEY_HERE"  // see here how to register a V2 API Key: https://docs.etherscan.io/etherscan-v2/getting-an-api-key
 }
 ```
 
-### On Etherscan (Ethereum Mainnet)
+### For example on Base:
 ```bash
-npx hardhat verify --network mainnet CONTRACT_ADDRESS
+npx hardhat verify --network base CONTRACT_ADDRESS
 ```
