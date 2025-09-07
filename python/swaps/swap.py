@@ -50,7 +50,7 @@ async def main():
             print("❌ No valid quotes available")
             return
         
-        print(f"Using quote ID: {best_quote['quote_id']} from {best_quote['provider_id']}")
+        print(f"Using quote ID: {best_quote['quote_id']} from {best_quote['provider_info']['provider_id']}")
 
         # Creating transaction payload using the best quote
         tx_payload = await submit_quote(
@@ -60,7 +60,7 @@ async def main():
             network=network, 
             sell_token_amount=sell_token_amount, 
             buy_token_address=buy_token_address, 
-            providers=[best_quote["provider_id"]],
+            providers=[best_quote["provider_info"]["provider_id"]],
             slippage=slippage)
         
         tx_payload_json = json.dumps(tx_payload) 

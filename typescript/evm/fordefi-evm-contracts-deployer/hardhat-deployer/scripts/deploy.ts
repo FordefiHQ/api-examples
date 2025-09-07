@@ -2,8 +2,9 @@ import fs from 'fs';
 import hre from "hardhat";
 import dotenv from 'dotenv';
 import "@nomicfoundation/hardhat-ethers";
+import { getProvider } from "./get-provider";
 import { HttpNetworkUserConfig } from "hardhat/types";
-import { FordefiWeb3Provider } from "@fordefi/web3-provider";
+import { FordefiProviderConfig } from "@fordefi/web3-provider";
 
 dotenv.config()
 
@@ -16,17 +17,20 @@ const FORDEFI_EVM_VAULT_ADDRESS = process.env.FORDEFI_EVM_VAULT_ADDRESS ??
 (() => { throw new Error('FORDEFI_EVM_VAULT_ADDRESS is not set') })();
 
 const networkConfig = hre.network.config as HttpNetworkUserConfig;
-const fordefiProvider = new FordefiWeb3Provider({
+const config: FordefiProviderConfig = {
     address: FORDEFI_EVM_VAULT_ADDRESS as `0x${string}`,
     apiUserToken: FORDEFI_API_USER_TOKEN,
     apiPayloadSignKey: PEM_PRIVATE_KEY,
     chainId: networkConfig.chainId as number,
     rpcUrl: networkConfig.url,
-  });
+};
 
 async function main() {
-    const provider = new hre.ethers.BrowserProvider(fordefiProvider);
-    const signer = await provider.getSigner();
+    let provider = await getProvider(config);
+    if (!provider) throw new Error("Failed to initialize provider");
+    let web3Provider = new hre.ethers.BrowserProvider(provider); 
+  
+    const signer = await web3Provider.getSigner();
     const factory = await hre.ethers.getContractFactory("Greeter", signer);
     console.log('Deploying contract...');
 
