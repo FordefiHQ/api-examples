@@ -7,10 +7,10 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --exec ts-node webhooks_server.ts",
+    "dev": "nodemon --exec ts-node webhooks_hypernative.ts",
     "build": "tsc",
-    "server": "npx tsx webhooks_server.ts",
-    "hypernative": "npx tsx webhooks_hypernative.ts"
+    "fordefi_server": "npx tsx webhooks_fordefi.ts",
+    "hypernative_server": "npx tsx webhooks_hypernative.ts"
   },
   "devDependencies": {
     "@types/node": "^24.0.8",

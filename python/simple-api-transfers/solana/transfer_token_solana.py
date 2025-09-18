@@ -13,6 +13,10 @@ async def sol_tx_tokens(vault_id: str, destination: str, custom_note: str, value
         "signer_type": "api_signer",
         "type": "solana_transaction",
         "details": {
+            "fee": {
+                "type": "custom",
+                "unit_price": "100000000" # you can replace unit_price with priority_fee but NOT combine them
+            },
             "type": "solana_transfer",
             "to": destination,
             "value": {
@@ -42,8 +46,8 @@ SOL_VAULT_ID = os.getenv("SOL_VAULT_ID")
 path = "/api/v1/transactions"
 destination = "9BgxwZMyNzGUgp6hYXMyRKv3kSkyYZAMPGisqJgnXCFS" # Change to your destination address
 custom_note = "hello!" # Optional note
-value = str(1)  # in lamports (1 lamport = 0.000000001 SOL)
-token_address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+value = str(100)  # in smallest units (1 USDC = 1_000_000 SOL)
+token_address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" # USDC on Solana
 
 async def main():
     try:
