@@ -1,0 +1,5 @@
+{
+    "id": "294fbb5e-5f4d-4a24-a4b0-7a14059aff26",
+    "data": "{\"riskInsight\":{\"id\":\"000000000000\",\"chain\":\"ethereum\",\"name\":\"TEST MESSAGE\",\"category\":\"Technical\",\"timestamp\":\"2024-01-01T00:00:00Z\",\"severity\":\"Medium\",\"details\":\"Message delivered successfully\",\"involvedAssets\":[{\"address\":\"0x6b175474e89094c44da98b954eedeac495271d0f\",\"alias\":\"Maker: Dai Stablecoin\",\"type\":\"Contract\",\"chain\":\"ethereum\"}],\"riskTypeId\":\"T-9999\",\"riskTypeDescription\":\"TEST MESSAGE FOR TESTING CHANNELS\",\"txnHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"context\":[]},\"watchlists\":[{\"id\":0,\"name\":\"TEST WATCHLIST\"}],\"customAgents\":[],\"triggeredAssets\":[],\"securitySuits\":[]}",
+    "digitalSignature": "MEUCIQDIJuxkKN6lxJFKD/9FtMz7eKTVzNSphG6bEdO0CAoWkQIgBlf7npSxxI8W9ctWJBbP7WLaZ9O1Bl5iQ2AI3Qm/GOw="
+}

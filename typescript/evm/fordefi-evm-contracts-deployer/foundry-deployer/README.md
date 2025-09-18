@@ -64,7 +64,7 @@ const config = {
 
 ## Contract verification examples
 
-### On Etherscan
+### On Ethereum mainnet (Etherscan)
 ```bash
 forge verify-contract \
   --rpc-url https://ethereum.publicnode.com \
@@ -75,7 +75,18 @@ forge verify-contract \
   src/Batcher.sol:BatchTransfer
 ```
 
-### On Basescan:
+# On Ethereum Sepolia
+```bash
+forge verify-contract \
+  --rpc-url https://sepolia.infura.io/v3/YOUR_INFURA_KEY \
+  --verifier etherscan \
+  --verifier-url 'https://api-sepolia.etherscan.io/api' \
+  --etherscan-api-key YOUR_ETHERSCAN_API_KEY \
+  CONTRACT_ADDRESS \
+  src/YourContract.sol:YourContractName
+```
+
+### On Basescan
 ```bash
 forge verify-contract \
   --rpc-url https://mainnet-preconf.base.org \
