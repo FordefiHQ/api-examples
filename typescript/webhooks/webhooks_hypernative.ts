@@ -412,8 +412,7 @@ app.use((error: Error, req: Request, res: Response, next: any) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🪝 Fordefi webhook server running on http://0.0.0.0:${PORT}`);
-  console.log(`📝 Main webhook endpoint: http://0.0.0.0:${PORT}/`);
-  console.log(`🔥 Hypernative webhook endpoint: http://0.0.0.0:${PORT}/hypernative`);
+  console.log(`📝 Main webhook endpoint with smart routing: http://0.0.0.0:${PORT}/`);
   console.log(`❤️ Health check endpoint: http://0.0.0.0:${PORT}/health`);
 });
 
