@@ -36,6 +36,7 @@ Two TypeScript Express.js webhook server implementations to choose from:
 
 ### Additional for Advanced Handler (`webhooks_hypernative.ts`):
 - **Fordefi API User Token** - [Get your token here](https://docs.fordefi.com/developers/getting-started/create-an-api-user)
+- **Fordefi API Signer up and running** - [Learn more here](https://docs.fordefi.com/developers/getting-started/set-up-an-api-signer/api-signer-docker)
 - **Hypernative Account** - [Sign up here](https://app.hypernative.xyz/)
 
 ## Installation
@@ -113,11 +114,12 @@ Two TypeScript Express.js webhook server implementations to choose from:
    Add these scripts to your `package.json`:
    ```json
    {
-     "scripts": {
-       "dev": "nodemon --exec ts-node app.ts",
-       "build": "tsc",
-       "start": "node dist/app.js"
-     }
+   "scripts": {
+      "dev": "nodemon --exec ts-node webhooks_hypernative.ts",
+      "build": "tsc",
+      "fordefi_server": "npx tsx webhooks_fordefi.ts",
+      "hypernative_server": "npx tsx webhooks_hypernative.ts"
+   },
    }
    ```
 
@@ -127,33 +129,16 @@ Two TypeScript Express.js webhook server implementations to choose from:
 
 **For Basic Fordefi-only webhooks:**
 ```bash
-# Development
-npx tsx webhooks_fordefi.ts
-
-# Or with nodemon for auto-reload
-nodemon --exec npx tsx webhooks_fordefi.ts
+npm run fordefi_server
 ```
 
 **For Advanced handler with Hypernative integration:**
 ```bash
 # Development
-npx tsx webhooks_hypernative.ts
-
-# Or with nodemon for auto-reload
-nodemon --exec npx tsx webhooks_hypernative.ts
+npm run dev
+# Production
+npm run hypernative_server
 ```
-
-### Production Mode
-```bash
-# Build TypeScript
-npm run build
-
-# Run the compiled JavaScript (update package.json scripts accordingly)
-node dist/webhooks_fordefi.js
-# OR
-node dist/webhooks_hypernative.js
-```
-
 ## API Endpoints
 
 ### Basic Handler (`webhooks_fordefi.ts`)
@@ -167,7 +152,6 @@ node dist/webhooks_hypernative.js
 |---------|----------|-------------|
 | `GET` | `/health` | Health check endpoint |
 | `POST` | `/` | Smart webhook endpoint that routes Fordefi and Hypernative events automatically |
-| `POST` | `/hypernative` | Dedicated endpoint for Hypernative security alerts with automated transaction signing |
 
 ### Fordefi Webhook Flow (`POST /`)
 
@@ -184,7 +168,7 @@ node dist/webhooks_hypernative.js
 4. **Logging** - Logs complete transaction event details
 5. **Response** - Returns success confirmation
 
-### Hypernative Webhook Flow (`POST /hypernative`) *(Advanced Handler Only)*
+### Hypernative Webhook Flow (`POST /`) *(Advanced Handler Only)*
 
 1. **Header Extraction** - Retrieves `fordefi-transaction-id` from headers
 2. **Signature Verification** - Validates `digitalSignature` from request body using ECDSA P-256
