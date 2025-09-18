@@ -52,8 +52,8 @@ evm_chain = "ethereum"
 path = "/api/v1/transactions"
 destination = "0xF659feEE62120Ce669A5C45Eb6616319D552dD93" # CHANGE
 custom_note = "hello!" # Optional note
-token_contract_address = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" # USDT on BSC
-value = "100000" # 1 USDT = 1_000_000_000_000_000_000
+token_contract_address = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" # USDT on Ethereum mainnet
+value = "10" # 1 USDT = 1_000_000
 
 async def main():
     try:
