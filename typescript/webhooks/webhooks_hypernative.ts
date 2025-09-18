@@ -5,6 +5,10 @@ import dotenv from 'dotenv';
 import { p256 } from '@noble/curves/p256';
 import express, { Request, Response } from 'express';
 
+const app = express();
+app.use(express.raw({ type: 'application/json' }));
+const PORT = Number(process.env.PORT) || 8080;
+
 // SECRETS and ENV VARIABLES
 
 dotenv.config();
@@ -56,10 +60,6 @@ try {
 }
 
 /// APP LOGIC
-
-const app = express();
-const PORT = Number(process.env.PORT) || 8080;
-app.use(express.raw({ type: 'application/json' }));
 
 interface WebhookEvent {
   event?: {
@@ -259,7 +259,7 @@ app.post('/hypernative', async (req: Request, res: Response): Promise<void> => {
  */
 async function handleHypernativeWebhook(req: Request, res: Response): Promise<void> {
   try {
-    console.log('\n🔥 Received Hypernative webhook');
+    console.log('\n⚡ Received Hypernative webhook');
     
     // 1. Get the fordefi-transaction-id from headers
     const transactionId = req.headers['fordefi-transaction-id'] as string;
@@ -389,7 +389,7 @@ app.post('/', async (req: Request, res: Response): Promise<void> => {
         return;
       }
 
-    console.log('\n📝 Received Fordefi event:');
+    console.log('\n 🏰 Received Fordefi event:');
     const eventData: WebhookEvent = JSON.parse(rawBody.toString());
     console.log(JSON.stringify(eventData, null, 2));
 
