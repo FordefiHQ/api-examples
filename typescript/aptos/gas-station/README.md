@@ -25,6 +25,19 @@ User Transaction → Fordefi Vault (MPC Signing) → Geomi Gas Station (Fee Spon
 - Fordefi API User private key (PEM format)
 - Fordefi API Signer configured ([documentation](https://docs.fordefi.com/developers/program-overview))
 
+## Setting Up Geomi Gas Station
+
+1. **Create a Gas Station** at [Geomi](https://geomi.dev/)
+   - Select your network (Testnet/Mainnet)
+
+2. **Configure Allowed Contracts** (must match the transaction functions):
+   - Add `0x1::fungible_asset` with `transfer` function allowed
+   - Add `0x1::primary_fungible_store` with `transfer` function allowed
+   
+3. **Obtain Credentials**:
+   - Generate an API key from the Gas Station dashboard
+   - Copy the fee payer address (e.g., `0x6ad7...fccad`)
+   - Fund the fee payer address with APT coins for sponsoring transactions
 
 ## Installation
 
