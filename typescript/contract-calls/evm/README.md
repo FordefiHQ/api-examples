@@ -10,9 +10,9 @@ The code lives in this folder and uses `ethers` v6 with `@fordefi/web3-provider`
 ### Prerequisites
 - **Fordefi Setup:**
   - Fordefi organization and Solana vault
-  - API User access token
-  - API User private key (PEM format)
-  - API Signer configured ([documentation](https://docs.fordefi.com/developers/program-overview))
+  - Fordefi API User access token
+  - Fordefi API User private key (PEM format)
+  - Fordefi API Signer configured ([documentation](https://docs.fordefi.com/developers/program-overview))
 
 - **Development Environment:**
   - Node.js and npm installed

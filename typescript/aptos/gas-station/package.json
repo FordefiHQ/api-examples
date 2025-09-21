@@ -1,5 +1,5 @@
 {
-  "name": "@fordefi/aptos-calls",
+  "name": "@fordefi/aptos-gas-station",
   "version": "1.0.0",
   "description": "",
   "license": "ISC",
@@ -17,7 +17,6 @@
   "dependencies": {
     "@aptos-labs/gas-station-client": "^2.0.3",
     "@aptos-labs/ts-sdk": "^5.0.0",
-    "@aptos-labs/wallet-adapter-react": "^7.0.7",
     "axios": "^1.11.0",
     "dotenv": "^17.2.1"
   }
