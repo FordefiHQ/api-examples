@@ -25,12 +25,7 @@ export async function buildPayload(fordefiConfig: FordefiAptosConfig, APTOS_NETW
     const sequenceNumber = senderAccount.sequence_number;
     console.log(sequenceNumber)
 
-    console.log(`Current sequence number for ${originVaultAddress}: ${sequenceNumber}`);
-
-    const txCount = await aptos.getAccountTransactionsCount({
-        accountAddress: originVaultAddress,
-    });
-    console.log("Account transaction count: ", txCount);
+    console.log(`Current sequence number: ${sequenceNumber}`);
 
     let transaction = await aptos.transaction.build.simple({
         sender: originVaultAddress,
