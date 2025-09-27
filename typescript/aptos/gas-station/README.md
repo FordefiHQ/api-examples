@@ -49,7 +49,7 @@ npm install
 2. Create a `secret` directory and add your private key:
 ```bash
 mkdir secret
-# Add your Fordefi private key as private.pem in the secret directory
+# Add your Fordefi API User private key as private.pem in the secret directory
 ```
 
 3. Create a `.env` file with your credentials:
@@ -64,15 +64,15 @@ Update the `src/config.ts` file with your specific details:
 
 ```typescript
 export const fordefiConfig: FordefiAptosConfig = {
-    accessToken: process.env.API_USER_ACCESS_TOKEN!,
+    accessToken: process.env.API_USER_ACCESS_TOKEN!, // Your Fordefi API User access token
     originVaultId: "your-fordefi-vault-id",
     originAddress: "your-fordefi-vault-address", 
     destAddress: "destination-address",
     sponsor: "your-geomi-gas-station-address",
     sponsor_api_key: process.env.GAS_STATION_API_KEY!,
-    privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
+    privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'), // Your Fordefi API User private key
     apiPathEndpoint: '/api/v1/transactions',
-    asset: '0x69091fbab5f7d635ee7ac5098cf0c1efbe31d68fec0f2cd565e8d168daf52832', // Testnet USDC
+    asset: '0xbae207659db88bea0cbead6da0ed00aac12edcdda169e591cd41c94180b46f3b', // Mainnet USDC
     decimals: 6n,
     amount: 1n,
 };

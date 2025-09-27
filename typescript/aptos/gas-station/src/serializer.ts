@@ -55,10 +55,10 @@ export async function buildPayload(fordefiConfig: FordefiAptosConfig, APTOS_NETW
         type: "aptos_transaction",
         details: {
             skip_prediction: false,
-            fail_on_prediction_failure: false,
+            fail_on_prediction_failure: true,
             with_fee_payer: true,
             type: 'aptos_serialized_entry_point_payload',
-            chain: 'aptos_testnet',
+            chain: 'aptos_mainnet',
             serialized_transaction_payload: base64EncodedTransaction,
             push_mode: 'manual'
         }
@@ -96,9 +96,6 @@ export async function sendToGasStation(transaction: any, fordefiConfig: FordefiA
         sponsor
     );
     const multiAuthenticator = signedTransaction.authenticator as TransactionAuthenticatorMultiAgent;
-
-    console.log("Simple transaction: ", simpleTransaction);
-    console.log("Sender authenticator: ", multiAuthenticator.sender);
 
     try {
         const { transactionHash } = await gasStationClient.signAndSubmitTransaction({
