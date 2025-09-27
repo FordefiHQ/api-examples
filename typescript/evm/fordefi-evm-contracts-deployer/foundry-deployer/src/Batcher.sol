@@ -31,7 +31,7 @@ contract BatchTransfer is ReentrancyGuard, Ownable {
                                 ETH Batching
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice Send the same ETH amount to many recipients (exact funding required)
+    /// @notice Send the same ETH amount to many recipients (EXACT funding required)
     function batchSendETHSameAmount(address[] calldata recipients, uint256 amountPerRecipient) external nonReentrant payable {
 
         uint256 n = recipients.length;
@@ -81,7 +81,7 @@ contract BatchTransfer is ReentrancyGuard, Ownable {
                                 ERC20 Tokens Batching 
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice Send the same token amount to many recipients (pull once, push many)
+    /// @notice Send the same token amount to many recipients
     function batchSendTokenSameAmount(address token, address[] calldata recipients, uint256 amountPerRecipient) external nonReentrant {
         if (token == address(0)) revert ZeroAddress();
 
@@ -104,7 +104,7 @@ contract BatchTransfer is ReentrancyGuard, Ownable {
         emit BatchTokenTransfer(msg.sender, token, total, n);
     }
 
-    /// @notice Send different token amounts to many recipients (pull once, push many)
+    /// @notice Send different token amounts to many recipients
     function batchSendTokenDifferentAmounts( address token, address[] calldata recipients, uint256[] calldata amounts) external nonReentrant {
         if (token == address(0)) revert ZeroAddress();
 
@@ -133,7 +133,7 @@ contract BatchTransfer is ReentrancyGuard, Ownable {
         emit BatchTokenTransfer(msg.sender, token, total, n);
     }
 
-    /// @notice This admin function rescues tokens accidentally sent to the contract:
+    /// @notice Rescues tokens accidentally sent to the contract:
     function tokenRescue(address token, address to, uint amount) external onlyOwner{
         if (to == address(0)) revert ZeroAddress();
         IERC20(token).safeTransfer(to, amount);
