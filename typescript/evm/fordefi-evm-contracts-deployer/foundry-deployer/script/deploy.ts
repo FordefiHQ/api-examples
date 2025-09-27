@@ -65,7 +65,8 @@ async function main() {
 
   // F) Deploy!
   console.log("Deploying contract...");
-  const lock = await factory.deploy();
+  const ownerAddress = config.address; // our contract requires an owner but yours might not
+  const lock = await factory.deploy(ownerAddress);
 
   console.log("Contract deployed to:", await lock.getAddress());
 }
