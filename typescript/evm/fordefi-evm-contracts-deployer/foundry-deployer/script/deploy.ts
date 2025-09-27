@@ -26,6 +26,9 @@ const config: FordefiProviderConfig = {
   rpcUrl: RPC_URL
 };
 
+const ownerAddress = config.address; // our contract's constructor requires an owner but yours might not
+console.log("Owner address: ", ownerAddress)
+
 async function main() {
   // A) Create the Fordefi provider
   let provider = await getProvider(config);
@@ -55,7 +58,7 @@ async function main() {
   console.log("Current gas price: ", ethers.formatUnits(gasPrice.gasPrice || 0n, "gwei"), "gwei");
 
   // Estimate deployment gas
-  const deployTx = await factory.getDeployTransaction();
+  const deployTx = await factory.getDeployTransaction(ownerAddress);
   const estimatedGas = await web3Provider.estimateGas(deployTx);
   console.log("Estimated gas for deployment: ", estimatedGas.toString());
 
@@ -65,7 +68,6 @@ async function main() {
 
   // F) Deploy!
   console.log("Deploying contract...");
-  const ownerAddress = config.address; // our contract requires an owner but yours might not
   const lock = await factory.deploy(ownerAddress);
 
   console.log("Contract deployed to:", await lock.getAddress());
