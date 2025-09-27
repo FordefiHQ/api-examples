@@ -1,0 +1,23 @@
+{
+  "name": "@fordefi/aptos-gas-station",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "call": "npx ts-node ./src/run.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@aptos-labs/gas-station-client": "^2.0.3",
+    "@aptos-labs/ts-sdk": "^5.0.0",
+    "axios": "^1.11.0",
+    "dotenv": "^17.2.1"
+  }
+}
