@@ -1,4 +1,4 @@
-# Aptos Gas Station with Fordefi & Geomi Integration
+# Aptos Gas Station with Fordefi & Geomi
 
 This example demonstrates how to use Fordefi's secure vault infrastructure together with [Geomi's Gas Station](https://geomi.dev/) to sponsor transaction fees on the Aptos blockchain.
 
