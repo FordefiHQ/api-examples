@@ -1,9 +1,9 @@
 import { signWithApiSigner } from './signer';
-import { increaseLiquidityWithOrca } from './serializers/serialize_increase_liquidity'
-import { createAndSignTx } from './utils/process_tx'
-import { pushToJito } from './push_to_jito'
-import dotenv from 'dotenv'
-import fs from 'fs'
+import { increaseLiquidityWithOrca } from './serializers/serialize_increase_liquidity';
+import { createAndSignTx } from './utils/process_tx';
+import { pushToJito } from './push_to_jito';
+import dotenv from 'dotenv';
+import fs from 'fs';
 
 dotenv.config()
 

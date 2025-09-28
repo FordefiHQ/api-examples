@@ -1,9 +1,9 @@
 import { signWithApiSigner } from './signer';
-import { removeLiquidityWithOrca } from './serializers/serialize_remove_liquidity'
-import { createAndSignTx } from './utils/process_tx'
-import { pushToJito } from './push_to_jito'
-import dotenv from 'dotenv'
-import fs from 'fs'
+import { removeLiquidityWithOrca } from './serializers/serialize_remove_liquidity';
+import { createAndSignTx } from './utils/process_tx';
+import { pushToJito } from './push_to_jito';
+import dotenv from 'dotenv';
+import fs from 'fs';
 
 dotenv.config()
 
