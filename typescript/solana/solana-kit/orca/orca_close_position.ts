@@ -1,9 +1,9 @@
 import { signWithApiSigner } from './signer';
-import { closePositionWithOrca } from './serializers/serialize_close_position'
-import { createAndSignTx } from './utils/process_tx'
-import { pushToJito } from './push_to_jito'
-import dotenv from 'dotenv'
-import fs from 'fs'
+import { closePositionWithOrca } from './serializers/serialize_close_position';
+import { createAndSignTx } from './utils/process_tx';
+import { pushToJito } from './push_to_jito';
+import dotenv from 'dotenv';
+import fs from 'fs';
 
 dotenv.config()
 

@@ -9,12 +9,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract BatchTransfer is ReentrancyGuard, Ownable {
     using SafeERC20 for IERC20;
-    uint256 public MAX_BATCH_SIZE = 200;
+    uint16 public MAX_BATCH_SIZE = 200;
     
     event BatchETHTransfer(address indexed sender, uint256 totalAmount, uint256 recipients);
     event BatchTokenTransfer(address indexed sender, address indexed token, uint256 totalAmount, uint256 recipients);
     event TokenRescued(address indexed token, address indexed owner, uint amount);
-    event NewBatchSize(uint size);
+    event NewMaxBatchSize(uint16 size);
 
     error ArrayLengthMismatch();
     error BatchSizeExceeded();
@@ -150,11 +150,11 @@ contract BatchTransfer is ReentrancyGuard, Ownable {
     }
 
     /// @notice Changes MAX_BATCH_SIZE
-    function changeMaxBatchSize(uint size) external onlyOwner{
+    function changeMaxBatchSize(uint16 size) external onlyOwner{
         if (size < 10) revert MinimumSizeIsTen();
         if (size > 1000) revert MaximumSizeExceeded();
         MAX_BATCH_SIZE = size;
 
-        emit NewBatchSize(size);
+        emit NewMaxBatchSize(size);
     }
 }

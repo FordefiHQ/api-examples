@@ -1,9 +1,9 @@
 import { signWithApiSigner } from './signer';
-import { harvestPositionWithOrca } from './serializers/serialize_harvest_position'
-import { createAndSignTx } from './utils/process_tx'
-import { pushToJito } from './push_to_jito'
-import dotenv from 'dotenv'
-import fs from 'fs'
+import { harvestPositionWithOrca } from './serializers/serialize_harvest_position';
+import { createAndSignTx } from './utils/process_tx';
+import { pushToJito } from './push_to_jito';
+import dotenv from 'dotenv';
+import fs from 'fs';
 
 dotenv.config()
 
