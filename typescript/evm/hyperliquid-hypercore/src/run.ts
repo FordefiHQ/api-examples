@@ -2,6 +2,7 @@ import { hyperliquidConfig } from "./config";
 import { withdraw3 } from "./hl-withdraw";
 import { usdSend } from "./hl-send-usdc";
 import { deposit } from "./hl-deposit";
+import { vault_transfer_agent } from "./hl-vault-transfer-agent";
 
 async function main() {
     try {
@@ -9,7 +10,10 @@ async function main() {
             await deposit(hyperliquidConfig)
         } else if (hyperliquidConfig.action == "withdraw"){
             await withdraw3(hyperliquidConfig)
-        } else {
+        } else if (hyperliquidConfig.action == "vault_transfer"){
+            await vault_transfer_agent(hyperliquidConfig)
+        }  
+        else {
             await usdSend(hyperliquidConfig)
         }
     } catch (error) {
