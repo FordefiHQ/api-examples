@@ -13,8 +13,13 @@ export async function usdSend(hyperliquidConfig: HyperliquidConfig) {
         if (!provider) {
           throw new Error("Failed to initialize provider");
         }
-        let web3Provider = new ethers.BrowserProvider(provider); 
+        let web3Provider = new ethers.BrowserProvider(provider);
         const signer = await web3Provider.getSigner();
+
+        // Log the actual signer address for debugging
+        const signerAddress = await signer.getAddress();
+        console.log("Signer address from provider:", signerAddress);
+        console.log("Configured Fordefi address:", fordefiConfig.address);
 
         // Create custom wallet adapter
         const wallet = new FordefiWalletAdapter(signer, fordefiConfig.address);
@@ -25,9 +30,11 @@ export async function usdSend(hyperliquidConfig: HyperliquidConfig) {
         });
 
         // Create ExchangeClient with the custom wallet
-        const exchClient = new hl.ExchangeClient({ 
-            wallet, 
-            transport 
+        // IMPORTANT: Must explicitly set signatureChainId for Arbitrum
+        const exchClient = new hl.ExchangeClient({
+            wallet,
+            transport,
+            signatureChainId: '0xa4b1'  // Arbitrum chainId in hex (42161)
         });
         console.log("Exchange client created successfully");
         // Validate amount is not empty
@@ -39,8 +46,9 @@ export async function usdSend(hyperliquidConfig: HyperliquidConfig) {
             throw new Error("Destination must be a valid Ethereum address starting with '0x'");
         }
         // Perform USDC transfer
+        // IMPORTANT: Lowercase the destination address to avoid signature issues
         const result = await exchClient.usdSend({
-            destination: hyperliquidConfig.destination,
+            destination: hyperliquidConfig.destination.toLowerCase() as `0x${string}`,
             amount: String(hyperliquidConfig.amount),
         });
         console.log("USDC transfer successful: ", result);

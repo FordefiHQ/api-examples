@@ -8,7 +8,7 @@ export class FordefiWalletAdapter {
 
     constructor(signer: ethers.Signer, address: string) {
         this.signer = signer;
-        this.address = address;
+        this.address = address.toLowerCase()
     }
 
     async getAddress(): Promise<string> {
@@ -16,20 +16,25 @@ export class FordefiWalletAdapter {
     }
 
     async signTypedData(
-        domain: TypedDataDomain, 
+        domain: TypedDataDomain,
         types: Record<string, Array<TypedDataField>>,
-        value: Record<string, any> 
+        value: Record<string, any>
     ): Promise<string> {
         console.log("Signing with domain:", domain);
         console.log("Types:", types);
         console.log("Value:", value);
 
-        const modifiedDomain = {
-            ...domain,
-            chainId: fordefiConfig.chainId
-        };
+        // IMPORTANT: Hyperliquid uses different chainIds for different action types:
+        // - L1 actions (vault transfers): require chainId 1337
+        // - User-signed actions (usdSend): use the actual network chainId
+        const modifiedDomain = domain.chainId === 1337
+            ? domain  // Keep 1337 for L1 actions (Exchange domain)
+            : {
+                ...domain,
+                chainId: fordefiConfig.chainId  // Override for user-signed actions
+            };
         console.log("Modified domain:", modifiedDomain);
-        
+
         return this.signer.signTypedData(
             modifiedDomain,
             types,
