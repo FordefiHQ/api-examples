@@ -1,11 +1,11 @@
-import { ethers, parseUnits, formatUnits } from 'ethers';
-import { HyperliquidConfig, fordefiConfig } from './config'
-import { getProvider } from './get-provider';
+import { ethers } from 'ethers';
 import * as hl from "@nktkas/hyperliquid";
+import { getProvider } from './get-provider';
 import { FordefiWalletAdapter } from './wallet-adapter';
+import { HyperliquidConfig, fordefiConfig } from './config'
 
-export async function withdraw3(hlConfig: HyperliquidConfig) {
-    if (!hlConfig) {
+export async function withdraw3(hyperliquidConfig: HyperliquidConfig) {
+    if (!hyperliquidConfig) {
         throw new Error("Config required!");
     }
     try {
@@ -25,22 +25,23 @@ export async function withdraw3(hlConfig: HyperliquidConfig) {
         // Create ExchangeClient with the custom wallet
         const exchClient = new hl.ExchangeClient({ 
             wallet, 
-            transport 
+            transport,
+            signatureChainId: '0xa4b1' 
         });
         console.log("Exchange client created successfully");
 
         // Validate amount is not empty
-        if (!hlConfig.amount) {
+        if (!hyperliquidConfig.amount) {
             throw new Error("Amount is required and cannot be empty");
         }
         // Validate destination address format
-        if (!hlConfig.destination || !hlConfig.destination.startsWith('0x')) {
+        if (!hyperliquidConfig.destination || !hyperliquidConfig.destination.startsWith('0x')) {
             throw new Error("Destination must be a valid Ethereum address starting with '0x'");
         }
         // Account clearinghouse state
         const result = await exchClient.withdraw3({
-            destination: hlConfig.destination, // Withdraw funds to your Fordefi EVM vault
-            amount: String(hlConfig.amount),
+            destination: hyperliquidConfig.destination.toLowerCase() as `0x${string}`,
+            amount: String(hyperliquidConfig.amount),
         });
         console.log("Withdrawal successful:", result);
         

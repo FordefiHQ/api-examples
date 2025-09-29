@@ -16,11 +16,6 @@ export async function usdSend(hyperliquidConfig: HyperliquidConfig) {
         let web3Provider = new ethers.BrowserProvider(provider);
         const signer = await web3Provider.getSigner();
 
-        // Log the actual signer address for debugging
-        const signerAddress = await signer.getAddress();
-        console.log("Signer address from provider:", signerAddress);
-        console.log("Configured Fordefi address:", fordefiConfig.address);
-
         // Create custom wallet adapter
         const wallet = new FordefiWalletAdapter(signer, fordefiConfig.address);
 
