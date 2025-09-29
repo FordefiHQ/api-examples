@@ -30,11 +30,11 @@ export async function usdSend(hyperliquidConfig: HyperliquidConfig) {
         });
 
         // Create ExchangeClient with the custom wallet
-        // IMPORTANT: Must explicitly set signatureChainId for Arbitrum
+        // IMPORTANT: Must explicitly set signatureChainId for Arbitrum in hex (42161)
         const exchClient = new hl.ExchangeClient({
             wallet,
             transport,
-            signatureChainId: '0xa4b1'  // Arbitrum chainId in hex (42161)
+            signatureChainId: '0xa4b1' 
         });
         console.log("Exchange client created successfully");
         // Validate amount is not empty
