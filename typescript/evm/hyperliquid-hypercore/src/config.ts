@@ -10,7 +10,8 @@ export interface HyperliquidConfig {
     destination?: `0x${string}`,
     amount?: string,
     agentPk?: string
-    isDeposit?: boolean
+    isDeposit?: boolean,
+    hyperliquid_vault_address?: string
 };
 
 // Configure the Fordefi provider
@@ -29,5 +30,6 @@ export const hyperliquidConfig: HyperliquidConfig = {
     destination: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73", // Change to your destination address
     amount: "1",
     agentPk: process.env.HYPERCORE_AGENT_PK ?? (() => { throw new Error('API Agent private key is not set'); })(),
-    isDeposit: true
+    isDeposit: true,
+    hyperliquid_vault_address: "0xdfc24b077bc1425ad1dea75bcb6f8158e10df303"
 };
