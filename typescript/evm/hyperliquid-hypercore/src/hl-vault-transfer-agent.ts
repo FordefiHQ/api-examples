@@ -1,8 +1,6 @@
-import { HyperliquidConfig, fordefiConfig } from './config';
 import * as hl from "@nktkas/hyperliquid";
 import { privateKeyToAccount } from 'viem/accounts';
-
-const VAULT_ADDRESS = "0xdfc24b077bc1425ad1dea75bcb6f8158e10df303";
+import { HyperliquidConfig, fordefiConfig } from './config';
 
 /**
  * Vault transfer using Agent wallet (API wallet)
@@ -32,7 +30,7 @@ export async function vault_transfer_agent(hyperliquidConfig: HyperliquidConfig)
         const agentWallet = privateKeyToAccount(hyperliquidConfig.agentPk as `0x${string}`);
         console.log(`Agent wallet address: ${agentWallet.address}`);
         console.log(`Master account address: ${fordefiConfig.address}`);
-        console.log(`Vault address: ${VAULT_ADDRESS}`);
+        console.log(`Vault address: ${hyperliquidConfig.hyperliquid_vault_address}`);
 
         // Create transport
         const transport = new hl.HttpTransport({
@@ -52,7 +50,7 @@ export async function vault_transfer_agent(hyperliquidConfig: HyperliquidConfig)
         // Perform vault transfer
         // The agent signs on behalf of the master account (vaultAddress)
         const result = await exchClient.vaultTransfer({
-            vaultAddress: VAULT_ADDRESS.toLowerCase() as `0x${string}`,
+            vaultAddress: hyperliquidConfig.hyperliquid_vault_address!.toLowerCase() as `0x${string}`,
             isDeposit: hyperliquidConfig.isDeposit as boolean,
             usd: Number(hyperliquidConfig.amount) * 1e6,
         });
