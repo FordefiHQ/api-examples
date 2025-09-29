@@ -5,7 +5,7 @@ import { FordefiProviderConfig } from '@fordefi/web3-provider';
 dotenv.config()
 
 export interface HyperliquidConfig { 
-    action: "deposit" | "withdraw" | "sendUsd" | "vault_transfer"
+    action: "deposit" | "withdraw" | "sendUsd" | "vault_transfer" 
     isTestnet: boolean,
     destination?: `0x${string}`,
     amount?: string,
