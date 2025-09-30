@@ -17,7 +17,7 @@ export interface HyperliquidConfig {
 export interface AgentWalletConfig { 
     agentAddress: string,
     agentName: string,
-    validUntil: string
+    validUntil?: string
 }
 
 // Configure the Fordefi provider
@@ -31,7 +31,7 @@ export const fordefiConfig: FordefiProviderConfig = {
 };
 
 export const hyperliquidConfig: HyperliquidConfig = {
-    action: "approve_agent", 
+    action: "revoke_agent", 
     isTestnet: false,
     destination: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73", // Change to your destination address
     amount: "4",
@@ -41,7 +41,7 @@ export const hyperliquidConfig: HyperliquidConfig = {
 };
 
 export const agentWalletConfig: AgentWalletConfig = {
-    agentAddress: "", // leave empty
+    agentAddress: "", // leave EMPTY when APPROVING a new agent, only add the agent address when revoking an agent
     agentName: "agent_jones",
-    validUntil: "1774777045175"
+    validUntil: "1774777045175" // only required when approving an agent
 }
