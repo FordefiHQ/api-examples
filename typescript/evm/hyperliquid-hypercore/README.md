@@ -167,6 +167,64 @@ export const hyperliquidConfig: HyperliquidConfig = {
 npm run action
 ```
 
+### Approve Agent Wallet
+
+Before an agent wallet can perform L1 actions, it must be approved by your master account (Fordefi vault):
+
+1. Change the action to `"approve_agent"` in `src/config.ts`:
+```typescript
+export const hyperliquidConfig: HyperliquidConfig = {
+    action: "approve_agent",
+    isTestnet: false,
+    destination: fordefiConfig.address,
+    amount: "1" // Required by config but not used
+};
+
+export const agentWalletConfig: AgentWalletConfig = {
+    agentName: "my_agent_wallet",
+    agentAddress: "", // Leave empty, will be generated automatically
+    validUntil: 1893456000000 // Timestamp in milliseconds when approval expires
+};
+```
+
+2. Run:
+```bash
+npm run action
+```
+
+This will:
+- Generate a new Ethereum keypair for the agent wallet
+- Save the private key to `agent-private-key.json`
+- Approve the agent wallet to act on behalf of your Fordefi vault
+- Display the agent wallet address
+
+**Important**: Store the generated private key VERY securely.
+
+### Revoke Agent Wallet
+
+To revoke an agent wallet's approval:
+
+1. Change the action to `"revoke_agent"` in `src/config.ts`:
+```typescript
+export const hyperliquidConfig: HyperliquidConfig = {
+    action: "revoke_agent",
+    isTestnet: false,
+    destination: fordefiConfig.address,
+    amount: "1" // Required by config but not used
+};
+
+export const agentWalletConfig: AgentWalletConfig = {
+    agentAddress: "", // Agent wallet address to revoke, can be left EMPTY
+    agentName: "my_agent", // Must match the name used during approval
+    validUntil: 1893456000000
+};
+```
+
+2. Run:
+```bash
+npm run action
+```
+
 ### Vault Transfer (L1 Action - Requires Agent Wallet)
 
 To deposit or withdraw from a Hyperliquid vault:
@@ -195,7 +253,7 @@ npm run start
 ```
 
 **Important Notes**:
-- Agent wallet must be approved by your master account first
+- Agent wallet must be approved by your master account first (see "Approve Agent Wallet" section)
 - Agent wallet signs on behalf of your Fordefi vault address
 
 ### Quick Action Reference
@@ -207,6 +265,8 @@ Simply change the `action` field in `src/config.ts` and run `npm run action`:
 | `deposit` | Deposit USDC to Hyperliquid | Fordefi | `action: "deposit", amount: "5"` |
 | `withdraw` | Withdraw from Hyperliquid | Fordefi | `action: "withdraw", destination: "0x...", amount: "1"` |
 | `sendUsd` | Send USDC within Hyperliquid | Fordefi | `action: "sendUsd", destination: "0x...", amount: "1"` |
+| `approve_agent` | Approve agent wallet | Fordefi | `action: "approve_agent", agentName: "my_agent"` |
+| `revoke_agent` | Revoke agent wallet | Fordefi | `action: "revoke_agent", agentName: "my_agent"` |
 | `vault_transfer` | Vault deposit/withdrawal | Agent | `action: "vault_transfer", isDeposit: true, amount: "1"` |
 
 ## Troubleshooting
