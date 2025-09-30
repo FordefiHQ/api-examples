@@ -28,7 +28,7 @@ export async function approveAgentWallet(hyperliquidConfig: HyperliquidConfig, a
     // Create keypair for Agent wallet and format name
     agentWalletConfig.agentAddress= await generateAgentKeypair(agentWalletConfig.agentName)
     agentWalletConfig.agentName = agentWalletConfig.agentName + ` valid_until ${agentWalletConfig.validUntil}`
-    console.log("Agent address: ")
+    console.log(`Agent address: ${agentWalletConfig.agentAddress}`)
 
     try {
         let provider = await getProvider(fordefiConfig);

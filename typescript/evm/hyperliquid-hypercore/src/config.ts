@@ -35,13 +35,13 @@ export const hyperliquidConfig: HyperliquidConfig = {
     isTestnet: false,
     destination: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73", // Change to your destination address
     amount: "4",
-    agentPk: process.env.HYPERCORE_AGENT_PK ?? (() => { throw new Error('API Agent private key is not set'); })(),
-    isDeposit: true,
-    hyperliquid_vault_address: "0xdfc24b077bc1425ad1dea75bcb6f8158e10df303"
+    agentPk: process.env.HYPERCORE_AGENT_PK ?? (() => { throw new Error('API Agent private key is not set'); })(), // only required for L1 actions
+    isDeposit: true, // only required when for "vault_transfer" action
+    hyperliquid_vault_address: "0xdfc24b077bc1425ad1dea75bcb6f8158e10df303" // only required when for "vault_transfer" action
 };
 
 export const agentWalletConfig: AgentWalletConfig = {
-    agentAddress: "", // leave EMPTY when APPROVING a new agent, only add the agent address when revoking an agent
-    agentName: "agent_jones",
-    validUntil: "1774777045175" // only required when approving an agent
+    agentAddress: "", // always leave empty
+    agentName: "agent_smith",
+    validUntil: "1774777045175" // only required when approving an agent, MAX is 180 days in UNIX time
 }
