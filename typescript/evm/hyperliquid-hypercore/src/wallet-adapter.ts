@@ -10,7 +10,7 @@ import { fordefiConfig } from './config';
  *
  * WHY THIS LIMITATION EXISTS:
  * - Hyperliquid L1 actions use EIP-712 signatures with chainId 1337 in the domain
- * - ChainId 1337 is not a real blockchain network - it's a special value used by Hyperliquid
+ * - ChainId 1337 is not a real blockchain network - it's a placeholder value used by Hyperliquid
  * - Fordefi's signing infrastructure requires the chainId to correspond to an actual network
  * - Attempting to sign with chainId 1337 will result in signature recovery errors
  *
