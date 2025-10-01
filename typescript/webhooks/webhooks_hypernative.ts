@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
 import { p256 } from '@noble/curves/p256';
 import express, { Request, Response } from 'express';
 
@@ -13,9 +14,11 @@ const PORT = Number(process.env.PORT) || 8080;
 
 dotenv.config();
 
-const currentDir = typeof __dirname !== 'undefined' ? __dirname : process.cwd();
-const fordefiPublicKeyPath = path.join(currentDir, 'keys', 'fordefi_public_key.pem');
-const hypernativePublicKeyPath = path.join(currentDir, 'keys', 'hypernative_public_key.pem');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const fordefiPublicKeyPath = path.join(__dirname, 'keys', 'fordefi_public_key.pem');
+const hypernativePublicKeyPath = path.join(__dirname, 'keys', 'hypernative_public_key.pem');
 
 let FORDEFI_PUBLIC_KEY: string;
 let HYPERNATIVE_PUBLIC_KEY: string;

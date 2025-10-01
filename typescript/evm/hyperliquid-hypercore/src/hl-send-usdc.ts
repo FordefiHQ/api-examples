@@ -25,7 +25,7 @@ export async function usdSend(hyperliquidConfig: HyperliquidConfig) {
         });
 
         // Create ExchangeClient with the custom wallet
-        // IMPORTANT: Must explicitly set signatureChainId for Arbitrum in hex (42161)
+        // IMPORTANT: Must explicitly set signatureChainId for Arbitrum in hex (0xa4b1)
         const exchClient = new hl.ExchangeClient({
             wallet,
             transport,
@@ -38,7 +38,7 @@ export async function usdSend(hyperliquidConfig: HyperliquidConfig) {
         }
         // Validate destination address format
         if (!hyperliquidConfig.destination || !hyperliquidConfig.destination.startsWith('0x')) {
-            throw new Error("Destination must be a valid Ethereum address starting with '0x'");
+            throw new Error("Destination must be a valid EVM address starting with '0x'");
         }
         // Perform USDC transfer
         // IMPORTANT: Lowercase the destination address to avoid signature issues
