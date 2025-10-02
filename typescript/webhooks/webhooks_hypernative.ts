@@ -7,6 +7,7 @@ import { p256 } from '@noble/curves/p256';
 import express, { Request, Response } from 'express';
 
 const app = express();
+app.set('trust proxy', true);
 app.use(express.raw({ type: 'application/json' }));
 const PORT = Number(process.env.PORT) || 8080;
 
@@ -349,6 +350,7 @@ async function handleHypernativeWebhook(req: Request, res: Response): Promise<vo
  * Main webhook endpoint that smartly routes between Fordefi and Hypernative events
  */
 app.post('/', async (req: Request, res: Response): Promise<void> => {
+    console.log(`\n🌐 Client IP: ${req.ip}`);
     try {
       console.log(req.headers)
       // Check if this might be a Hypernative event by looking for transaction ID header and digitalSignature in body
