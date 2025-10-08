@@ -11,6 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.set('trust proxy', true);
 const PORT = Number(process.env.PORT) || 8080;
 
 const publicKeyPath = path.join(__dirname, 'keys', 'fordefi_public_key.pem')
@@ -109,6 +110,8 @@ app.get('/health', (req: Request, res: Response) => {
 
 app.post('/', async (req: Request, res: Response): Promise<void> => {
     try {
+      console.log(`\n🌐 Client IP: ${req.ip}`);
+
       // 1. Get the signature from headers
       const signature = req.headers['x-signature'] as string;
       if (!signature) {

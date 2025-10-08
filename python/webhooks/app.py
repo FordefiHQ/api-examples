@@ -33,6 +33,7 @@ def verify_signature(signature: str, body: bytes) -> bool:
 
 @app.post("/")
 async def fordefi_webhook(request: Request):
+    print(f"\n🌐 Client IP: {request.client.host}")
     print("\n📋 Incoming webhook headers:")
     for header_name, header_value in request.headers.items():
         print(f"  {header_name}: {header_value}")

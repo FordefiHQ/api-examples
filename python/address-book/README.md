@@ -1,6 +1,6 @@
 # Fordefi Address Book API Example
 
-Programmaticaly sdd contacts to your Fordefi Address Book using the API.
+Programmaticaly add contacts to your Fordefi Address Book using the API.
 
 ## Prerequisites
 
@@ -27,6 +27,8 @@ EVM_VAULT_ID=your_vault_id_here
 
 ## Usage
 
+### Add a Single Contact
+
 ```bash
 uv run add-contact.py
 ```
@@ -39,8 +41,26 @@ chains = ["evm_ethereum_mainnet"]
 contact_address = "0x888888888889758F76e7103c6CbF23ABbF58F946"
 ```
 
-## Files
+### Add Multiple Contacts (Batch)
 
-- `add-contact.py` - Main script to add contacts
-- `sign_payload.py` - ECDSA signing with private key
-- `broadcast.py` - API request handling
+```bash
+uv run add-batch.py
+```
+
+Edit the contacts list in `add-batch.py`:
+```python
+"contacts": [
+    {
+    "name": "Batcher Ethereum",
+    "type": chain_type,
+    "address": "0x7D8D7e776aC41c5F819965b2E288b2D03fe517aE",
+    "chains":["evm_ethereum_mainnet"]
+    },
+    {
+    "name": "Batcher Base",
+    "type": chain_type,
+    "address": "0x8D1A4e041A3080d9a4170e7606B5255c23298886",
+    "chains":["evm_base_mainnet"]
+    }
+]
+```
