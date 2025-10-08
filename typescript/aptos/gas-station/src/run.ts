@@ -26,8 +26,8 @@ async function main(): Promise<void> {
 
   if (signedFordefiTx){
     // Send signed transaction to gas station
-    console.log("Transaction fully signed ✅");
-    console.log(`Final Fordefi transaction ID: ${signedFordefiTx.id}`);
+    console.log("Transaction signed by Fordefi ✅");
+    console.log(`Fordefi transaction ID: ${signedFordefiTx.id}`);
     const fullySignedTx = await get_tx(fordefiConfig.apiPathEndpoint, fordefiConfig.accessToken,signedFordefiTx.id)
     console.log("Sending transaction to gas station ⛽");
     await sendToGasStation(fullySignedTx, fordefiConfig, APTOS_NETWORK)

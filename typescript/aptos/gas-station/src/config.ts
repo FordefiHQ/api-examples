@@ -19,11 +19,11 @@ export interface FordefiAptosConfig {
   };
   
 export const fordefiConfig: FordefiAptosConfig = {
-    accessToken: process.env.API_USER_ACCESS_TOKEN!,
+    accessToken: process.env.FORDEFI_API_USER_TOKEN!,
     originVaultId: "1dcb5a50-1d77-4869-876e-c18c73152cf5", // your Fordefi Aptos Vault Id
     originAddress: "0x125cdce37fe906619ffe12c4d411041f4de297c4b7667042a6fe3f3e1c9edcc6", // your Fordefi Aptos Vault address
     destAddress: "0x8d5c07055c3b58f979998b7f7e754b9febff64858e03adba77d097be97622b47",
-    sponsor: "0x6ad7edfe6c3444d245e72616a9a403205b08d47f6db92aace8dba88556ffccad", // your Geomi gas station address
+    sponsor: "0x3e1840f768d14b17b1f9628dee28beb94046b826073fd1b4ac9c003d0ada5248", // your Geomi gas station address
     sponsor_api_key: process.env.GAS_STATION_API_KEY!, // your Geomi gas station API Key
     privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'), // your Fordef User private key
     apiPathEndpoint: '/api/v1/transactions',
