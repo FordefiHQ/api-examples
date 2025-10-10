@@ -6,8 +6,8 @@ from pathlib import Path
 from sign_payload import sign
 from dotenv import load_dotenv
 from broadcast import broadcast_tx
-from submit_quote import submit_native_to_erc20_quote, submit_erc20_to_erc20_quote
 from get_provider_list import getSwapProviders 
+from submit_quote import submit_native_to_erc20_quote, submit_erc20_to_erc20_quote
 from get_quote import get_native_to_erc20_quote, get_erc20_to_erc20_quote, get_best_quote
 
 load_dotenv()
@@ -23,7 +23,7 @@ buy_token_address = "0xdAC17F958D2ee523a2206206994597C13D831ec7" # USDT on Ether
 chain_type = "evm"
 network = "evm_ethereum_mainnet"
 slippage = "500" # in bps
-is_erc20_to_erc20_swap = True # to configure
+is_erc20_to_erc20_swap = False # to configure
 
 async def main():
     try:
