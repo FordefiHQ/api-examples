@@ -1,0 +1,13 @@
+[project]
+name = "tx-validation-via-api"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "ecdsa>=0.19.1",
+    "fastapi>=0.119.0",
+    "python-dotenv>=1.1.1",
+    "requests>=2.32.5",
+    "uvicorn>=0.37.0",
+]
