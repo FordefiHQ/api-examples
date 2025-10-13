@@ -29,7 +29,7 @@ class TransactionAbortError(Exception):
 
 
 def verify_signature(signature: str, body: bytes) -> bool:
-    """Verify webhook signature using ECDSA"""
+    """Verify Fordefi signature using ECDSA"""
     try:
         return signature_pub_key.verify(
             signature=base64.b64decode(signature),
@@ -92,7 +92,6 @@ def wait_for_transaction_creation(transaction_id: str, max_wait_time: int = 300)
 
 
 def abort_transaction(transaction_id: str, reason: str) -> None:
-    """Abort a transaction with the given reason"""
     transaction_data = get_transaction_data(transaction_id)
     if transaction_data.get("state") == "aborted":
         print(f"ℹ️ Transaction {transaction_id} is already aborted. No action needed.")
@@ -144,7 +143,6 @@ def abort_transaction(transaction_id: str, reason: str) -> None:
 
 
 def validate_eip_712_order(transaction_data: Dict) -> None:
-    """Validate EIP-712 orders"""
     print("🔍 Validating EIP-712 order...")
     raw_data = transaction_data.get("raw_data")
     if not raw_data:
@@ -242,7 +240,6 @@ def validate_hex_data(transaction_data: Dict) -> None:
         raise TransactionAbortError(f"Error validating hex data: {e}")
 
 def approve_transaction(transaction_id: str, access_token: str) -> None:
-    """Approve a transaction"""
     url = f"https://api.fordefi.com/api/v1/transactions/{transaction_id}/approve"
     headers = {"Authorization": f"Bearer {access_token}"}
 
@@ -316,18 +313,11 @@ def validate_transaction(transaction_data: Dict, transaction_id) -> None:
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint"""
-    return {"status": "online"}
+    return {"status": "ok"}
 
 
 @app.post("/")
 async def fordefi_webhook(request: Request):
-    """
-    Fordefi webhook endpoint for monitoring transactions.
-    
-    Validates transactions to prevent unauthorized fund movements
-    by checking receivers and ensuring ORIGIN_VAULT is present.
-    """
     # Authenticate webhook is from Fordefi
     signature = request.headers.get("X-Signature")
     if not signature:

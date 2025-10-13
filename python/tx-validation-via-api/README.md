@@ -1,4 +1,4 @@
-# Fordefi Single-User Transaction Validator Bot
+# Approve Transactions via API
 
 A webhook-based validator bot. Validates and automatically approves or aborts transactions based on security rules.
 
@@ -209,30 +209,6 @@ The bot handles different transaction states:
 | `mined` | Skipped (confirmed on-chain) |
 | Other states | Logged and skipped |
 
-## Error Handling
-
-### Signature Verification Errors
-- Returns `401 Unauthorized`
-- Logs the verification error
-
-### JSON Parsing Errors
-- Returns `400 Bad Request`
-- Logs the parsing error
-
-### Validation Failures
-- Transaction is aborted with specific reason
-- Returns `200 OK` with abort message
-- Logs detailed validation failure info
-
-### API Errors (Approve/Abort)
-- Logs detailed error including status code and request ID
-- 400 errors treated as informational (transaction may already be in target state)
-- Non-400 errors raise `500 Internal Server Error`
-
-### Unexpected Errors
-- Attempts to abort transaction
-- Returns error message to webhook
-- Logs full exception details
 
 ## Key Functions
 
@@ -274,33 +250,12 @@ foundryup
 - Check that the PEM file format is valid
 - Ensure the public key matches your Fordefi organization
 
-### Issue: Transaction not found via API
-
-**Solutions**:
-- Verify `VALIDATOR_BOT_TOKEN` has correct permissions
-- Check that the token hasn't expired
-- Confirm the transaction ID is valid
-
-### Issue: 400 errors on approve/abort
-
-**Note**: Often expected when transaction state has changed between webhook and API call. Check logs for current transaction state.
-
 ### Issue: EIP-712 validation not working
 
 **Solutions**:
 - Verify `raw_data` field exists in webhook
 - Check that `raw_data` is valid JSON
 - Ensure the structured data has a `message.receiver` field
-
-## Security Considerations
-
-1. **Keep tokens secure**: Never commit `.env` files to version control
-2. **Validate public key**: Ensure Fordefi public key is from a trusted source
-3. **Use HTTPS**: In production, always use HTTPS endpoints
-4. **Monitor logs**: Regularly review logs for suspicious activity
-5. **Test thoroughly**: Use testnet/devnet before production deployment
-6. **Update ORIGIN_VAULT**: Ensure it matches your actual vault address
-7. **Firewall protection**: Restrict webhook endpoint access if possible
 
 ## Development
 
