@@ -1,10 +1,10 @@
 import os
 import json
-import requests
+import time
+import ecdsa
 import base64
 import hashlib
-import ecdsa
-import time
+import requests
 import subprocess
 from typing import Dict
 from http import HTTPStatus
@@ -12,21 +12,16 @@ from dotenv import load_dotenv
 from ecdsa.util import sigdecode_der
 from fastapi import FastAPI, Request, HTTPException
 
-ORIGIN_VAULT = "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73" # Change to your Vault's address
-ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
-
 app = FastAPI()
 
 load_dotenv()
 VALIDATOR_BOT_TOKEN = os.getenv("VALIDATOR_BOT_TOKEN")
-HEALTH_CHECK_BOT_TOKEN = os.getenv("HEALTH_CHECK_BOT_TOKEN")
-public_key_path = os.getenv("FORDEFI_PUBLIC_KEY_PATH")
-
-with open(public_key_path, "r") as f:
+ORIGIN_VAULT = "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73" # Change to your Vault's address
+ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
+with open('./public_key.pem', "r") as f:
     FORDEFI_PUBLIC_KEY = f.read()
 
 signature_pub_key = ecdsa.VerifyingKey.from_pem(FORDEFI_PUBLIC_KEY)
-
 
 class TransactionAbortError(Exception):
     """Raised when a transaction should be aborted"""
@@ -341,6 +336,7 @@ async def fordefi_webhook(request: Request):
     raw_body = await request.body()
     if not verify_signature(signature, raw_body):
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Invalid signature")
+    print("Fordefi ignature is verified ✍️✅")
 
     # Parse webhook data
     try:
