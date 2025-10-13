@@ -60,7 +60,7 @@ FORDEFI_PUBLIC_KEY_PATH=/path/to/public_key.pem
 Edit [bot.py:15](bot.py#L15) to set your vault address:
 
 ```python
-ORIGIN_VAULT = "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73"  # Change to your Vault's address
+ORIGIN_VAULT = "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73"  # Change to your Fordefi EVM Vault's address
 ```
 
 ## Configuration
@@ -74,7 +74,7 @@ ORIGIN_VAULT = "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73"  # Change to your Va
 
 ### Security Constants
 
-- **ORIGIN_VAULT**: Your authorized vault address that should receive funds
+- **ORIGIN_VAULT**: Your Fordefi EVM vault address that should receive funds
 - **ZERO_ADDRESS**: Ethereum zero address (valid receiver for some DEX orders)
 
 ## Usage
@@ -103,34 +103,9 @@ Then configure your Fordefi webhook URL to point to the ngrok URL.
 
 ### POST `/`
 
-Main webhook endpoint that receives Fordefi transaction notifications.
+Main webhook endpoint that receives Fordefi transaction events.
 
 **Authentication**: Requires valid `X-Signature` header with ECDSA signature
-
-**Request Body Example**:
-```json
-{
-  "webhook_id": "wh_123456",
-  "event_id": "evt_789012",
-  "event": {
-    "id": "tx_345678",
-    "state": "waiting_for_approval",
-    "type": "evm_transaction",
-    "from": {"address": "0x..."},
-    "to": {"address": "0x..."},
-    "value": "1000000000000000000",
-    "chain": {"name": "ethereum"},
-    "raw_data": "{...}",
-    "hex_data": "0x...",
-    "parsed_data": {"method": "transfer"}
-  }
-}
-```
-
-**Responses**:
-- `200 OK`: Transaction validated and approved/aborted
-- `400 Bad Request`: Invalid JSON payload
-- `401 Unauthorized`: Missing or invalid signature
 
 ### GET `/health`
 
@@ -139,7 +114,7 @@ Health check endpoint to verify the bot is running.
 **Response**:
 ```json
 {
-  "status": "online"
+  "status": "ok"
 }
 ```
 
@@ -208,30 +183,6 @@ The bot handles different transaction states:
 | `pushed_to_blockchain` | Skipped (already on-chain) |
 | `mined` | Skipped (confirmed on-chain) |
 | Other states | Logged and skipped |
-
-
-## Key Functions
-
-### `verify_signature(signature: str, body: bytes) -> bool`
-Verifies webhook ECDSA signature using Fordefi's public key.
-
-### `get_transaction_data(transaction_id: str) -> Dict`
-Fetches full transaction data from Fordefi API.
-
-### `validate_eip_712_order(transaction_data: Dict) -> None`
-Validates EIP-712 structured data for DEX orders. Raises `TransactionAbortError` if invalid.
-
-### `validate_hex_data(transaction_data: Dict) -> None`
-Decodes and validates transaction calldata. Raises `TransactionAbortError` if invalid.
-
-### `approve_transaction(transaction_id: str, access_token: str) -> None`
-Approves a transaction via Fordefi API.
-
-### `abort_transaction(transaction_id: str, reason: str) -> None`
-Aborts a transaction with a specific reason.
-
-### `validate_transaction(transaction_data: Dict, transaction_id: str) -> None`
-Orchestrates all validations and approves if all pass.
 
 ## Troubleshooting
 
