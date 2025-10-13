@@ -336,7 +336,7 @@ async def fordefi_webhook(request: Request):
     raw_body = await request.body()
     if not verify_signature(signature, raw_body):
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Invalid signature")
-    print("Fordefi ignature is verified ✍️✅")
+    print("Fordefi signature is verified ✍️✅")
 
     # Parse webhook data
     try:
