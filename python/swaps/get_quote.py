@@ -68,7 +68,7 @@ async def get_native_to_erc20_quote(vault_id: str, chain_type: str, network: str
           json=quote_data
         )
 
-        print("Request headers: ", quote.headers)
+        print("Request ID: ", quote.headers['x-request-id'])
         if quote.status_code >= 400:
             try:
                 error_response = quote.json()
