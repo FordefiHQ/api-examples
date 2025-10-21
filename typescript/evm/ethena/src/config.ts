@@ -22,7 +22,8 @@ export const fordefiConfig: FordefiProviderConfig = {
   apiUserToken: process.env.FORDEFI_API_USER_TOKEN  || "",
   apiPayloadSignKey: fs.readFileSync('./fordefi_secret/private.pem', 'utf8'),
   chainId: 1, // Mainnet
-  rpcUrl: "https://eth.llamarpc.com"
+  rpcUrl: "https://eth.llamarpc.com",
+  skipPrediction: true
 };
 
 export const mintOrder: MintOrder = {

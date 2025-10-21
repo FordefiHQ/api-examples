@@ -19,8 +19,8 @@ async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, custom_
                     "type": "custom",
                     "details": {
                         "type": "dynamic",
-                        "max_fee_per_gas": "1000", # 1 GWEI
-                        "max_priority_fee_per_gas": "1000" # 0,1 GWEI
+                        "max_fee_per_gas": "1000", 
+                        "max_priority_fee_per_gas": "1000" # per EIP-1559: max_fee_per_gas >= max_priority_fee_per_gas
                 }
             },
             "to": destination,

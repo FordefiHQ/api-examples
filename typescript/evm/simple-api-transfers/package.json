@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "tx": "tsx tx.ts"
+    "tx": "npx ts-node run.ts"
   },
   "author": "dan jaheny",
   "license": "ISC",
@@ -15,7 +14,6 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
-    "@fordefi/web3-provider": "^0.3.0",
     "axios": "^1.7.9",
     "dotenv": "^16.4.7"
   }
