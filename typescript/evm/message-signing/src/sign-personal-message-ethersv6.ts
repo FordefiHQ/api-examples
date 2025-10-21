@@ -13,7 +13,6 @@ async function main() {
 
   const message = "Go go Fordefi!";
   
-  // Sign the personal message
   const signature = await signer.signMessage(message);
   
   console.log('Message:', message);
