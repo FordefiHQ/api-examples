@@ -38,7 +38,7 @@ npm install ethers@^5.x.x # for example 5.8.0
 FORDEFI_API_USER_TOKEN=your_api_user_token_here
 ```
 
-4. Create a directory `fordefi_secret` and place your API Signer's PEM private key in `fordefi_secret/private.pem`
+5. Create a directory `fordefi_secret` and place your API Signer's PEM private key in `fordefi_secret/private.pem`
 
 ## Configuration
 

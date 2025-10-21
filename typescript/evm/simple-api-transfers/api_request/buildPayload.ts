@@ -19,7 +19,7 @@ export async function createRequest(fordefiConfig: FordefiConfig, txParams: TxPa
                 "max_priority_fee_per_gas": txParams.max_priority_fee_per_gas
             }
         },
-        "skip_prediction": true,
+        "skip_prediction": false,
         "push_mode": "auto",
         //"funder": "c3317b70-0509-41f8-be1e-e7c91e42281f", //OPTIONAL -> designates a different vault to be the gas payer for the transaction
         "chain": `${txParams.evmChain}_mainnet`,
