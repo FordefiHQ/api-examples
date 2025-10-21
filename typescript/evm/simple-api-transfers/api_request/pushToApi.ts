@@ -11,6 +11,7 @@ export async function createAndSignTx(
   const url = `${fordefiApiUrl}${path}`;
 
   try {
+    console.log("Sending transaction to Fordefi 🏰")
     const respTx = await axios.post(url, requestBody, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
