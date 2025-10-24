@@ -21,6 +21,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
   * Native SUI transfers
 * Exchange transfers
 * Setting up Fordefi Webhooks (Python)
+* Programatically signing Bitcoin PSBT with a Segwit or Taproot address
 * Approve Transactions via API
 * Signing EIP-712 typed messages with an EVM Fordefi vault
 * Programmatically adding a contact address or a batch of contact addresses to your Fordefi organization's Address Book
