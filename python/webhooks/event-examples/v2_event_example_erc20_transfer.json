@@ -1,0 +1,890 @@
+{
+    "id": "c831eb2e-747f-4e49-a700-c5ee5821af1f",
+    "created_at": "2025-10-24T08:00:37.538000Z",
+    "modified_at": "2025-10-24T08:00:37.538000Z",
+    "managed_transaction_data": {
+      "created_by": {
+        "id": "fb30b30f-eabe-4b7f-a0de-60e64eb1ffcc",
+        "user_type": "person",
+        "name": "Dan Jaheny",
+        "email": "danj@fordefi.com",
+        "state": "active",
+        "role": "admin"
+      },
+      "device_signing_request": {
+        "created_by": {
+          "id": "fb30b30f-eabe-4b7f-a0de-60e64eb1ffcc",
+          "user_type": "person",
+          "name": "Dan Jaheny",
+          "email": "danj@fordefi.com",
+          "state": "active",
+          "role": "admin"
+        },
+        "signers": [
+          {
+            "user": {
+              "id": "fb30b30f-eabe-4b7f-a0de-60e64eb1ffcc",
+              "user_type": "person",
+              "name": "Dan Jaheny",
+              "email": "danj@fordefi.com",
+              "state": "active",
+              "role": "admin"
+            },
+            "modified_at": "2025-10-24T08:00:38.443000Z",
+            "has_signed": false
+          }
+        ]
+      },
+      "aml_policy_match": {
+        "is_default": true,
+        "rule_id": "00000000-0000-0000-0000-000000000000",
+        "rule_name": "",
+        "action_type": "allow"
+      },
+      "policy_match": {
+        "is_default": false,
+        "rule_id": "8d49393b-0773-4462-b492-9324ace0c271",
+        "rule_name": "Internal Tx Allowed",
+        "action_type": "allow"
+      },
+      "signer_type": "initiator",
+      "risks": [],
+      "vault": {
+        "id": "c3317b70-0509-41f8-be1e-e7c91e42281f",
+        "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+        "name": "EVM Gas Station",
+        "address": "0xF659feEE62120Ce669A5C45Eb6616319D552dD93",
+        "state": "active",
+        "type": "evm"
+      },
+      "has_current_user_vault_permissions": true,
+      "push_mode": "auto",
+      "sign_mode": "auto"
+    },
+    "signatures": [],
+    "note": "",
+    "spam_state": "unset",
+    "direction": "outgoing",
+    "signed_externally": false,
+    "interacted_vaults": [
+      {
+        "id": "81e82853-3c4f-4cd4-b494-78fb4abf168a",
+        "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+        "name": "EVM Vault",
+        "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+        "state": "active",
+        "type": "evm"
+      },
+      {
+        "id": "c3317b70-0509-41f8-be1e-e7c91e42281f",
+        "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+        "name": "EVM Gas Station",
+        "address": "0xF659feEE62120Ce669A5C45Eb6616319D552dD93",
+        "state": "active",
+        "type": "evm"
+      }
+    ],
+    "state": "approved",
+    "state_changes": [
+      {
+        "changed_at": "2025-10-24T08:00:37.538000Z",
+        "asset_prices": [],
+        "prices": {
+          "token_prices": []
+        },
+        "new_state": "waiting_for_approval"
+      },
+      {
+        "changed_at": "2025-10-24T08:00:38.442000Z",
+        "asset_prices": [],
+        "prices": {
+          "token_prices": []
+        },
+        "previous_state": "waiting_for_approval",
+        "new_state": "approved"
+      }
+    ],
+    "aml_check": {
+      "results": {
+        "scan_status": "completed",
+        "scan_results": {
+          "type": "chainalysis",
+          "alerts": [],
+          "external_id": "6b20f624-7cf6-3bed-830e-3e38846c2ff6"
+        }
+      }
+    },
+    "is_cancelation": false,
+    "is_acceleration": false,
+    "type": "evm_transaction",
+    "evm_transaction_type_details": {
+      "type": "token_transfer",
+      "direction": "internal",
+      "recipient": {
+        "vault": {
+          "id": "81e82853-3c4f-4cd4-b494-78fb4abf168a",
+          "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+          "name": "EVM Vault",
+          "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+          "state": "active",
+          "type": "evm"
+        },
+        "explorer_url": "https://arbiscan.io/address/0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+        "type": "evm",
+        "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73"
+      },
+      "is_internal": true
+    },
+    "chain": {
+      "chain_type": "evm",
+      "named_chain_id": "arbitrum_mainnet",
+      "chain_id": 42161,
+      "unique_id": "evm_arbitrum_mainnet",
+      "name": "Arbitrum One",
+      "native_currency_symbol": "ETH",
+      "native_currency_name": "Ether",
+      "blockchain_explorer": {
+        "transaction_url": "https://arbiscan.io/tx/",
+        "address_url": "https://arbiscan.io/address/",
+        "root_url": "https://arbiscan.io/",
+        "transaction_format_url": "https://arbiscan.io/tx/%s",
+        "address_format_url": "https://arbiscan.io/address/%s",
+        "asset_format_url": "https://arbiscan.io/address/%s"
+      },
+      "logo_url": "https://logos.fordefi.com/chains/evm/default/42161.svg",
+      "is_testnet": false,
+      "is_enabled": true,
+      "gas_type": "legacy",
+      "supports_secure_node": false,
+      "source": "default"
+    },
+    "from": {
+      "vault": {
+        "id": "c3317b70-0509-41f8-be1e-e7c91e42281f",
+        "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+        "name": "EVM Gas Station",
+        "address": "0xF659feEE62120Ce669A5C45Eb6616319D552dD93",
+        "state": "active",
+        "type": "evm"
+      },
+      "explorer_url": "https://arbiscan.io/address/0xF659feEE62120Ce669A5C45Eb6616319D552dD93",
+      "type": "evm",
+      "address": "0xF659feEE62120Ce669A5C45Eb6616319D552dD93"
+    },
+    "to": {
+      "explorer_url": "https://arbiscan.io/address/0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+      "type": "evm",
+      "address": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+      "contract": {
+        "name": "Tether",
+        "dapp": {
+          "id": "dfca2151-c2e0-5738-a5fd-3513fd68379a",
+          "name": "rhino.fi",
+          "url": "https://app.rhino.fi/",
+          "logo_url": "https://logos.fordefi.com/dapps/dfca2151-c2e0-5738-a5fd-3513fd68379a.png"
+        },
+        "is_verified": true,
+        "token": {
+          "address": {
+            "chain": {
+              "chain_type": "evm",
+              "named_chain_id": "arbitrum_mainnet",
+              "chain_id": 42161,
+              "unique_id": "evm_arbitrum_mainnet"
+            },
+            "hex_repr": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"
+          },
+          "name": "Tether USD",
+          "symbol": "USDT",
+          "type": "erc20",
+          "decimals": 6,
+          "logo_url": "https://logos.fordefi.com/tokens/42161/0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9.png"
+        }
+      }
+    },
+    "value": "0",
+    "data": "qQWcuwAAAAAAAAAAAAAAAIv8+eJ2S8hN5LvQoPWq8Z9HAnpzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPRP4=",
+    "hex_data": "0xa9059cbb0000000000000000000000008bfcf9e2764bc84de4bbd0a0f5aaf19f47027a7300000000000000000000000000000000000000000000000000000000000f44fe",
+    "parsed_data": {
+      "method": "transfer",
+      "method_arguments": [
+        {
+          "name": "_recipient",
+          "type": "address",
+          "value": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+          "enriched_address": {
+            "vault": {
+              "id": "81e82853-3c4f-4cd4-b494-78fb4abf168a",
+              "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+              "name": "EVM Vault",
+              "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+              "state": "active",
+              "type": "evm"
+            },
+            "explorer_url": "https://arbiscan.io/address/0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+            "type": "evm",
+            "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73"
+          }
+        },
+        {
+          "name": "_amount",
+          "type": "uint256",
+          "value": "1000702"
+        }
+      ]
+    },
+    "expected_result": {
+      "reversion": {
+        "state": "not_reverted"
+      },
+      "gas_debit": {
+        "gas_used": "95514",
+        "gas_price": "12000000",
+        "total_fee": "1146168000000",
+        "fiat_price": {
+          "price": "394756",
+          "price_float": "394756",
+          "fiat_currency": {
+            "currency_symbol": "usd",
+            "decimals": 2
+          }
+        },
+        "priced_asset": {
+          "type": "asset_price",
+          "asset_identifier": {
+            "type": "evm",
+            "details": {
+              "chain": {
+                "chain_type": "evm",
+                "named_chain_id": "arbitrum_mainnet",
+                "chain_id": 42161,
+                "unique_id": "evm_arbitrum_mainnet",
+                "name": "Arbitrum One",
+                "native_currency_symbol": "ETH",
+                "native_currency_name": "Ether",
+                "blockchain_explorer": {
+                  "transaction_url": "https://arbiscan.io/tx/",
+                  "address_url": "https://arbiscan.io/address/",
+                  "root_url": "https://arbiscan.io/",
+                  "transaction_format_url": "https://arbiscan.io/tx/%s",
+                  "address_format_url": "https://arbiscan.io/address/%s",
+                  "asset_format_url": "https://arbiscan.io/address/%s"
+                },
+                "logo_url": "https://logos.fordefi.com/chains/evm/default/42161.svg",
+                "is_testnet": false,
+                "is_enabled": true,
+                "gas_type": "legacy",
+                "supports_secure_node": false,
+                "source": "default"
+              },
+              "type": "native"
+            }
+          },
+          "asset_info": {
+            "id": "fe8ac93b-4480-4f60-b53c-a6dabe17c76b",
+            "asset_identifier": {
+              "type": "evm",
+              "details": {
+                "type": "native",
+                "chain": "evm_arbitrum_mainnet"
+              },
+              "chain": {
+                "chain_type": "evm",
+                "named_chain_id": "arbitrum_mainnet",
+                "chain_id": 42161,
+                "unique_id": "evm_arbitrum_mainnet",
+                "name": "Arbitrum One",
+                "native_currency_symbol": "ETH",
+                "native_currency_name": "Ether",
+                "blockchain_explorer": {
+                  "transaction_url": "https://arbiscan.io/tx/",
+                  "address_url": "https://arbiscan.io/address/",
+                  "root_url": "https://arbiscan.io/",
+                  "transaction_format_url": "https://arbiscan.io/tx/%s",
+                  "address_format_url": "https://arbiscan.io/address/%s",
+                  "asset_format_url": "https://arbiscan.io/address/%s"
+                },
+                "logo_url": "https://logos.fordefi.com/chains/evm/default/42161.svg",
+                "is_testnet": false,
+                "is_enabled": true,
+                "gas_type": "legacy",
+                "supports_secure_node": false,
+                "source": "default"
+              }
+            },
+            "name": "Ether",
+            "symbol": "ETH",
+            "decimals": 18,
+            "verified": true,
+            "metadata_uri": "",
+            "is_spam": false
+          },
+          "price": {
+            "price": "394756",
+            "price_float": "394756",
+            "fiat_currency": {
+              "currency_symbol": "usd",
+              "decimals": 2
+            }
+          }
+        }
+      },
+      "effects": {
+        "balance_changes": [
+          {
+            "priced_asset": {
+              "type": "asset_price",
+              "asset_identifier": {
+                "type": "evm",
+                "details": {
+                  "chain": {
+                    "chain_type": "evm",
+                    "named_chain_id": "arbitrum_mainnet",
+                    "chain_id": 42161,
+                    "unique_id": "evm_arbitrum_mainnet",
+                    "name": "Arbitrum One",
+                    "native_currency_symbol": "ETH",
+                    "native_currency_name": "Ether",
+                    "blockchain_explorer": {
+                      "transaction_url": "https://arbiscan.io/tx/",
+                      "address_url": "https://arbiscan.io/address/",
+                      "root_url": "https://arbiscan.io/",
+                      "transaction_format_url": "https://arbiscan.io/tx/%s",
+                      "address_format_url": "https://arbiscan.io/address/%s",
+                      "asset_format_url": "https://arbiscan.io/address/%s"
+                    },
+                    "logo_url": "https://logos.fordefi.com/chains/evm/default/42161.svg",
+                    "is_testnet": false,
+                    "is_enabled": true,
+                    "gas_type": "legacy",
+                    "supports_secure_node": false,
+                    "source": "default"
+                  },
+                  "type": "erc20",
+                  "token": {
+                    "explorer_url": "https://arbiscan.io/address/0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+                    "type": "evm",
+                    "address": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+                    "contract": {
+                      "name": "Tether",
+                      "dapp": {
+                        "id": "dfca2151-c2e0-5738-a5fd-3513fd68379a",
+                        "name": "rhino.fi",
+                        "url": "https://app.rhino.fi/",
+                        "logo_url": "https://logos.fordefi.com/dapps/dfca2151-c2e0-5738-a5fd-3513fd68379a.png"
+                      },
+                      "is_verified": true,
+                      "token": {
+                        "address": {
+                          "chain": {
+                            "chain_type": "evm",
+                            "named_chain_id": "arbitrum_mainnet",
+                            "chain_id": 42161,
+                            "unique_id": "evm_arbitrum_mainnet"
+                          },
+                          "hex_repr": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"
+                        },
+                        "name": "Tether USD",
+                        "symbol": "USDT",
+                        "type": "erc20",
+                        "decimals": 6,
+                        "logo_url": "https://logos.fordefi.com/tokens/42161/0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9.png"
+                      }
+                    }
+                  }
+                }
+              },
+              "asset_info": {
+                "id": "06860696-53b8-49b8-a976-e4182f7bf006",
+                "asset_identifier": {
+                  "type": "evm",
+                  "details": {
+                    "type": "erc20",
+                    "token": {
+                      "chain": "evm_arbitrum_mainnet",
+                      "hex_repr": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"
+                    }
+                  },
+                  "chain": {
+                    "chain_type": "evm",
+                    "named_chain_id": "arbitrum_mainnet",
+                    "chain_id": 42161,
+                    "unique_id": "evm_arbitrum_mainnet",
+                    "name": "Arbitrum One",
+                    "native_currency_symbol": "ETH",
+                    "native_currency_name": "Ether",
+                    "blockchain_explorer": {
+                      "transaction_url": "https://arbiscan.io/tx/",
+                      "address_url": "https://arbiscan.io/address/",
+                      "root_url": "https://arbiscan.io/",
+                      "transaction_format_url": "https://arbiscan.io/tx/%s",
+                      "address_format_url": "https://arbiscan.io/address/%s",
+                      "asset_format_url": "https://arbiscan.io/address/%s"
+                    },
+                    "logo_url": "https://logos.fordefi.com/chains/evm/default/42161.svg",
+                    "is_testnet": false,
+                    "is_enabled": true,
+                    "gas_type": "legacy",
+                    "supports_secure_node": false,
+                    "source": "default"
+                  }
+                },
+                "name": "Tether USD",
+                "symbol": "USDT",
+                "decimals": 6,
+                "verified": true,
+                "metadata_uri": "",
+                "is_spam": false,
+                "logo_url": "https://logos.fordefi.com/tokens/42161/0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9.png",
+                "explorer_url": "https://arbiscan.io/address/0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"
+              },
+              "price": {
+                "price": "100",
+                "price_float": "100.1",
+                "fiat_currency": {
+                  "currency_symbol": "usd",
+                  "decimals": 2
+                }
+              }
+            },
+            "diff": "-1000702",
+            "type": "erc20",
+            "address": {
+              "vault": {
+                "id": "c3317b70-0509-41f8-be1e-e7c91e42281f",
+                "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+                "name": "EVM Gas Station",
+                "address": "0xF659feEE62120Ce669A5C45Eb6616319D552dD93",
+                "state": "active",
+                "type": "evm"
+              },
+              "explorer_url": "https://arbiscan.io/address/0xF659feEE62120Ce669A5C45Eb6616319D552dD93",
+              "type": "evm",
+              "address": "0xF659feEE62120Ce669A5C45Eb6616319D552dD93"
+            },
+            "owner": {
+              "vault": {
+                "id": "c3317b70-0509-41f8-be1e-e7c91e42281f",
+                "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+                "name": "EVM Gas Station",
+                "address": "0xF659feEE62120Ce669A5C45Eb6616319D552dD93",
+                "state": "active",
+                "type": "evm"
+              },
+              "explorer_url": "https://arbiscan.io/address/0xF659feEE62120Ce669A5C45Eb6616319D552dD93",
+              "type": "evm",
+              "address": "0xF659feEE62120Ce669A5C45Eb6616319D552dD93"
+            },
+            "price": {
+              "price": "100",
+              "price_float": "100.1",
+              "fiat_currency": {
+                "currency_symbol": "usd",
+                "decimals": 2
+              }
+            },
+            "token_contract": {
+              "name": "Tether",
+              "dapp": {
+                "id": "dfca2151-c2e0-5738-a5fd-3513fd68379a",
+                "name": "rhino.fi",
+                "url": "https://app.rhino.fi/",
+                "logo_url": "https://logos.fordefi.com/dapps/dfca2151-c2e0-5738-a5fd-3513fd68379a.png"
+              },
+              "is_verified": true,
+              "token": {
+                "address": {
+                  "chain": {
+                    "chain_type": "evm",
+                    "named_chain_id": "arbitrum_mainnet",
+                    "chain_id": 42161,
+                    "unique_id": "evm_arbitrum_mainnet"
+                  },
+                  "hex_repr": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"
+                },
+                "name": "Tether USD",
+                "symbol": "USDT",
+                "type": "erc20",
+                "decimals": 6,
+                "logo_url": "https://logos.fordefi.com/tokens/42161/0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9.png"
+              }
+            }
+          },
+          {
+            "priced_asset": {
+              "type": "asset_price",
+              "asset_identifier": {
+                "type": "evm",
+                "details": {
+                  "chain": {
+                    "chain_type": "evm",
+                    "named_chain_id": "arbitrum_mainnet",
+                    "chain_id": 42161,
+                    "unique_id": "evm_arbitrum_mainnet",
+                    "name": "Arbitrum One",
+                    "native_currency_symbol": "ETH",
+                    "native_currency_name": "Ether",
+                    "blockchain_explorer": {
+                      "transaction_url": "https://arbiscan.io/tx/",
+                      "address_url": "https://arbiscan.io/address/",
+                      "root_url": "https://arbiscan.io/",
+                      "transaction_format_url": "https://arbiscan.io/tx/%s",
+                      "address_format_url": "https://arbiscan.io/address/%s",
+                      "asset_format_url": "https://arbiscan.io/address/%s"
+                    },
+                    "logo_url": "https://logos.fordefi.com/chains/evm/default/42161.svg",
+                    "is_testnet": false,
+                    "is_enabled": true,
+                    "gas_type": "legacy",
+                    "supports_secure_node": false,
+                    "source": "default"
+                  },
+                  "type": "erc20",
+                  "token": {
+                    "explorer_url": "https://arbiscan.io/address/0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+                    "type": "evm",
+                    "address": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+                    "contract": {
+                      "name": "Tether",
+                      "dapp": {
+                        "id": "dfca2151-c2e0-5738-a5fd-3513fd68379a",
+                        "name": "rhino.fi",
+                        "url": "https://app.rhino.fi/",
+                        "logo_url": "https://logos.fordefi.com/dapps/dfca2151-c2e0-5738-a5fd-3513fd68379a.png"
+                      },
+                      "is_verified": true,
+                      "token": {
+                        "address": {
+                          "chain": {
+                            "chain_type": "evm",
+                            "named_chain_id": "arbitrum_mainnet",
+                            "chain_id": 42161,
+                            "unique_id": "evm_arbitrum_mainnet"
+                          },
+                          "hex_repr": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"
+                        },
+                        "name": "Tether USD",
+                        "symbol": "USDT",
+                        "type": "erc20",
+                        "decimals": 6,
+                        "logo_url": "https://logos.fordefi.com/tokens/42161/0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9.png"
+                      }
+                    }
+                  }
+                }
+              },
+              "asset_info": {
+                "id": "06860696-53b8-49b8-a976-e4182f7bf006",
+                "asset_identifier": {
+                  "type": "evm",
+                  "details": {
+                    "type": "erc20",
+                    "token": {
+                      "chain": "evm_arbitrum_mainnet",
+                      "hex_repr": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"
+                    }
+                  },
+                  "chain": {
+                    "chain_type": "evm",
+                    "named_chain_id": "arbitrum_mainnet",
+                    "chain_id": 42161,
+                    "unique_id": "evm_arbitrum_mainnet",
+                    "name": "Arbitrum One",
+                    "native_currency_symbol": "ETH",
+                    "native_currency_name": "Ether",
+                    "blockchain_explorer": {
+                      "transaction_url": "https://arbiscan.io/tx/",
+                      "address_url": "https://arbiscan.io/address/",
+                      "root_url": "https://arbiscan.io/",
+                      "transaction_format_url": "https://arbiscan.io/tx/%s",
+                      "address_format_url": "https://arbiscan.io/address/%s",
+                      "asset_format_url": "https://arbiscan.io/address/%s"
+                    },
+                    "logo_url": "https://logos.fordefi.com/chains/evm/default/42161.svg",
+                    "is_testnet": false,
+                    "is_enabled": true,
+                    "gas_type": "legacy",
+                    "supports_secure_node": false,
+                    "source": "default"
+                  }
+                },
+                "name": "Tether USD",
+                "symbol": "USDT",
+                "decimals": 6,
+                "verified": true,
+                "metadata_uri": "",
+                "is_spam": false,
+                "logo_url": "https://logos.fordefi.com/tokens/42161/0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9.png",
+                "explorer_url": "https://arbiscan.io/address/0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"
+              },
+              "price": {
+                "price": "100",
+                "price_float": "100.1",
+                "fiat_currency": {
+                  "currency_symbol": "usd",
+                  "decimals": 2
+                }
+              }
+            },
+            "diff": "1000702",
+            "type": "erc20",
+            "address": {
+              "vault": {
+                "id": "81e82853-3c4f-4cd4-b494-78fb4abf168a",
+                "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+                "name": "EVM Vault",
+                "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+                "state": "active",
+                "type": "evm"
+              },
+              "explorer_url": "https://arbiscan.io/address/0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+              "type": "evm",
+              "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73"
+            },
+            "owner": {
+              "vault": {
+                "id": "81e82853-3c4f-4cd4-b494-78fb4abf168a",
+                "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+                "name": "EVM Vault",
+                "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+                "state": "active",
+                "type": "evm"
+              },
+              "explorer_url": "https://arbiscan.io/address/0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+              "type": "evm",
+              "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73"
+            },
+            "price": {
+              "price": "100",
+              "price_float": "100.1",
+              "fiat_currency": {
+                "currency_symbol": "usd",
+                "decimals": 2
+              }
+            },
+            "token_contract": {
+              "name": "Tether",
+              "dapp": {
+                "id": "dfca2151-c2e0-5738-a5fd-3513fd68379a",
+                "name": "rhino.fi",
+                "url": "https://app.rhino.fi/",
+                "logo_url": "https://logos.fordefi.com/dapps/dfca2151-c2e0-5738-a5fd-3513fd68379a.png"
+              },
+              "is_verified": true,
+              "token": {
+                "address": {
+                  "chain": {
+                    "chain_type": "evm",
+                    "named_chain_id": "arbitrum_mainnet",
+                    "chain_id": 42161,
+                    "unique_id": "evm_arbitrum_mainnet"
+                  },
+                  "hex_repr": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"
+                },
+                "name": "Tether USD",
+                "symbol": "USDT",
+                "type": "erc20",
+                "decimals": 6,
+                "logo_url": "https://logos.fordefi.com/tokens/42161/0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9.png"
+              }
+            }
+          }
+        ],
+        "transfers": [
+          {
+            "priced_asset": {
+              "type": "asset_price",
+              "asset_identifier": {
+                "type": "evm",
+                "details": {
+                  "chain": {
+                    "chain_type": "evm",
+                    "named_chain_id": "arbitrum_mainnet",
+                    "chain_id": 42161,
+                    "unique_id": "evm_arbitrum_mainnet",
+                    "name": "Arbitrum One",
+                    "native_currency_symbol": "ETH",
+                    "native_currency_name": "Ether",
+                    "blockchain_explorer": {
+                      "transaction_url": "https://arbiscan.io/tx/",
+                      "address_url": "https://arbiscan.io/address/",
+                      "root_url": "https://arbiscan.io/",
+                      "transaction_format_url": "https://arbiscan.io/tx/%s",
+                      "address_format_url": "https://arbiscan.io/address/%s",
+                      "asset_format_url": "https://arbiscan.io/address/%s"
+                    },
+                    "logo_url": "https://logos.fordefi.com/chains/evm/default/42161.svg",
+                    "is_testnet": false,
+                    "is_enabled": true,
+                    "gas_type": "legacy",
+                    "supports_secure_node": false,
+                    "source": "default"
+                  },
+                  "type": "erc20",
+                  "token": {
+                    "explorer_url": "https://arbiscan.io/address/0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+                    "type": "evm",
+                    "address": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+                    "contract": {
+                      "name": "Tether",
+                      "dapp": {
+                        "id": "dfca2151-c2e0-5738-a5fd-3513fd68379a",
+                        "name": "rhino.fi",
+                        "url": "https://app.rhino.fi/",
+                        "logo_url": "https://logos.fordefi.com/dapps/dfca2151-c2e0-5738-a5fd-3513fd68379a.png"
+                      },
+                      "is_verified": true,
+                      "token": {
+                        "address": {
+                          "chain": {
+                            "chain_type": "evm",
+                            "named_chain_id": "arbitrum_mainnet",
+                            "chain_id": 42161,
+                            "unique_id": "evm_arbitrum_mainnet"
+                          },
+                          "hex_repr": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"
+                        },
+                        "name": "Tether USD",
+                        "symbol": "USDT",
+                        "type": "erc20",
+                        "decimals": 6,
+                        "logo_url": "https://logos.fordefi.com/tokens/42161/0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9.png"
+                      }
+                    }
+                  }
+                }
+              },
+              "asset_info": {
+                "id": "06860696-53b8-49b8-a976-e4182f7bf006",
+                "asset_identifier": {
+                  "type": "evm",
+                  "details": {
+                    "type": "erc20",
+                    "token": {
+                      "chain": "evm_arbitrum_mainnet",
+                      "hex_repr": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"
+                    }
+                  },
+                  "chain": {
+                    "chain_type": "evm",
+                    "named_chain_id": "arbitrum_mainnet",
+                    "chain_id": 42161,
+                    "unique_id": "evm_arbitrum_mainnet",
+                    "name": "Arbitrum One",
+                    "native_currency_symbol": "ETH",
+                    "native_currency_name": "Ether",
+                    "blockchain_explorer": {
+                      "transaction_url": "https://arbiscan.io/tx/",
+                      "address_url": "https://arbiscan.io/address/",
+                      "root_url": "https://arbiscan.io/",
+                      "transaction_format_url": "https://arbiscan.io/tx/%s",
+                      "address_format_url": "https://arbiscan.io/address/%s",
+                      "asset_format_url": "https://arbiscan.io/address/%s"
+                    },
+                    "logo_url": "https://logos.fordefi.com/chains/evm/default/42161.svg",
+                    "is_testnet": false,
+                    "is_enabled": true,
+                    "gas_type": "legacy",
+                    "supports_secure_node": false,
+                    "source": "default"
+                  }
+                },
+                "name": "Tether USD",
+                "symbol": "USDT",
+                "decimals": 6,
+                "verified": true,
+                "metadata_uri": "",
+                "is_spam": false,
+                "logo_url": "https://logos.fordefi.com/tokens/42161/0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9.png",
+                "explorer_url": "https://arbiscan.io/address/0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"
+              },
+              "price": {
+                "price": "100",
+                "price_float": "100.1",
+                "fiat_currency": {
+                  "currency_symbol": "usd",
+                  "decimals": 2
+                }
+              }
+            },
+            "amount": "1000702",
+            "type": "erc20",
+            "from": {
+              "vault": {
+                "id": "c3317b70-0509-41f8-be1e-e7c91e42281f",
+                "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+                "name": "EVM Gas Station",
+                "address": "0xF659feEE62120Ce669A5C45Eb6616319D552dD93",
+                "state": "active",
+                "type": "evm"
+              },
+              "explorer_url": "https://arbiscan.io/address/0xF659feEE62120Ce669A5C45Eb6616319D552dD93",
+              "type": "evm",
+              "address": "0xF659feEE62120Ce669A5C45Eb6616319D552dD93"
+            },
+            "to": {
+              "vault": {
+                "id": "81e82853-3c4f-4cd4-b494-78fb4abf168a",
+                "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+                "name": "EVM Vault",
+                "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+                "state": "active",
+                "type": "evm"
+              },
+              "explorer_url": "https://arbiscan.io/address/0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+              "type": "evm",
+              "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73"
+            },
+            "price": {
+              "price": "100",
+              "price_float": "100.1",
+              "fiat_currency": {
+                "currency_symbol": "usd",
+                "decimals": 2
+              }
+            },
+            "token_contract": {
+              "name": "Tether",
+              "dapp": {
+                "id": "dfca2151-c2e0-5738-a5fd-3513fd68379a",
+                "name": "rhino.fi",
+                "url": "https://app.rhino.fi/",
+                "logo_url": "https://logos.fordefi.com/dapps/dfca2151-c2e0-5738-a5fd-3513fd68379a.png"
+              },
+              "is_verified": true,
+              "token": {
+                "address": {
+                  "chain": {
+                    "chain_type": "evm",
+                    "named_chain_id": "arbitrum_mainnet",
+                    "chain_id": 42161,
+                    "unique_id": "evm_arbitrum_mainnet"
+                  },
+                  "hex_repr": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"
+                },
+                "name": "Tether USD",
+                "symbol": "USDT",
+                "type": "erc20",
+                "decimals": 6,
+                "logo_url": "https://logos.fordefi.com/tokens/42161/0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9.png"
+              }
+            }
+          }
+        ],
+        "allowances": [],
+        "bridge": [],
+        "contract_deployments": []
+      }
+    },
+    "simulation_status_result": {
+      "simulation_status": "success",
+      "details": "not reverted"
+    },
+    "gas_submitted": {
+      "price": "12000000",
+      "priority": "medium",
+      "limit": "95514",
+      "type": "legacy"
+    },
+    "use_secure_node": false
+  }

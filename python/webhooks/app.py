@@ -3,8 +3,10 @@ import json
 import ecdsa
 import base64
 import hashlib
-from pathlib import Path 
+from pathlib import Path
 from http import HTTPStatus
+from datetime import datetime, timezone
+from threading import Lock
 from dotenv import load_dotenv
 from ecdsa.util import sigdecode_der
 from fastapi import FastAPI, Request, HTTPException
@@ -18,6 +20,26 @@ with open(public_key_path, "r") as f:
 signature_pub_key = ecdsa.VerifyingKey.from_pem(FORDEFI_PUBLIC_KEY)
 
 app = FastAPI()
+
+events_file_lock = Lock()
+events_file_path = Path("./live_events.json")
+
+def log_event_to_file(event_data: dict):
+    """Thread-safe logging of events to JSON file"""
+    with events_file_lock:
+        events = []
+        if events_file_path.exists():
+            try:
+                with open(events_file_path, "r") as f:
+                    events = json.load(f)
+            except json.JSONDecodeError:
+                events = []
+        events.append({
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "event": event_data
+        })
+        with open(events_file_path, "w") as f:
+            json.dump(events, f, indent=2)
 
 def verify_signature(signature: str, body: bytes) -> bool:
     try:
@@ -55,8 +77,14 @@ async def fordefi_webhook(request: Request):
             detail="Invalid signature"
         )
 
+    event_data = json.loads(raw_body.decode())
+
     print("\n📝 Received event:")
-    print(json.dumps(json.loads(raw_body.decode()), indent=2))
+    print(json.dumps(event_data, indent=2))
+
+    # Log event to file (OPTIONAL)
+    log_event_to_file(event_data)
+    print(f"✅ Event logged to {events_file_path}")
 
     return {"status": "success"}
 

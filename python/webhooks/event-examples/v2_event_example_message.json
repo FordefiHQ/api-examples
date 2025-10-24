@@ -1,0 +1,977 @@
+{
+    "id": "2c501f70-53d2-45ff-a659-a9fe9b95d218",
+    "created_at": "2025-10-23T14:59:39.472000Z",
+    "modified_at": "2025-10-23T14:59:39.472000Z",
+    "managed_transaction_data": {
+      "created_by": {
+        "id": "fb30b30f-eabe-4b7f-a0de-60e64eb1ffcc",
+        "user_type": "person",
+        "name": "Dan Jaheny",
+        "email": "danj@fordefi.com",
+        "state": "active",
+        "role": "admin"
+      },
+      "device_signing_request": {
+        "created_by": {
+          "id": "fb30b30f-eabe-4b7f-a0de-60e64eb1ffcc",
+          "user_type": "person",
+          "name": "Dan Jaheny",
+          "email": "danj@fordefi.com",
+          "state": "active",
+          "role": "admin"
+        },
+        "signers": [
+          {
+            "user": {
+              "id": "fb30b30f-eabe-4b7f-a0de-60e64eb1ffcc",
+              "user_type": "person",
+              "name": "Dan Jaheny",
+              "email": "danj@fordefi.com",
+              "state": "active",
+              "role": "admin"
+            },
+            "modified_at": "2025-10-23T14:59:39.560000Z",
+            "has_signed": false
+          }
+        ]
+      },
+      "approval_request": {
+        "state": "auto_approved",
+        "quorum_size": 1,
+        "approvers": [
+          {
+            "user": {
+              "id": "239536f3-6858-40ee-84ee-13ff8a4956d5",
+              "user_type": "person",
+              "name": "Daniel Bellmas",
+              "email": "danielb@fordefi.com",
+              "state": "active",
+              "role": "admin"
+            },
+            "modified_at": "2025-10-23T14:59:39.522000Z",
+            "decision": "dummy",
+            "state": "not_participated"
+          },
+          {
+            "user": {
+              "id": "b8d89e21-e44a-4f13-8338-739ae50a22ad",
+              "user_type": "person",
+              "name": "Daniel Katzan",
+              "email": "danielkatzan@fordefi.com",
+              "state": "active",
+              "role": "admin"
+            },
+            "modified_at": "2025-10-23T14:59:39.522000Z",
+            "decision": "dummy",
+            "state": "not_participated"
+          },
+          {
+            "user": {
+              "id": "fb30b30f-eabe-4b7f-a0de-60e64eb1ffcc",
+              "user_type": "person",
+              "name": "Dan Jaheny",
+              "email": "danj@fordefi.com",
+              "state": "active",
+              "role": "admin"
+            },
+            "modified_at": "2025-10-23T14:59:39.525000Z",
+            "decision": "dummy",
+            "state": "approved"
+          },
+          {
+            "user": {
+              "id": "894c4207-2990-4c6b-9866-08c69026c732",
+              "user_type": "person",
+              "name": "hvbris@protonmail.com",
+              "email": "hvbris@protonmail.com",
+              "state": "active",
+              "role": "admin"
+            },
+            "modified_at": "2025-10-23T14:59:39.522000Z",
+            "decision": "dummy",
+            "state": "not_participated"
+          },
+          {
+            "user": {
+              "id": "353332eb-5bcc-4fd4-a561-966343a44276",
+              "user_type": "api_user",
+              "name": "DanBot",
+              "state": "active",
+              "role": "trader"
+            },
+            "modified_at": "2025-10-23T14:59:39.522000Z",
+            "decision": "dummy",
+            "state": "not_participated"
+          },
+          {
+            "user": {
+              "id": "b81120d9-a62b-4191-b0fd-20dc557c81cf",
+              "user_type": "api_user",
+              "name": "SamBot2",
+              "state": "active",
+              "role": "trader"
+            },
+            "modified_at": "2025-10-23T14:59:39.522000Z",
+            "decision": "dummy",
+            "state": "not_participated"
+          },
+          {
+            "user": {
+              "id": "06097eff-9fcf-419d-a91c-0d807ea985b0",
+              "user_type": "api_user",
+              "name": "Dan Perso",
+              "state": "active",
+              "role": "trader"
+            },
+            "modified_at": "2025-10-23T14:59:39.522000Z",
+            "decision": "dummy",
+            "state": "not_participated"
+          },
+          {
+            "user": {
+              "id": "1eda3028-96fa-4f65-b951-a7796cb51ff2",
+              "user_type": "person",
+              "name": "trad3alert@gmail.com",
+              "email": "trad3alert@gmail.com",
+              "state": "active",
+              "role": "admin"
+            },
+            "modified_at": "2025-10-23T14:59:39.522000Z",
+            "decision": "dummy",
+            "state": "not_participated"
+          },
+          {
+            "user": {
+              "id": "42cafa10-ad04-46f2-867f-6af3d65f2a9b",
+              "user_type": "api_user",
+              "name": "KatzieBot",
+              "state": "active",
+              "role": "trader"
+            },
+            "modified_at": "2025-10-23T14:59:39.522000Z",
+            "decision": "dummy",
+            "state": "not_participated"
+          },
+          {
+            "user": {
+              "id": "62ae25ec-9224-4ab8-8a3f-50bf9cf378fa",
+              "user_type": "api_user",
+              "name": "HealthCheck Bot",
+              "state": "active",
+              "role": "trader"
+            },
+            "modified_at": "2025-10-23T14:59:39.522000Z",
+            "decision": "dummy",
+            "state": "not_participated"
+          },
+          {
+            "user": {
+              "id": "3d1379e0-53d7-4639-8f21-7376760c77fb",
+              "user_type": "api_user",
+              "name": "bot",
+              "state": "active",
+              "role": "trader"
+            },
+            "modified_at": "2025-10-23T14:59:39.522000Z",
+            "decision": "dummy",
+            "state": "not_participated"
+          },
+          {
+            "user": {
+              "id": "bd902627-48ed-4f2d-902c-a31d8af150c1",
+              "user_type": "api_user",
+              "name": "testBotMcBotty",
+              "state": "active",
+              "role": "trader"
+            },
+            "modified_at": "2025-10-23T14:59:39.522000Z",
+            "decision": "dummy",
+            "state": "not_participated"
+          },
+          {
+            "user": {
+              "id": "201bbe3a-9bb1-4904-affa-d8446010bb9f",
+              "user_type": "api_user",
+              "name": "dapp_updater",
+              "state": "active",
+              "role": "trader"
+            },
+            "modified_at": "2025-10-23T14:59:39.522000Z",
+            "decision": "dummy",
+            "state": "not_participated"
+          },
+          {
+            "user": {
+              "id": "19b9b88d-28c7-4a14-afb7-f209a7502da0",
+              "user_type": "api_user",
+              "name": "UniswapBot",
+              "state": "active",
+              "role": "trader"
+            },
+            "modified_at": "2025-10-23T14:59:39.522000Z",
+            "decision": "dummy",
+            "state": "not_participated"
+          },
+          {
+            "user": {
+              "id": "ebd2aa9a-c454-45b2-9e2f-e99ada3b83da",
+              "user_type": "api_user",
+              "name": "Validator Bot",
+              "state": "active",
+              "role": "trader"
+            },
+            "modified_at": "2025-10-23T14:59:39.522000Z",
+            "decision": "dummy",
+            "state": "not_participated"
+          },
+          {
+            "user": {
+              "id": "042506a0-cb79-4886-9af0-86aaad62a055",
+              "user_type": "api_user",
+              "name": "SamBot Ultimate",
+              "state": "active",
+              "role": "trader"
+            },
+            "modified_at": "2025-10-23T14:59:39.522000Z",
+            "decision": "dummy",
+            "state": "not_participated"
+          },
+          {
+            "user": {
+              "id": "83a61a8e-42a0-4080-9778-f98eeeaa06cd",
+              "user_type": "api_user",
+              "name": "test_g",
+              "state": "active",
+              "role": "trader"
+            },
+            "modified_at": "2025-10-23T14:59:39.522000Z",
+            "decision": "dummy",
+            "state": "not_participated"
+          },
+          {
+            "user": {
+              "id": "71e70930-d701-4b02-be04-2cc2b6bb4a97",
+              "user_type": "api_user",
+              "name": "test",
+              "state": "active",
+              "role": "trader"
+            },
+            "modified_at": "2025-10-23T14:59:39.522000Z",
+            "decision": "dummy",
+            "state": "not_participated"
+          }
+        ],
+        "required_groups": 1,
+        "approval_groups": [
+          {
+            "quorum_size": 1,
+            "approvers": [
+              {
+                "user": {
+                  "id": "239536f3-6858-40ee-84ee-13ff8a4956d5",
+                  "user_type": "person",
+                  "name": "Daniel Bellmas",
+                  "email": "danielb@fordefi.com",
+                  "state": "active",
+                  "role": "admin"
+                },
+                "modified_at": "2025-10-23T14:59:39.522000Z",
+                "decision": "dummy",
+                "state": "not_participated"
+              },
+              {
+                "user": {
+                  "id": "b8d89e21-e44a-4f13-8338-739ae50a22ad",
+                  "user_type": "person",
+                  "name": "Daniel Katzan",
+                  "email": "danielkatzan@fordefi.com",
+                  "state": "active",
+                  "role": "admin"
+                },
+                "modified_at": "2025-10-23T14:59:39.522000Z",
+                "decision": "dummy",
+                "state": "not_participated"
+              },
+              {
+                "user": {
+                  "id": "fb30b30f-eabe-4b7f-a0de-60e64eb1ffcc",
+                  "user_type": "person",
+                  "name": "Dan Jaheny",
+                  "email": "danj@fordefi.com",
+                  "state": "active",
+                  "role": "admin"
+                },
+                "modified_at": "2025-10-23T14:59:39.525000Z",
+                "decision": "dummy",
+                "state": "approved"
+              },
+              {
+                "user": {
+                  "id": "894c4207-2990-4c6b-9866-08c69026c732",
+                  "user_type": "person",
+                  "name": "hvbris@protonmail.com",
+                  "email": "hvbris@protonmail.com",
+                  "state": "active",
+                  "role": "admin"
+                },
+                "modified_at": "2025-10-23T14:59:39.522000Z",
+                "decision": "dummy",
+                "state": "not_participated"
+              },
+              {
+                "user": {
+                  "id": "353332eb-5bcc-4fd4-a561-966343a44276",
+                  "user_type": "api_user",
+                  "name": "DanBot",
+                  "state": "active",
+                  "role": "trader"
+                },
+                "modified_at": "2025-10-23T14:59:39.522000Z",
+                "decision": "dummy",
+                "state": "not_participated"
+              },
+              {
+                "user": {
+                  "id": "b81120d9-a62b-4191-b0fd-20dc557c81cf",
+                  "user_type": "api_user",
+                  "name": "SamBot2",
+                  "state": "active",
+                  "role": "trader"
+                },
+                "modified_at": "2025-10-23T14:59:39.522000Z",
+                "decision": "dummy",
+                "state": "not_participated"
+              },
+              {
+                "user": {
+                  "id": "06097eff-9fcf-419d-a91c-0d807ea985b0",
+                  "user_type": "api_user",
+                  "name": "Dan Perso",
+                  "state": "active",
+                  "role": "trader"
+                },
+                "modified_at": "2025-10-23T14:59:39.522000Z",
+                "decision": "dummy",
+                "state": "not_participated"
+              },
+              {
+                "user": {
+                  "id": "1eda3028-96fa-4f65-b951-a7796cb51ff2",
+                  "user_type": "person",
+                  "name": "trad3alert@gmail.com",
+                  "email": "trad3alert@gmail.com",
+                  "state": "active",
+                  "role": "admin"
+                },
+                "modified_at": "2025-10-23T14:59:39.522000Z",
+                "decision": "dummy",
+                "state": "not_participated"
+              },
+              {
+                "user": {
+                  "id": "42cafa10-ad04-46f2-867f-6af3d65f2a9b",
+                  "user_type": "api_user",
+                  "name": "KatzieBot",
+                  "state": "active",
+                  "role": "trader"
+                },
+                "modified_at": "2025-10-23T14:59:39.522000Z",
+                "decision": "dummy",
+                "state": "not_participated"
+              },
+              {
+                "user": {
+                  "id": "62ae25ec-9224-4ab8-8a3f-50bf9cf378fa",
+                  "user_type": "api_user",
+                  "name": "HealthCheck Bot",
+                  "state": "active",
+                  "role": "trader"
+                },
+                "modified_at": "2025-10-23T14:59:39.522000Z",
+                "decision": "dummy",
+                "state": "not_participated"
+              },
+              {
+                "user": {
+                  "id": "3d1379e0-53d7-4639-8f21-7376760c77fb",
+                  "user_type": "api_user",
+                  "name": "bot",
+                  "state": "active",
+                  "role": "trader"
+                },
+                "modified_at": "2025-10-23T14:59:39.522000Z",
+                "decision": "dummy",
+                "state": "not_participated"
+              },
+              {
+                "user": {
+                  "id": "bd902627-48ed-4f2d-902c-a31d8af150c1",
+                  "user_type": "api_user",
+                  "name": "testBotMcBotty",
+                  "state": "active",
+                  "role": "trader"
+                },
+                "modified_at": "2025-10-23T14:59:39.522000Z",
+                "decision": "dummy",
+                "state": "not_participated"
+              },
+              {
+                "user": {
+                  "id": "201bbe3a-9bb1-4904-affa-d8446010bb9f",
+                  "user_type": "api_user",
+                  "name": "dapp_updater",
+                  "state": "active",
+                  "role": "trader"
+                },
+                "modified_at": "2025-10-23T14:59:39.522000Z",
+                "decision": "dummy",
+                "state": "not_participated"
+              },
+              {
+                "user": {
+                  "id": "19b9b88d-28c7-4a14-afb7-f209a7502da0",
+                  "user_type": "api_user",
+                  "name": "UniswapBot",
+                  "state": "active",
+                  "role": "trader"
+                },
+                "modified_at": "2025-10-23T14:59:39.522000Z",
+                "decision": "dummy",
+                "state": "not_participated"
+              },
+              {
+                "user": {
+                  "id": "ebd2aa9a-c454-45b2-9e2f-e99ada3b83da",
+                  "user_type": "api_user",
+                  "name": "Validator Bot",
+                  "state": "active",
+                  "role": "trader"
+                },
+                "modified_at": "2025-10-23T14:59:39.522000Z",
+                "decision": "dummy",
+                "state": "not_participated"
+              },
+              {
+                "user": {
+                  "id": "042506a0-cb79-4886-9af0-86aaad62a055",
+                  "user_type": "api_user",
+                  "name": "SamBot Ultimate",
+                  "state": "active",
+                  "role": "trader"
+                },
+                "modified_at": "2025-10-23T14:59:39.522000Z",
+                "decision": "dummy",
+                "state": "not_participated"
+              },
+              {
+                "user": {
+                  "id": "83a61a8e-42a0-4080-9778-f98eeeaa06cd",
+                  "user_type": "api_user",
+                  "name": "test_g",
+                  "state": "active",
+                  "role": "trader"
+                },
+                "modified_at": "2025-10-23T14:59:39.522000Z",
+                "decision": "dummy",
+                "state": "not_participated"
+              },
+              {
+                "user": {
+                  "id": "71e70930-d701-4b02-be04-2cc2b6bb4a97",
+                  "user_type": "api_user",
+                  "name": "test",
+                  "state": "active",
+                  "role": "trader"
+                },
+                "modified_at": "2025-10-23T14:59:39.522000Z",
+                "decision": "dummy",
+                "state": "not_participated"
+              }
+            ]
+          }
+        ]
+      },
+      "policy_match": {
+        "is_default": true,
+        "rule_id": "00000000-0000-0000-0000-000000000000",
+        "rule_name": "",
+        "action_type": "require_approval"
+      },
+      "signer_type": "initiator",
+      "risks": [],
+      "vault": {
+        "id": "81e82853-3c4f-4cd4-b494-78fb4abf168a",
+        "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+        "name": "EVM Vault",
+        "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+        "state": "active",
+        "type": "evm"
+      },
+      "has_current_user_vault_permissions": true,
+      "push_mode": "auto",
+      "sign_mode": "auto"
+    },
+    "signatures": [],
+    "note": "",
+    "spam_state": "unset",
+    "direction": "outgoing",
+    "signed_externally": false,
+    "interacted_vaults": [
+      {
+        "id": "81e82853-3c4f-4cd4-b494-78fb4abf168a",
+        "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+        "name": "EVM Vault",
+        "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+        "state": "active",
+        "type": "evm"
+      }
+    ],
+    "state": "approved",
+    "state_changes": [
+      {
+        "changed_at": "2025-10-23T14:59:39.472000Z",
+        "asset_prices": [],
+        "prices": {
+          "token_prices": []
+        },
+        "new_state": "waiting_for_approval"
+      },
+      {
+        "changed_at": "2025-10-23T14:59:39.559000Z",
+        "asset_prices": [],
+        "prices": {
+          "token_prices": []
+        },
+        "previous_state": "waiting_for_approval",
+        "new_state": "approved"
+      }
+    ],
+    "aml_check": {
+      "results": {
+        "scan_status": "skipped"
+      }
+    },
+    "is_cancelation": false,
+    "is_acceleration": false,
+    "type": "evm_transaction",
+    "evm_transaction_type_details": {
+      "type": "contract_call"
+    },
+    "chain": {
+      "chain_type": "evm",
+      "named_chain_id": "arbitrum_mainnet",
+      "chain_id": 42161,
+      "unique_id": "evm_arbitrum_mainnet",
+      "name": "Arbitrum One",
+      "native_currency_symbol": "ETH",
+      "native_currency_name": "Ether",
+      "blockchain_explorer": {
+        "transaction_url": "https://arbiscan.io/tx/",
+        "address_url": "https://arbiscan.io/address/",
+        "root_url": "https://arbiscan.io/",
+        "transaction_format_url": "https://arbiscan.io/tx/%s",
+        "address_format_url": "https://arbiscan.io/address/%s",
+        "asset_format_url": "https://arbiscan.io/address/%s"
+      },
+      "logo_url": "https://logos.fordefi.com/chains/evm/default/42161.svg",
+      "is_testnet": false,
+      "is_enabled": true,
+      "gas_type": "legacy",
+      "supports_secure_node": false,
+      "source": "default"
+    },
+    "from": {
+      "vault": {
+        "id": "81e82853-3c4f-4cd4-b494-78fb4abf168a",
+        "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+        "name": "EVM Vault",
+        "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+        "state": "active",
+        "type": "evm"
+      },
+      "explorer_url": "https://arbiscan.io/address/0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+      "type": "evm",
+      "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73"
+    },
+    "to": {
+      "explorer_url": "https://arbiscan.io/address/0xbA3cB449bD2B4ADddBc894D8697F5170800EAdeC",
+      "type": "evm",
+      "address": "0xbA3cB449bD2B4ADddBc894D8697F5170800EAdeC",
+      "contract": {
+        "name": "CoWSwapEthFlow",
+        "dapp": {
+          "id": "a745805c-86b8-5e48-ae93-a71651fbb64a",
+          "name": "CoW Swap",
+          "url": "https://swap.cow.fi/",
+          "logo_url": "https://logos.fordefi.com/dapps/a745805c-86b8-5e48-ae93-a71651fbb64a.png"
+        },
+        "is_verified": true
+      }
+    },
+    "value": "500000000000000",
+    "data": "Miu6IQAAAAAAAAAAAAAAAK+I0GXnfIzCI5Mnxe2zpDImjlgxAAAAAAAAAAAAAAAAi/z54nZLyE3ku9Cg9arxn0cCenMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAca/UmNAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHNwCiHhIK7jYbO4ZRXOPOLudKVUx2Bl1r9F3XtwSUiQR1doAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABo+knYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4YuCg==",
+    "hex_data": "0x322bba21000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e58310000000000000000000000008bfcf9e2764bc84de4bbd0a0f5aaf19f47027a730000000000000000000000000000000000000000000000000001c6bf5263400000000000000000000000000000000000000000000000000000000000001cdc028878482bb8d86cee1945738f38bb9d295531d81975afd1775edc12522411d5da00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000068fa49d800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003862e0a",
+    "parsed_data": {
+      "method": "createOrder",
+      "method_arguments": [
+        {
+          "name": "order",
+          "type": "(address,address,uint256,uint256,bytes32,uint256,uint32,bool,int64)",
+          "value": "{0xaf88d065e77c8cC2239327C5EDb3A432268e5831 0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73 500000000000000 1891330 [136 120 72 43 184 216 108 238 25 69 115 143 56 187 157 41 85 49 216 25 117 175 209 119 94 220 18 82 36 17 213 218] 0 1761233368 false 59125258}"
+        }
+      ]
+    },
+    "expected_result": {
+      "reversion": {
+        "state": "not_reverted"
+      },
+      "gas_debit": {
+        "gas_used": "87856",
+        "gas_price": "13392000",
+        "total_fee": "1176567552000",
+        "fiat_price": {
+          "price": "384104",
+          "price_float": "384104",
+          "fiat_currency": {
+            "currency_symbol": "usd",
+            "decimals": 2
+          }
+        },
+        "priced_asset": {
+          "type": "asset_price",
+          "asset_identifier": {
+            "type": "evm",
+            "details": {
+              "chain": {
+                "chain_type": "evm",
+                "named_chain_id": "arbitrum_mainnet",
+                "chain_id": 42161,
+                "unique_id": "evm_arbitrum_mainnet",
+                "name": "Arbitrum One",
+                "native_currency_symbol": "ETH",
+                "native_currency_name": "Ether",
+                "blockchain_explorer": {
+                  "transaction_url": "https://arbiscan.io/tx/",
+                  "address_url": "https://arbiscan.io/address/",
+                  "root_url": "https://arbiscan.io/",
+                  "transaction_format_url": "https://arbiscan.io/tx/%s",
+                  "address_format_url": "https://arbiscan.io/address/%s",
+                  "asset_format_url": "https://arbiscan.io/address/%s"
+                },
+                "logo_url": "https://logos.fordefi.com/chains/evm/default/42161.svg",
+                "is_testnet": false,
+                "is_enabled": true,
+                "gas_type": "legacy",
+                "supports_secure_node": false,
+                "source": "default"
+              },
+              "type": "native"
+            }
+          },
+          "asset_info": {
+            "id": "fe8ac93b-4480-4f60-b53c-a6dabe17c76b",
+            "asset_identifier": {
+              "type": "evm",
+              "details": {
+                "type": "native",
+                "chain": "evm_arbitrum_mainnet"
+              },
+              "chain": {
+                "chain_type": "evm",
+                "named_chain_id": "arbitrum_mainnet",
+                "chain_id": 42161,
+                "unique_id": "evm_arbitrum_mainnet",
+                "name": "Arbitrum One",
+                "native_currency_symbol": "ETH",
+                "native_currency_name": "Ether",
+                "blockchain_explorer": {
+                  "transaction_url": "https://arbiscan.io/tx/",
+                  "address_url": "https://arbiscan.io/address/",
+                  "root_url": "https://arbiscan.io/",
+                  "transaction_format_url": "https://arbiscan.io/tx/%s",
+                  "address_format_url": "https://arbiscan.io/address/%s",
+                  "asset_format_url": "https://arbiscan.io/address/%s"
+                },
+                "logo_url": "https://logos.fordefi.com/chains/evm/default/42161.svg",
+                "is_testnet": false,
+                "is_enabled": true,
+                "gas_type": "legacy",
+                "supports_secure_node": false,
+                "source": "default"
+              }
+            },
+            "name": "Ether",
+            "symbol": "ETH",
+            "decimals": 18,
+            "verified": true,
+            "metadata_uri": "",
+            "is_spam": false
+          },
+          "price": {
+            "price": "384104",
+            "price_float": "384104",
+            "fiat_currency": {
+              "currency_symbol": "usd",
+              "decimals": 2
+            }
+          }
+        }
+      },
+      "effects": {
+        "balance_changes": [
+          {
+            "priced_asset": {
+              "type": "asset_price",
+              "asset_identifier": {
+                "type": "evm",
+                "details": {
+                  "chain": {
+                    "chain_type": "evm",
+                    "named_chain_id": "arbitrum_mainnet",
+                    "chain_id": 42161,
+                    "unique_id": "evm_arbitrum_mainnet",
+                    "name": "Arbitrum One",
+                    "native_currency_symbol": "ETH",
+                    "native_currency_name": "Ether",
+                    "blockchain_explorer": {
+                      "transaction_url": "https://arbiscan.io/tx/",
+                      "address_url": "https://arbiscan.io/address/",
+                      "root_url": "https://arbiscan.io/",
+                      "transaction_format_url": "https://arbiscan.io/tx/%s",
+                      "address_format_url": "https://arbiscan.io/address/%s",
+                      "asset_format_url": "https://arbiscan.io/address/%s"
+                    },
+                    "logo_url": "https://logos.fordefi.com/chains/evm/default/42161.svg",
+                    "is_testnet": false,
+                    "is_enabled": true,
+                    "gas_type": "legacy",
+                    "supports_secure_node": false,
+                    "source": "default"
+                  },
+                  "type": "native"
+                }
+              },
+              "asset_info": {
+                "id": "fe8ac93b-4480-4f60-b53c-a6dabe17c76b",
+                "asset_identifier": {
+                  "type": "evm",
+                  "details": {
+                    "type": "native",
+                    "chain": "evm_arbitrum_mainnet"
+                  },
+                  "chain": {
+                    "chain_type": "evm",
+                    "named_chain_id": "arbitrum_mainnet",
+                    "chain_id": 42161,
+                    "unique_id": "evm_arbitrum_mainnet",
+                    "name": "Arbitrum One",
+                    "native_currency_symbol": "ETH",
+                    "native_currency_name": "Ether",
+                    "blockchain_explorer": {
+                      "transaction_url": "https://arbiscan.io/tx/",
+                      "address_url": "https://arbiscan.io/address/",
+                      "root_url": "https://arbiscan.io/",
+                      "transaction_format_url": "https://arbiscan.io/tx/%s",
+                      "address_format_url": "https://arbiscan.io/address/%s",
+                      "asset_format_url": "https://arbiscan.io/address/%s"
+                    },
+                    "logo_url": "https://logos.fordefi.com/chains/evm/default/42161.svg",
+                    "is_testnet": false,
+                    "is_enabled": true,
+                    "gas_type": "legacy",
+                    "supports_secure_node": false,
+                    "source": "default"
+                  }
+                },
+                "name": "Ether",
+                "symbol": "ETH",
+                "decimals": 18,
+                "verified": true,
+                "metadata_uri": "",
+                "is_spam": false
+              },
+              "price": {
+                "price": "384104",
+                "price_float": "384104",
+                "fiat_currency": {
+                  "currency_symbol": "usd",
+                  "decimals": 2
+                }
+              }
+            },
+            "diff": "-500000000000000",
+            "type": "native",
+            "address": {
+              "vault": {
+                "id": "81e82853-3c4f-4cd4-b494-78fb4abf168a",
+                "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+                "name": "EVM Vault",
+                "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+                "state": "active",
+                "type": "evm"
+              },
+              "explorer_url": "https://arbiscan.io/address/0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+              "type": "evm",
+              "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73"
+            },
+            "owner": {
+              "vault": {
+                "id": "81e82853-3c4f-4cd4-b494-78fb4abf168a",
+                "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+                "name": "EVM Vault",
+                "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+                "state": "active",
+                "type": "evm"
+              },
+              "explorer_url": "https://arbiscan.io/address/0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+              "type": "evm",
+              "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73"
+            },
+            "price": {
+              "price": "384104",
+              "price_float": "384104",
+              "fiat_currency": {
+                "currency_symbol": "usd",
+                "decimals": 2
+              }
+            }
+          }
+        ],
+        "transfers": [
+          {
+            "priced_asset": {
+              "type": "asset_price",
+              "asset_identifier": {
+                "type": "evm",
+                "details": {
+                  "chain": {
+                    "chain_type": "evm",
+                    "named_chain_id": "arbitrum_mainnet",
+                    "chain_id": 42161,
+                    "unique_id": "evm_arbitrum_mainnet",
+                    "name": "Arbitrum One",
+                    "native_currency_symbol": "ETH",
+                    "native_currency_name": "Ether",
+                    "blockchain_explorer": {
+                      "transaction_url": "https://arbiscan.io/tx/",
+                      "address_url": "https://arbiscan.io/address/",
+                      "root_url": "https://arbiscan.io/",
+                      "transaction_format_url": "https://arbiscan.io/tx/%s",
+                      "address_format_url": "https://arbiscan.io/address/%s",
+                      "asset_format_url": "https://arbiscan.io/address/%s"
+                    },
+                    "logo_url": "https://logos.fordefi.com/chains/evm/default/42161.svg",
+                    "is_testnet": false,
+                    "is_enabled": true,
+                    "gas_type": "legacy",
+                    "supports_secure_node": false,
+                    "source": "default"
+                  },
+                  "type": "native"
+                }
+              },
+              "asset_info": {
+                "id": "fe8ac93b-4480-4f60-b53c-a6dabe17c76b",
+                "asset_identifier": {
+                  "type": "evm",
+                  "details": {
+                    "type": "native",
+                    "chain": "evm_arbitrum_mainnet"
+                  },
+                  "chain": {
+                    "chain_type": "evm",
+                    "named_chain_id": "arbitrum_mainnet",
+                    "chain_id": 42161,
+                    "unique_id": "evm_arbitrum_mainnet",
+                    "name": "Arbitrum One",
+                    "native_currency_symbol": "ETH",
+                    "native_currency_name": "Ether",
+                    "blockchain_explorer": {
+                      "transaction_url": "https://arbiscan.io/tx/",
+                      "address_url": "https://arbiscan.io/address/",
+                      "root_url": "https://arbiscan.io/",
+                      "transaction_format_url": "https://arbiscan.io/tx/%s",
+                      "address_format_url": "https://arbiscan.io/address/%s",
+                      "asset_format_url": "https://arbiscan.io/address/%s"
+                    },
+                    "logo_url": "https://logos.fordefi.com/chains/evm/default/42161.svg",
+                    "is_testnet": false,
+                    "is_enabled": true,
+                    "gas_type": "legacy",
+                    "supports_secure_node": false,
+                    "source": "default"
+                  }
+                },
+                "name": "Ether",
+                "symbol": "ETH",
+                "decimals": 18,
+                "verified": true,
+                "metadata_uri": "",
+                "is_spam": false
+              },
+              "price": {
+                "price": "384104",
+                "price_float": "384104",
+                "fiat_currency": {
+                  "currency_symbol": "usd",
+                  "decimals": 2
+                }
+              }
+            },
+            "amount": "500000000000000",
+            "type": "native",
+            "from": {
+              "vault": {
+                "id": "81e82853-3c4f-4cd4-b494-78fb4abf168a",
+                "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+                "name": "EVM Vault",
+                "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+                "state": "active",
+                "type": "evm"
+              },
+              "explorer_url": "https://arbiscan.io/address/0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+              "type": "evm",
+              "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73"
+            },
+            "to": {
+              "explorer_url": "https://arbiscan.io/address/0xbA3cB449bD2B4ADddBc894D8697F5170800EAdeC",
+              "type": "evm",
+              "address": "0xbA3cB449bD2B4ADddBc894D8697F5170800EAdeC",
+              "contract": {
+                "name": "CoWSwapEthFlow",
+                "dapp": {
+                  "id": "a745805c-86b8-5e48-ae93-a71651fbb64a",
+                  "name": "CoW Swap",
+                  "url": "https://swap.cow.fi/",
+                  "logo_url": "https://logos.fordefi.com/dapps/a745805c-86b8-5e48-ae93-a71651fbb64a.png"
+                },
+                "is_verified": true
+              }
+            },
+            "price": {
+              "price": "384104",
+              "price_float": "384104",
+              "fiat_currency": {
+                "currency_symbol": "usd",
+                "decimals": 2
+              }
+            }
+          }
+        ],
+        "allowances": [],
+        "bridge": [],
+        "contract_deployments": []
+      }
+    },
+    "simulation_status_result": {
+      "simulation_status": "success",
+      "details": "not reverted"
+    },
+    "gas_submitted": {
+      "price": "13392000",
+      "priority": "medium",
+      "limit": "87856",
+      "type": "legacy"
+    },
+    "use_secure_node": false
+  }
