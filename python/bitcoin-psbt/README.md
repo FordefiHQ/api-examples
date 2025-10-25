@@ -25,6 +25,7 @@ A Python script for creating and submitting Bitcoin PSBT (Partially Signed Bitco
 3. Configure environment variables:
    Create a `.env` file in the root directory with the following:
    ```plaintext
+   PSBT_HEX_DATA="your_hex_encoded_psbt_data"
    FORDEFI_API_USER_TOKEN="your_token"
    FORDEFI_BTC_VAULT_ID="your_vault_id"
    FORDEFI_BTC_VAULT_TAPROOT_ADDRESS="taproot_address_from_btc_vault"
@@ -40,24 +41,10 @@ A Python script for creating and submitting Bitcoin PSBT (Partially Signed Bitco
 
 ## Usage
 
-1. Add your hex PSBT data in `psbt.py`:
-   ```python
-   # In psbt.py, replace the placeholder with your PSBT data
-   psbt_hex_data = "0x70736274ff...." # Replace with your actual PSBT hex data
-   ```
-
-2. Run the script:
+Run the script:
    ```bash
    uv run psbt.py
    ```
-
-## Expected Output
-
-Upon successful execution, the script will:
-
-- Create a transaction in your Fordefi vault
-- Return a transaction ID that can be tracked in the Fordefi dashboard
-- The transaction will be pending approval/signing based on your vault's policy
 
 ## Optional Parameters
 
@@ -72,7 +59,7 @@ inputs = [
         "index": 0,  # Input index
         "signer_identity": {
             "type": "address",
-            "address": "bc1p..." # Taproot address that will sign this input
+            "address": "bc1p..." # Taproot or Segwit address that will sign this input
         }
     }
 ]

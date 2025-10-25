@@ -16,10 +16,12 @@ FORDEFI_BTC_VAULT_TAPROOT_ADDRESS = os.getenv("FORDEFI_BTC_VAULT_TAPROOT_ADDRESS
 FORDEFI_BTC_VAULT_SEGWIT_ADDRESS = os.getenv("FORDEFI_BTC_VAULT_SEGWIT_ADDRESS")
 PATH = "/api/v1/transactions"
 PRIVATE_KEY_PEM_FILE = Path("./secret/private.pem")
+will_auto_finalize = True
+is_bitcoin_mainnet = True
 
 async def main():
     psbt_hex_data = os.getenv("PSBT_HEX_DATA")    
-    request_json = await build_request(FORDEFI_BTC_VAULT_ID, FORDEFI_BTC_VAULT_SEGWIT_ADDRESS, psbt_hex_data)
+    request_json = await build_request(FORDEFI_BTC_VAULT_ID, FORDEFI_BTC_VAULT_SEGWIT_ADDRESS, psbt_hex_data, will_auto_finalize, is_bitcoin_mainnet)
 
     request_body = json.dumps(request_json)
     timestamp = datetime.datetime.now().strftime("%s")
@@ -30,6 +32,7 @@ async def main():
     try: 
         print("Making API request to Fordefi for MPC signature 📡")
         resp_tx = await broadcast_tx(PATH, FORDEFI_API_USER_TOKEN, signature, timestamp, request_body)
+        print("Request ID: ", resp_tx.headers['x-request-id'])
         resp_tx.raise_for_status()
         return resp_tx
     except requests.exceptions.HTTPError as e:

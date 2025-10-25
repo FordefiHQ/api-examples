@@ -1,14 +1,13 @@
-async def build_request(vault_id, vault_address, raw_psbt_bytes):
+from typing import Any
+
+async def build_request(vault_id: str, vault_address: str, psbt_hex_data: str, will_auto_finalize: bool, is_bitcoin_mainnet: bool) -> dict[str, Any]:
     print(f'Preparing transaction from Vault {vault_id}')
     print(f"Vault address: {vault_address}")
     if vault_address.startswith('bc1q'):
-        # Native SegWit (P2WPKH) - Bech32
         address_type = "segwit"
     elif vault_address.startswith('bc1p'):
-        # Taproot (P2TR) - Bech32m
         address_type = "taproot"
     elif vault_address.startswith('1') or vault_address.startswith('3'):
-        # Legacy addresses (P2PKH or P2SH)
         raise ValueError(f"Legacy Bitcoin addresses are not supported. Address: {vault_address}")
     else:
         raise ValueError(f"Unknown Bitcoin address format: {vault_address}")
@@ -21,14 +20,14 @@ async def build_request(vault_id, vault_address, raw_psbt_bytes):
             "type": "utxo_transaction",
             "details": {
                 "type": "utxo_partially_signed_bitcoin_transaction",
-                "psbt_raw_data": raw_psbt_bytes,
-                "auto_finalize": True,
+                "psbt_raw_data": psbt_hex_data,
+                "auto_finalize": will_auto_finalize,
                 "sender": { # The address that will sign the inputs
                     "address": vault_address, # Must be from a Fordefi Vault
                     "address_type": address_type,
                     "chain": {
                         "chain_type": "utxo",
-                        "unique_id": "bitcoin_mainnet"
+                        "unique_id": "bitcoin_mainnet" if is_bitcoin_mainnet else "bitcoin_testnet"
                     },
                 },
                 "inputs": [ # OPTIONAL array describing how each input will be signed
