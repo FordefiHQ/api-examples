@@ -47,7 +47,9 @@ async def main():
         signature = await sign(payload=payload, private_key_path=PRIVATE_KEY_PEM_FILE)
 
         ## Send signed payload to Fordefi
-        await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
+        print("Making API request to Fordefi 📡")
+        res = await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
+        print("Request ID: ", res.headers['x-request-id'])
         print("✅ Batch submitted successfully!")
 
     except Exception as e:

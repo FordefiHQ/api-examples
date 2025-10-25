@@ -29,7 +29,7 @@ async def main():
     try:
         # Getting list of providers
         provider_list  = await getSwapProviders(chain_type, USER_API_TOKEN)
-        print(provider_list)
+        print("Providers: ", provider_list)
         
         if is_erc20_to_erc20_swap is True:
         # Getting quotes from providers
@@ -98,7 +98,9 @@ async def main():
         signature = await sign(payload=payload, private_key_path=PRIVATE_KEY_PEM_FILE)
 
         ## Sending transaction to Fordefi for MPC signature and broadcast
-        await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, tx_payload_json)
+        print("Making API request to Fordefi for MPC signature 📡")
+        res = await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, tx_payload_json)
+        print("Request ID: ", res.headers['x-request-id'])
         print("✅ Transaction submitted successfully!")
     except Exception as e:
         print(f"❌ Transaction failed: {str(e)}")
