@@ -568,6 +568,17 @@ async function createSolanaReceiveMessageTx(
     TOKEN_MESSENGER_MINTER_PROGRAM_ID,
   );
 
+  // Event authorities (required by #[event_cpi] macro on both programs)
+  const [messageTransmitterEventAuthority] = PublicKey.findProgramAddressSync(
+    [Buffer.from("__event_authority")],
+    MESSAGE_TRANSMITTER_PROGRAM_ID,
+  );
+
+  const [tokenMessengerEventAuthority] = PublicKey.findProgramAddressSync(
+    [Buffer.from("__event_authority")],
+    TOKEN_MESSENGER_MINTER_PROGRAM_ID,
+  );
+
   // Derive used nonce PDA (note: singular "used_nonce" per the working example)
   // Extract the full 32-byte nonce from the message (bytes 12-43)
   const nonceBytes = messageBytes.slice(12, 44); // 32 bytes for V2
@@ -609,7 +620,7 @@ async function createSolanaReceiveMessageTx(
   const instruction: TransactionInstruction = {
     programId: MESSAGE_TRANSMITTER_PROGRAM_ID,
     keys: [
-      // MessageTransmitter accounts
+      // MessageTransmitter named accounts (7)
       { pubkey: recipientPubkey, isSigner: true, isWritable: true }, // payer
       { pubkey: recipientPubkey, isSigner: true, isWritable: false }, // caller
       { pubkey: authorityPda, isSigner: false, isWritable: false }, // authority_pda
@@ -618,7 +629,7 @@ async function createSolanaReceiveMessageTx(
       { pubkey: TOKEN_MESSENGER_MINTER_PROGRAM_ID, isSigner: false, isWritable: false }, // receiver
       { pubkey: SystemProgram.programId, isSigner: false, isWritable: false }, // system_program
 
-      // TokenMessenger remaining accounts
+      // TokenMessenger remaining accounts (11) - passed to receiver via CPI
       { pubkey: tokenMessenger, isSigner: false, isWritable: false },
       { pubkey: remoteTokenMessenger, isSigner: false, isWritable: false },
       { pubkey: tokenMinter, isSigner: false, isWritable: true },
@@ -628,6 +639,8 @@ async function createSolanaReceiveMessageTx(
       { pubkey: recipientTokenAccount, isSigner: false, isWritable: true },
       { pubkey: custodyTokenAccount, isSigner: false, isWritable: true },
       { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+      { pubkey: tokenMessengerEventAuthority, isSigner: false, isWritable: false },
+      { pubkey: TOKEN_MESSENGER_MINTER_PROGRAM_ID, isSigner: false, isWritable: false },
     ],
     data: instructionData,
   };
