@@ -36,7 +36,11 @@ async function main(): Promise<void> {
   console.log("---------------Starting Bridging---------------");
   const result = await kit.bridge({
     from: { adapter: adapterFrom, chain: bridgeCongfig.chainFrom },
-    to: { adapter: adapterTo, chain: bridgeCongfig.chainTo },
+    to: { 
+      adapter: adapterTo, 
+      chain: bridgeCongfig.chainTo,
+      recipientAddress: bridgeCongfig.destinationAddress
+    },
     amount: bridgeCongfig.amount,
   } as any);
 

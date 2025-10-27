@@ -98,9 +98,9 @@ export async function openPositionWithRaydium(fordefiConfig: FordefiSolanaConfig
 
     let secondSignature = null;
     if (isV0Tx && transaction.signatures.length > 1) {
-      secondSignature = Buffer.from(transaction.signatures[1]).toString('base64');
+      secondSignature = Buffer.from(transaction.signatures[1]!).toString('base64');
     } else if (!isV0Tx && transaction.signatures.length > 1) {
-      const sig = transaction.signatures[1].signature;
+      const sig = transaction.signatures[1]!.signature;
       if (sig) {
         secondSignature = Buffer.from(sig).toString('base64');
       }
