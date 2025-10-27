@@ -1,5 +1,4 @@
 import "dotenv/config";
-import { inspect } from "util";
 import { getProvider } from "./get-provider";
 import {signWithApiSigner } from "./signer";
 import {createAndSignTx} from './process_tx'
@@ -74,49 +73,35 @@ async function burnUsdcOnEthereum(): Promise<{
 }> {
   console.log("=== Step 1: Burning USDC on Ethereum ===\n");
 
-  // Initialize Fordefi provider
   const fordefiProvider = await getProvider(fordefiConfigFrom);
   if (!fordefiProvider) {
     throw new Error("Failed to initialize Fordefi provider");
   }
 
-  // Create viem wallet client with Fordefi provider
   const walletClient = createWalletClient({
     chain: mainnet,
     transport: custom(fordefiProvider),
   });
 
-  // Get account addresses
   const [fromAddress] = await walletClient.getAddresses();
 
-  console.log(`From address: ${fromAddress}`);
-  console.log(
-    `Burning ${bridgeConfigSolana.amountUsdc} USDC on ${bridgeConfigSolana.ethereumChain}`,
-  );
-  console.log(
-    `Destination: ${bridgeConfigSolana.solanaRecipientAddress} (Solana)\n`,
-  );
+  console.log(`From: ${fromAddress}`);
+  console.log(`Amount: ${bridgeConfigSolana.amountUsdc} USDC`);
+  console.log(`To: ${bridgeConfigSolana.solanaRecipientAddress}\n`);
 
-  // Convert Solana address to 32-byte hex format
   const solanaAddressBytes = bs58.decode(
     bridgeConfigSolana.solanaRecipientAddress,
   );
   const solanaAddressBytes32 =
     `0x${Buffer.from(solanaAddressBytes).toString("hex").padStart(64, "0")}` as `0x${string}`;
 
-  console.log(
-    `Solana address as bytes32: ${solanaAddressBytes32.slice(0, 20)}...\n`,
-  );
+  const amountInSmallestUnit = parseUnits(bridgeConfigSolana.amountUsdc, 6);
 
-  const amountInSmallestUnit = parseUnits(bridgeConfigSolana.amountUsdc, 6); // USDC has 6 decimals
-
-  // Check and approve USDC spend if needed
   const publicClient = createPublicClient({
     chain: mainnet,
     transport: http(fordefiConfigFrom.rpcUrl),
   });
 
-  // Check USDC balance first
   const usdcBalance = (await publicClient.readContract({
     address: ETHEREUM_USDC as `0x${string}`,
     abi: [
@@ -132,15 +117,11 @@ async function burnUsdcOnEthereum(): Promise<{
     args: [fromAddress],
   })) as bigint;
 
-  console.log(`USDC Balance: ${usdcBalance.toString()} (${Number(usdcBalance) / 1e6} USDC)`);
-  console.log(`Amount to burn: ${amountInSmallestUnit.toString()} (${bridgeConfigSolana.amountUsdc} USDC)`);
-
   if (usdcBalance < amountInSmallestUnit) {
     throw new Error(
       `Insufficient USDC balance. Have ${Number(usdcBalance) / 1e6} USDC, need ${bridgeConfigSolana.amountUsdc} USDC`,
     );
   }
-  console.log("✅ Sufficient USDC balance\n");
 
   const currentAllowance = (await publicClient.readContract({
     address: ETHEREUM_USDC as `0x${string}`,
@@ -161,7 +142,7 @@ async function burnUsdcOnEthereum(): Promise<{
   })) as bigint;
 
   if (currentAllowance < amountInSmallestUnit) {
-    console.log("Approving USDC spend...");
+    console.log("Approving USDC...");
     const approveTxHash = await walletClient.writeContract({
       address: ETHEREUM_USDC as `0x${string}`,
       abi: [
@@ -182,13 +163,10 @@ async function burnUsdcOnEthereum(): Promise<{
     });
 
     const approveReceipt = await publicClient.waitForTransactionReceipt({ hash: approveTxHash });
-    console.log(`✅ USDC approved - Status: ${approveReceipt.status}`);
-
     if (approveReceipt.status !== "success") {
-      throw new Error(`Approval transaction failed with status: ${approveReceipt.status}`);
+      throw new Error("Approval transaction failed");
     }
 
-    // Verify the allowance was actually set
     const newAllowance = (await publicClient.readContract({
       address: ETHEREUM_USDC as `0x${string}`,
       abi: [
@@ -207,44 +185,24 @@ async function burnUsdcOnEthereum(): Promise<{
       args: [fromAddress, ETHEREUM_TOKEN_MESSENGER as `0x${string}`],
     })) as bigint;
 
-    console.log(`New allowance: ${newAllowance.toString()} (${Number(newAllowance) / 1e6} USDC)`);
-
     if (newAllowance < amountInSmallestUnit) {
-      throw new Error(`Allowance still insufficient after approval. Have ${Number(newAllowance) / 1e6} USDC, need ${bridgeConfigSolana.amountUsdc} USDC`);
+      throw new Error("Allowance still insufficient after approval");
     }
 
-    // Small delay to ensure blockchain state has propagated
-    console.log("Waiting 2 seconds for blockchain state propagation...\n");
+    console.log("Approved\n");
     await new Promise(resolve => setTimeout(resolve, 2000));
-  } else {
-    console.log(`✅ Sufficient allowance already exists: ${currentAllowance.toString()}\n`);
   }
 
-  // CCTP V2 parameters for Fast Transfer
-  // Fast Transfer: finality 1000, ~20 seconds, 0.01% fee
-  // Standard Transfer: finality 2000, ~13-19 minutes, free
   const useFastTransfer = bridgeConfigSolana.useFastTransfer;
   const minFinalityThreshold = useFastTransfer ? 1000 : 2000;
   const maxFee = useFastTransfer
-    ? (amountInSmallestUnit * BigInt(1)) / BigInt(10000) // 0.01% for fast transfer
-    : BigInt(0); // Free for standard transfer
-  const destinationCaller = "0x" + "0".repeat(64); // bytes32(0) = any caller
+    ? (amountInSmallestUnit * BigInt(1)) / BigInt(10000)
+    : BigInt(0);
+  const destinationCaller = "0x" + "0".repeat(64);
 
   console.log(
-    `Transfer mode: ${useFastTransfer ? "FAST (20 seconds, 0.01% fee)" : "STANDARD (13-19 minutes, free)"}`,
+    `Mode: ${useFastTransfer ? "Fast (~20s, 0.01% fee)" : "Standard (~15min, free)"}`,
   );
-  console.log(`minFinalityThreshold: ${minFinalityThreshold}`);
-  console.log(`maxFee: ${maxFee.toString()} USDC (smallest units)\n`);
-
-  // Call depositForBurn (CCTP V2 with Fast Transfer support)
-  console.log("Calling depositForBurn (V2) with parameters:");
-  console.log(`  amount: ${amountInSmallestUnit.toString()}`);
-  console.log(`  destinationDomain: ${SOLANA_DOMAIN}`);
-  console.log(`  mintRecipient: ${solanaAddressBytes32}`);
-  console.log(`  burnToken: ${ETHEREUM_USDC}`);
-  console.log(`  destinationCaller: ${destinationCaller}`);
-  console.log(`  maxFee: ${maxFee.toString()}`);
-  console.log(`  minFinalityThreshold: ${minFinalityThreshold}\n`);
 
   const data = encodeFunctionData({
     abi: [
@@ -276,7 +234,6 @@ async function burnUsdcOnEthereum(): Promise<{
     ],
   });
 
-  // Use the Fordefi provider's request method directly
   const txHash = (await fordefiProvider.request({
     method: "eth_sendTransaction",
     params: [
@@ -288,65 +245,33 @@ async function burnUsdcOnEthereum(): Promise<{
     ],
   })) as `0x${string}`;
 
-  console.log(`Transaction submitted: ${txHash}`);
+  console.log(`Burn tx: ${txHash}`);
   console.log("Waiting for confirmation...");
 
   const receipt = await publicClient.waitForTransactionReceipt({
     hash: txHash,
   });
-  console.log("✅ Transaction confirmed");
-  console.log(`   Block number: ${receipt.blockNumber}`);
-  console.log(`   Gas used: ${receipt.gasUsed.toString()}`);
-  console.log(`   Status: ${receipt.status === "success" ? "✅ Success" : "❌ Failed"}`);
-  console.log(`   View on Etherscan: https://etherscan.io/tx/${txHash}\n`);
+  console.log(`Confirmed (block ${receipt.blockNumber})`);
+  console.log(`https://etherscan.io/tx/${txHash}\n`);
 
-  // Extract MessageSent event from logs
-  // MessageSent event signature: MessageSent(bytes)
   const messageSentEventSignature = keccak256(
     Buffer.from("MessageSent(bytes)"),
   );
-
-  console.log(
-    `Looking for MessageSent event with signature: ${messageSentEventSignature}`,
-  );
-  console.log(`Found ${receipt.logs.length} logs in transaction\n`);
 
   const messageSentLog = receipt.logs.find(
     (log) => log.topics[0] === messageSentEventSignature,
   );
 
   if (!messageSentLog || !messageSentLog.data) {
-    console.log("Available log topics:");
-    receipt.logs.forEach((log, i) => {
-      console.log(`  Log ${i}: ${log.topics[0]}`);
-    });
     throw new Error("MessageSent event not found in transaction receipt");
   }
 
-  // Decode the message from the event data
-  // The data field contains ABI-encoded bytes: offset (32 bytes) + length (32 bytes) + data
   const eventData = messageSentLog.data;
-
-  console.log(`Raw event data length: ${eventData.length} chars`);
-  console.log(`Raw event data: ${eventData.slice(0, 100)}...`);
-
-  // ABI decoding for bytes:
-  // First 32 bytes (64 hex chars after 0x) = offset to data start (should be 0x20 = 32)
-  const offsetHex = eventData.slice(2, 66);
-  console.log(`Offset: 0x${offsetHex}`);
-
-  // Next 32 bytes = length of the message
   const lengthHex = eventData.slice(66, 130);
   const messageLength = parseInt(lengthHex, 16);
-  console.log(`Message length from ABI: ${messageLength} bytes`);
-
-  // Extract exactly messageLength bytes (no padding)
   const messageHex = "0x" + eventData.slice(130, 130 + messageLength * 2);
   const message = messageHex as `0x${string}`;
   const messageHash = keccak256(message);
-
-  console.log(`Message: ${message.slice(0, 66)}...`);
-  console.log(`Message hash: ${messageHash}\n`);
 
   return {
     txHash,
@@ -360,116 +285,56 @@ async function burnUsdcOnEthereum(): Promise<{
 // ============================================================================
 
 async function waitForAttestation(
-  messageHash: string,
   txHash: string,
 ): Promise<{ message: string; attestation: string }> {
   console.log("=== Step 2: Waiting for Circle Attestation ===\n");
-  console.log(`Message hash: ${messageHash}`);
-  console.log(`Transaction hash: ${txHash}`);
 
   const isFastTransfer = bridgeConfigSolana.useFastTransfer;
-
-  if (isFastTransfer) {
-    console.log(
-      "\n✨ Fast Transfer Mode: ~1000 block finality (~20 seconds)",
-    );
-    console.log("Fee: 0.01% of transfer amount\n");
-  } else {
-    console.log(
-      "\n⏱️  Standard Transfer Mode: ~2000 block finality (13-19 minutes)",
-    );
-    console.log("Fee: FREE\n");
-  }
-
-  // CCTP V2 uses a different API endpoint - query by transaction hash
-  const ETHEREUM_DOMAIN = 0; // Ethereum mainnet domain ID
+  const ETHEREUM_DOMAIN = 0;
   const ATTESTATION_API_URL = `https://iris-api.circle.com/v2/messages/${ETHEREUM_DOMAIN}`;
-  const MAX_ATTEMPTS = isFastTransfer ? 60 : 240; // 5 minutes for fast, 20 minutes for standard
+  const MAX_ATTEMPTS = isFastTransfer ? 60 : 240;
 
   for (let i = 0; i < MAX_ATTEMPTS; i++) {
     try {
-      // V2 API uses transaction hash as query parameter
       const response = await fetch(`${ATTESTATION_API_URL}?transactionHash=${txHash}`);
-
-      // Log response status for debugging
-      if (i === 0) {
-        console.log(`Attestation API URL: ${ATTESTATION_API_URL}?transactionHash=${txHash}`);
-        console.log(`Initial response status: ${response.status}\n`);
-      }
 
       if (response.ok) {
         const data = await response.json();
 
-        // Log the full response on first attempt and periodically for debugging
-        if (i === 0 || i % 12 === 0) {
-          console.log(`[Attempt ${i + 1}/${MAX_ATTEMPTS}] Response:`, JSON.stringify(data, null, 2));
-        }
-
-        // V2 API returns an array of messages
         if (data.messages && data.messages.length > 0) {
-          const messageData = data.messages[0]; // Get the first (and should be only) message
+          const messageData = data.messages[0];
 
-          // Check if attestation is ready - it's a hex string when complete, "PENDING" when not
           const isAttestationReady =
             messageData.attestation &&
             messageData.attestation !== "PENDING" &&
             messageData.attestation.startsWith("0x");
 
           if (isAttestationReady) {
-            console.log("✅ Attestation received!\n");
+            console.log("Attestation received\n");
             return {
               message: messageData.message,
               attestation: messageData.attestation,
             };
           }
 
-          // Show progress every 12 attempts (1 minute) or on first few attempts
-          if (i % 12 === 0 || i < 5) {
+          if (i % 12 === 0) {
             const elapsedSeconds = i * 5;
             const elapsedMinutes = Math.floor(elapsedSeconds / 60);
             const remainingSeconds = elapsedSeconds % 60;
-            const status = messageData.status || messageData.attestation || "pending";
-            console.log(
-              `[${elapsedMinutes}m ${remainingSeconds}s] Status: ${status}`,
-            );
+            console.log(`[${elapsedMinutes}m ${remainingSeconds}s] Waiting...`);
           }
-        } else {
-          // No messages found yet
-          if (i < 5) {
-            console.log(`[Attempt ${i + 1}] No messages found yet, waiting...`);
-          }
-        }
-      } else {
-        // Log non-OK responses for debugging
-        const errorText = await response.text();
-        if (i === 0 || i % 12 === 0) {
-          console.log(
-            `[Attempt ${i + 1}] Response ${response.status}: ${errorText.slice(0, 200)}`,
-          );
         }
       }
     } catch (error) {
-      if (i === 0 || i % 12 === 0) {
-        console.error(`[Attempt ${i + 1}] Error fetching attestation:`, error);
-      }
+      // Silent retry
     }
 
-    // Wait 5 seconds before next attempt
     await new Promise((resolve) => setTimeout(resolve, 5000));
   }
 
   const timeoutMinutes = isFastTransfer ? 5 : 20;
-  console.error(`\n❌ Attestation timeout after ${timeoutMinutes} minutes\n`);
-  console.error(`Troubleshooting steps:`);
-  console.error(`1. Check Circle's attestation API: ${ATTESTATION_API_URL}?transactionHash=${txHash}`);
-  console.error(`2. Verify the message hash is correct: ${messageHash}`);
-  console.error(`3. Check if the transaction was successful on Etherscan: https://etherscan.io/tx/${txHash}`);
-  console.error(`4. For fast transfers, ensure finality threshold of 1000 is met`);
-  console.error(`5. For standard transfers, ensure finality threshold of 2000 is met\n`);
-
   throw new Error(
-    `Attestation timeout: Message not attested after ${timeoutMinutes} minutes. ` +
-      "Check the troubleshooting steps above.",
+    `Attestation timeout after ${timeoutMinutes} minutes. Check: ${ATTESTATION_API_URL}?transactionHash=${txHash}`,
   );
 }
 
@@ -656,27 +521,10 @@ async function createSolanaReceiveMessageTx(
 
   transaction.add(instruction);
 
-  // Serialize the transaction message (unsigned)
-  // Using legacy transaction serialize() which is more compact
   const serializedTx = transaction.serializeMessage();
   const base64EncodedData = Buffer.from(serializedTx).toString("base64");
 
-  console.log("✅ Transaction serialized to base64");
-  console.log(`Serialized transaction size: ${serializedTx.length} bytes`);
-  console.log(`Base64 encoded length: ${base64EncodedData.length} characters`);
-  console.log(`Message size: ${messageBytes.length} bytes`);
-  console.log(`Attestation size: ${attestationBytes.length} bytes`);
-  console.log(`Instruction data size: ${instructionData.length} bytes`);
-  console.log(`Number of accounts: ${instruction.keys.length}`);
-
-  // Check if transaction is too large for Fordefi (limit is 1232 bytes raw)
-  if (serializedTx.length > 1232) {
-    console.warn(`\n⚠️  WARNING: Transaction size (${serializedTx.length} bytes) exceeds Fordefi limit (1232 bytes)`);
-    console.warn(`   This is due to the large CCTP message and attestation data.`);
-    console.warn(`   Attempting to submit anyway...\n`);
-  } else {
-    console.log(`✅ Transaction size OK (${serializedTx.length} / 1232 bytes)\n`);
-  }
+  console.log(`Transaction size: ${serializedTx.length} bytes\n`);
 
   return base64EncodedData;
 }
@@ -705,23 +553,10 @@ async function submitToFordefiApi(base64SerializedTx: string): Promise<void> {
   const timestamp = new Date().getTime();
   const payload = `${"/api/v1/transactions"}|${timestamp}|${requestBody}`;
 
-  try {
-    // Send tx payload to API Signer for signature
-    const signature = await signWithApiSigner(payload, bridgeConfigSolana.apiPayloadSignKey);
+  const signature = await signWithApiSigner(payload, bridgeConfigSolana.apiPayloadSignKey);
+  const response = await createAndSignTx("/api/v1/transactions", bridgeConfigSolana.apiUserToken, signature, timestamp, requestBody);
 
-    // Send signed payload to Fordefi for MPC signature
-    const response = await createAndSignTx("/api/v1/transactions", bridgeConfigSolana.apiUserToken, signature, timestamp, requestBody);
-    const data = response.data;
-    console.log(data)
-
-    console.log("Fordefi API payload:");
-    console.log(inspect(fordefiApiPayload, false, 2, true));
-
-    console.log();
-  } catch (error) {
-    console.error("Error submitting to Fordefi API:", error);
-    throw error;
-  }
+  console.log("Response:", response.data);
 }
 
 // ============================================================================
@@ -730,49 +565,28 @@ async function submitToFordefiApi(base64SerializedTx: string): Promise<void> {
 
 async function main(): Promise<void> {
   try {
-    console.log("╔════════════════════════════════════════════════════════╗");
-    console.log("║  Ethereum → Solana CCTP Bridge with Fordefi          ║");
-    console.log("╚════════════════════════════════════════════════════════╝\n");
+    console.log("=== Ethereum → Solana CCTP Bridge ===\n");
 
-    // Validate configuration
     if (!bridgeConfigSolana.solanaRecipientAddress) {
-      throw new Error(
-        "SOLANA_RECIPIENT_ADDRESS must be set in environment variables",
-      );
+      throw new Error("SOLANA_RECIPIENT_ADDRESS must be set");
     }
     if (!bridgeConfigSolana.fordefiVaultId) {
-      throw new Error(
-        "FORDEFI_SOLANA_VAULT_ID must be set in environment variables",
-      );
+      throw new Error("FORDEFI_SOLANA_VAULT_ID must be set");
     }
 
-    // Step 1: Burn USDC on Ethereum
-    const { txHash, message, messageHash } = await burnUsdcOnEthereum();
-    console.log(`✅ Burn transaction: ${txHash}\n`);
-
-    // Step 2: Wait for attestation
-    const { attestation } = await waitForAttestation(messageHash, txHash);
-
-    // Step 3: Create and serialize Solana transaction
-    const base64SerializedTx = await createSolanaReceiveMessageTx(
-      message,
-      attestation,
-    );
-
-    // Step 4: Submit to Fordefi API
+    const { txHash, message } = await burnUsdcOnEthereum();
+    const { attestation } = await waitForAttestation(txHash);
+    const base64SerializedTx = await createSolanaReceiveMessageTx(message, attestation);
     await submitToFordefiApi(base64SerializedTx);
 
-    console.log("\n✅ Bridge flow completed successfully!");
-    console.log(
-      "\nThe serialized Solana transaction is ready to be signed by Fordefi.",
-    );
+    console.log("\n✅ Bridge completed\n");
   } catch (error) {
-    console.error("\n❌ ERROR:", inspect(error, false, null, true));
+    console.error("\n❌ Error:", error);
     process.exit(1);
   }
 }
 
 main().catch((err) => {
-  console.error("FATAL ERROR:", inspect(err, false, null, true));
+  console.error("Fatal error:", err);
   process.exit(1);
 });
