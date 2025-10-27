@@ -568,12 +568,6 @@ async function createSolanaReceiveMessageTx(
     TOKEN_MESSENGER_MINTER_PROGRAM_ID,
   );
 
-  // Token messenger event authority
-  const [tokenMessengerEventAuthority] = PublicKey.findProgramAddressSync(
-    [Buffer.from("__event_authority")],
-    TOKEN_MESSENGER_MINTER_PROGRAM_ID,
-  );
-
   // Derive used nonce PDA (note: singular "used_nonce" per the working example)
   // Extract the full 32-byte nonce from the message (bytes 12-43)
   const nonceBytes = messageBytes.slice(12, 44); // 32 bytes for V2
@@ -584,14 +578,14 @@ async function createSolanaReceiveMessageTx(
   );
 
   // Build instruction data using Anchor format
-  // Anchor discriminator for "receiveMessage" = first 8 bytes of sha256("global:receiveMessage")
+  // Anchor discriminator for "receive_message" = first 8 bytes of sha256("global:receive_message")
   const crypto = await import("crypto");
   const hash = crypto.createHash("sha256");
-  hash.update("global:receiveMessage");
+  hash.update("global:receive_message");
   const discriminator = hash.digest().slice(0, 8);
 
   // Anchor encodes parameters as: discriminator + borsh-serialized params
-  // For receiveMessage(params: ReceiveMessageParams), we need to serialize:
+  // For receive_message(params: ReceiveMessageParams), we need to serialize:
   // struct ReceiveMessageParams { message: Vec<u8>, attestation: Vec<u8> }
 
   // Borsh encoding for Vec<u8>: length (u32 LE) + data
@@ -615,28 +609,25 @@ async function createSolanaReceiveMessageTx(
   const instruction: TransactionInstruction = {
     programId: MESSAGE_TRANSMITTER_PROGRAM_ID,
     keys: [
-      // Named accounts (from the Anchor IDL)
+      // MessageTransmitter accounts
       { pubkey: recipientPubkey, isSigner: true, isWritable: true }, // payer
-      { pubkey: recipientPubkey, isSigner: true, isWritable: false }, // caller (deduplicated by Solana)
+      { pubkey: recipientPubkey, isSigner: true, isWritable: false }, // caller
       { pubkey: authorityPda, isSigner: false, isWritable: false }, // authority_pda
       { pubkey: messageTransmitterAccount, isSigner: false, isWritable: false }, // message_transmitter
-      { pubkey: usedNonces, isSigner: false, isWritable: true }, // used_nonces
+      { pubkey: usedNonces, isSigner: false, isWritable: true }, // used_nonce
       { pubkey: TOKEN_MESSENGER_MINTER_PROGRAM_ID, isSigner: false, isWritable: false }, // receiver
       { pubkey: SystemProgram.programId, isSigner: false, isWritable: false }, // system_program
 
-      // Remaining accounts for deposit-for-burn message handling (V2 order)
-      // These match the working Arbitrum->Solana example exactly
+      // TokenMessenger remaining accounts
       { pubkey: tokenMessenger, isSigner: false, isWritable: false },
       { pubkey: remoteTokenMessenger, isSigner: false, isWritable: false },
-      { pubkey: tokenMinter, isSigner: false, isWritable: true }, // writable!
-      { pubkey: localToken, isSigner: false, isWritable: true }, // writable!
+      { pubkey: tokenMinter, isSigner: false, isWritable: true },
+      { pubkey: localToken, isSigner: false, isWritable: true },
       { pubkey: tokenPair, isSigner: false, isWritable: false },
       { pubkey: feeRecipientTokenAccount, isSigner: false, isWritable: true },
       { pubkey: recipientTokenAccount, isSigner: false, isWritable: true },
       { pubkey: custodyTokenAccount, isSigner: false, isWritable: true },
       { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
-      { pubkey: tokenMessengerEventAuthority, isSigner: false, isWritable: false },
-      { pubkey: TOKEN_MESSENGER_MINTER_PROGRAM_ID, isSigner: false, isWritable: false }, // deduplicated
     ],
     data: instructionData,
   };

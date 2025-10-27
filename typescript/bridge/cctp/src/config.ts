@@ -79,7 +79,7 @@ export interface BridgeConfigSolana {
 
 export const bridgeConfigSolana: BridgeConfigSolana = {
   ethereumChain: "Ethereum",
-  amountUsdc: "0.5",
+  amountUsdc: "0.1",
   useFastTransfer: true, // Set to false for standard transfer (free but takes 13-19 minutes)
   solanaRpcUrl: "https://api.mainnet-beta.solana.com",
   solanaChain: "solana_mainnet",
