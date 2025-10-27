@@ -502,7 +502,7 @@ async function createSolanaReceiveMessageTx(
   );
 
   const [authorityPda] = PublicKey.findProgramAddressSync(
-    [Buffer.from("message_transmitter_authority"), messageTransmitterAccount.toBuffer()],
+    [Buffer.from("message_transmitter_authority"), TOKEN_MESSENGER_MINTER_PROGRAM_ID.toBuffer()],
     MESSAGE_TRANSMITTER_PROGRAM_ID,
   );
 
