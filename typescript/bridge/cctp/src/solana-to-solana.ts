@@ -366,14 +366,120 @@ async function waitForAttestation(
   );
 }
 
-async function createEvmReceiveMessageTx(
+// Helper function to decode the mintRecipient from the CCTP message
+function decodeMintRecipientFromMessage(message: string): string {
+  // CCTP message format (simplified):
+  // - version (4 bytes)
+  // - sourceDomain (4 bytes)
+  // - destinationDomain (4 bytes)
+  // - nonce (8 bytes)
+  // - sender (32 bytes)
+  // - recipient (32 bytes) <- this is the mintRecipient
+  // - destinationCaller (32 bytes)
+  // - messageBody (variable)
+  
+  const messageBytes = message.startsWith('0x') ? message.slice(2) : message;
+  
+  // Recipient starts at byte 52 (after version, domains, nonce, sender)
+  // Each byte is 2 hex chars, so position 52 * 2 = 104
+  const recipientStart = 52 * 2;
+  const recipientHex = messageBytes.substring(recipientStart, recipientStart + 64);
+  
+  // Convert 32-byte hex to Ethereum address (take last 20 bytes)
+  const address = '0x' + recipientHex.slice(-40);
+  
+  return address;
+}
+
+async function receiveMessageOnEvm(
   message: string,
   attestation: string
-): Promise<string> {
-  console.log("=== Step 4: Creating EVM receiveMessage transaction ===\n");
+): Promise<void> {
+  console.log("\n=== Step 4: Receiving Message on EVM (Arbitrum) ===\n");
   
-  // TODO: Implement EVM receiveMessage transaction creation
-  throw new Error("Not yet implemented");
+  // Decode and show the recipient
+  const mintRecipient = decodeMintRecipientFromMessage(message);
+  console.log(`💰 USDC will be minted to: ${mintRecipient}`);
+  console.log(`   Expected recipient: ${bridgeConfigSolana.evmRecipientAddress}`);
+  
+  if (mintRecipient.toLowerCase() !== bridgeConfigSolana.evmRecipientAddress.toLowerCase()) {
+    console.warn(`⚠️  WARNING: Recipient mismatch!`);
+  } else {
+    console.log(`✅ Recipient matches!\n`);
+  }
+  
+  const provider = await getProvider(fordefiConfigFrom);
+  if (!provider) {
+    throw new Error("Failed to initialize Fordefi provider");
+  }
+
+  // MessageTransmitter contract on Arbitrum
+  const MESSAGE_TRANSMITTER_ADDRESS = "0xaCF1ceeF35caAc005e15888dDb8A3515C41B4872";
+  
+  // MessageTransmitter ABI - just the receiveMessage function
+  const MESSAGE_TRANSMITTER_ABI = [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "message",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "attestation",
+          "type": "bytes"
+        }
+      ],
+      "name": "receiveMessage",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "success",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ];
+
+  console.log("Calling receiveMessage on Arbitrum...");
+  console.log(`Transaction caller: ${fordefiConfigFrom.address}`);
+  console.log(`Message: ${message.substring(0, 50)}...`);
+  console.log(`Attestation: ${attestation.substring(0, 50)}...`);
+  
+  // Create wallet client with Fordefi provider
+  const walletClient = createWalletClient({
+    chain: arbitrum,
+    transport: custom(provider),
+  });
+
+  const account = fordefiConfigFrom.address as `0x${string}`;
+
+  // Call receiveMessage on the MessageTransmitter contract
+  const hash = await walletClient.writeContract({
+    address: MESSAGE_TRANSMITTER_ADDRESS,
+    abi: MESSAGE_TRANSMITTER_ABI,
+    functionName: "receiveMessage",
+    args: [message, attestation],
+    account,
+  });
+
+  console.log(`\n✅ ReceiveMessage transaction submitted: ${hash}`);
+  console.log(`Waiting for confirmation...`);
+
+  // Wait for transaction receipt
+  const publicClient = createPublicClient({
+    chain: arbitrum,
+    transport: http(),
+  });
+
+  const receipt = await publicClient.waitForTransactionReceipt({ hash });
+  
+  console.log(`\n✅ Transaction confirmed in block ${receipt.blockNumber}`);
+  console.log(`\n💰 USDC has been minted to: ${mintRecipient}`);
+  console.log(`   Check balance at: https://arbiscan.io/address/${mintRecipient}`);
 }
 
 // ============================================================================
@@ -417,15 +523,15 @@ async function main(): Promise<void> {
     // Step 3: Wait for Circle attestation using transaction hash
     const { message, attestation } = await waitForAttestation(txHash);
     
-    console.log("\n✅ Bridge transaction completed!\n");
-    console.log(`Message: ${message}`);
-    console.log(`Attestation: ${attestation.substring(0, 50)}...`);
+    console.log("✅ Attestation received!");
+    console.log(`Message: ${message.substring(0, 66)}...`);
+    console.log(`Attestation: ${attestation.substring(0, 66)}...`);
     
-    // TODO: Step 4: Create EVM receiveMessage transaction
-    // const evmTxData = await createEvmReceiveMessageTx(message, attestation);
+    // Step 4: Receive message on EVM (Arbitrum) to mint USDC
+    await receiveMessageOnEvm(message, attestation);
     
-    // TODO: Step 5: Submit EVM transaction to destination chain
-    // (Implementation depends on destination chain - could be another Fordefi call or direct submission)
+    console.log("\n🎉 Bridge completed successfully! 🎉");
+    console.log(`USDC burned on Solana and minted on Arbitrum!`);
   } catch (error) {
     console.error("\n❌ Error:", error);
     process.exit(1);
