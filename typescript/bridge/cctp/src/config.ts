@@ -97,6 +97,7 @@ export const bridgeConfigSolana: BridgeConfigSolana = {
 };
 
 // CCTP & USDC Contracts
+// https://developers.circle.com/cctp/evm-smart-contracts
 // V2 TokenMessenger with Fast Transfer support
 export const TOKEN_MESSENGER = "0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d";
 export const ETHEREUM_USDC = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
