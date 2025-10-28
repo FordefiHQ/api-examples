@@ -1,0 +1,438 @@
+import "dotenv/config";
+import { getProvider } from "./get-provider";
+import {signWithApiSigner } from "./signer";
+import {createAndSignTx, get_tx} from './process_tx'
+import {
+  fordefiConfigFrom,
+  bridgeConfigSolana
+} from "./config";
+import {
+  createWalletClient,
+  createPublicClient,
+  custom,
+  http,
+  parseUnits,
+  keccak256,
+  encodeFunctionData,
+} from "viem";
+import { arbitrum } from "viem/chains";
+import {
+  Connection,
+  PublicKey,
+  TransactionMessage,
+  VersionedTransaction,
+  TransactionInstruction,
+  SystemProgram,
+  Transaction,
+  ComputeBudgetProgram,
+  AddressLookupTableProgram,
+  AddressLookupTableAccount,
+  Keypair,
+} from "@solana/web3.js";
+import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import * as spl from "@solana/spl-token";
+import bs58 from "bs58";
+import { MESSAGE_TRANSMITTER_PROGRAM_ID, TOKEN_MESSENGER_MINTER_PROGRAM_ID, SOLANA_USDC_MINT, SOLANA_DOMAIN, ARBITRUM_DOMAIN, TOKEN_MESSENGER, ARBITRUM_USDC  } from "./config";
+import {
+  getProgramsV2,
+  getReceiveMessagePdasV2,
+  decodeEventNonceFromMessageV2,
+  getDepositForBurnPdasV2
+} from "../solana-cctp-contracts/examples/v2/utilsV2";
+import * as anchor from "@coral-xyz/anchor";
+import { BN } from "@coral-xyz/anchor";
+import { getBytes } from "ethers";
+
+/**
+ * Solana to Solana CCTP Bridge with Fordefi
+ *
+ * This script demonstrates bridging USDC from Solana to another chain (e.g., Arbitrum):
+ * 1. Burn USDC on Solana using depositForBurn (serialized for Fordefi remote signer)
+ * 2. Submit serialized transaction to Fordefi API
+ * 3. Wait for Circle attestation
+ * 4. Receive message on destination chain
+ */
+
+// ============================================================================
+// Helper: Convert EVM address to bytes32
+// ============================================================================
+
+function evmAddressToBytes32(address: string): string {
+  // Remove 0x prefix if present
+  const cleanAddress = address.replace(/^0x/, "");
+  // Pad with zeros to make it 32 bytes (64 hex chars)
+  return "0x" + cleanAddress.padStart(64, "0");
+}
+
+// ============================================================================
+// Step 1: Burn USDC on Solana (Deposit for Burn)
+// ============================================================================
+
+async function burnUsdcOnSolana(
+  amount: BN,
+  maxFee: BN,
+  minFinalityThreshold: number
+): Promise<{ base64EncodedData: string; eventAccountSignature: string; messageSentEventData: PublicKey }> {
+  console.log("=== Step 1: Deposit for Burn on Solana ===\n");
+
+  const connection = new Connection(
+    bridgeConfigSolana.solanaRpcUrl,
+    "confirmed",
+  );
+  
+  const ownerPubkey = new PublicKey(
+    bridgeConfigSolana.solanaRecipientAddress,
+  );
+
+  // Initialize Anchor provider and programs
+  const anchorProvider = new anchor.AnchorProvider(
+    connection,
+    { publicKey: ownerPubkey } as any,
+    { commitment: "confirmed" }
+  );
+  
+  const { messageTransmitterProgram, tokenMessengerMinterProgram } =
+    getProgramsV2(anchorProvider);
+
+  const usdcAddress = SOLANA_USDC_MINT;
+  
+  // Derive the ATA for the owner's USDC account (burn token account)
+  const userTokenAccount = await getAssociatedTokenAddress(
+    usdcAddress,
+    ownerPubkey
+  );
+
+  // Set destination domain and recipient
+  const destinationDomain = ARBITRUM_DOMAIN; // Destination domain (Arbitrum)
+  // For EVM destination, convert EVM address to bytes32 and create a PublicKey from it
+  const mintRecipient = new PublicKey(
+    getBytes(evmAddressToBytes32(bridgeConfigSolana.evmRecipientAddress))
+  );
+  
+  // destinationCaller as PublicKey (default means no specific caller required)
+  const destinationCaller = PublicKey.default;
+
+  // Get PDAs for deposit for burn
+  const pdas = getDepositForBurnPdasV2(
+    {
+      messageTransmitterProgram,
+      tokenMessengerMinterProgram,
+    },
+    usdcAddress,
+    destinationDomain
+  );
+
+  // Generate a new keypair for the MessageSent event account
+  const messageSentEventAccountKeypair = Keypair.generate();
+
+  // Build the depositForBurn instruction using the Anchor program
+  const instructionBuilder = tokenMessengerMinterProgram.methods
+    .depositForBurn({
+      amount,
+      destinationDomain,
+      mintRecipient,
+      maxFee,
+      minFinalityThreshold,
+      destinationCaller,
+    })
+    .accounts({
+      owner: ownerPubkey,
+      eventRentPayer: ownerPubkey,
+      senderAuthorityPda: pdas.authorityPda.publicKey,
+      burnTokenAccount: userTokenAccount,
+      messageTransmitter: pdas.messageTransmitterAccount.publicKey,
+      tokenMessenger: pdas.tokenMessengerAccount.publicKey,
+      remoteTokenMessenger: pdas.remoteTokenMessengerKey.publicKey,
+      tokenMinter: pdas.tokenMinterAccount.publicKey,
+      localToken: pdas.localToken.publicKey,
+      burnTokenMint: usdcAddress,
+      messageSentEventData: messageSentEventAccountKeypair.publicKey,
+      messageTransmitterProgram: messageTransmitterProgram.programId,
+      tokenMessengerMinterProgram: tokenMessengerMinterProgram.programId,
+      tokenProgram: spl.TOKEN_PROGRAM_ID,
+      systemProgram: SystemProgram.programId,
+    } as any)
+    .signers([messageSentEventAccountKeypair]);
+
+  const instruction = await instructionBuilder.instruction();
+
+  // Get recent blockhash
+  const { blockhash } = await connection.getLatestBlockhash();
+
+  // Create VersionedTransaction with the instruction
+  const instructions: TransactionInstruction[] = [];
+  instructions.push(instruction);
+
+  const txMessage = new TransactionMessage({
+    payerKey: ownerPubkey,
+    recentBlockhash: blockhash,
+    instructions: instructions,
+  }).compileToV0Message();
+
+  const transaction = new VersionedTransaction(txMessage);
+  
+  // Sign the transaction locally with the messageSentEventAccountKeypair
+  // to get its signature that we'll pass to Fordefi
+  transaction.sign([messageSentEventAccountKeypair]);
+  
+  // Extract the signature from the messageSentEventAccountKeypair
+  // The signature array is ordered by the signers in the transaction
+  // Index 0: owner/payer (will be signed by Fordefi)
+  // Index 1: messageSentEventAccountKeypair (signed locally)
+  const eventAccountSignature = transaction.signatures[1];
+  
+  if (!eventAccountSignature || eventAccountSignature.every(byte => byte === 0)) {
+    throw new Error("Failed to sign with messageSentEventAccountKeypair");
+  }
+  
+  // Serialize ONLY the message (not the full transaction)
+  const serializedMessage = transaction.message.serialize();
+  const base64EncodedMessage = Buffer.from(serializedMessage).toString("base64");
+  
+  // Convert signature to base64
+  const base64Signature = Buffer.from(eventAccountSignature).toString("base64");
+
+  console.log(`Transaction message size: ${serializedMessage.length} bytes`);
+  console.log(`Amount: ${amount.toString()} USDC`);
+  console.log(`Destination Domain: ${destinationDomain}`);
+  console.log(`Mint Recipient (EVM): ${bridgeConfigSolana.evmRecipientAddress}`);
+  console.log(`Event Account Keypair: ${messageSentEventAccountKeypair.publicKey.toString()}`);
+  console.log(`\nNote: Message serialized. Event account signature will be included.`);
+  console.log(`Fordefi will add the owner signature and broadcast.\n`);
+
+  return {
+    base64EncodedData: base64EncodedMessage,
+    eventAccountSignature: base64Signature,
+    messageSentEventData: messageSentEventAccountKeypair.publicKey
+  };
+}
+
+// ============================================================================
+// Step 2: Submit to Fordefi API
+// ============================================================================
+
+async function submitToFordefiApi(
+  base64SerializedMessage: string,
+  eventAccountSignature: string
+): Promise<string> {
+  console.log("=== Step 2: Submitting to Fordefi API ===\n");
+
+  const fordefiApiPayload = {
+    vault_id: bridgeConfigSolana.fordefiVaultId,
+    signer_type: "api_signer",
+    sign_mode: "auto",
+    type: "solana_transaction",
+    details: {
+      type: "solana_serialized_transaction_message",
+      push_mode: "auto",
+      chain: "solana_mainnet",
+      data: base64SerializedMessage,
+      signatures: [
+        { data: null }, // Placeholder for Fordefi vault signature (owner/payer)
+        { data: eventAccountSignature }, // Pre-signed by messageSentEventAccountKeypair
+      ]
+    },
+  };
+
+  const requestBody = JSON.stringify(fordefiApiPayload);
+  const timestamp = new Date().getTime();
+  const payload = `${"/api/v1/transactions"}|${timestamp}|${requestBody}`;
+
+  const signature = await signWithApiSigner(payload, bridgeConfigSolana.apiPayloadSignKey);
+  const response = await createAndSignTx("/api/v1/transactions", bridgeConfigSolana.apiUserToken, signature, timestamp, requestBody);
+
+  const transactionId = response.data.id;
+  console.log(`Transaction ID: ${transactionId}`);
+  console.log("Waiting for transaction to be confirmed on-chain...\n");
+
+  // Poll Fordefi API to get the transaction hash
+  return await waitForTransactionHash(transactionId);
+}
+
+async function waitForTransactionHash(transactionId: string): Promise<string> {
+  const MAX_ATTEMPTS = 60; // 5 minutes max
+  
+  for (let i = 0; i < MAX_ATTEMPTS; i++) {
+    try {
+      const path = `/api/v1/transactions/${transactionId}`;
+      const data = await get_tx(path, bridgeConfigSolana.apiUserToken);
+      
+      // Debug: log the blockchain_data structure on first completed state
+      if (data.state === "completed" && i === 0) {
+        console.log("Blockchain data:", JSON.stringify(data.blockchain_data, null, 2));
+      }
+      
+      // Check multiple possible locations for the transaction hash
+      const txHash = 
+        data.blockchain_data?.hash ||
+        data.blockchain_data?.transaction_hash ||
+        data.blockchain_data?.signature ||
+        data.tx_hash ||
+        data.hash;
+      
+      if (txHash && data.state === "completed") {
+        console.log(`✅ Transaction confirmed: ${txHash}`);
+        console.log(`Transaction state: ${data.state}\n`);
+        return txHash;
+      }
+      
+      if (data.state === "failed" || data.state === "rejected") {
+        throw new Error(`Transaction ${data.state}: ${JSON.stringify(data)}`);
+      }
+
+      if (i % 6 === 0) {
+        console.log(`[${i * 5}s] Transaction state: ${data.state}...`);
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error(`Error polling transaction: ${errorMsg}`);
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+  }
+
+  throw new Error("Timeout waiting for transaction confirmation");
+}
+
+// ============================================================================
+// Step 3: Wait for Circle Attestation
+// ============================================================================
+
+async function waitForAttestation(
+  txHash: string,
+): Promise<{ message: string; attestation: string }> {
+  console.log("\n=== Step 3: Waiting for Circle Attestation ===\n");
+  console.log(`Transaction hash: ${txHash}`);
+
+  const isFastTransfer = bridgeConfigSolana.useFastTransfer;
+  const ATTESTATION_API_URL = `https://iris-api.circle.com/v2/messages/${SOLANA_DOMAIN}`;
+  const MAX_ATTEMPTS = isFastTransfer ? 60 : 240;
+
+  console.log(`Using ${isFastTransfer ? "fast" : "standard"} transfer mode`);
+  console.log(`Will check Circle API for up to ${MAX_ATTEMPTS * 5} seconds\n`);
+
+  for (let i = 0; i < MAX_ATTEMPTS; i++) {
+    try {
+      const url = `${ATTESTATION_API_URL}?transactionHash=${txHash}`;
+      const response = await fetch(url);
+
+      if (response.ok) {
+        const data = await response.json();
+
+        if (data.messages && data.messages.length > 0) {
+          const messageData = data.messages[0];
+
+          const isAttestationReady =
+            messageData.attestation &&
+            messageData.attestation !== "PENDING" &&
+            messageData.attestation.startsWith("0x");
+
+          if (isAttestationReady) {
+            console.log("✅ Attestation received!\n");
+            return {
+              message: messageData.message,
+              attestation: messageData.attestation,
+            };
+          }
+
+          // Show status even if pending
+          if (i % 6 === 0) {
+            const elapsedSeconds = i * 5;
+            const elapsedMinutes = Math.floor(elapsedSeconds / 60);
+            const remainingSeconds = elapsedSeconds % 60;
+            console.log(`[${elapsedMinutes}m ${remainingSeconds}s] Status: ${messageData.attestation || 'PENDING'}...`);
+          }
+        } else if (i === 0) {
+          console.log("Message not yet indexed by Circle. Waiting...");
+        }
+      } else {
+        if (i % 12 === 0) {
+          console.log(`API returned status ${response.status}, continuing to poll...`);
+        }
+      }
+    } catch (error) {
+      if (i % 12 === 0) {
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.log(`Error querying attestation: ${errorMsg}`);
+      }
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+  }
+
+  const timeoutMinutes = isFastTransfer ? 5 : 20;
+  throw new Error(
+    `Attestation timeout after ${timeoutMinutes} minutes. Check manually: ${ATTESTATION_API_URL}?transactionHash=${txHash}`,
+  );
+}
+
+async function createEvmReceiveMessageTx(
+  message: string,
+  attestation: string
+): Promise<string> {
+  console.log("=== Step 4: Creating EVM receiveMessage transaction ===\n");
+  
+  // TODO: Implement EVM receiveMessage transaction creation
+  throw new Error("Not yet implemented");
+}
+
+// ============================================================================
+// Main Function
+// ============================================================================
+
+async function main(): Promise<void> {
+  try {
+    console.log("=== Solana → EVM CCTP Bridge ===\n");
+
+    if (!bridgeConfigSolana.solanaRecipientAddress) {
+      throw new Error("SOLANA_RECIPIENT_ADDRESS must be set");
+    }
+    if (!bridgeConfigSolana.fordefiVaultId) {
+      throw new Error("FORDEFI_SOLANA_VAULT_ID must be set");
+    }
+
+    // Configure burn parameters
+    // Convert human-readable amount (e.g., "0.1") to smallest unit with 6 decimals
+    const amountInSmallestUnit = Math.floor(
+      parseFloat(bridgeConfigSolana.amountUsdc) * 1_000_000
+    );
+    const amount = new BN(amountInSmallestUnit);
+    const maxFee = new BN(0); // No fee
+    const minFinalityThreshold = 0; // Immediate finality
+    
+    console.log(`Bridging ${bridgeConfigSolana.amountUsdc} USDC (${amountInSmallestUnit} smallest units)\n`);
+
+    // Step 1: Burn USDC on Solana (Deposit for Burn)
+    const { base64EncodedData, eventAccountSignature, messageSentEventData } = await burnUsdcOnSolana(
+      amount,
+      maxFee,
+      minFinalityThreshold
+    );
+
+    // Step 2: Submit to Fordefi API and wait for transaction hash
+    const txHash = await submitToFordefiApi(base64EncodedData, eventAccountSignature);
+    
+    console.log(`MessageSent Event Account: ${messageSentEventData.toString()}`);
+    
+    // Step 3: Wait for Circle attestation using transaction hash
+    const { message, attestation } = await waitForAttestation(txHash);
+    
+    console.log("\n✅ Bridge transaction completed!\n");
+    console.log(`Message: ${message}`);
+    console.log(`Attestation: ${attestation.substring(0, 50)}...`);
+    
+    // TODO: Step 4: Create EVM receiveMessage transaction
+    // const evmTxData = await createEvmReceiveMessageTx(message, attestation);
+    
+    // TODO: Step 5: Submit EVM transaction to destination chain
+    // (Implementation depends on destination chain - could be another Fordefi call or direct submission)
+  } catch (error) {
+    console.error("\n❌ Error:", error);
+    process.exit(1);
+  }
+}
+
+main().catch((err) => {
+  console.error("Fatal error:", err);
+  process.exit(1);
+});
