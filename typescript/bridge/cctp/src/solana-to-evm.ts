@@ -58,10 +58,8 @@ import { getBytes } from "ethers";
 // ============================================================================
 
 function evmAddressToBytes32(address: string): string {
-  // Remove 0x prefix if present
-  const cleanAddress = address.replace(/^0x/, "");
-  // Pad with zeros to make it 32 bytes (64 hex chars)
-  return "0x" + cleanAddress.padStart(64, "0");
+  // Circle's implementation - prepend zeros to make 32 bytes
+  return `0x000000000000000000000000${address.replace("0x", "")}`;
 }
 
 // ============================================================================
@@ -103,13 +101,11 @@ async function burnUsdcOnSolana(
   );
 
   // Set destination domain and recipient
-  const destinationDomain = ARBITRUM_DOMAIN; // Destination domain (Arbitrum)
+  const destinationDomain = ARBITRUM_DOMAIN;
   // For EVM destination, convert EVM address to bytes32 and create a PublicKey from it
-  const mintRecipient = new PublicKey(
-    getBytes(evmAddressToBytes32(bridgeConfigSolana.evmRecipientAddress))
-  );
-  
-  // destinationCaller as PublicKey (default means no specific caller required)
+  const evmAddressBytes32 = evmAddressToBytes32(bridgeConfigSolana.evmRecipientAddress);
+  const mintRecipientBytes = getBytes(evmAddressBytes32);
+  const mintRecipient = new PublicKey(mintRecipientBytes);
   const destinationCaller = PublicKey.default;
 
   // Get PDAs for deposit for burn
@@ -368,25 +364,21 @@ async function waitForAttestation(
 
 // Helper function to decode the mintRecipient from the CCTP message
 function decodeMintRecipientFromMessage(message: string): string {
-  // CCTP message format (simplified):
-  // - version (4 bytes)
-  // - sourceDomain (4 bytes)
-  // - destinationDomain (4 bytes)
-  // - nonce (8 bytes)
-  // - sender (32 bytes)
-  // - recipient (32 bytes) <- this is the mintRecipient
-  // - destinationCaller (32 bytes)
-  // - messageBody (variable)
-  
   const messageBytes = message.startsWith('0x') ? message.slice(2) : message;
   
-  // Recipient starts at byte 52 (after version, domains, nonce, sender)
-  // Each byte is 2 hex chars, so position 52 * 2 = 104
-  const recipientStart = 52 * 2;
-  const recipientHex = messageBytes.substring(recipientStart, recipientStart + 64);
+  // Skip to message body (after 116 bytes = 232 hex chars of header)
+  const messageBody = messageBytes.substring(232);
   
-  // Convert 32-byte hex to Ethereum address (take last 20 bytes)
-  const address = '0x' + recipientHex.slice(-40);
+  // Based on actual message data, the mintRecipient appears at position 136-200 of the message body
+  // This corresponds to what would be labeled as the "amount" field in standard parsing
+  const mintRecipientField = messageBody.substring(136, 200);
+  
+  // Extract the last 40 characters (20 bytes) as the Ethereum address
+  const address = '0x' + mintRecipientField.slice(-40);
+  
+  console.log(`\nDecode mintRecipient from message:`);
+  console.log(`  MintRecipient field (32 bytes): 0x${mintRecipientField}`);
+  console.log(`  Extracted address: ${address}`);
   
   return address;
 }
@@ -524,7 +516,7 @@ async function main(): Promise<void> {
     const { message, attestation } = await waitForAttestation(txHash);
     
     console.log("✅ Attestation received!");
-    console.log(`Message: ${message.substring(0, 66)}...`);
+    console.log(`Message (full): ${message}`);
     console.log(`Attestation: ${attestation.substring(0, 66)}...`);
     
     // Step 4: Receive message on EVM (Arbitrum) to mint USDC

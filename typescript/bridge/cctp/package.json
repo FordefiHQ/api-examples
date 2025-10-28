@@ -6,7 +6,7 @@
   "scripts": {
     "evm2evm": "npx tsx src/evm-to-evm.ts",
     "evm2solana": "npx tsx src/evm-to-solana.ts",
-    "solana2evm": "npx tsx src/solana-to-solana.ts"
+    "solana2evm": "npx tsx src/solana-to-evm.ts"
   },
   "keywords": [],
   "author": "",
