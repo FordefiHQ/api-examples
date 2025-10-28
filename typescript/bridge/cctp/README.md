@@ -1,6 +1,6 @@
-# CCTP Bridge Examples with Fordefi
+# CCTP Circle Bridge with Fordefi
 
-Bridge USDC across chains using Circle's CCTP (Cross-Chain Transfer Protocol) with Fordefi as the signing provider.
+Bridge USDC across chains using Circle's CCTP (Cross-Chain Transfer Protocol) with Fordefi.
 
 ## Overview
 
@@ -20,11 +20,7 @@ Both examples use **Circle Bridge Kit**, which automatically handles:
 ┌─────────────┐         ┌──────────────┐         ┌─────────────┐
 │  EVM Chain  │────1───>│    Circle    │────2───>│ Destination │
 │  (Burn)     │         │ (Attestation)│         │   (Mint)    │
-└─────────────┘         └──────────────┘         └─────────────┘
-      │                                                  │
-      │                                                  │
-  Fordefi                                           Bridge Kit
-  Web3 Provider                                  
+└─────────────┘         └──────────────┘         └─────────────┘                               
 ```
 
 ## Prerequisites
@@ -33,7 +29,8 @@ Both examples use **Circle Bridge Kit**, which automatically handles:
 
 1. **Fordefi Credentials**:
    - Place your API user token in `.env` as `FORDEFI_API_USER_TOKEN`
-   - Place your private key PEM file in `./fordefi_secret/private.pem`
+   - Place your API user private key PEM file in `./fordefi_secret/private.pem`
+   - Your API Signer must be setup and running (see here)[https://docs.fordefi.com/developers/getting-started/set-up-an-api-signer/api-signer-docker]
 
 2. **For EVM to Solana**: 
    - Set `PHANTOM_PK` environment variable with a Solana private key (used as relayer/payer)
@@ -141,10 +138,10 @@ npm run evm2solana
 
 ## Common Issues
 
-1. **"Account not found"** - For Solana, ensure the Fordefi vault's USDC token account exists (the script handles this automatically using the relayer)
+1. **"Account not found"** - For Solana, ensure the Fordefi vault's USDC token account exists
 2. **"Invalid attestation"** - Wait longer for attestation or verify the source transaction succeeded
 3. **Bridge pending** - Standard transfers take 13-19 minutes; fast transfers take ~20 seconds
-4. **Insufficient SOL** - Ensure the relayer account (Phantom PK) has enough SOL to pay for transaction fees
+4. **Insufficient SOL** - Ensure the relayer account (Phantom PK) has enough SOL to pay for transaction fees to mint USDC on Solana
 
 ## Resources
 

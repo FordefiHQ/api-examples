@@ -5,6 +5,7 @@ import fs from "fs";
 
 dotenv.config();
 
+//////// EVM TO EVM CONFIG ////////////
 function getChainId(chainName: string): number {
   switch (chainName) {
     case "Ethereum":
