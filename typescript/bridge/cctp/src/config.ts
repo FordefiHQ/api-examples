@@ -71,6 +71,7 @@ export interface BridgeConfigSolana {
   // Solana side
   solanaRpcUrl: string;
   solanaRecipientAddress: string; // Solana wallet address that will receive USDC
+  evmRecipientAddress: string; // EVM wallet address that will receive USDC when bridging from Solana to EVM
   fordefiVaultId: string; // Fordefi vault ID for Solana signer
   apiUserToken: string,
   apiPayloadSignKey: any
@@ -82,6 +83,7 @@ export const bridgeConfigSolana: BridgeConfigSolana = {
   useFastTransfer: true, // Set to false for standard transfer (free but takes 13-19 minutes)
   solanaRpcUrl: "https://api.mainnet-beta.solana.com",
   solanaRecipientAddress: "CtvSEG7ph7SQumMtbnSKtDTLoUQoy8bxPUcjwvmNgGim",
+  evmRecipientAddress: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73", // EVM address for Solana->EVM bridge
   fordefiVaultId: "9597e08a-32a8-4f96-a043-a3e7f1675f8d",
   apiUserToken: process.env.FORDEFI_API_USER_TOKEN ??
     (() => {
