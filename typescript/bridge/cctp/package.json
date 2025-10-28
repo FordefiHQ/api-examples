@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "evm-to-evm": "npx tsx src/evm-to-evm.ts",
-    "eth-to-solana": "npx tsx src/eth-to-solana.ts"
+    "evm-to-solana": "npx tsx src/evm-to-solana.ts",
+    "create-alt": "ALT_ACTION=create npx tsx src/setup-alt.ts",
+    "extend-alt": "ALT_ACTION=extend npx tsx src/setup-alt.ts"
   },
   "keywords": [],
   "author": "",

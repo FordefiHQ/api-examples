@@ -1,4 +1,5 @@
 import { FordefiProviderConfig } from "@fordefi/web3-provider";
+import { PublicKey } from "@solana/web3.js";
 import dotenv from "dotenv";
 import fs from "fs";
 
@@ -22,7 +23,7 @@ function getChainId(chainName: string): number {
 }
 
 export const bridgeCongfig = {
-  chainFrom: "Ethereum",
+  chainFrom: "Arbitrum",
   chainTo: "Base",
   destinationAddress: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
   amount: "1",
@@ -41,7 +42,7 @@ export const fordefiConfigFrom: FordefiProviderConfig = {
     (() => {
       throw new Error("PEM_PRIVATE_KEY is not set");
     })(),
-  rpcUrl: "https://eth.llamarpc.com",
+  rpcUrl: "https://arb1.arbitrum.io/rpc",
 };
 
 export const fordefiConfigTo: FordefiProviderConfig = {
@@ -70,19 +71,20 @@ export interface BridgeConfigSolana {
 
   // Solana side
   solanaRpcUrl: string;
-  solanaChain: "solana_mainnet" | "solana_devnet";
   solanaRecipientAddress: string; // Solana wallet address that will receive USDC
   fordefiVaultId: string; // Fordefi vault ID for Solana signer
   apiUserToken: string,
-  apiPayloadSignKey: any
+  apiPayloadSignKey: any,
+  
+  // Address Lookup Table (optional, for reducing transaction size)
+  altAddress?: string; // ALT address if already created
 }
 
 export const bridgeConfigSolana: BridgeConfigSolana = {
-  ethereumChain: "Ethereum",
+  ethereumChain: bridgeCongfig.chainFrom,
   amountUsdc: "0.1",
   useFastTransfer: true, // Set to false for standard transfer (free but takes 13-19 minutes)
   solanaRpcUrl: "https://api.mainnet-beta.solana.com",
-  solanaChain: "solana_mainnet",
   solanaRecipientAddress: "CtvSEG7ph7SQumMtbnSKtDTLoUQoy8bxPUcjwvmNgGim",
   fordefiVaultId: "9597e08a-32a8-4f96-a043-a3e7f1675f8d",
   apiUserToken: process.env.FORDEFI_API_USER_TOKEN ??
@@ -94,4 +96,27 @@ export const bridgeConfigSolana: BridgeConfigSolana = {
     (() => {
       throw new Error("PEM_PRIVATE_KEY is not set");
     })(),
+  altAddress: "4c8K7xHYeroEMU4SecCdiPkWXKazrj3zPqcbzD4yPfcT",
+
 };
+
+// Ethereum Mainnet CCTP Contracts
+// V2 TokenMessenger with Fast Transfer support
+export const TOKEN_MESSENGER = "0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d";
+export const ETHEREUM_USDC = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
+export const ARBITRUM_USDC = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
+
+// Solana CCTP Program IDs (Mainnet & Devnet)
+export const MESSAGE_TRANSMITTER_PROGRAM_ID = new PublicKey(
+  "CCTPV2Sm4AdWt5296sk4P66VBZ7bEhcARwFaaS9YPbeC",
+);
+export const TOKEN_MESSENGER_MINTER_PROGRAM_ID = new PublicKey(
+  "CCTPV2vPZJS2u2BBsUoscuikbYjnpFmbFsvVuJdgUMQe",
+);
+export const SOLANA_USDC_MINT = new PublicKey(
+  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+);
+// CCTP Domain IDs
+export const ETHEREUM_DOMAIN = 0;
+export const ARBITRUM_DOMAIN = 3;
+export const SOLANA_DOMAIN = 5;
