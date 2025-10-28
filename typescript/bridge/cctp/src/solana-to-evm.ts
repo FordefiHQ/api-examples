@@ -188,13 +188,8 @@ async function burnUsdcOnSolana(
   // Convert signature to base64
   const base64Signature = Buffer.from(eventAccountSignature).toString("base64");
 
-  console.log(`Transaction message size: ${serializedMessage.length} bytes`);
   console.log(`Amount: ${amount.toString()} USDC`);
-  console.log(`Destination Domain: ${destinationDomain}`);
-  console.log(`Mint Recipient (EVM): ${bridgeConfigSolana.evmRecipientAddress}`);
-  console.log(`Event Account Keypair: ${messageSentEventAccountKeypair.publicKey.toString()}`);
-  console.log(`\nNote: Message serialized. Event account signature will be included.`);
-  console.log(`Fordefi will add the owner signature and broadcast.\n`);
+  console.log(`Destination: ${bridgeConfigSolana.evmRecipientAddress} (Arbitrum)\n`);
 
   return {
     base64EncodedData: base64EncodedMessage,
@@ -238,8 +233,7 @@ async function submitToFordefiApi(
   const response = await createAndSignTx("/api/v1/transactions", bridgeConfigSolana.apiUserToken, signature, timestamp, requestBody);
 
   const transactionId = response.data.id;
-  console.log(`Transaction ID: ${transactionId}`);
-  console.log("Waiting for transaction to be confirmed on-chain...\n");
+  console.log(`Transaction ID: ${transactionId}\n`);
 
   // Poll Fordefi API to get the transaction hash
   return await waitForTransactionHash(transactionId);
@@ -253,11 +247,6 @@ async function waitForTransactionHash(transactionId: string): Promise<string> {
       const path = `/api/v1/transactions/${transactionId}`;
       const data = await get_tx(path, bridgeConfigSolana.apiUserToken);
       
-      // Debug: log the blockchain_data structure on first completed state
-      if (data.state === "completed" && i === 0) {
-        console.log("Blockchain data:", JSON.stringify(data.blockchain_data, null, 2));
-      }
-      
       // Check multiple possible locations for the transaction hash
       const txHash = 
         data.blockchain_data?.hash ||
@@ -267,8 +256,7 @@ async function waitForTransactionHash(transactionId: string): Promise<string> {
         data.hash;
       
       if (txHash && data.state === "completed") {
-        console.log(`✅ Transaction confirmed: ${txHash}`);
-        console.log(`Transaction state: ${data.state}\n`);
+        console.log(`✅ Transaction confirmed: ${txHash}\n`);
         return txHash;
       }
       
@@ -297,15 +285,13 @@ async function waitForTransactionHash(transactionId: string): Promise<string> {
 async function waitForAttestation(
   txHash: string,
 ): Promise<{ message: string; attestation: string }> {
-  console.log("\n=== Step 3: Waiting for Circle Attestation ===\n");
-  console.log(`Transaction hash: ${txHash}`);
+  console.log("=== Step 3: Waiting for Circle Attestation ===\n");
 
   const isFastTransfer = bridgeConfigSolana.useFastTransfer;
   const ATTESTATION_API_URL = `https://iris-api.circle.com/v2/messages/${SOLANA_DOMAIN}`;
   const MAX_ATTEMPTS = isFastTransfer ? 60 : 240;
 
-  console.log(`Using ${isFastTransfer ? "fast" : "standard"} transfer mode`);
-  console.log(`Will check Circle API for up to ${MAX_ATTEMPTS * 5} seconds\n`);
+  console.log(`Using ${isFastTransfer ? "fast" : "standard"} transfer mode\n`);
 
   for (let i = 0; i < MAX_ATTEMPTS; i++) {
     try {
@@ -336,10 +322,8 @@ async function waitForAttestation(
             const elapsedSeconds = i * 5;
             const elapsedMinutes = Math.floor(elapsedSeconds / 60);
             const remainingSeconds = elapsedSeconds % 60;
-            console.log(`[${elapsedMinutes}m ${remainingSeconds}s] Status: ${messageData.attestation || 'PENDING'}...`);
+            console.log(`[${elapsedMinutes}m ${remainingSeconds}s] Waiting for attestation...`);
           }
-        } else if (i === 0) {
-          console.log("Message not yet indexed by Circle. Waiting...");
         }
       } else {
         if (i % 12 === 0) {
@@ -376,10 +360,6 @@ function decodeMintRecipientFromMessage(message: string): string {
   // Extract the last 40 characters (20 bytes) as the Ethereum address
   const address = '0x' + mintRecipientField.slice(-40);
   
-  console.log(`\nDecode mintRecipient from message:`);
-  console.log(`  MintRecipient field (32 bytes): 0x${mintRecipientField}`);
-  console.log(`  Extracted address: ${address}`);
-  
   return address;
 }
 
@@ -387,17 +367,13 @@ async function receiveMessageOnEvm(
   message: string,
   attestation: string
 ): Promise<void> {
-  console.log("\n=== Step 4: Receiving Message on EVM (Arbitrum) ===\n");
+  console.log("=== Step 4: Receiving Message on Arbitrum ===\n");
   
-  // Decode and show the recipient
+  // Decode and verify the recipient
   const mintRecipient = decodeMintRecipientFromMessage(message);
-  console.log(`💰 USDC will be minted to: ${mintRecipient}`);
-  console.log(`   Expected recipient: ${bridgeConfigSolana.evmRecipientAddress}`);
   
   if (mintRecipient.toLowerCase() !== bridgeConfigSolana.evmRecipientAddress.toLowerCase()) {
-    console.warn(`⚠️  WARNING: Recipient mismatch!`);
-  } else {
-    console.log(`✅ Recipient matches!\n`);
+    console.warn(`⚠️  WARNING: Recipient mismatch! Expected: ${bridgeConfigSolana.evmRecipientAddress}, Got: ${mintRecipient}`);
   }
   
   const provider = await getProvider(fordefiConfigFrom);
@@ -436,10 +412,7 @@ async function receiveMessageOnEvm(
     }
   ];
 
-  console.log("Calling receiveMessage on Arbitrum...");
-  console.log(`Transaction caller: ${fordefiConfigFrom.address}`);
-  console.log(`Message: ${message.substring(0, 50)}...`);
-  console.log(`Attestation: ${attestation.substring(0, 50)}...`);
+  console.log("Calling receiveMessage...");
   
   // Create wallet client with Fordefi provider
   const walletClient = createWalletClient({
@@ -458,8 +431,7 @@ async function receiveMessageOnEvm(
     account,
   });
 
-  console.log(`\n✅ ReceiveMessage transaction submitted: ${hash}`);
-  console.log(`Waiting for confirmation...`);
+  console.log(`Transaction submitted: ${hash}`);
 
   // Wait for transaction receipt
   const publicClient = createPublicClient({
@@ -469,9 +441,8 @@ async function receiveMessageOnEvm(
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
   
-  console.log(`\n✅ Transaction confirmed in block ${receipt.blockNumber}`);
-  console.log(`\n💰 USDC has been minted to: ${mintRecipient}`);
-  console.log(`   Check balance at: https://arbiscan.io/address/${mintRecipient}`);
+  console.log(`✅ Transaction confirmed in block ${receipt.blockNumber}`);
+  console.log(`💰 USDC minted to: ${mintRecipient}`);
 }
 
 // ============================================================================
@@ -498,7 +469,7 @@ async function main(): Promise<void> {
     const maxFee = new BN(0); // No fee
     const minFinalityThreshold = 0; // Immediate finality
     
-    console.log(`Bridging ${bridgeConfigSolana.amountUsdc} USDC (${amountInSmallestUnit} smallest units)\n`);
+    console.log(`Bridging ${bridgeConfigSolana.amountUsdc} USDC\n`);
 
     // Step 1: Burn USDC on Solana (Deposit for Burn)
     const { base64EncodedData, eventAccountSignature, messageSentEventData } = await burnUsdcOnSolana(
@@ -510,20 +481,13 @@ async function main(): Promise<void> {
     // Step 2: Submit to Fordefi API and wait for transaction hash
     const txHash = await submitToFordefiApi(base64EncodedData, eventAccountSignature);
     
-    console.log(`MessageSent Event Account: ${messageSentEventData.toString()}`);
-    
     // Step 3: Wait for Circle attestation using transaction hash
     const { message, attestation } = await waitForAttestation(txHash);
-    
-    console.log("✅ Attestation received!");
-    console.log(`Message (full): ${message}`);
-    console.log(`Attestation: ${attestation.substring(0, 66)}...`);
     
     // Step 4: Receive message on EVM (Arbitrum) to mint USDC
     await receiveMessageOnEvm(message, attestation);
     
-    console.log("\n🎉 Bridge completed successfully! 🎉");
-    console.log(`USDC burned on Solana and minted on Arbitrum!`);
+    console.log("\n🎉 Bridge completed successfully!");
   } catch (error) {
     console.error("\n❌ Error:", error);
     process.exit(1);
