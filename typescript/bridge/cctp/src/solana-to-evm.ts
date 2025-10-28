@@ -32,7 +32,7 @@ import {
 import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import * as spl from "@solana/spl-token";
 import bs58 from "bs58";
-import { MESSAGE_TRANSMITTER_PROGRAM_ID, TOKEN_MESSENGER_MINTER_PROGRAM_ID, SOLANA_USDC_MINT, SOLANA_DOMAIN, ARBITRUM_DOMAIN, TOKEN_MESSENGER, ARBITRUM_USDC  } from "./config";
+import { MESSAGE_TRANSMITTER_PROGRAM_ID, TOKEN_MESSENGER_MINTER_PROGRAM_ID, SOLANA_USDC_MINT, SOLANA_DOMAIN, ARBITRUM_DOMAIN, TOKEN_MESSENGER, ARBITRUM_USDC, ARBITRUM_MESSAGE_TRANSMITTER_V2  } from "./config";
 import {
   getProgramsV2,
   getReceiveMessagePdasV2,
@@ -405,8 +405,8 @@ async function receiveMessageOnEvm(
     throw new Error("Failed to initialize Fordefi provider");
   }
 
-  // MessageTransmitter contract on Arbitrum
-  const MESSAGE_TRANSMITTER_ADDRESS = "0xaCF1ceeF35caAc005e15888dDb8A3515C41B4872";
+  // MessageTransmitter V2 contract on Arbitrum
+  const MESSAGE_TRANSMITTER_ADDRESS = ARBITRUM_MESSAGE_TRANSMITTER_V2;
   
   // MessageTransmitter ABI - just the receiveMessage function
   const MESSAGE_TRANSMITTER_ABI = [
