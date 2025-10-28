@@ -10,10 +10,7 @@ import {
   createWalletClient,
   createPublicClient,
   custom,
-  http,
-  parseUnits,
-  keccak256,
-  encodeFunctionData,
+  http
 } from "viem";
 import { arbitrum } from "viem/chains";
 import {
@@ -23,35 +20,18 @@ import {
   VersionedTransaction,
   TransactionInstruction,
   SystemProgram,
-  Transaction,
-  ComputeBudgetProgram,
-  AddressLookupTableProgram,
-  AddressLookupTableAccount,
   Keypair,
 } from "@solana/web3.js";
 import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import * as spl from "@solana/spl-token";
-import bs58 from "bs58";
-import { MESSAGE_TRANSMITTER_PROGRAM_ID, TOKEN_MESSENGER_MINTER_PROGRAM_ID, SOLANA_USDC_MINT, SOLANA_DOMAIN, ARBITRUM_DOMAIN, TOKEN_MESSENGER, ARBITRUM_USDC, ARBITRUM_MESSAGE_TRANSMITTER_V2  } from "./config";
+import { SOLANA_USDC_MINT, SOLANA_DOMAIN, ARBITRUM_DOMAIN, ARBITRUM_MESSAGE_TRANSMITTER_V2  } from "./config";
 import {
   getProgramsV2,
-  getReceiveMessagePdasV2,
-  decodeEventNonceFromMessageV2,
   getDepositForBurnPdasV2
 } from "../solana-cctp-contracts/examples/v2/utilsV2";
 import * as anchor from "@coral-xyz/anchor";
 import { BN } from "@coral-xyz/anchor";
 import { getBytes } from "ethers";
-
-/**
- * Solana to Solana CCTP Bridge with Fordefi
- *
- * This script demonstrates bridging USDC from Solana to another chain (e.g., Arbitrum):
- * 1. Burn USDC on Solana using depositForBurn (serialized for Fordefi remote signer)
- * 2. Submit serialized transaction to Fordefi API
- * 3. Wait for Circle attestation
- * 4. Receive message on destination chain
- */
 
 // ============================================================================
 // Helper: Convert EVM address to bytes32
