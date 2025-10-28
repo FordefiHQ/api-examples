@@ -1,0 +1,33 @@
+{
+  "name": "@fordefi/cctp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "evm2evm": "npx tsx src/evm-to-evm.ts",
+    "evm2solana": "npx tsx src/evm-to-solana.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@circle-fin/adapter-ethers-v6": "^1.0.0",
+    "@circle-fin/adapter-solana": "^1.0.0",
+    "@circle-fin/adapter-viem-v2": "^1.0.0",
+    "@circle-fin/bridge-kit": "^1.0.0",
+    "@fordefi/web3-provider": "^0.3.0",
+    "@solana/spl-token": "^0.4.14",
+    "@solana/web3.js": "^1.98.4",
+    "axios": "^1.13.0",
+    "dotenv": "^16.6.1",
+    "ethers": "^6.14.1",
+    "tsx": "^4.20.6",
+    "viem": "^2.38.4"
+  }
+}
