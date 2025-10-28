@@ -62,22 +62,17 @@ export const fordefiConfigTo: FordefiProviderConfig = {
 };
 
 //////// EVM TO SOLANA CONFIG ////////////
-
 export interface BridgeConfigSolana {
   // Ethereum side
   ethereumChain: string;
-  amountUsdc: string; // Human-readable amount (e.g., "10.5")
+  amountUsdc: string; // Human-readable amount (--> "10.5")
   useFastTransfer: boolean; // Use fast transfer (20 seconds, 0.01% fee) vs standard (13-19 minutes, free)
-
   // Solana side
   solanaRpcUrl: string;
   solanaRecipientAddress: string; // Solana wallet address that will receive USDC
   fordefiVaultId: string; // Fordefi vault ID for Solana signer
   apiUserToken: string,
-  apiPayloadSignKey: any,
-  
-  // Address Lookup Table (optional, for reducing transaction size)
-  altAddress?: string; // ALT address if already created
+  apiPayloadSignKey: any
 }
 
 export const bridgeConfigSolana: BridgeConfigSolana = {
@@ -95,17 +90,14 @@ export const bridgeConfigSolana: BridgeConfigSolana = {
     fs.readFileSync("./fordefi_secret/private.pem", "utf8") ??
     (() => {
       throw new Error("PEM_PRIVATE_KEY is not set");
-    })(),
-  altAddress: "4c8K7xHYeroEMU4SecCdiPkWXKazrj3zPqcbzD4yPfcT",
-
+    })()
 };
 
-// Ethereum Mainnet CCTP Contracts
+// CCTP & USDC Contracts
 // V2 TokenMessenger with Fast Transfer support
 export const TOKEN_MESSENGER = "0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d";
 export const ETHEREUM_USDC = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 export const ARBITRUM_USDC = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
-
 // Solana CCTP Program IDs (Mainnet & Devnet)
 export const MESSAGE_TRANSMITTER_PROGRAM_ID = new PublicKey(
   "CCTPV2Sm4AdWt5296sk4P66VBZ7bEhcARwFaaS9YPbeC",
@@ -120,3 +112,4 @@ export const SOLANA_USDC_MINT = new PublicKey(
 export const ETHEREUM_DOMAIN = 0;
 export const ARBITRUM_DOMAIN = 3;
 export const SOLANA_DOMAIN = 5;
+export const SOLANA_RELAYER_PRIVATE_KEY = process.env.PHANTOM_PK || "";
