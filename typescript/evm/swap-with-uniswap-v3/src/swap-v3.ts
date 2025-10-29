@@ -11,12 +11,10 @@ import { AlphaRouter, SwapOptionsSwapRouter02, SwapType } from '@uniswap/smart-o
 
 
 async function main() {
-  const fordefiProvider = await getProvider();
-  if (!fordefiProvider) {
+  const provider = await getProvider();
+  if (!provider) {
       throw new Error("Failed to initialize provider");
   }
-  // Wrap FordefiWeb3Provider with ethers BrowserProvider for AlphaRouter compatibility
-  const provider = new ethers.providers.JsonRpcProvider(fordefiProvider as any);
   // Check what tokens we're swapping
   console.log("Token in -> ", CurrentConfig.tokens.in.address)
   console.log("Token out -> ", CurrentConfig.tokens.out.address)

@@ -221,7 +221,7 @@ async function main() {
   );
 
   // Mint the position
-  console.log('🚀 Minting liquidity position...');
+  console.log('💧 Minting liquidity position...');
 
   // Calculate proper gas fees
   const baseFee = feeData.lastBaseFeePerGas || ethers.utils.parseUnits('25', 'gwei');
@@ -249,13 +249,13 @@ async function main() {
   // Parse the Mint event to get the token ID
   const mintEvent = receipt.events?.find((e: any) => e.event === 'IncreaseLiquidity');
   if (mintEvent) {
-    console.log(`\n🎉 Position Token ID: ${mintEvent.args?.tokenId?.toString()}`);
+    console.log(`\n🪙 Position Token ID: ${mintEvent.args?.tokenId?.toString()}`);
     console.log(`Liquidity: ${mintEvent.args?.liquidity?.toString()}`);
     console.log(`Amount 0: ${mintEvent.args?.amount0?.toString()}`);
     console.log(`Amount 1: ${mintEvent.args?.amount1?.toString()}`);
   }
 
-  console.log('\n✨ Done! Your liquidity has been added to the pool.');
+  console.log('\n✨💧 Done! Your liquidity has been added to the pool.');
 }
 
 main().catch((error) => {
