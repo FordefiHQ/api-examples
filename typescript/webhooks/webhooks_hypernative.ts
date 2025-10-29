@@ -3,7 +3,7 @@ import path from 'path';
 import axios from 'axios';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
-import { p256 } from '@noble/curves/p256';
+import { p256 } from '@noble/curves/nist';
 import express, { Request, Response } from 'express';
 
 const app = express();
@@ -12,7 +12,6 @@ app.use(express.raw({ type: 'application/json' }));
 const PORT = Number(process.env.PORT) || 8080;
 
 // SECRETS and ENV VARIABLES
-
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -170,8 +169,8 @@ async function verifyHypernativeSignature(signature: string, body: Buffer): Prom
         hash: 'SHA-256'
       },
       publicKey,
-      ieeeSignature,
-      body
+      new Uint8Array(ieeeSignature),
+      new Uint8Array(body)
     );
 
     console.log(`Hypernative signature verification result: ${isValid}`);
@@ -231,8 +230,8 @@ async function verifySignature(signature: string, body: Buffer): Promise<boolean
         hash: 'SHA-256'
       },
       publicKey,
-      ieeeSignature,
-      body
+      new Uint8Array(ieeeSignature),
+      new Uint8Array(body)
     );
 
     console.log(`Signature verification result: ${isValid}`);
