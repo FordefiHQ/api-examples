@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "swap-v3": "npx ts-node src/uniswap-v3.ts"
+    "swap": "npx ts-node src/swap-v3.ts",
+    "lp": "npx ts-node src/add-liquidity-v3.ts"
   },
   "keywords": [],
   "author": "",

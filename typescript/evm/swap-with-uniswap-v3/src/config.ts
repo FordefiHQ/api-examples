@@ -26,6 +26,22 @@ interface ExampleConfig {
   }
 };
 
+interface LiquidityConfig {
+  tokens: {
+    token0: Token
+    token1: Token
+    token0Amount: number
+    token1Amount: number
+    poolFee: number
+  }
+  priceRange: {
+    rangePercent: number
+  }
+  slippage: {
+    slippageBps: number // in basis points (100 = 1%)
+  }
+};
+
 const WETH_TOKEN = new Token(
   1,
   '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // on Arbitrum
@@ -69,5 +85,22 @@ export const CurrentConfig: ExampleConfig = {
   },
   slippage:{
     slippageAmount: 100 // in bps (1% in this example)
+  }
+};
+
+// Configure liquidity provision
+export const LiquidityProvisionConfig: LiquidityConfig = {
+  tokens: {
+    token0: USDC_TOKEN,
+    token1: WETH_TOKEN,
+    token0Amount: 10, // 1 USDC
+    token1Amount: 0.00005, // 0.00005 WETH
+    poolFee: FeeAmount.MEDIUM
+  },
+  priceRange: {
+    rangePercent: 10 // ±10% range around current price
+  },
+  slippage: {
+    slippageBps: 500 // 5% slippage tolerance (500 basis points)
   }
 };
