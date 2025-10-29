@@ -1,46 +1,10 @@
+import { ExampleConfig, LiquidityConfig, WETH_TOKEN, USDC_TOKEN } from './interfaces'
 import { FordefiProviderConfig } from '@fordefi/web3-provider';
-import { Token, BigintIsh } from '@uniswap/sdk-core'
 import { FeeAmount } from '@uniswap/v3-sdk'
 import dotenv from 'dotenv';
 import fs from 'fs'
 
 dotenv.config();
-
-interface ExampleConfig {
-  rpc: {
-    local: string
-    mainnet: string
-  }
-  tokens: {
-    in: Token
-    amountIn: number
-    out: Token
-    poolFee: number
-  },
-  wallet?: { 
-    address: string
-  },
-  slippage:
-  {
-    slippageAmount: BigintIsh
-  }
-};
-
-const WETH_TOKEN = new Token(
-  1,
-  '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // on Arbitrum
-  18,
-  'WETH',
-  'Wrapped Ether'
-);
-
-const USDC_TOKEN = new Token(
-  1,
-  '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // on Mainnet
-  6,
-  'USDC',
-  'USD//C'
-);
 
 // Configure the Fordefi provider
 export const fordefiConfig: FordefiProviderConfig = {
@@ -69,5 +33,22 @@ export const CurrentConfig: ExampleConfig = {
   },
   slippage:{
     slippageAmount: 100 // in bps (1% in this example)
+  }
+};
+
+// Configure liquidity provision
+export const LiquidityProvisionConfig: LiquidityConfig = {
+  tokens: {
+    token0: USDC_TOKEN,
+    token1: WETH_TOKEN,
+    token0Amount: 5, // 1 USDC
+    token1Amount: 0.002, // 0.00005 WETH
+    poolFee: FeeAmount.MEDIUM
+  },
+  priceRange: {
+    rangePercent: 10 // ±10% range around current price
+  },
+  slippage: {
+    slippageBps: 500 // 5% slippage tolerance (500 basis points)
   }
 };

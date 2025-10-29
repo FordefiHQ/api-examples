@@ -5,6 +5,8 @@ export const V3_SWAP_ROUTER_ADDRESS =
   '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45'
 export const WETH_CONTRACT_ADDRESS =
   '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+export const NONFUNGIBLE_POSITION_MANAGER_ADDRESS =
+  '0xC36442b4a4522E871399CD717aBDD847Ab11FE88'
 
 // Currencies and Tokens
 export const USDC_TOKEN = new Token(
@@ -37,6 +39,7 @@ export const ERC20_ABI = [
   'function balanceOf(address owner) view returns (uint256)',
   'function decimals() view returns (uint8)',
   'function symbol() view returns (string)',
+  'function allowance(address owner, address spender) view returns (uint256)',
 
   // Authenticated Functions
   'function transfer(address to, uint amount) returns (bool)',
@@ -52,6 +55,12 @@ export const WETH_ABI = [
 
   // Unwrap ETH
   'function withdraw(uint wad) public',
+];
+
+export const NONFUNGIBLE_POSITION_MANAGER_ABI = [
+  'function mint(tuple(address token0, address token1, uint24 fee, int24 tickLower, int24 tickUpper, uint256 amount0Desired, uint256 amount1Desired, uint256 amount0Min, uint256 amount1Min, address recipient, uint256 deadline) params) external payable returns (uint256 tokenId, uint128 liquidity, uint256 amount0, uint256 amount1)',
+  'function positions(uint256 tokenId) external view returns (uint96 nonce, address operator, address token0, address token1, uint24 fee, int24 tickLower, int24 tickUpper, uint128 liquidity, uint256 feeGrowthInside0LastX128, uint256 feeGrowthInside1LastX128, uint128 tokensOwed0, uint128 tokensOwed1)',
+  'event IncreaseLiquidity(uint256 indexed tokenId, uint128 liquidity, uint256 amount0, uint256 amount1)',
 ];
 
 // Transactions

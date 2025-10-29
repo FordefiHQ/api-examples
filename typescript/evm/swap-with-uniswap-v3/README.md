@@ -1,16 +1,21 @@
-# Uniswap v3 Token Swap with Fordefi
+# Uniswap v3 Token Swap & Liquidity Provision with Fordefi
 
-A script to perform token swaps on Uniswap v3 with Fordefi.
+Scripts to perform token swaps and provide liquidity on Uniswap v3 with Fordefi.
 
 ## Overview
 
-This script enables you to execute token swaps on Uniswap v3 while using your Fordefi EVM vault as the signer. It leverages Uniswap's SDK to get quotes, find routes and create orders, with transaction signing handled by Fordefi.
+This project includes two main scripts:
+
+1. **Token Swap**: Execute token swaps on Uniswap v3 while using your Fordefi EVM vault as the signer
+2. **Liquidity Provision**: Add liquidity to Uniswap v3 pools with concentrated liquidity positions
+
+Both scripts leverage Uniswap's SDK and handle transaction signing through Fordefi.
 
 ## Prerequisites
 
 - Fordefi organization and EVM vault
 - Node.js and npm installed
-- Fordefi credentials: API User token and API Signer set up ([documentation](https://docs.fordefi.com/developers/program-overview))
+- Fordefi credentials: API User access token and private keys and API Signer set up ([documentation](https://docs.fordefi.com/developers/getting-started/set-up-an-api-signer/api-signer-docker))
 
 ## Setup
 
@@ -28,21 +33,27 @@ FORDEFI_API_USER_TOKEN=your_api_user_token_here
 
 ## Configuration
 
-The script uses the following main configurations found in `config.ts`:
+Both scripts use configurations found in `config.ts`:
 
-1. The Fordefi Web3 Provider configuration for connecting to any EVM chain and orchestrate signing your swap with your Fordefi EVM Vault:
+### 1. Fordefi Web3 Provider Configuration
+
+For connecting to any EVM chain and orchestrating signing with your Fordefi EVM Vault:
 
 ```typescript
 export const fordefiConfig: FordefiProviderConfig = {
-  chainId: 1, // Mainet
+  chainId: 1, // Mainnet
   address: '0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73', // The Fordefi EVM Vault that will sign the message
-  apiUserToken: process.env.FORDEFI_API_USER_TOKEN  
+  apiUserToken: process.env.FORDEFI_API_USER_TOKEN
   apiPayloadSignKey: fs.readFileSync('./fordefi_secret/private.pem', 'utf8'),
   rpcUrl: 'https://ethereum-rpc.publicnode.com',
-  skipPrediction: false 
+  skipPrediction: false
 };
 ```
-2. The Uniswap SDK configuration including the tokens to swap, the Fordefi Vault that will perform the swap and the slippage for your swap.
+
+### 2. Token Swap Configuration
+
+Uniswap SDK configuration including the tokens to swap and slippage:
+
 ```typescript
 export const CurrentConfig: ExampleConfig = {
   rpc: {
@@ -56,17 +67,55 @@ export const CurrentConfig: ExampleConfig = {
     poolFee: FeeAmount.MEDIUM
   },
   wallet: {
-    address:fordefiConfig.address
+    address: fordefiConfig.address
   },
-  slippage:{
+  slippage: {
     slippageAmount: 100 // in bps (1% in this example)
   }
 };
 ```
 
+### 3. Liquidity Provision Configuration
+
+Configuration for adding liquidity to Uniswap v3 pools:
+
+```typescript
+export const LiquidityProvisionConfig = {
+  tokens: {
+    token0: USDC_TOKEN,
+    token1: WETH_TOKEN,
+    token0Amount: 100,  // Amount of token0 to add (in natural units)
+    token1Amount: 0.05, // Amount of token1 to add (in natural units)
+    poolFee: FeeAmount.MEDIUM
+  },
+  priceRange: {
+    rangePercent: 10 // Price range for concentrated liquidity (±10%)
+  },
+  slippage: {
+    slippageBps: 500 // Slippage tolerance in basis points (5%)
+  }
+};
+```
+
+**Important Notes on Liquidity Provision:**
+
+- The script uses a "floating amount" strategy where `token0Amount` is fixed and `token1` adjusts to match the pool's current price ratio
+- This prevents "Price slippage check" reversions caused by mismatched token ratios
+- `rangePercent` determines how concentrated your liquidity is (lower = more concentrated, higher fees but more risk)
+- Ensure sufficient token balances and approvals for both tokens
+
 ## Usage
 
-Run the script with:
+### Token Swap
+
+Run the swap script with:
 ```bash
 npm run swap
+```
+
+### Add Liquidity
+
+Run the liquidity provision script with:
+```bash
+npm run lp
 ```
