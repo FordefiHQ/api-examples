@@ -1,64 +1,21 @@
-import { LiquidityProvisionConfig, fordefiConfig } from './config';
-import { POOL_ABI, FACTORY_ABI} from './interfaces'
+import { LiquidityProvisionConfig, POSITION_TOKEN_ID } from './config';
 import { fromReadableAmount } from './helper';
 import { 
   ERC20_ABI, 
   NONFUNGIBLE_POSITION_MANAGER_ADDRESS,
   NONFUNGIBLE_POSITION_MANAGER_ABI 
 } from './constants';
-import { Pool, nearestUsableTick } from '@uniswap/v3-sdk';
 import { getProvider } from './get-provider';
-import { Token } from '@uniswap/sdk-core';
 import { ethers } from 'ethers';
 import JSBI from 'jsbi';
 
-const FACTORY_ADDRESS = '0x1F98431c8aD98523631AE4a59f267346ea31F984';
-
-async function getPoolInfo(
-  token0: Token,
-  token1: Token,
-  fee: number,
-  provider: ethers.providers.JsonRpcProvider
-) {
-  const factoryContract = new ethers.Contract(FACTORY_ADDRESS, FACTORY_ABI, provider);
-  const poolAddress = await factoryContract.getPool(token0.address, token1.address, fee);
-
-  if (poolAddress === ethers.constants.AddressZero) {
-    throw new Error('Pool does not exist');
+async function main() {
+  if (!POSITION_TOKEN_ID) {
+    throw new Error('Please provide a position token ID as the first argument');
   }
 
-  const poolContract = new ethers.Contract(poolAddress, POOL_ABI, provider);
-  const [slot0, liquidity] = await Promise.all([
-    poolContract.slot0(),
-    poolContract.liquidity(),
-  ]);
-
-  return {
-    poolAddress,
-    sqrtPriceX96: slot0.sqrtPriceX96,
-    tick: slot0.tick,
-    liquidity: JSBI.BigInt(liquidity.toString()),
-  };
-}
-
-function calculatePriceRange(
-  currentTick: number,
-  rangePercent: number,
-  tickSpacing: number
-) {
-  // Calculate tick range based on percentage
-  // tick = log base 1.0001 of price
-  // To get ±X% range: ticks = ±(log(1 + X/100) / log(1.0001))
-  const tickRange = Math.floor(Math.log(1 + rangePercent / 100) / Math.log(1.0001));
-  
-  const tickLower = nearestUsableTick(currentTick - tickRange, tickSpacing);
-  const tickUpper = nearestUsableTick(currentTick + tickRange, tickSpacing);
-
-  return { tickLower, tickUpper };
-}
-
-async function main() {
-  console.log('🌊 Starting Uniswap V3 Liquidity Provision...\n');
+  console.log('🌊 Starting Uniswap V3 Liquidity Addition...\n');
+  console.log(`Position Token ID: ${POSITION_TOKEN_ID}\n`);
 
   const provider = await getProvider();
   if (!provider) {
@@ -66,7 +23,28 @@ async function main() {
   }
 
   const signer = provider.getSigner();
-  const { token0, token1, token0Amount, token1Amount, poolFee } = LiquidityProvisionConfig.tokens;
+
+  // Create position manager contract
+  const positionManager = new ethers.Contract(
+    NONFUNGIBLE_POSITION_MANAGER_ADDRESS,
+    NONFUNGIBLE_POSITION_MANAGER_ABI,
+    signer
+  );
+
+  // Fetch position details
+  console.log('📊 Fetching position details...');
+  const position = await positionManager.positions(POSITION_TOKEN_ID);
+  
+  console.log('Position details:');
+  console.log(`Token 0: ${position.token0}`);
+  console.log(`Token 1: ${position.token1}`);
+  console.log(`Fee: ${position.fee}`);
+  console.log(`Tick Lower: ${position.tickLower}`);
+  console.log(`Tick Upper: ${position.tickUpper}`);
+  console.log(`Current Liquidity: ${position.liquidity.toString()}\n`);
+
+  // Get token details from config
+  const { token0, token1, token0Amount, token1Amount } = LiquidityProvisionConfig.tokens;
 
   // Ensure tokens are ordered correctly (token0 address < token1 address)
   const [orderedToken0, orderedToken1] = token0.sortsBefore(token1) 
@@ -77,53 +55,34 @@ async function main() {
     ? [token0Amount, token1Amount]
     : [token1Amount, token0Amount];
 
-  console.log(`Token 0: ${orderedToken0.symbol} (${orderedToken0.address})`);
-  console.log(`Token 1: ${orderedToken1.symbol} (${orderedToken1.address})`);
-  console.log(`Amount 0: ${orderedAmount0}`);
-  console.log(`Amount 1: ${orderedAmount1}\n`);
+  // Verify the position tokens match our config
+  if (position.token0.toLowerCase() !== orderedToken0.address.toLowerCase() ||
+      position.token1.toLowerCase() !== orderedToken1.address.toLowerCase()) {
+    throw new Error(
+      `Position tokens don't match config!\n` +
+      `Position: ${position.token0} / ${position.token1}\n` +
+      `Config: ${orderedToken0.address} / ${orderedToken1.address}`
+    );
+  }
 
-  // Get pool information
-  console.log('📊 Fetching pool information...');
-  const poolInfo = await getPoolInfo(orderedToken0, orderedToken1, poolFee, provider);
-  console.log(`Pool address: ${poolInfo.poolAddress}`);
-  console.log(`Current tick: ${poolInfo.tick}`);
-  console.log(`Current sqrtPriceX96: ${poolInfo.sqrtPriceX96.toString()}\n`);
-
-  // Create Pool instance
-  const pool = new Pool(
-    orderedToken0,
-    orderedToken1,
-    poolFee,
-    poolInfo.sqrtPriceX96.toString(),
-    poolInfo.liquidity.toString(),
-    poolInfo.tick
-  );
-
-  // Calculate price range
-  const { tickLower, tickUpper } = calculatePriceRange(
-    poolInfo.tick,
-    LiquidityProvisionConfig.priceRange.rangePercent,
-    pool.tickSpacing
-  );
-
-  console.log(`💡 Calculated tick range:`);
-  console.log(`Tick Lower: ${tickLower}`);
-  console.log(`Tick Upper: ${tickUpper}`);
-  console.log(`Tick Spacing: ${pool.tickSpacing}\n`);
+  console.log(`Adding liquidity:`);
+  console.log(`${orderedToken0.symbol}: ${orderedAmount0} (target)`);
+  console.log(`${orderedToken1.symbol}: ${orderedAmount1} (estimated)\n`);
 
   // Convert amounts to raw format
-  // Option 1: Set one amount as target, the other very high to let Uniswap calculate
+  // Use "floating amount" strategy: set amount0 as target, amount1 very high to let Uniswap calculate
   const amount0Desired = fromReadableAmount(orderedAmount0, orderedToken0.decimals);
+  
   // Set amount1Desired much higher than expected - Uniswap will only use what's needed
   const amount1DesiredBase = fromReadableAmount(orderedAmount1, orderedToken1.decimals);
   const amount1Desired = JSBI.multiply(
     amount1DesiredBase,
-    JSBI.BigInt(100) // 100x the expected amount as maximum
+    JSBI.BigInt(10) // 10x the expected amount as maximum
   );
 
   // Calculate minimum amounts based on configured slippage tolerance
   const slippageBps = LiquidityProvisionConfig.slippage.slippageBps;
-  const slippageMultiplier = JSBI.BigInt(10000 - slippageBps); // e.g., 9500 for 5% slippage
+  const slippageMultiplier = JSBI.BigInt(10000 - slippageBps);
   const bpsBase = JSBI.BigInt(10000);
 
   // Set conservative minimums - amount0 is protected, amount1 can float
@@ -137,9 +96,9 @@ async function main() {
   console.log('💰 Token amounts:');
   console.log(`Slippage tolerance: ${slippageBps / 100}%`);
   console.log(`${orderedToken0.symbol} desired: ${amount0Desired.toString()}`);
-  console.log(`${orderedToken1.symbol} desired: ${amount1Desired.toString()}`);
+  console.log(`${orderedToken1.symbol} desired (max): ${amount1Desired.toString()}`);
   console.log(`${orderedToken0.symbol} minimum: ${amount0Min.toString()}`);
-  console.log(`${orderedToken1.symbol} minimum: ${amount1Min.toString()}\n`);
+  console.log(`${orderedToken1.symbol} minimum: ${amount1Min.toString()} (floating)\n`);
 
   // Check and approve tokens
   console.log('✅ Checking token approvals...');
@@ -171,10 +130,10 @@ async function main() {
     console.log(`${orderedToken0.symbol} already has sufficient allowance ✅`);
   }
 
-  // Approve token1 if needed
+  // Approve token1 if needed (use the 100x amount for approval)
   const amount1BigNumber = ethers.BigNumber.from(amount1Desired.toString());
   if (allowance1.lt(amount1BigNumber)) {
-    console.log(`Approving ${orderedToken1.symbol}...`);
+    console.log(`Approving ${orderedToken1.symbol} (max allowance)...`);
     const tx1 = await token1Contract.approve(
       NONFUNGIBLE_POSITION_MANAGER_ADDRESS,
       amount1BigNumber
@@ -186,25 +145,20 @@ async function main() {
     console.log(`${orderedToken1.symbol} already has sufficient allowance ✅\n`);
   }
 
-  // Prepare mint parameters
+  // Prepare increase liquidity parameters
   const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes from now
 
-  const mintParams = {
-    token0: orderedToken0.address,
-    token1: orderedToken1.address,
-    fee: poolFee,
-    tickLower,
-    tickUpper,
+  const increaseLiquidityParams = {
+    tokenId: POSITION_TOKEN_ID,
     amount0Desired: amount0Desired.toString(),
     amount1Desired: amount1Desired.toString(),
     amount0Min: amount0Min.toString(),
     amount1Min: amount1Min.toString(),
-    recipient: fordefiConfig.address,
     deadline,
   };
 
-  console.log('🎯 Mint parameters:');
-  console.log(JSON.stringify(mintParams, null, 2));
+  console.log('🎯 Increase liquidity parameters:');
+  console.log(JSON.stringify(increaseLiquidityParams, null, 2));
   console.log('');
 
   // Get gas estimates
@@ -212,16 +166,6 @@ async function main() {
   const feeData = await provider.getFeeData();
   console.log(`Current baseFeePerGas: ${ethers.utils.formatUnits(feeData.lastBaseFeePerGas || 0, 9)} Gwei`);
   console.log(`Suggested gasPrice: ${ethers.utils.formatUnits(feeData.gasPrice || 0, 9)} Gwei\n`);
-
-  // Create position manager contract
-  const positionManager = new ethers.Contract(
-    NONFUNGIBLE_POSITION_MANAGER_ADDRESS,
-    NONFUNGIBLE_POSITION_MANAGER_ABI,
-    signer
-  );
-
-  // Mint the position
-  console.log('💧 Minting liquidity position...');
 
   // Calculate proper gas fees
   const baseFee = feeData.lastBaseFeePerGas || ethers.utils.parseUnits('25', 'gwei');
@@ -232,8 +176,11 @@ async function main() {
   console.log(`Priority fee: ${ethers.utils.formatUnits(priorityFee, 9)} Gwei`);
   console.log(`Max fee per gas: ${ethers.utils.formatUnits(maxFeePerGas, 9)} Gwei\n`);
 
-  const tx = await positionManager.mint(mintParams, {
-    gasLimit: 500_000,
+  // Increase the position liquidity
+  console.log('💧 Increasing position liquidity...');
+
+  const tx = await positionManager.increaseLiquidity(increaseLiquidityParams, {
+    gasLimit: 400_000,
     maxFeePerGas,
     maxPriorityFeePerGas: priorityFee,
   });
@@ -242,20 +189,27 @@ async function main() {
   console.log('⏳ Waiting for confirmation...');
 
   const receipt = await tx.wait();
-  console.log(`\n✅ Liquidity position created successfully!`);
+  console.log(`\n✅ Liquidity added successfully!`);
   console.log(`Transaction confirmed in block: ${receipt.blockNumber}`);
   console.log(`Gas used: ${receipt.gasUsed.toString()}`);
 
-  // Parse the Mint event to get the token ID
-  const mintEvent = receipt.events?.find((e: any) => e.event === 'IncreaseLiquidity');
-  if (mintEvent) {
-    console.log(`\n🪙 Position Token ID: ${mintEvent.args?.tokenId?.toString()}`);
-    console.log(`Liquidity: ${mintEvent.args?.liquidity?.toString()}`);
-    console.log(`Amount 0: ${mintEvent.args?.amount0?.toString()}`);
-    console.log(`Amount 1: ${mintEvent.args?.amount1?.toString()}`);
+  // Parse the IncreaseLiquidity event
+  const increaseEvent = receipt.events?.find((e: any) => e.event === 'IncreaseLiquidity');
+  if (increaseEvent) {
+    console.log(`\n📈 Liquidity Details:`);
+    console.log(`Token ID: ${increaseEvent.args?.tokenId?.toString()}`);
+    console.log(`Liquidity Added: ${increaseEvent.args?.liquidity?.toString()}`);
+    console.log(`Amount 0 Used: ${increaseEvent.args?.amount0?.toString()}`);
+    console.log(`Amount 1 Used: ${increaseEvent.args?.amount1?.toString()}`);
   }
 
-  console.log('\n✨💧 Done! Your liquidity has been added to the pool.');
+  // Fetch updated position
+  const updatedPosition = await positionManager.positions(POSITION_TOKEN_ID);
+  console.log(`\n📊 Updated Position:`);
+  console.log(`New Total Liquidity: ${updatedPosition.liquidity.toString()}`);
+  console.log(`Liquidity Increase: ${updatedPosition.liquidity.sub(position.liquidity).toString()}`);
+
+  console.log('\n🦄💧 Done! Additional liquidity has been added to your position.');
 }
 
 main().catch((error) => {

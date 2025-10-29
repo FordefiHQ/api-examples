@@ -1,8 +1,9 @@
-import { ExampleConfig, LiquidityConfig, WETH_TOKEN, USDC_TOKEN } from './interfaces'
+import { ExampleConfig, LiquidityConfig } from './interfaces';
 import { FordefiProviderConfig } from '@fordefi/web3-provider';
-import { FeeAmount } from '@uniswap/v3-sdk'
+import { USDC_TOKEN, WETH_TOKEN } from './constants';
+import { FeeAmount } from '@uniswap/v3-sdk';
 import dotenv from 'dotenv';
-import fs from 'fs'
+import fs from 'fs';
 
 dotenv.config();
 
@@ -15,6 +16,9 @@ export const fordefiConfig: FordefiProviderConfig = {
   rpcUrl: 'https://ethereum-rpc.publicnode.com',
   skipPrediction: false 
 };
+
+// Configure your position NFT
+export const POSITION_TOKEN_ID = "1118150"
 
 // Configure your Uniswap swap
 export const CurrentConfig: ExampleConfig = {
@@ -36,13 +40,13 @@ export const CurrentConfig: ExampleConfig = {
   }
 };
 
-// Configure liquidity provision
+// Configure liquidity provision or increasing the position
 export const LiquidityProvisionConfig: LiquidityConfig = {
   tokens: {
     token0: USDC_TOKEN,
     token1: WETH_TOKEN,
     token0Amount: 5, // 1 USDC
-    token1Amount: 0.002, // 0.00005 WETH
+    token1Amount: 0.001, // 0.00005 WETH
     poolFee: FeeAmount.MEDIUM
   },
   priceRange: {
