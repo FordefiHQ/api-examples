@@ -117,5 +117,5 @@ npm run swap
 
 Run the liquidity provision script with:
 ```bash
-npm run add-liquidity
+npm run lp
 ```
