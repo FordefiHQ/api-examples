@@ -108,10 +108,41 @@ export const LiquidityProvisionConfig = {
 
 **Important Notes on Liquidity Provision:**
 
-- The script uses a "floating amount" strategy where `token0Amount` is fixed and `token1` adjusts to match the pool's current price ratio
-- This prevents "Price slippage check" reversions caused by mismatched token ratios
+#### The "Floating Amount" Strategy
+
+Both the mint and increase liquidity scripts use a **"floating amount" strategy** to prevent "price slippage check" errors:
+
+- **Token0 (USDC)**: Set as your **target amount** - this is the exact amount you want to deposit
+  - Example: `token0Amount: 5` means you want to add exactly 5 USDC
+  
+- **Token1 (WETH)**: Set as **flexible/floating** - Uniswap calculates the exact amount needed
+  - The value you set (e.g., `token1Amount: 0.001`) is used as a base estimate
+  - Internally, the script multiplies this by 10x as a maximum cap
+  - `amount1Min` is set to 0, allowing Uniswap to calculate the precise amount based on pool price
+  - Only the exact amount needed (according to current pool price) will be used
+
+**Why This Works:**
+
+Uniswap V3 requires liquidity to be added at the exact ratio matching the current pool price. If you try to force both token amounts, you'll get "price slippage check" errors because:
+- The pool price changes constantly
+- Even small differences cause the transaction to revert
+
+The floating amount strategy solves this by:
+1. ✅ You control exactly how much token0 (USDC) to add
+2. ✅ Uniswap automatically calculates the correct token1 (WETH) amount
+3. ✅ The ratio always matches perfectly - no more reverts!
+
+**Configuration Example:**
+```typescript
+token0Amount: 5,      // Add exactly 5 USDC
+token1Amount: 0.001,  // Estimate ~0.001 WETH (actual will be calculated by Uniswap)
+```
+
+**Other Configuration Details:**
+
 - `rangePercent` determines how concentrated your liquidity is (lower = more concentrated, higher fees but more risk)
-- Ensure sufficient token balances and approvals for both tokens
+- Ensure sufficient token balances for both tokens - have extra token1 since the exact amount needed will be calculated
+- The scripts handle token approvals automatically
 
 ## Usage
 

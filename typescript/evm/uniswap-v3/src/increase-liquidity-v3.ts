@@ -66,33 +66,39 @@ async function main() {
   }
 
   console.log(`Adding liquidity:`);
-  console.log(`${orderedToken0.symbol}: ${orderedAmount0}`);
-  console.log(`${orderedToken1.symbol}: ${orderedAmount1}\n`);
+  console.log(`${orderedToken0.symbol}: ${orderedAmount0} (target)`);
+  console.log(`${orderedToken1.symbol}: ${orderedAmount1} (estimated)\n`);
 
   // Convert amounts to raw format
+  // Use "floating amount" strategy: set amount0 as target, amount1 very high to let Uniswap calculate
   const amount0Desired = fromReadableAmount(orderedAmount0, orderedToken0.decimals);
-  const amount1Desired = fromReadableAmount(orderedAmount1, orderedToken1.decimals);
+  
+  // Set amount1Desired much higher than expected - Uniswap will only use what's needed
+  const amount1DesiredBase = fromReadableAmount(orderedAmount1, orderedToken1.decimals);
+  const amount1Desired = JSBI.multiply(
+    amount1DesiredBase,
+    JSBI.BigInt(10) // 10x the expected amount as maximum
+  );
 
   // Calculate minimum amounts based on configured slippage tolerance
   const slippageBps = LiquidityProvisionConfig.slippage.slippageBps;
   const slippageMultiplier = JSBI.BigInt(10000 - slippageBps);
   const bpsBase = JSBI.BigInt(10000);
 
+  // Set conservative minimums - amount0 is protected, amount1 can float
   const amount0Min = JSBI.divide(
     JSBI.multiply(amount0Desired, slippageMultiplier),
     bpsBase
   );
-  const amount1Min = JSBI.divide(
-    JSBI.multiply(amount1Desired, slippageMultiplier),
-    bpsBase
-  );
+  // Set amount1Min to 0 to let it float based on pool price
+  const amount1Min = JSBI.BigInt(0);
 
   console.log('💰 Token amounts:');
   console.log(`Slippage tolerance: ${slippageBps / 100}%`);
   console.log(`${orderedToken0.symbol} desired: ${amount0Desired.toString()}`);
-  console.log(`${orderedToken1.symbol} desired: ${amount1Desired.toString()}`);
+  console.log(`${orderedToken1.symbol} desired (max): ${amount1Desired.toString()}`);
   console.log(`${orderedToken0.symbol} minimum: ${amount0Min.toString()}`);
-  console.log(`${orderedToken1.symbol} minimum: ${amount1Min.toString()}\n`);
+  console.log(`${orderedToken1.symbol} minimum: ${amount1Min.toString()} (floating)\n`);
 
   // Check and approve tokens
   console.log('✅ Checking token approvals...');
@@ -124,10 +130,10 @@ async function main() {
     console.log(`${orderedToken0.symbol} already has sufficient allowance ✅`);
   }
 
-  // Approve token1 if needed
+  // Approve token1 if needed (use the 100x amount for approval)
   const amount1BigNumber = ethers.BigNumber.from(amount1Desired.toString());
   if (allowance1.lt(amount1BigNumber)) {
-    console.log(`Approving ${orderedToken1.symbol}...`);
+    console.log(`Approving ${orderedToken1.symbol} (max allowance)...`);
     const tx1 = await token1Contract.approve(
       NONFUNGIBLE_POSITION_MANAGER_ADDRESS,
       amount1BigNumber
@@ -203,7 +209,7 @@ async function main() {
   console.log(`New Total Liquidity: ${updatedPosition.liquidity.toString()}`);
   console.log(`Liquidity Increase: ${updatedPosition.liquidity.sub(position.liquidity).toString()}`);
 
-  console.log('\n✨💧 Done! Additional liquidity has been added to your position.');
+  console.log('\n🦄💧 Done! Additional liquidity has been added to your position.');
 }
 
 main().catch((error) => {

@@ -118,7 +118,7 @@ async function main() {
   const amount1DesiredBase = fromReadableAmount(orderedAmount1, orderedToken1.decimals);
   const amount1Desired = JSBI.multiply(
     amount1DesiredBase,
-    JSBI.BigInt(100) // 100x the expected amount as maximum
+    JSBI.BigInt(10) // 10x the expected amount as maximum
   );
 
   // Calculate minimum amounts based on configured slippage tolerance
@@ -255,7 +255,7 @@ async function main() {
     console.log(`Amount 1: ${mintEvent.args?.amount1?.toString()}`);
   }
 
-  console.log('\n✨💧 Done! Your liquidity has been added to the pool.');
+  console.log('\n🦄💧 Done! Your liquidity has been added to the pool.');
 }
 
 main().catch((error) => {

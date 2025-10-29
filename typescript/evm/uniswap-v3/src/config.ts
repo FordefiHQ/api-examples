@@ -45,7 +45,7 @@ export const LiquidityProvisionConfig: LiquidityConfig = {
   tokens: {
     token0: USDC_TOKEN,
     token1: WETH_TOKEN,
-    token0Amount: 2, // 1 USDC
+    token0Amount: 5, // 1 USDC
     token1Amount: 0.001, // 0.00005 WETH
     poolFee: FeeAmount.MEDIUM
   },
