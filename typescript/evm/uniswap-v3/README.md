@@ -4,12 +4,13 @@ Scripts to perform token swaps and provide liquidity on Uniswap v3 with Fordefi.
 
 ## Overview
 
-This project includes two main scripts:
+This project includes three main scripts:
 
 1. **Token Swap**: Execute token swaps on Uniswap v3 while using your Fordefi EVM vault as the signer
-2. **Liquidity Provision**: Add liquidity to Uniswap v3 pools with concentrated liquidity positions
+2. **Liquidity Provision (Mint)**: Create a new liquidity position in Uniswap v3 pools with concentrated liquidity
+3. **Increase Liquidity**: Add more liquidity to an existing Uniswap v3 position
 
-Both scripts leverage Uniswap's SDK and handle transaction signing through Fordefi.
+All scripts leverage Uniswap's SDK and handle transaction signing through Fordefi.
 
 ## Prerequisites
 
@@ -75,7 +76,15 @@ export const CurrentConfig: ExampleConfig = {
 };
 ```
 
-### 3. Liquidity Provision Configuration
+### 3. Position Token ID Configuration
+
+When you create a new liquidity position, you'll receive a position token ID. Set this in your config to manage that position:
+
+```typescript
+export const POSITION_TOKEN_ID = "1118150"
+```
+
+### 4. Liquidity Provision Configuration
 
 Configuration for adding liquidity to Uniswap v3 pools:
 
@@ -113,9 +122,30 @@ Run the swap script with:
 npm run swap
 ```
 
-### Add Liquidity
+### Create New Liquidity Position
 
-Run the liquidity provision script with:
+Run the liquidity provision script to mint a new position:
 ```bash
 npm run lp
 ```
+
+This will create a new NFT position and output the position token ID. Copy this ID and add it to your `config.ts`:
+
+```typescript
+export const POSITION_TOKEN_ID = "1118150" // Replace with your token ID
+```
+
+### Increase Liquidity on Existing Position
+
+After setting your `POSITION_TOKEN_ID` in the config, run:
+```bash
+npm run increase
+```
+
+The script will:
+1. Use the position token ID from your config
+2. Fetch your existing position details
+3. Verify it matches your configured tokens
+4. Add the amounts specified in `LiquidityProvisionConfig`
+5. Handle token approvals automatically
+6. Display the updated position information

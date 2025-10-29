@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "swap": "npx ts-node src/swap-v3.ts",
-    "lp": "npx ts-node src/add-liquidity-v3.ts"
+    "lp": "npx ts-node src/mint-position-v3.ts",
+    "increase": "npx ts-node src/increase-liquidity-v3.ts"
   },
   "keywords": [],
   "author": "",

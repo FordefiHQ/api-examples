@@ -8,8 +8,6 @@ import { ChainId, CurrencyAmount, TradeType, Percent } from '@uniswap/sdk-core'
 import { AlphaRouter, SwapOptionsSwapRouter02, SwapType } from '@uniswap/smart-order-router';
 
 
-
-
 async function main() {
   const provider = await getProvider();
   if (!provider) {

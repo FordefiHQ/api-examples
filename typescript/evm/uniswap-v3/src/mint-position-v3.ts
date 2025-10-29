@@ -1,5 +1,5 @@
 import { LiquidityProvisionConfig, fordefiConfig } from './config';
-import { POOL_ABI, FACTORY_ABI} from './interfaces'
+import { POOL_ABI, FACTORY_ABI} from './constants'
 import { fromReadableAmount } from './helper';
 import { 
   ERC20_ABI, 
