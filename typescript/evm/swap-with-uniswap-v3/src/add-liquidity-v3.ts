@@ -1,6 +1,5 @@
-import { getProvider } from './get-provider';
-import { ethers } from 'ethers';
 import { LiquidityProvisionConfig, fordefiConfig } from './config';
+import { POOL_ABI, FACTORY_ABI} from './interfaces'
 import { fromReadableAmount } from './helper';
 import { 
   ERC20_ABI, 
@@ -8,20 +7,10 @@ import {
   NONFUNGIBLE_POSITION_MANAGER_ABI 
 } from './constants';
 import { Pool, nearestUsableTick } from '@uniswap/v3-sdk';
+import { getProvider } from './get-provider';
 import { Token } from '@uniswap/sdk-core';
+import { ethers } from 'ethers';
 import JSBI from 'jsbi';
-
-// Pool ABI for fetching pool state
-const POOL_ABI = [
-  'function slot0() external view returns (uint160 sqrtPriceX96, int24 tick, uint16 observationIndex, uint16 observationCardinality, uint16 observationCardinalityNext, uint8 feeProtocol, bool unlocked)',
-  'function liquidity() external view returns (uint128)',
-  'function tickSpacing() external view returns (int24)',
-];
-
-// Factory ABI for getting pool address
-const FACTORY_ABI = [
-  'function getPool(address tokenA, address tokenB, uint24 fee) external view returns (address pool)',
-];
 
 const FACTORY_ADDRESS = '0x1F98431c8aD98523631AE4a59f267346ea31F984';
 
@@ -123,22 +112,27 @@ async function main() {
   console.log(`Tick Spacing: ${pool.tickSpacing}\n`);
 
   // Convert amounts to raw format
+  // Option 1: Set one amount as target, the other very high to let Uniswap calculate
   const amount0Desired = fromReadableAmount(orderedAmount0, orderedToken0.decimals);
-  const amount1Desired = fromReadableAmount(orderedAmount1, orderedToken1.decimals);
+  // Set amount1Desired much higher than expected - Uniswap will only use what's needed
+  const amount1DesiredBase = fromReadableAmount(orderedAmount1, orderedToken1.decimals);
+  const amount1Desired = JSBI.multiply(
+    amount1DesiredBase,
+    JSBI.BigInt(100) // 100x the expected amount as maximum
+  );
 
   // Calculate minimum amounts based on configured slippage tolerance
   const slippageBps = LiquidityProvisionConfig.slippage.slippageBps;
   const slippageMultiplier = JSBI.BigInt(10000 - slippageBps); // e.g., 9500 for 5% slippage
   const bpsBase = JSBI.BigInt(10000);
 
+  // Set conservative minimums - amount0 is protected, amount1 can float
   const amount0Min = JSBI.divide(
     JSBI.multiply(amount0Desired, slippageMultiplier),
     bpsBase
   );
-  const amount1Min = JSBI.divide(
-    JSBI.multiply(amount1Desired, slippageMultiplier),
-    bpsBase
-  );
+  // Set amount1Min to 0 to let it float based on pool price
+  const amount1Min = JSBI.BigInt(0);
 
   console.log('💰 Token amounts:');
   console.log(`Slippage tolerance: ${slippageBps / 100}%`);
@@ -228,10 +222,20 @@ async function main() {
 
   // Mint the position
   console.log('🚀 Minting liquidity position...');
+
+  // Calculate proper gas fees
+  const baseFee = feeData.lastBaseFeePerGas || ethers.utils.parseUnits('25', 'gwei');
+  const priorityFee = ethers.utils.parseUnits('2', 'gwei');
+  const maxFeePerGas = baseFee.mul(2).add(priorityFee);
+
+  console.log(`Base fee: ${ethers.utils.formatUnits(baseFee, 9)} Gwei`);
+  console.log(`Priority fee: ${ethers.utils.formatUnits(priorityFee, 9)} Gwei`);
+  console.log(`Max fee per gas: ${ethers.utils.formatUnits(maxFeePerGas, 9)} Gwei\n`);
+
   const tx = await positionManager.mint(mintParams, {
     gasLimit: 500_000,
-    maxFeePerGas: feeData.lastBaseFeePerGas?.mul(2) || ethers.utils.parseUnits('50', 'gwei'),
-    maxPriorityFeePerGas: ethers.utils.parseUnits('1', 'gwei'),
+    maxFeePerGas,
+    maxPriorityFeePerGas: priorityFee,
   });
 
   console.log(`Transaction hash: ${tx.hash}`);
