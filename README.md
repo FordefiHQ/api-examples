@@ -29,6 +29,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
 ## TypeScript Examples 🟦
 * Setting up Fordefi Webhooks (TypeScript)
 * Calling EVM contracts with a Fordefi vault
+* Cross-chain USDC transfers using Circle's CCTP
 * On EVM chains (Ethereum, Base, Arbitrum, etc.):
   * Deploying EVM smart contracts from your Fordefi vault using Hardhat or Foundry
   * Swapping tokens programmatically with CowSwap
