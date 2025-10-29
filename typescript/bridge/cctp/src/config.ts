@@ -63,38 +63,6 @@ export const fordefiConfigTo: FordefiProviderConfig = {
 };
 
 //////// EVM TO SOLANA CONFIG ////////////
-export interface BridgeConfigSolana {
-  // Ethereum side
-  ethereumChain: string;
-  amountUsdc: string; // Human-readable amount (--> "10.5")
-  useFastTransfer: boolean; // Use fast transfer (20 seconds, 0.01% fee) vs standard (13-19 minutes, free)
-  // Solana side
-  solanaRpcUrl: string;
-  solanaRecipientAddress: string; // Solana wallet address that will receive USDC
-  evmRecipientAddress: string; // EVM wallet address that will receive USDC when bridging from Solana to EVM
-  fordefiVaultId: string; // Fordefi vault ID for Solana signer
-  apiUserToken: string,
-  apiPayloadSignKey: any
-}
-
-export const bridgeConfigSolana: BridgeConfigSolana = {
-  ethereumChain: bridgeCongfig.chainFrom,
-  amountUsdc: "0.1",
-  useFastTransfer: true, // Set to false for standard transfer (free but takes 13-19 minutes)
-  solanaRpcUrl: "https://api.mainnet-beta.solana.com",
-  solanaRecipientAddress: "CtvSEG7ph7SQumMtbnSKtDTLoUQoy8bxPUcjwvmNgGim",
-  evmRecipientAddress: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73", // EVM address for Solana->EVM bridge
-  fordefiVaultId: "9597e08a-32a8-4f96-a043-a3e7f1675f8d",
-  apiUserToken: process.env.FORDEFI_API_USER_TOKEN ??
-    (() => {
-      throw new Error("FORDEFI_API_USER_TOKEN is not set");
-    })(),
-  apiPayloadSignKey:
-    fs.readFileSync("./fordefi_secret/private.pem", "utf8") ??
-    (() => {
-      throw new Error("PEM_PRIVATE_KEY is not set");
-    })()
-};
 
 // CCTP & USDC Contracts
 // https://developers.circle.com/cctp/evm-smart-contracts
@@ -119,3 +87,38 @@ export const ETHEREUM_DOMAIN = 0;
 export const ARBITRUM_DOMAIN = 3;
 export const SOLANA_DOMAIN = 5;
 export const SOLANA_RELAYER_PRIVATE_KEY = process.env.PHANTOM_PK || "";
+export interface BridgeConfigSolana {
+  // Ethereum side
+  ethereumChain: string;
+  amountUsdc: string; // Human-readable amount (--> "10.5")
+  useFastTransfer: boolean; // Use fast transfer (20 seconds, 0.01% fee) vs standard (13-19 minutes, free)
+  // Solana side
+  solanaRpcUrl: string;
+  solanaRecipientAddress: string; // Solana wallet address that will receive USDC
+  evmRecipientAddress: string; // EVM wallet address that will receive USDC when bridging from Solana to EVM
+  destinationDomain: number;
+  fordefiVaultId: string; // Fordefi vault ID for Solana signer
+  apiUserToken: string,
+  apiPayloadSignKey: any
+}
+
+export const bridgeConfigSolana: BridgeConfigSolana = {
+  ethereumChain: bridgeCongfig.chainFrom,
+  amountUsdc: "0.1",
+  useFastTransfer: true, // Set to false for standard transfer (free but takes 13-19 minutes)
+  solanaRpcUrl: "https://api.mainnet-beta.solana.com",
+  solanaRecipientAddress: "CtvSEG7ph7SQumMtbnSKtDTLoUQoy8bxPUcjwvmNgGim",
+  evmRecipientAddress: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73", // EVM address for Solana->EVM bridge
+  destinationDomain: ARBITRUM_DOMAIN,
+  fordefiVaultId: "9597e08a-32a8-4f96-a043-a3e7f1675f8d",
+  apiUserToken: process.env.FORDEFI_API_USER_TOKEN ??
+    (() => {
+      throw new Error("FORDEFI_API_USER_TOKEN is not set");
+    })(),
+  apiPayloadSignKey:
+    fs.readFileSync("./fordefi_secret/private.pem", "utf8") ??
+    (() => {
+      throw new Error("PEM_PRIVATE_KEY is not set");
+    })()
+};
+

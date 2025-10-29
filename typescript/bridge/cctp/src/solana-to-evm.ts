@@ -22,7 +22,7 @@ import {
   SystemProgram,
   Keypair,
 } from "@solana/web3.js";
-import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { getAssociatedTokenAddress } from "@solana/spl-token";
 import * as spl from "@solana/spl-token";
 import { SOLANA_USDC_MINT, SOLANA_DOMAIN, ARBITRUM_DOMAIN, ARBITRUM_MESSAGE_TRANSMITTER_V2  } from "./config";
 import {
@@ -38,7 +38,6 @@ import { getBytes } from "ethers";
 // ============================================================================
 
 function evmAddressToBytes32(address: string): string {
-  // Circle's implementation - prepend zeros to make 32 bytes
   return `0x000000000000000000000000${address.replace("0x", "")}`;
 }
 
@@ -71,17 +70,13 @@ async function burnUsdcOnSolana(
   
   const { messageTransmitterProgram, tokenMessengerMinterProgram } =
     getProgramsV2(anchorProvider);
-
-  const usdcAddress = SOLANA_USDC_MINT;
   
   // Derive the ATA for the owner's USDC account (burn token account)
   const userTokenAccount = await getAssociatedTokenAddress(
-    usdcAddress,
+    SOLANA_USDC_MINT,
     ownerPubkey
   );
 
-  // Set destination domain and recipient
-  const destinationDomain = ARBITRUM_DOMAIN;
   // For EVM destination, convert EVM address to bytes32 and create a PublicKey from it
   const evmAddressBytes32 = evmAddressToBytes32(bridgeConfigSolana.evmRecipientAddress);
   const mintRecipientBytes = getBytes(evmAddressBytes32);
@@ -94,18 +89,19 @@ async function burnUsdcOnSolana(
       messageTransmitterProgram,
       tokenMessengerMinterProgram,
     },
-    usdcAddress,
-    destinationDomain
+    SOLANA_USDC_MINT,
+    bridgeConfigSolana.destinationDomain
   );
 
-  // Generate a new keypair for the MessageSent event account
+  // Generate a new keypair for the MessageSent event account 
+  // This is a temporary account for storing the MessageSent event for this tx, the keypair is discarded after use
   const messageSentEventAccountKeypair = Keypair.generate();
 
   // Build the depositForBurn instruction using the Anchor program
   const instructionBuilder = tokenMessengerMinterProgram.methods
     .depositForBurn({
       amount,
-      destinationDomain,
+      destinationDomain: bridgeConfigSolana.destinationDomain,
       mintRecipient,
       maxFee,
       minFinalityThreshold,
@@ -121,7 +117,7 @@ async function burnUsdcOnSolana(
       remoteTokenMessenger: pdas.remoteTokenMessengerKey.publicKey,
       tokenMinter: pdas.tokenMinterAccount.publicKey,
       localToken: pdas.localToken.publicKey,
-      burnTokenMint: usdcAddress,
+      burnTokenMint: SOLANA_USDC_MINT,
       messageSentEventData: messageSentEventAccountKeypair.publicKey,
       messageTransmitterProgram: messageTransmitterProgram.programId,
       tokenMessengerMinterProgram: tokenMessengerMinterProgram.programId,
@@ -161,7 +157,7 @@ async function burnUsdcOnSolana(
     throw new Error("Failed to sign with messageSentEventAccountKeypair");
   }
   
-  // Serialize ONLY the message (not the full transaction)
+  // Serialize the message
   const serializedMessage = transaction.message.serialize();
   const base64EncodedMessage = Buffer.from(serializedMessage).toString("base64");
   
@@ -467,7 +463,7 @@ async function main(): Promise<void> {
     // Step 4: Receive message on EVM (Arbitrum) to mint USDC
     await receiveMessageOnEvm(message, attestation);
     
-    console.log("\n🎉 Bridge completed successfully!");
+    console.log("\n🌉 Bridge completed successfully!");
   } catch (error) {
     console.error("\n❌ Error:", error);
     process.exit(1);
