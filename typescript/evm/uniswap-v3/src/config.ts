@@ -18,7 +18,7 @@ export const fordefiConfig: FordefiProviderConfig = {
 };
 
 // Configure your position NFT (used for increase and remove liquidity operations)
-export const POSITION_TOKEN_ID = "1118801"
+export const POSITION_TOKEN_ID = "1118818"
 
 // Configure your Uniswap swap
 export const swapConfig: SwapConfig = {
