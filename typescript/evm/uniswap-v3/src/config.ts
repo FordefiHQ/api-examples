@@ -1,4 +1,4 @@
-import { ExampleConfig, LiquidityConfig } from './interfaces';
+import { SwapConfig, LiquidityConfig, RemoveConfig } from './interfaces';
 import { FordefiProviderConfig } from '@fordefi/web3-provider';
 import { USDC_TOKEN, WETH_TOKEN } from './constants';
 import { FeeAmount } from '@uniswap/v3-sdk';
@@ -17,11 +17,11 @@ export const fordefiConfig: FordefiProviderConfig = {
   skipPrediction: false 
 };
 
-// Configure your position NFT
-export const POSITION_TOKEN_ID = "1118150"
+// Configure your position NFT (used for increase and remove liquidity operations)
+export const POSITION_TOKEN_ID = "1118801"
 
 // Configure your Uniswap swap
-export const CurrentConfig: ExampleConfig = {
+export const swapConfig: SwapConfig = {
   rpc: {
     local: '',
     mainnet: 'https://ethereum-rpc.publicnode.com',
@@ -45,13 +45,21 @@ export const LiquidityProvisionConfig: LiquidityConfig = {
   tokens: {
     token0: USDC_TOKEN,
     token1: WETH_TOKEN,
-    token0Amount: 5, // 1 USDC
-    token1Amount: 0.001, // 0.00005 WETH
+    token0Amount: 5, // in human-reable units
+    token1Amount: 0.001, // in human-reable units
     poolFee: FeeAmount.MEDIUM
   },
   priceRange: {
     rangePercent: 10 // ±10% range around current price
   },
+  slippage: {
+    slippageBps: 500 // 5% slippage tolerance (500 basis points)
+  }
+};
+
+// Configure removing liquidity from a position
+export const RemoveLiquidityConfig: RemoveConfig = {
+  liquidityPercentage: 100, // Remove 100% of liquidity (can be adjusted to remove partial amounts)
   slippage: {
     slippageBps: 500 // 5% slippage tolerance (500 basis points)
   }

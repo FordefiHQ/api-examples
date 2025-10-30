@@ -1,6 +1,6 @@
 import { Token, BigintIsh } from '@uniswap/sdk-core'
 
-export interface ExampleConfig {
+export interface SwapConfig {
   rpc: {
     local: string
     mainnet: string
@@ -31,6 +31,13 @@ export interface LiquidityConfig {
   priceRange: {
     rangePercent: number
   }
+  slippage: {
+    slippageBps: number // in basis points (100 = 1%)
+  }
+};
+
+export interface RemoveConfig {
+  liquidityPercentage: number // Percentage of liquidity to remove (1-100)
   slippage: {
     slippageBps: number // in basis points (100 = 1%)
   }
