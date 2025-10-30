@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
-import { p256 } from '@noble/curves/nist';
+import { p256 } from '@noble/curves/nist.js';
 import express, { Request, Response } from 'express';
 
 // SECRETS and ENV VARIABLES
@@ -39,7 +39,7 @@ interface WebhookEvent {
  * Parse and convert from DER format to IEEE P1363
  */
 function derToP1363(derSig: Uint8Array): Uint8Array {
-  const signature = p256.Signature.fromDER(derSig).toCompactRawBytes();
+  const signature = p256.Signature.fromBytes(derSig, 'der').toBytes();
 
   return signature;
 }

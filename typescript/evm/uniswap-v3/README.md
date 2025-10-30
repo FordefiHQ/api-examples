@@ -4,11 +4,12 @@ Scripts to perform token swaps and provide liquidity on Uniswap v3 with Fordefi.
 
 ## Overview
 
-This project includes three main scripts:
+This project includes four main scripts:
 
 1. **Token Swap**: Execute token swaps on Uniswap v3 while using your Fordefi EVM vault as the signer
 2. **Liquidity Provision (Mint)**: Create a new liquidity position in Uniswap v3 pools with concentrated liquidity
 3. **Increase Liquidity**: Add more liquidity to an existing Uniswap v3 position
+4. **Remove Liquidity**: Remove liquidity from an existing position and collect the tokens
 
 All scripts leverage Uniswap's SDK and handle transaction signing through Fordefi.
 
@@ -16,7 +17,7 @@ All scripts leverage Uniswap's SDK and handle transaction signing through Fordef
 
 - Fordefi organization and EVM vault
 - Node.js and npm installed
-- Fordefi credentials: API User access token and private keys and API Signer set up ([documentation](https://docs.fordefi.com/developers/getting-started/set-up-an-api-signer/api-signer-docker))
+- Fordefi credentials: API User access token, API User private key and API Signer set up and running ([documentation](https://docs.fordefi.com/developers/getting-started/set-up-an-api-signer/api-signer-docker))
 
 ## Setup
 
@@ -30,7 +31,7 @@ npm install
 FORDEFI_API_USER_TOKEN=your_api_user_token_here
 ```
 
-4. Create a directory `fordefi_secret` and place your API Signer's PEM private key in `fordefi_secret/private.pem`
+4. Create a directory `fordefi_secret` and place your API User's private key in `fordefi_secret/private.pem`
 
 ## Configuration
 
@@ -84,7 +85,7 @@ When you create a new liquidity position, you'll receive a position token ID. Se
 export const POSITION_TOKEN_ID = "1118150"
 ```
 
-### 4. Liquidity Provision Configuration
+### 4. Liquidity Provision Configuration (Mint & Increase)
 
 Configuration for adding liquidity to Uniswap v3 pools:
 
@@ -144,6 +145,28 @@ token1Amount: 0.001,  // Estimate ~0.001 WETH (actual will be calculated by Unis
 - Ensure sufficient token balances for both tokens - have extra token1 since the exact amount needed will be calculated
 - The scripts handle token approvals automatically
 
+### 5. Remove Liquidity Configuration
+
+Configuration for removing liquidity from an existing position:
+
+```typescript
+export const RemoveLiquidityConfig = {
+  liquidityPercentage: 100, // Remove 100% of liquidity (can be 1-100)
+  slippage: {
+    slippageBps: 500 // Slippage tolerance in basis points (5%)
+  }
+};
+```
+
+**Configuration Options:**
+
+- `liquidityPercentage`: Percentage of liquidity to remove from the position
+  - `100` = Remove all liquidity (close position)
+  - `50` = Remove half of the liquidity
+  - `25` = Remove quarter of the liquidity
+  - Any value from 1 to 100
+- `slippageBps`: Slippage tolerance in basis points (500 = 5%)
+
 ## Usage
 
 ### Token Swap
@@ -180,3 +203,28 @@ The script will:
 4. Add the amounts specified in `LiquidityProvisionConfig`
 5. Handle token approvals automatically
 6. Display the updated position information
+
+### Remove Liquidity from Existing Position
+
+After setting your `POSITION_TOKEN_ID` and `RemoveLiquidityConfig` in the config, run:
+```bash
+npm run remove
+```
+
+The script will:
+1. Use the position token ID from your config
+2. Fetch your existing position details
+3. Remove the specified percentage of liquidity from `RemoveLiquidityConfig`
+4. Collect the withdrawn tokens to your wallet
+5. Display the amounts collected and updated position information
+
+**Important Notes:**
+
+- Configure the percentage to remove in `RemoveLiquidityConfig.liquidityPercentage` (1-100)
+  - Set to `100` to completely close the position
+  - Set to a lower value (e.g., `50`) to remove partial liquidity
+- The removal process happens in two steps:
+  1. **Decrease Liquidity**: Removes liquidity from the position
+  2. **Collect**: Withdraws the tokens from the position manager to your wallet
+- No token approvals are needed when removing liquidity
+- Configure slippage tolerance in `RemoveLiquidityConfig.slippage.slippageBps`

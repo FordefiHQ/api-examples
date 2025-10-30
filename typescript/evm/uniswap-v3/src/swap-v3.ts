@@ -2,7 +2,7 @@ import JSBI from 'jsbi';
 import { ethers } from 'ethers';
 import { getProvider } from './get-provider';
 import { fromReadableAmount } from './helper';
-import { CurrentConfig, fordefiConfig } from './config';
+import { swapConfig, fordefiConfig } from './config';
 import { ERC20_ABI, V3_SWAP_ROUTER_ADDRESS } from './constants';
 import { ChainId, CurrencyAmount, TradeType, Percent } from '@uniswap/sdk-core'
 import { AlphaRouter, SwapOptionsSwapRouter02, SwapType } from '@uniswap/smart-order-router';
@@ -21,24 +21,24 @@ async function main() {
   
   // Display swap configuration
   console.log('📋 Swap Configuration:');
-  console.log(`From: ${CurrentConfig.tokens.in.symbol} (${CurrentConfig.tokens.in.address})`);
-  console.log(`To: ${CurrentConfig.tokens.out.symbol} (${CurrentConfig.tokens.out.address})`);
-  console.log(`Amount In: ${CurrentConfig.tokens.amountIn} ${CurrentConfig.tokens.in.symbol}`);
-  console.log(`Slippage: ${Number(CurrentConfig.slippage.slippageAmount) / 100}%`);
+  console.log(`From: ${swapConfig.tokens.in.symbol} (${swapConfig.tokens.in.address})`);
+  console.log(`To: ${swapConfig.tokens.out.symbol} (${swapConfig.tokens.out.address})`);
+  console.log(`Amount In: ${swapConfig.tokens.amountIn} ${swapConfig.tokens.in.symbol}`);
+  console.log(`Slippage: ${Number(swapConfig.slippage.slippageAmount) / 100}%`);
   console.log(`Wallet: ${walletAddress}\n`);
   
   // Check token balances
   console.log('💰 Checking token balances...');
-  const tokenInContract = new ethers.Contract(CurrentConfig.tokens.in.address, ERC20_ABI, signer);
-  const tokenOutContract = new ethers.Contract(CurrentConfig.tokens.out.address, ERC20_ABI, signer);
+  const tokenInContract = new ethers.Contract(swapConfig.tokens.in.address, ERC20_ABI, signer);
+  const tokenOutContract = new ethers.Contract(swapConfig.tokens.out.address, ERC20_ABI, signer);
   
   const [balanceIn, balanceOut] = await Promise.all([
     tokenInContract.balanceOf(walletAddress),
     tokenOutContract.balanceOf(walletAddress)
   ]);
   
-  console.log(`${CurrentConfig.tokens.in.symbol} balance: ${ethers.utils.formatUnits(balanceIn, CurrentConfig.tokens.in.decimals)}`);
-  console.log(`${CurrentConfig.tokens.out.symbol} balance: ${ethers.utils.formatUnits(balanceOut, CurrentConfig.tokens.out.decimals)}\n`);
+  console.log(`${swapConfig.tokens.in.symbol} balance: ${ethers.utils.formatUnits(balanceIn, swapConfig.tokens.in.decimals)}`);
+  console.log(`${swapConfig.tokens.out.symbol} balance: ${ethers.utils.formatUnits(balanceOut, swapConfig.tokens.out.decimals)}\n`);
 
   // Invoke Uniswap router
   console.log('🔍 Finding best route...');
@@ -49,23 +49,23 @@ async function main() {
 
   // Define swap and token amount
   const options: SwapOptionsSwapRouter02 = {
-    recipient: CurrentConfig.wallet?.address || fordefiConfig.address,
-    slippageTolerance: new Percent(CurrentConfig.slippage.slippageAmount, 10_000), // define slippage in bps - 1% in this example
+    recipient: swapConfig.wallet?.address || fordefiConfig.address,
+    slippageTolerance: new Percent(swapConfig.slippage.slippageAmount, 10_000), // define slippage in bps - 1% in this example
     deadline: Math.floor(Date.now() / 1000 + 1800),
     type: SwapType.SWAP_ROUTER_02,
   };
   const rawTokenAmountIn: JSBI = fromReadableAmount(
-    CurrentConfig.tokens.amountIn,
-    CurrentConfig.tokens.in.decimals
+    swapConfig.tokens.amountIn,
+    swapConfig.tokens.in.decimals
   );
 
   // Find route for swap
   const route = await router.route(
     CurrencyAmount.fromRawAmount(
-      CurrentConfig.tokens.in,
+      swapConfig.tokens.in,
       rawTokenAmountIn
     ),
-    CurrentConfig.tokens.out,
+    swapConfig.tokens.out,
     TradeType.EXACT_INPUT,
     options
   )
@@ -75,8 +75,8 @@ async function main() {
   
   // Display route details
   console.log('✅ Route found!');
-  console.log(`Quote: ${route.quote.toFixed()} ${CurrentConfig.tokens.out.symbol}`);
-  console.log(`Expected Output: ${route.quote.toSignificant(6)} ${CurrentConfig.tokens.out.symbol}`);
+  console.log(`Quote: ${route.quote.toFixed()} ${swapConfig.tokens.out.symbol}`);
+  console.log(`Expected Output: ${route.quote.toSignificant(6)} ${swapConfig.tokens.out.symbol}`);
   console.log(`Gas Estimate: ${route.estimatedGasUsed.toString()}`);
   console.log(`Gas Cost (USD): $${route.gasPriceWei ? route.estimatedGasUsedUSD.toFixed(2) : 'N/A'}`);
   console.log(`Route: ${route.route.map((r: any) => r.protocol).join(' -> ')}\n`);
@@ -84,7 +84,7 @@ async function main() {
   // Check and approve tokens if needed
   console.log('✅ Checking token approval...');
   const tokenContract = new ethers.Contract(
-    CurrentConfig.tokens.in.address, 
+    swapConfig.tokens.in.address, 
     ERC20_ABI, 
     signer
   );
@@ -93,13 +93,13 @@ async function main() {
   const requiredAmount = ethers.BigNumber.from(rawTokenAmountIn.toString());
   
   if (currentAllowance.lt(requiredAmount)) {
-    console.log(`Approving ${CurrentConfig.tokens.in.symbol}...`);
+    console.log(`Approving ${swapConfig.tokens.in.symbol}...`);
     const approveTx = await tokenContract.approve(V3_SWAP_ROUTER_ADDRESS, requiredAmount);
     console.log(`Approval transaction: ${approveTx.hash}`);
     await approveTx.wait();
-    console.log(`${CurrentConfig.tokens.in.symbol} approved ✅\n`);
+    console.log(`${swapConfig.tokens.in.symbol} approved ✅\n`);
   } else {
-    console.log(`${CurrentConfig.tokens.in.symbol} already has sufficient allowance ✅\n`);
+    console.log(`${swapConfig.tokens.in.symbol} already has sufficient allowance ✅\n`);
   }
 
   // Prepare transaction
@@ -154,16 +154,16 @@ async function main() {
     tokenOutContract.balanceOf(walletAddress)
   ]);
   
-  console.log(`${CurrentConfig.tokens.in.symbol}: ${ethers.utils.formatUnits(finalBalanceIn, CurrentConfig.tokens.in.decimals)}`);
-  console.log(`${CurrentConfig.tokens.out.symbol}: ${ethers.utils.formatUnits(finalBalanceOut, CurrentConfig.tokens.out.decimals)}`);
+  console.log(`${swapConfig.tokens.in.symbol}: ${ethers.utils.formatUnits(finalBalanceIn, swapConfig.tokens.in.decimals)}`);
+  console.log(`${swapConfig.tokens.out.symbol}: ${ethers.utils.formatUnits(finalBalanceOut, swapConfig.tokens.out.decimals)}`);
   
   // Calculate actual amounts swapped
   const amountInUsed = balanceIn.sub(finalBalanceIn);
   const amountOutReceived = finalBalanceOut.sub(balanceOut);
   
   console.log(`\n📊 Swap Summary:`);
-  console.log(`Sent: ${ethers.utils.formatUnits(amountInUsed, CurrentConfig.tokens.in.decimals)} ${CurrentConfig.tokens.in.symbol}`);
-  console.log(`Received: ${ethers.utils.formatUnits(amountOutReceived, CurrentConfig.tokens.out.decimals)} ${CurrentConfig.tokens.out.symbol}`);
+  console.log(`Sent: ${ethers.utils.formatUnits(amountInUsed, swapConfig.tokens.in.decimals)} ${swapConfig.tokens.in.symbol}`);
+  console.log(`Received: ${ethers.utils.formatUnits(amountOutReceived, swapConfig.tokens.out.decimals)} ${swapConfig.tokens.out.symbol}`);
   console.log('\n✨🦄 Done!');
 };
 main().catch(console.error);
