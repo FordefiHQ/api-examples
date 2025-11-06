@@ -6,7 +6,7 @@ import requests
 from pathlib import Path
 from dotenv import load_dotenv
 from broadcast import broadcast_tx
-from construct_request import build_request
+from construct_api_request import build_request
 from sign_payload import sign_wih_api_user_private_key
 
 load_dotenv()
@@ -20,8 +20,8 @@ will_auto_finalize = True
 is_bitcoin_mainnet = True
 
 async def main():
-    psbt_hex_data = os.getenv("PSBT_HEX_DATA")    
-    request_json = await build_request(FORDEFI_BTC_VAULT_ID, FORDEFI_BTC_VAULT_SEGWIT_ADDRESS, psbt_hex_data, will_auto_finalize, is_bitcoin_mainnet)
+    psbt_hex_data = os.getenv("PSBT_HEX_DATA")
+    request_json = await build_request(FORDEFI_BTC_VAULT_ID, FORDEFI_BTC_VAULT_TAPROOT_ADDRESS, psbt_hex_data, will_auto_finalize, is_bitcoin_mainnet)
 
     request_body = json.dumps(request_json)
     timestamp = datetime.datetime.now().strftime("%s")

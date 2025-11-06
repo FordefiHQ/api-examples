@@ -32,7 +32,7 @@ export const fordefiConfig: FordefiProviderConfig = {
 
 export const agentWalletConfig: AgentWalletConfig = {
     agentAddress: "", // always leave empty
-    agentName: "agent_dean",
+    agentName: "agent_daisy",
     validUntil: "1774777045175" // only required when approving an agent, MAX is 180 days in UNIX time
 };
 
