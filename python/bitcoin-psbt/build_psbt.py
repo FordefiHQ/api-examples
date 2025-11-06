@@ -492,7 +492,7 @@ def main():
         # Save PSBT to file
         output_file = "psbt_output.txt"
         with open(output_file, 'w') as f:
-            f.write(psbt_hex)
+            f.write(f"0x{psbt_hex}")
 
         print(f"\n📄 PSBT saved to: {output_file}")
         print("\nTo use with the Fordefi API, set the environment variable:")

@@ -6,7 +6,7 @@ A set of Python scripts for creating and submitting Bitcoin PSBT (Partially Sign
 
 This project provides two main components:
 
-1. **PSBT Construction** (`construct_psbt.py`) - A utility script that constructs a PSBT for transferring BTC from one address to another by fetching UTXOs from the blockchain
+1. **PSBT Construction** (`build_psbt.py`) - A utility script that constructs a PSBT for transferring BTC from one address to another by fetching UTXOs from the blockchain
 2. **Fordefi API Submission** (`construct_api_request.py` + `run.py`) - Submits any PSBT to the Fordefi API for signing and broadcasting
 
 **Note:** You can use the provided PSBT construction script OR provide your own pre-constructed PSBT hex data.
@@ -67,7 +67,7 @@ This project provides two main components:
 If you want to create a PSBT from scratch, run the construction script:
 
 ```bash
-uv run construct_psbt.py
+uv run build_psbt.py
 ```
 
 This will:
@@ -92,7 +92,7 @@ This requires the Fordefi-specific environment variables (`FORDEFI_API_USER_TOKE
 
 ### PSBT Construction Script
 
-The `construct_psbt.py` script supports:
+The `build_psbt.py` script supports:
 - **Multiple address types**: Legacy P2PKH/P2SH, SegWit v0 (P2WPKH/P2WSH), and Taproot (P2TR)
 - **Automatic UTXO fetching**: Uses Blockstream API to fetch UTXOs for any Bitcoin address
 - **Smart UTXO selection**: Automatically selects the optimal UTXOs to cover the transaction amount and fees

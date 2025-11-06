@@ -15,7 +15,7 @@ PATH = "/api/v1/transactions"
 PRIVATE_KEY_PEM_FILE = Path("./secret/private.pem")
 psbt_hex_data = os.getenv("PSBT_HEX_DATA")
 vault_id = os.getenv("FORDEFI_BTC_VAULT_ID")
-sender_address = os.getenv("FORDEFI_BTC_VAULT_TAPROOT_ADDRESS")
+sender_address = os.getenv("BTC_SENDER_ADDRESS")
 will_auto_finalize = True
 is_bitcoin_mainnet = True
 
