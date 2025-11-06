@@ -37,11 +37,11 @@ export const agentWalletConfig: AgentWalletConfig = {
 };
 
 export const hyperliquidConfig: HyperliquidConfig = {
-    action: "vault_transfer",
+    action: "approve_agent",
     isTestnet: false,
     destination: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73", // Change to your destination address
     amount: "10",
-    agentPk: JSON.parse(fs.readFileSync('./agent-private-key.json', 'utf8'))[`private_key_${agentWalletConfig.agentName}`] ?? (() => { throw new Error('API Agent private key is not set'); })(), // only required for L1 actions
+    //agentPk: JSON.parse(fs.readFileSync('./agent-private-key.json', 'utf8'))[`private_key_${agentWalletConfig.agentName}`] ?? (() => { throw new Error('API Agent private key is not set'); })(), // only required for L1 actions
     isDeposit: false, // only required when for "vault_transfer" action
     hyperliquid_vault_address: "0xdfc24b077bc1425ad1dea75bcb6f8158e10df303" // only required when for "vault_transfer" action
 };
