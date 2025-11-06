@@ -39,9 +39,7 @@ This project provides two main components:
    PSBT_HEX_DATA="your_hex_encoded_psbt_data"
    FORDEFI_API_USER_TOKEN="your_token"
    FORDEFI_BTC_VAULT_ID="your_vault_id"
-   FORDEFI_BTC_VAULT_TAPROOT_ADDRESS="taproot_address_from_btc_vault"
-   # OR
-   FORDEFI_BTC_VAULT_SEGWIT_ADDRESS="segwit_address_from_btc_vault"
+   BTC_SENDER_ADDRESS="taproot_or_segwit_or_legacy_address_from_btc_vault"
    ```
 
    **Option B: Using the PSBT construction script**
