@@ -88,6 +88,25 @@ def convertbits(data, frombits, tobits, pad=True):
     return ret
 
 
+def is_legacy_address(address: str) -> bool:
+    """
+    Check if an address is a legacy Bitcoin address (P2PKH or P2SH).
+    Legacy addresses start with '1', '3' (mainnet) or 'm', 'n', '2' (testnet).
+
+    Args:
+        address: Bitcoin address string
+
+    Returns:
+        True if the address is a legacy address, False otherwise
+    """
+    if not address:
+        return False
+
+    # Legacy address prefixes
+    legacy_prefixes = ('1', '3', 'm', 'n', '2')
+    return address[0] in legacy_prefixes
+
+
 def address_to_scriptpubkey(address: str) -> bytes:
     """
     Convert any Bitcoin address to its scriptPubKey.
@@ -459,6 +478,15 @@ def main():
 
     if not send_amount:
         print("Error: BTC_SEND_AMOUNT environment variable not set")
+        return
+
+    # Validate that recipient address is not a legacy address
+    # Fordefi cannot sign PSBTs with legacy addresses
+    if is_legacy_address(recipient_address):
+        print("Error: BTC_RECIPIENT_ADDRESS cannot be a legacy address")
+        print("Legacy addresses (starting with '1', '3', 'm', 'n', or '2') are not supported by Fordefi.")
+        print("Please use a SegWit (bc1q/tb1q) or Taproot (bc1p/tb1p) address instead.")
+        print(f"Provided address: {recipient_address}")
         return
 
     try:

@@ -39,17 +39,19 @@ This project provides two main components:
    PSBT_HEX_DATA="your_hex_encoded_psbt_data"
    FORDEFI_API_USER_TOKEN="your_token"
    FORDEFI_BTC_VAULT_ID="your_vault_id"
-   BTC_SENDER_ADDRESS="taproot_or_segwit_or_legacy_address_from_btc_vault"
+   BTC_SENDER_ADDRESS="taproot_or_segwit_address_from_btc_vault"
    ```
 
    **Option B: Using the PSBT construction script**
    ```plaintext
    BTC_SENDER_ADDRESS="tb1q..."  # Bitcoin address to spend from
-   BTC_RECIPIENT_ADDRESS="tb1q..."  # Bitcoin address to send to
+   BTC_RECIPIENT_ADDRESS="tb1q..."  # SegWit (bc1q/tb1q) or Taproot (bc1p/tb1p) address to send to
    BTC_SEND_AMOUNT="50000"  # Amount in satoshis
    BTC_FEE="1000"  # Transaction fee in satoshis (optional, default: 200)
    BTC_NETWORK="testnet"  # 'testnet' or 'mainnet' (optional, default: testnet)
    ```
+
+   **Important:** `BTC_RECIPIENT_ADDRESS` must be a SegWit (bc1q/tb1q) or Taproot (bc1p/tb1p) address. Legacy addresses (starting with '1', '3', 'm', 'n', or '2') are not supported by Fordefi and will be rejected.
 4. Place your API User's `.pem` private key file in a `/secret` directory in the root folder.
 
 5. Start the Fordefi API Signer:
