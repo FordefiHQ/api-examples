@@ -457,11 +457,10 @@ def create_psbt_from_utxos(
 def main():
     sender_address = os.getenv('BTC_SENDER_ADDRESS')
     recipient_address = os.getenv('BTC_RECIPIENT_ADDRESS')
-    send_amount = os.getenv('BTC_SEND_AMOUNT')  # in satoshis
-    fee = os.getenv('BTC_FEE', '200')  # default 200 satoshis
-    network = os.getenv('BTC_NETWORK', 'testnet')  # default to testnet
+    send_amount = os.getenv('BTC_SEND_AMOUNT')
+    fee = os.getenv('BTC_FEE', '200')
+    network = os.getenv('BTC_NETWORK', 'testnet')
 
-    # Validate environment variables
     if not sender_address:
         print("Error: BTC_SENDER_ADDRESS environment variable not set")
         print("\nExample usage:")
@@ -471,15 +470,12 @@ def main():
         print("export BTC_FEE='1000'  # optional, in satoshis")
         print("export BTC_NETWORK='testnet'  # or 'mainnet'")
         return
-
     if not recipient_address:
         print("Error: BTC_RECIPIENT_ADDRESS environment variable not set")
         return
-
     if not send_amount:
         print("Error: BTC_SEND_AMOUNT environment variable not set")
         return
-
     # Validate that recipient address is not a legacy address
     # Fordefi cannot sign PSBTs with legacy addresses
     if is_legacy_address(recipient_address):
@@ -495,16 +491,13 @@ def main():
     except ValueError:
         print("Error: BTC_SEND_AMOUNT and BTC_FEE must be integers (satoshis)")
         return
-
     if send_amount <= 0:
         print("Error: BTC_SEND_AMOUNT must be positive")
         return
-
     if fee < 0:
         print("Error: BTC_FEE cannot be negative")
         return
 
-    # Create the PSBT
     result = create_psbt_from_utxos(
         sender_address=sender_address,
         recipient_address=recipient_address,
@@ -517,12 +510,12 @@ def main():
         psbt_hex, _ = result
         print("\n✓ PSBT construction successful!")
 
-        # Save PSBT to file
+        # OPTIONAL - Save PSBT to file
         output_file = "psbt_output.txt"
         with open(output_file, 'w') as f:
             f.write(f"0x{psbt_hex}")
-
         print(f"\n📄 PSBT saved to: {output_file}")
+
         print("\nTo use with the Fordefi API, set the environment variable:")
         print(f'PSBT_HEX_DATA="0x{psbt_hex}"')
         print("\nThen run: python psbt.py")
