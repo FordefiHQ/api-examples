@@ -4,11 +4,11 @@ import requests
 import binascii
 from io import BytesIO
 from dotenv import load_dotenv
-from typing import List, Optional
 from bitcoin import SelectParams
-from bitcoin.core import CTransaction, CTxIn, CTxOut, COutPoint, lx
-from bitcoin.core.script import CScript, OP_DUP, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG, OP_1
+from typing import List, Optional
 from bitcoin.wallet import CBitcoinAddress
+from bitcoin.core.script import CScript, OP_1
+from bitcoin.core import CTransaction, CTxIn, CTxOut, COutPoint, lx
 
 load_dotenv()
 
@@ -439,7 +439,7 @@ def main():
     sender_address = os.getenv('BTC_SENDER_ADDRESS')
     recipient_address = os.getenv('BTC_RECIPIENT_ADDRESS')
     send_amount = os.getenv('BTC_SEND_AMOUNT')  # in satoshis
-    fee = os.getenv('BTC_FEE', '1000')  # default 200 satoshis
+    fee = os.getenv('BTC_FEE', '200')  # default 200 satoshis
     network = os.getenv('BTC_NETWORK', 'testnet')  # default to testnet
 
     # Validate environment variables
