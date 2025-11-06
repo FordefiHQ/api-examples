@@ -476,13 +476,13 @@ def main():
     if not send_amount:
         print("Error: BTC_SEND_AMOUNT environment variable not set")
         return
-    # Validate that recipient address is not a legacy address
-    # Fordefi cannot sign PSBTs with legacy addresses
-    if is_legacy_address(recipient_address):
-        print("Error: BTC_RECIPIENT_ADDRESS cannot be a legacy address")
+    # Validate that sender address is not a legacy address
+    # Fordefi cannot sign PSBTs with legacy sender addresses
+    if is_legacy_address(sender_address):
+        print("Error: BTC_SENDER_ADDRESS cannot be a legacy address")
         print("Legacy addresses (starting with '1', '3', 'm', 'n', or '2') are not supported by Fordefi.")
         print("Please use a SegWit (bc1q/tb1q) or Taproot (bc1p/tb1p) address instead.")
-        print(f"Provided address: {recipient_address}")
+        print(f"Provided address: {sender_address}")
         return
 
     try:

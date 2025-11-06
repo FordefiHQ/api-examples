@@ -51,7 +51,7 @@ This project provides two main components:
    BTC_NETWORK="testnet"  # 'testnet' or 'mainnet' (optional, default: testnet)
    ```
 
-   **Important:** `BTC_RECIPIENT_ADDRESS` must be a SegWit (bc1q/tb1q) or Taproot (bc1p/tb1p) address. Legacy addresses (starting with '1', '3', 'm', 'n', or '2') are not supported by Fordefi and will be rejected.
+   **Important:** `BTC_SENDER_ADDRESS` must be a SegWit (bc1q/tb1q) or Taproot (bc1p/tb1p) address. Siging PSBTs with a legacy addresses (starting with '1', '3', 'm', 'n', or '2') is not supported by Fordefi and will be rejected.
 4. Place your API User's `.pem` private key file in a `/secret` directory in the root folder.
 
 5. Start the Fordefi API Signer:
