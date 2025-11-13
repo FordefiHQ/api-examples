@@ -455,8 +455,8 @@ def create_psbt_from_utxos(
 
 
 def main():
-    sender_address = os.getenv('BTC_SENDER_ADDRESS_STG')
-    recipient_address = os.getenv('BTC_RECIPIENT_ADDRESS_STG')
+    sender_address = os.getenv('BTC_SENDER_ADDRESS')
+    recipient_address = os.getenv('BTC_RECIPIENT_ADDRESS')
     send_amount = os.getenv('BTC_SEND_AMOUNT')
     fee = os.getenv('BTC_FEE', '200')
     network = os.getenv('BTC_NETWORK', 'testnet')
