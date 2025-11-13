@@ -3,23 +3,21 @@ import base64
 import json
 
 async def broadcast_tx(
-    path: str, 
-    access_token: str, 
-    signature: bytes, 
-    timestamp: str, 
+    path: str,
+    access_token: str,
+    signature: bytes,
+    timestamp: str,
     request_body: str
 ) -> requests.Response:
 
     try:
-        resp_tx = requests.post(
-            f"https://api.fordefi.com{path}",
-            headers={
-                "Authorization": f"Bearer {access_token}",
-                "x-signature": base64.b64encode(signature),
-                "x-timestamp": timestamp.encode(),
-            },
-            data=request_body,
-        )
+        url = f"https://api.fordefi.com{path}"
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "x-signature": base64.b64encode(signature),
+            "x-timestamp": timestamp.encode(),
+        }
+        resp_tx = requests.post(url, headers=headers, data=request_body)
         resp_tx.raise_for_status()
         return resp_tx
 

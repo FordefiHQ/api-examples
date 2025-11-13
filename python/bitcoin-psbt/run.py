@@ -25,10 +25,8 @@ async def main():
     request_body = json.dumps(request_json)
     timestamp = datetime.datetime.now().strftime("%s")
     payload = f"{PATH}|{timestamp}|{request_body}"
-        
     signature = await sign_wih_api_user_private_key(payload, PRIVATE_KEY_PEM_FILE)
-
-    try: 
+    try:
         print("Making API request to Fordefi for MPC signature 📡")
         resp_tx = await broadcast_tx(PATH, FORDEFI_API_USER_TOKEN, signature, timestamp, request_body)
         print("Request ID: ", resp_tx.headers['x-request-id'])
