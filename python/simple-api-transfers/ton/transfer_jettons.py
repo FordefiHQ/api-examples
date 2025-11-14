@@ -15,6 +15,7 @@ async def build_request(vault_id: str, destination: str, custom_note: str, jetto
         "note": custom_note,
         "type": "ton_transaction",
         "details": {
+            "push_mode": "manual",
             "type": "ton_transfer",
             "to":{
                 "type": "hex",
