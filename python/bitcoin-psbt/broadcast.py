@@ -3,10 +3,10 @@ import base64
 import json
 
 async def broadcast_tx(
-    path: str, 
-    access_token: str, 
-    signature: bytes, 
-    timestamp: str, 
+    path: str,
+    access_token: str,
+    signature: bytes,
+    timestamp: str,
     request_body: str
 ) -> requests.Response:
 
