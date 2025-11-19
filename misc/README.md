@@ -118,8 +118,6 @@ For Windows, you'll need to create a `run_recovery.bat` script (see Windows-spec
 .\recovery-tool.exe public-key-recover -d "cmd /c run_recovery.bat YOUR_PIN" -p "backup_snapshot.json" > private_keys.csv
 ```
 
-**Note**: On Windows, you will only see a "Recovering vault 100%" progress bar during execution. The detailed PKCS11 logging that appears on macOS/Linux is not visible in the PowerShell terminal due to how Windows handles stderr redirection. The decryption still works correctly.
-
 **Using WSL:**
 
 ```bash
@@ -181,7 +179,7 @@ The `run_recovery.bat` script works similarly to the bash version and accepts yo
 
 ### Success
 
-If successful, you'll see output similar to:
+If successful on macOS/Linux, you'll see output similar to:
 
 ```text
 === PKCS11 Decrypt Started at Mon Nov 10 12:00:00 CET 2025 ===
@@ -199,6 +197,8 @@ Output file size: 32 bytes
 
 [Recovered private keys output to private_keys.csv]
 ```
+
+**Note**: On Windows, you will only see a "Recovering vault 100%" progress bar during execution. The detailed PKCS11 logging that appears on macOS/Linux is not visible in the PowerShell terminal due to how Windows handles stderr redirection. The decryption still works correctly.
 
 The `private_keys.csv` file will contain your recovered private keys in CSV format.
 
