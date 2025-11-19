@@ -45,10 +45,10 @@ async def atom_tx_native(vault_id: str, chain: str, destination: str, amount: st
 USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
 COSMOS_VAULT_ID = os.getenv("COSMOS_VAULT_ID")
 path = "/api/v1/transactions"
-chain="cosmos_cosmoshub-4"
-destination = "cosmos1c8296f7cq4nvwjfvjq2x2jmrxnmw7wjyscxamy" # CHANGE to your destination address
+chain="cosmos_injective-1" 
+destination = "inj1uj04ttfch59w4h9mhsju5kdq23vd4k5k44ngjm" # CHANGE to your destination address
 memo = "1234" # Optional memo
-amount = str(100) # 1 ATOM = 1_000_000 uatom
+amount = str(100) # 1 INJ = 1_000_000_000_000_000_000 uatom
 
 async def main():
     try:

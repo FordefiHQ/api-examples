@@ -36,7 +36,7 @@ sudo dnf install -y yubico-piv-tool opensc engine-pkcs11
 #### Windows
 
 1. **Download and install YubiKey Manager**:
-   - Download from [https://www.yubico.com/support/download/yubikey-manager/](https://www.yubico.com/support/download/yubikey-manager/)
+   - Download from [https://developers.yubico.com/yubico-piv-tool/Releases/](https://developers.yubico.com/yubico-piv-tool/Releases/)
    - Run the installer and follow the installation wizard
 
 2. **Download and install OpenSC**:
@@ -81,7 +81,7 @@ pkcs11-tool --module /usr/lib/x86_64-linux-gnu/libykcs11.so --list-objects --pin
 #### Windows (PowerShell)
 
 ```powershell
-& "C:\Program Files\OpenSC Project\OpenSC\tools\pkcs11-tool.exe" --module "C:\Program Files\Yubico\YubiKey Manager\libykcs11.dll" --list-objects --pin YOUR_PIN
+& "C:\Program Files\OpenSC Project\OpenSC\tools\pkcs11-tool.exe" --module "C:\Program Files\Yubico\Yubico PIV Tool\bin\libykcs11.dll" --list-objects --pin YOUR_PIN
 ```
 
 **Expected Output (all platforms):**
@@ -115,7 +115,7 @@ For Windows, you'll need to create a `run_recovery.bat` script (see Windows-spec
 **Using PowerShell with .bat script:**
 
 ```powershell
-.\recovery-tool.exe public-key-recover -d 'run_recovery.bat YOUR_PIN' -p 'backup_snapshot.json' > private_keys.csv 2>&1
+.\recovery-tool.exe public-key-recover -d "cmd /c run_recovery.bat YOUR_PIN" -p "backup_snapshot.json" > private_keys.csv
 ```
 
 **Using WSL:**
@@ -179,7 +179,7 @@ The `run_recovery.bat` script works similarly to the bash version and accepts yo
 
 ### Success
 
-If successful, you'll see output similar to:
+If successful on macOS/Linux, you'll see output similar to:
 
 ```text
 === PKCS11 Decrypt Started at Mon Nov 10 12:00:00 CET 2025 ===
@@ -197,6 +197,8 @@ Output file size: 32 bytes
 
 [Recovered private keys output to private_keys.csv]
 ```
+
+**Note**: On Windows, you will only see a "Recovering vault 100%" progress bar during execution. The detailed PKCS11 logging that appears on macOS/Linux is not visible in the PowerShell terminal due to how Windows handles stderr redirection. The decryption still works correctly.
 
 The `private_keys.csv` file will contain your recovered private keys in CSV format.
 
@@ -242,7 +244,7 @@ ykman piv info
 
 ```powershell
 # List available PKCS11 slots
-& "C:\Program Files\OpenSC Project\OpenSC\tools\pkcs11-tool.exe" --module "C:\Program Files\Yubico\YubiKey Manager\libykcs11.dll" --list-slots
+& "C:\Program Files\OpenSC Project\OpenSC\tools\pkcs11-tool.exe" --module "C:\Program Files\Yubico\Yubico PIV Tool\bin\libykcs11.dll" --list-slots
 
 # Check YubiKey PIV info
 ykman piv info
