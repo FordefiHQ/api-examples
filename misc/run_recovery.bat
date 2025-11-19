@@ -52,10 +52,6 @@ set "PKCS11_TOOL=C:\Program Files\OpenSC Project\OpenSC\tools\pkcs11-tool.exe"
 REM Capture exit code
 set EXIT_CODE=%ERRORLEVEL%
 
-REM Output debug info to stderr
-type "%TEMP_STDERR%" >&2
-type "%TEMP_STDOUT%" >&2
-
 REM Output the decrypted result to stdout
 powershell -NoProfile -Command "$bytes = [System.IO.File]::ReadAllBytes('%TEMP_OUT%'); [System.Console]::OpenStandardOutput().Write($bytes, 0, $bytes.Length)"
 

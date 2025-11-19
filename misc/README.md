@@ -115,8 +115,10 @@ For Windows, you'll need to create a `run_recovery.bat` script (see Windows-spec
 **Using PowerShell with .bat script:**
 
 ```powershell
-.\recovery-tool.exe public-key-recover -d "cmd /c run_recovery.bat YOUR_PIN" -p "backup_snapshot.json" > private_keys.csv 2>&1
+.\recovery-tool.exe public-key-recover -d "cmd /c run_recovery.bat YOUR_PIN" -p "backup_snapshot.json" > private_keys.csv
 ```
+
+**Note**: On Windows, you will only see a "Recovering vault 100%" progress bar during execution. The detailed PKCS11 logging that appears on macOS/Linux is not visible in the PowerShell terminal due to how Windows handles stderr redirection. The decryption still works correctly.
 
 **Using WSL:**
 
