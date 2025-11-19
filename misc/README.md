@@ -36,7 +36,7 @@ sudo dnf install -y yubico-piv-tool opensc engine-pkcs11
 #### Windows
 
 1. **Download and install YubiKey Manager**:
-   - Download from [https://www.yubico.com/support/download/yubikey-manager/](https://www.yubico.com/support/download/yubikey-manager/)
+   - Download from [https://developers.yubico.com/yubico-piv-tool/Releases/](https://developers.yubico.com/yubico-piv-tool/Releases/)
    - Run the installer and follow the installation wizard
 
 2. **Download and install OpenSC**:
@@ -81,7 +81,7 @@ pkcs11-tool --module /usr/lib/x86_64-linux-gnu/libykcs11.so --list-objects --pin
 #### Windows (PowerShell)
 
 ```powershell
-& "C:\Program Files\OpenSC Project\OpenSC\tools\pkcs11-tool.exe" --module "C:\Program Files\Yubico\YubiKey Manager\libykcs11.dll" --list-objects --pin YOUR_PIN
+& "C:\Program Files\OpenSC Project\OpenSC\tools\pkcs11-tool.exe" --module "C:\Program Files\Yubico\Yubico PIV Tool\bin\libykcs11.dll" --list-objects --pin YOUR_PIN
 ```
 
 **Expected Output (all platforms):**
@@ -115,7 +115,7 @@ For Windows, you'll need to create a `run_recovery.bat` script (see Windows-spec
 **Using PowerShell with .bat script:**
 
 ```powershell
-.\recovery-tool.exe public-key-recover -d 'run_recovery.bat YOUR_PIN' -p 'backup_snapshot.json' > private_keys.csv 2>&1
+.\recovery-tool.exe public-key-recover -d "cmd /c run_recovery.bat YOUR_PIN" -p "backup_snapshot.json" > private_keys.csv 2>&1
 ```
 
 **Using WSL:**
@@ -242,7 +242,7 @@ ykman piv info
 
 ```powershell
 # List available PKCS11 slots
-& "C:\Program Files\OpenSC Project\OpenSC\tools\pkcs11-tool.exe" --module "C:\Program Files\Yubico\YubiKey Manager\libykcs11.dll" --list-slots
+& "C:\Program Files\OpenSC Project\OpenSC\tools\pkcs11-tool.exe" --module "C:\Program Files\Yubico\Yubico PIV Tool\bin\libykcs11.dll" --list-slots
 
 # Check YubiKey PIV info
 ykman piv info
