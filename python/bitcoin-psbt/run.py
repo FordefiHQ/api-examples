@@ -14,10 +14,10 @@ FORDEFI_API_USER_TOKEN = os.getenv("FORDEFI_API_USER_TOKEN")
 PATH = "/api/v1/transactions"
 PRIVATE_KEY_PEM_FILE = Path("./secret/private.pem")
 psbt_hex_data = os.getenv("PSBT_HEX_DATA")
-vault_id = os.getenv("FORDEFI_BTC_VAULT_ID")
-sender_address = os.getenv("BTC_SENDER_ADDRESS")
+vault_id = os.getenv("FORDEFI_BTC_VAULT_ID_TESTNET_V3")
+sender_address = os.getenv("BTC_SENDER_ADDRESS_TESTNET_V3")
 will_auto_finalize = True
-is_bitcoin_mainnet = True
+is_bitcoin_mainnet = False
 
 async def main():
     request_json = await build_request(vault_id, sender_address, psbt_hex_data, will_auto_finalize, is_bitcoin_mainnet)
