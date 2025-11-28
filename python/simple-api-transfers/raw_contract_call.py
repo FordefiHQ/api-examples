@@ -2,7 +2,6 @@ import os
 import json
 import asyncio
 import datetime
-from pathlib import Path
 from utils.broadcast import broadcast_tx
 from utils.sign_payload import sign
 from dotenv import load_dotenv
@@ -34,7 +33,6 @@ async def contract_call(evm_chain: str, vault_id: str, contract: str, custom_not
     return request_json
 
 ## Fordefi configuration
-API_USER_PRIVATE_KEY = Path("./secret/private.pem")
 USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
 EVM_VAULT_ID = os.getenv("EVM_VAULT_ID")
 evm_chain = "ethereum"
@@ -52,7 +50,7 @@ async def main():
         timestamp = datetime.datetime.now().strftime("%s")
         payload = f"{path}|{timestamp}|{request_body}"
         ## Signing transaction with API User private key
-        signature = await sign(payload=payload, api_user_private_key=API_USER_PRIVATE_KEY)
+        signature = await sign(payload=payload)
         ## Push tx to Fordefi for MPC signing and broadcast to network
         await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
         print("✅ Transaction submitted successfully!")

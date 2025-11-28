@@ -1,12 +1,9 @@
 import ecdsa
 import hashlib
-from pathlib import Path
 
-PRIVATE_KEY_PEM_FILE = Path("./secret/private.pem")
-
-async def sign(payload: str) -> bytes:
+async def sign(payload: str, api_user_private_key: str) -> bytes:
     print('Signing the payload 🖋️')
-    with open(PRIVATE_KEY_PEM_FILE, "r") as f:
+    with open(api_user_private_key, "r") as f:
         signing_key = ecdsa.SigningKey.from_pem(f.read())
     signature = signing_key.sign(
         data=payload.encode(), hashfunc=hashlib.sha256, sigencode=ecdsa.util.sigencode_der
