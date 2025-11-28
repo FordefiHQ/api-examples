@@ -2,6 +2,7 @@ import os
 import json
 import asyncio
 import datetime
+from web3 import Web3
 from pathlib import Path
 from utils.broadcast import broadcast_tx
 from utils.sign_payload import sign
@@ -41,7 +42,7 @@ evm_chain = "ethereum"
 path = "/api/v1/transactions" # CHANGE
 contract = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
 custom_note = "It's a wrap!" # Optional note
-value = str(100_000_000_000) # 0.001 ETH (1 ETH = 0.000000000000000001 wei)
+value = str(Web3.to_wei(0.001, 'ether'))  # Returns 1000000000000000
 hex_call_data = "0xd0e30db0"
 
 async def main():
