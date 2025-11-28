@@ -8,4 +8,5 @@ dependencies = [
     "ecdsa>=0.19.1",
     "python-dotenv>=1.2.1",
     "requests>=2.32.5",
+    "web3>=7.14.0",
 ]
