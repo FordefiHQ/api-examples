@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "license": "ISC",
-  "author": "",
+  "author": "Hvbris",
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "spl": "ts-node --project tsconfig.json ./src/run.ts"
+    "spl": "tsx ./src/run.ts"
   },
   "dependencies": {
     "@solana-program/token": "^0.5.1",
@@ -19,7 +19,7 @@
     "@types/node": "^24.2.0",
     "install": "^0.13.0",
     "npm": "^11.5.2",
-    "tsx": "^4.20.3",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.2"
   }
 }
