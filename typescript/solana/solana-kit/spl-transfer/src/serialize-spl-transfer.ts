@@ -1,5 +1,5 @@
 import * as kit from '@solana/kit';
-import { FordefiSolanaConfig, TransferConfig } from './tx-spl'
+import { FordefiSolanaConfig, TransferConfig } from './config';
 import { TOKEN_PROGRAM_ADDRESS, findAssociatedTokenPda, getTransferCheckedInstruction } from '@solana-program/token';
 
 export async function createTx(fordefiConfig: FordefiSolanaConfig, transferConfig: TransferConfig){
@@ -13,14 +13,14 @@ export async function createTx(fordefiConfig: FordefiSolanaConfig, transferConfi
       mint:       usdcMint,
       tokenProgram: TOKEN_PROGRAM_ADDRESS,
     });
-    console.debug("Source ATA", sourceAta)  
+    console.debug("Source ATA", sourceAta);  
     
     const [destAta] = await findAssociatedTokenPda({
       owner:        destVault,
       mint:         usdcMint,
       tokenProgram: TOKEN_PROGRAM_ADDRESS,
     });
-    console.debug("Destination ATA", destAta)
+    console.debug("Destination ATA", destAta);
 
     // Token transfer ixs
     const ixes: any = [];
@@ -45,14 +45,9 @@ export async function createTx(fordefiConfig: FordefiSolanaConfig, transferConfi
         return kit.appendTransactionMessageInstruction(ixes[0], message);
       }
     );
-    console.log("Tx message: ", txMessage)
-    console.log("Tx instructions detailed:", JSON.stringify(txMessage.instructions, null, 2));
 
-    const signedTx = await kit.partiallySignTransactionMessageWithSigners(txMessage)
-    console.log("Signed transaction: ", signedTx)
-
+    const signedTx = await kit.partiallySignTransactionMessageWithSigners(txMessage);
     const base64EncodedData = Buffer.from(signedTx.messageBytes).toString('base64');
-    console.debug("Raw data ->", base64EncodedData)
 
     const pushMode = transferConfig.useJito ? "manual" : "auto";
     const jsonBody = {
@@ -69,5 +64,5 @@ export async function createTx(fordefiConfig: FordefiSolanaConfig, transferConfi
         "wait_for_state": "signed" // only use this field for create-and-wait
     };
 
-    return jsonBody;
+    return jsonBody
 }
