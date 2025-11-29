@@ -23,7 +23,7 @@ async function main(): Promise<void> {
     const signature = await signWithApiUserPrivateKey(payload, fordefiConfig.privateKeyPem);
     
     // Send signed payload to Fordefi for MPC signature
-    const response = await createAndSignTx(fordefiConfig.apiPathEndpoint, fordefiConfig.accessToken, signature, timestamp, requestBody);
+    const response = await createAndSignTx(fordefiConfig, signature, timestamp, requestBody);
     const data = response.data;
     console.log(data);
 
@@ -31,12 +31,12 @@ async function main(): Promise<void> {
     if(transferConfig.useJito){
       try {
         const transaction_id = data.id;
-        console.log(`Transaction ID -> ${transaction_id}`);
+        console.log(`Transaction ID: ${transaction_id}`);
   
         await pushToJito(transaction_id, fordefiConfig.accessToken);
   
       } catch (error: any){
-        console.error(`Failed to push the transaction to Orca: ${error.message}`);
+        console.error(`Failed to push the transaction to Jito: ${error.message}`);
       }
     } else {
       console.log("Transaction signed by source vault and submitted to network ✅");
