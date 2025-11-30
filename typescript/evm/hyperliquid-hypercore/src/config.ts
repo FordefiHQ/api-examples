@@ -5,12 +5,13 @@ import { FordefiProviderConfig } from '@fordefi/web3-provider';
 dotenv.config()
 
 export interface HyperliquidConfig { 
-    action: "deposit" | "withdraw" | "sendUsd" | "vault_transfer" | "approve_agent" | "revoke_agent"
+    action: "deposit" | "withdraw" | "sendUsd" | "vault_transfer" | "approve_agent" | "revoke_agent" | "spotSend"
     isTestnet: boolean,
     destination?: `0x${string}`, // destination address when using a "sendUsd" action
-    amount?: string,  // only required when for "vault_transfer" action
+    amount?: string,  // only required for "vault_transfer" action
+    token?: string,   // only required for a "spotSend" action
     agentPk?: string  // optional as it's ONLY required for L1 actions that must be performed by agent wallets
-    isDeposit?: boolean, // only required when for a "vault_transfer" action
+    isDeposit?: boolean, // only required for a "vault_transfer" action
     hyperliquid_vault_address?: string
 }
 
@@ -37,10 +38,11 @@ export const agentWalletConfig: AgentWalletConfig = {
 };
 
 export const hyperliquidConfig: HyperliquidConfig = {
-    action: "vault_transfer",
+    action: "spotSend",
     isTestnet: false,
-    //destination: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
-    //amount: "2",
+    destination: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+    amount: "2",
+    token: "USDC:0x6d1e7cde53ba9467b783cb7c530ce054", // USDC on HyperCore
     //agentPk: JSON.parse(fs.readFileSync('./agent-private-key.json', 'utf8'))[`private_key_${agentWalletConfig.agentName}`] ?? (() => { throw new Error('API Agent private key is not set'); })(),
     //isDeposit: true,
     //hyperliquid_vault_address: "0xdfc24b077bc1425ad1dea75bcb6f8158e10df303" 
