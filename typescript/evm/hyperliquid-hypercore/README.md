@@ -21,7 +21,7 @@ These actions use EIP-712 signatures with the actual network chainId (e.g., 4216
 - **usdSend** - Send USDC within Hyperliquid
 - **withdraw3** - Withdraw from Hyperliquid to Arbitrum
 - **deposit** - Deposit USDC from Arbitrum to Hyperliquid
-- **spotSend** - Transfer tokens from Perps to Spot DEX
+- **spotTransfer** - Transfer tokens between Perps and Spot DEX
 
 **Implementation**: Use Fordefi wallet directly via the wallet adapter (`wallet-adapter.ts`)
 
@@ -169,19 +169,20 @@ export const hyperliquidConfig: HyperliquidConfig = {
 npm run action
 ```
 
-### Transfer Tokens from Perps to Spot DEX
+### Transfer Tokens between Perps and Spot DEX
 
-To transfer tokens from the Perps DEX to the Spot DEX within Hyperliquid:
+To transfer tokens between the Perps DEX and Spot DEX within Hyperliquid:
 
-1. Change the action to `"spotSend"` and set the token in `src/config.ts`:
+1. Change the action to `"spotTransfer"` and set the token and direction in `src/config.ts`:
 
 ```typescript
 export const hyperliquidConfig: HyperliquidConfig = {
-    action: "spotSend",
+    action: "spotTransfer",
     isTestnet: false,
     destination: fordefiConfig.address, // Your Fordefi vault address
     amount: "2",
-    token: "USDC:0x6d1e7cde53ba9467b783cb7c530ce054" // Token identifier (name:address)
+    token: "USDC:0x6d1e7cde53ba9467b783cb7c530ce054", // Token identifier (name:address)
+    toSpot: true // true = Perps→Spot, false = Spot→Perps
 };
 ```
 
@@ -193,8 +194,8 @@ npm run action
 
 **Notes**:
 - The `token` field uses the format `TOKEN_NAME:TOKEN_ADDRESS` (e.g., `USDC:0x6d1e7cde53ba9467b783cb7c530ce054`)
-- This transfers tokens from your Perps balance to your Spot balance
-- Useful for moving assets to trade on Hyperliquid's Spot DEX
+- Set `toSpot: true` to transfer from Perps to Spot DEX
+- Set `toSpot: false` to transfer from Spot to Perps DEX
 
 ### Approve Agent Wallet
 
@@ -294,7 +295,7 @@ Simply change the `action` field in `src/config.ts` and run `npm run action`:
 | `deposit` | Deposit USDC to Hyperliquid | Fordefi | `action: "deposit", amount: "5"` |
 | `withdraw` | Withdraw from Hyperliquid | Fordefi | `action: "withdraw", destination: "0x...", amount: "1"` |
 | `sendUsd` | Send USDC within Hyperliquid | Fordefi | `action: "sendUsd", destination: "0x...", amount: "1"` |
-| `spotSend` | Transfer tokens from Perps to Spot | Fordefi | `action: "spotSend", token: "USDC:0x...", amount: "2"` |
+| `spotTransfer` | Transfer between Perps and Spot | Fordefi | `action: "spotTransfer", token: "USDC:0x...", toSpot: true` |
 | `approve_agent` | Approve agent wallet | Fordefi | `action: "approve_agent", agentName: "my_agent"` |
 | `revoke_agent` | Revoke agent wallet | Fordefi | `action: "revoke_agent", agentName: "my_agent"` |
 | `vault_transfer` | Vault deposit/withdrawal | Agent | `action: "vault_transfer", isDeposit: true, amount: "1"` |

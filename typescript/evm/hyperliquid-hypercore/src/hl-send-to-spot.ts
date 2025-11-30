@@ -6,7 +6,7 @@ import * as hl from "@nktkas/hyperliquid";
 import { ethers } from 'ethers';
 
 
-export async function sendToSpotFromPerps(hyperliquidConfig: HyperliquidConfig, fordefiConfig: FordefiProviderConfig) {
+export async function spotTransfer(hyperliquidConfig: HyperliquidConfig, fordefiConfig: FordefiProviderConfig) {
     if (!hyperliquidConfig) {
         throw new Error("Config required!");
     }
@@ -31,7 +31,7 @@ export async function sendToSpotFromPerps(hyperliquidConfig: HyperliquidConfig, 
         const exchClient = new hl.ExchangeClient({
             wallet,
             transport,
-            signatureChainId: '0xa4b1' 
+            signatureChainId: '0xa4b1'
         });
         console.log("Exchange client created successfully");
         // Validate amount is not empty
@@ -42,17 +42,23 @@ export async function sendToSpotFromPerps(hyperliquidConfig: HyperliquidConfig, 
         if (!hyperliquidConfig.destination || !hyperliquidConfig.destination.startsWith('0x')) {
             throw new Error("Destination must be a valid EVM address starting with '0x'");
         }
-        // Perform transfer to Spot DEX
-        // IMPORTANT: Lowercase the destination address to avoid signature issues
+
+        // Determine transfer direction based on toSpot flag
+        const toSpot = hyperliquidConfig.toSpot ?? true; // Default to Perps→Spot
+        const sourceDex = toSpot ? "" : "spot";
+        const destinationDex = toSpot ? "spot" : "";
+        const direction = toSpot ? "Perps → Spot" : "Spot → Perps";
+
+        // Perform transfer between Perps and Spot DEX
         const result = await exchClient.sendAsset({
             destination: fordefiConfig.address,
-            sourceDex: "", // always leave empty
-            destinationDex: "spot",
+            sourceDex,
+            destinationDex,
             token: hyperliquidConfig.token!,
             amount: String(hyperliquidConfig.amount),
         });
-        console.log(`Successfulyy transferred ${hyperliquidConfig.token} to Spot DEX: `, result);
-        
+        console.log(`Successfully transferred ${hyperliquidConfig.amount} ${hyperliquidConfig.token} (${direction}):`, result);
+
     } catch (error: any) {
         console.error("Error during asset transfer:", error.message || String(error));
     };
