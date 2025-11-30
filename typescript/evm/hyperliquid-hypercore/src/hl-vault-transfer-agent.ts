@@ -5,7 +5,7 @@ import { HyperliquidConfig, fordefiConfig } from './config';
 /**
  * Vault transfer using Agent wallet (API wallet)
  *
- * Agent wallets are recommended for L1 Actions like vault transfers.
+ * Agent wallets are necessary for L1 Actions like vault transfers.
  * The agent wallet signs on behalf of the master account (fordefiConfig.address).
  *
  * IMPORTANT: The agent must be approved first by the master account.
@@ -17,7 +17,7 @@ export async function vault_transfer_agent(hyperliquidConfig: HyperliquidConfig)
     }
 
     if (!hyperliquidConfig.agentPk) {
-        throw new Error("Agent private key (HYPERCORE_AGENT_PK) is required for this operation!");
+        throw new Error("An agent wallet private key is required for this operation, please approve an agent wallet first!");
     }
 
     try {
