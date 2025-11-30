@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import * as hl from "@nktkas/hyperliquid";
 import { getProvider } from './get-provider';
 import { FordefiWalletAdapter } from './wallet-adapter';
-import { HyperliquidConfig, fordefiConfig, AgentWalletConfig } from './config'
+import { HyperliquidConfig, fordefiConfig, AgentWalletConfig } from './config';
 
 export function generateAgentKeypair(agentName: string) {
     const wallet = ethers.Wallet.createRandom();

@@ -1,18 +1,18 @@
 import axios, { AxiosResponse } from 'axios';
+import { FordefiSolanaConfig } from '../src/config';
 
 export async function createAndSignTx(
-  path: string,
-  accessToken: string,
+  fordefiConfig: FordefiSolanaConfig,
   signature: string,
   timestamp: number,
   requestBody: string
 ): Promise<AxiosResponse> {
-  const url = `https://api.fordefi.com${path}`;
+  const url = `https://api.fordefi.com${fordefiConfig.apiPathEndpoint}`;
 
   try {
     const respTx = await axios.post(url, requestBody, {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${fordefiConfig.accessToken}`,
         'x-signature': signature,
         'x-timestamp': timestamp,
         'Content-Type': 'application/json',

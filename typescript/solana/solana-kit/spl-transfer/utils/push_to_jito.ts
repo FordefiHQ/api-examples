@@ -6,9 +6,9 @@ const URL = 'https://mainnet.block-engine.jito.wtf/api/v1/transactions';
 export async function pushToJito(transaction_id: string, accessToken:string): Promise<void> {
   try {
     const path = `/api/v1/transactions/${transaction_id}`;
-    const fetchRawSignature = await get_tx(path, accessToken);
-    const rawTransactionBase64 = (await fetchRawSignature.raw_transaction);
-    console.log(`Raw signature -> ${rawTransactionBase64}`);
+    const fetchTx = await get_tx(path, accessToken);
+    const rawTransactionBase64 = (await fetchTx.raw_transaction);
+    console.log(`Raw transaction: ${rawTransactionBase64}`);
 
     const jitoPayload = {
       jsonrpc: '2.0',
@@ -23,7 +23,7 @@ export async function pushToJito(transaction_id: string, accessToken:string): Pr
       jitoPayload, 
       { headers }
     )
-    console.log(`\n\nSuccessfully sent transaction to Jito!📡\nhttps://solana.fm/tx/${response.data.result}`);
+    console.log(`Successfully sent transaction to Jito!📡\nhttps://solana.fm/tx/${response.data.result}`);
 
   } catch (error: any) {
     console.error(`Error sending transaction: ${error}`);

@@ -35,6 +35,6 @@ export const transferConfig: TransferConfig = {
   mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
   decimals: 6,                                            
   amount: 100, // 1 USDC = 1_000_000
-  useJito: false,
+  useJito: true,
   jitoTip: 1000  
 };
