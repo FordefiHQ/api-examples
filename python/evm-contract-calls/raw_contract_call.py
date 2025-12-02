@@ -56,7 +56,10 @@ async def main():
         signature = await sign(payload=payload, api_user_private_key=API_USER_PRIVATE_KEY)
         ## Push tx to Fordefi for MPC signing and broadcast to network
         ok = await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
-        print("✅ Transaction submitted successfully!")
+        tx_data = ok.json()
+        tx_id = tx_data.get("id")
+        print(f"Transaction submitted successfully! ✅")
+        print(f"Transaction ID: {tx_id}")
     except Exception as e:
         print(f"❌ Transaction failed: {str(e)}")
 
