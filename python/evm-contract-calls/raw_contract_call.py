@@ -14,6 +14,7 @@ async def contract_call(evm_chain: str, vault_id: str, contract: str, custom_not
         "signer_type": "api_signer",
         "vault_id": vault_id,
         "note": custom_note,
+        "sign_mode": "auto",
         "type": "evm_transaction",
         "details": {
             "type": "evm_raw_transaction",
@@ -54,7 +55,7 @@ async def main():
         ## Signing transaction with API User private key
         signature = await sign(payload=payload, api_user_private_key=API_USER_PRIVATE_KEY)
         ## Push tx to Fordefi for MPC signing and broadcast to network
-        await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
+        ok = await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
         print("✅ Transaction submitted successfully!")
     except Exception as e:
         print(f"❌ Transaction failed: {str(e)}")

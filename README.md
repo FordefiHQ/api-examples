@@ -12,9 +12,10 @@ Code examples for using the Fordefi API in Python and TypeScript.
 * Simple API Transfers:
   * Native EVM assets (ETH, BNB, etc.) transfers
   * ERC20 token transfers
-  * ERC20 transfers with delegated gas payment from another vault ("gas station")
+  * ERC20 transfers with delegated gas payment from another vault ("sponsored" transactions)
   * Solana SOL transfers
   * Solana SPL token transfers
+  * Solana SPL token transfers with delegated gas payment from another vault ("sponsored" transactions)
   * Solana SOL & SPL transfers with Solders
   * Tron TRX transfers
   * Tron TRC20 transfers
