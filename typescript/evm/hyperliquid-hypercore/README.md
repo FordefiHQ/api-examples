@@ -16,6 +16,8 @@ This application enables secure interactions with the Hyperliquid L1 DEX from a 
 
 Fordefi supports signing with chainId 1337 for most Hyperliquid actions. Configure the `chainId` in `fordefiConfig` based on the action you want to perform:
 
+> **Important**: Support for signing messages with chainId 1337 must be manually activated by the Fordefi team for your organization. Please contact Fordefi if you need this feature enabled.
+
 ### chainId: 1337 (Default - works for most actions)
 
 Use chainId 1337 for:
