@@ -10,43 +10,36 @@ This application enables secure interactions with the Hyperliquid L1 DEX from a 
 - Withdrawing funds from Hyperliquid to your Fordefi EVM Vault
 - Sending USDC within the Hyperliquid ecosystem
 - Transferring tokens from Perps to Spot DEX
-- Vault transfers using API/Agent wallets (for L1 Actions)
+- Vault transfers (deposits/withdrawals to Hyperliquid vaults)
 
-## Important: Hyperliquid Signing Schemes
+## ChainId Configuration
 
-Hyperliquid uses two different signing schemes that require different wallet types:
+Fordefi supports signing with chainId 1337 for most Hyperliquid actions. Configure the `chainId` in `fordefiConfig` based on the action you want to perform:
 
-### 1. User-Signed Actions (✅ Fordefi Supported)
-These actions use EIP-712 signatures with the actual network chainId (e.g., 42161 for Arbitrum):
-- **usdSend** - Send USDC within Hyperliquid
-- **withdraw3** - Withdraw from Hyperliquid to Arbitrum
-- **deposit** - Deposit USDC from Arbitrum to Hyperliquid
+### chainId: 1337 (Default - works for most actions)
+
+Use chainId 1337 for:
+
+- **vault_transfer** - Deposit/withdraw from Hyperliquid vaults
+- **approve_agent** - Approve an agent wallet
+- **revoke_agent** - Revoke an agent wallet
+- **withdraw** - Withdraw from Hyperliquid to Arbitrum
+- **sendUsd** - Send USDC within Hyperliquid
 - **spotTransfer** - Transfer tokens between Perps and Spot DEX
 
-**Implementation**: Use Fordefi wallet directly via the wallet adapter (`wallet-adapter.ts`)
+### chainId: 42161 (Required for deposit only)
 
-### 2. L1 Actions (❌ Fordefi NOT Supported)
-These actions use EIP-712 signatures with chainId 1337, which is NOT a real blockchain network:
-- **vaultTransfer** - Deposit/withdraw from Hyperliquid vaults
+Use chainId 42161 (Arbitrum) for:
 
-**Why Fordefi Cannot Sign L1 Actions**:
-- Fordefi's signing infrastructure requires chainId to correspond to an actual blockchain network
-- ChainId 1337 is a special value used by Hyperliquid for L1 actions
-- Attempting to sign with chainId 1337 results in signature recovery errors
+- **deposit** - Deposit USDC from Arbitrum to Hyperliquid (on-chain transaction)
 
-**Solution**: Use API/Agent wallets (standard Ethereum private keys) for L1 actions
-- Agent wallets can sign with arbitrary chainIds including 1337
-- Must be approved by your Fordefi account first
-- Cannot perform withdrawals
-- Sign on behalf of the master account (Fordefi account)
-- See `hl-vault-transfer-agent.ts` for implementation example
+**Recommendation**: Keep chainId set to 1337 for most operations, and switch to 42161 only when performing deposits.
 
 ## Prerequisites
 
 - Fordefi organization and EVM vault
 - Node.js and npm installed
 - Fordefi credentials: API User access token, API User private key and API Signer set up ([documentation](https://docs.fordefi.com/developers/program-overview))
-- **(Optional)** Agent wallet private key for L1 Actions like vault transfers
 - TypeScript setup:
   ```bash
   # Install TypeScript and type definitions
@@ -73,24 +66,18 @@ npm install
 
 5. Place your API User's private key in `./secret/private.pem`
 
-6. **(Optional)** For L1 Actions like vault transfers, add your agent wallet private key to `.env`:
-   ```bash
-   HYPERCORE_AGENT_PK=0x...
-   ```
-   **Note**: The agent wallet must be approved by your master account (Fordefi account) first using the `approveAgent` action.
-
 ## Fordefi Configuration
 
 The application is configured through the `config.ts` file:
 
 ```typescript
 export const fordefiConfig: FordefiProviderConfig = {
-    chainId: 42161, // Arbitrum
-    address: '0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73', // Your Fordefi EVM Vault
+    chainId: 1337,  // Use 1337 for all actions except deposit (use 42161 for deposit)
+    address: '0x...', // Your Fordefi EVM Vault address
     apiUserToken: process.env.FORDEFI_API_USER_TOKEN,
-    apiPayloadSignKey: fs.readFileSync('./fordefi_secret/private.pem', 'utf8'),
-    rpcUrl: 'https://arbitrum-one-rpc.publicnode.com',
-    skipPrediction: false 
+    apiPayloadSignKey: fs.readFileSync('./secret/private.pem', 'utf8'),
+    rpcUrl: 'https://1rpc.io/arb',
+    skipPrediction: false
 };
 ```
 
@@ -105,7 +92,8 @@ First, ensure that your Fordefi API Signer is running.
 To deposit USDC from your Fordefi EVM Vault to Hyperliquid:
 
 1. Make sure you have sufficient USDC in your Fordefi EVM Vault on the Arbitrum chain.
-2. Set the action to `"deposit"` in `src/config.ts` (minimum 5 USDC required):
+2. **Important**: Set `chainId: 42161` in `fordefiConfig` (deposit is the only action that requires Arbitrum chainId).
+3. Set the action to `"deposit"` in `src/config.ts` (minimum 5 USDC required):
 
 ```typescript
 export const hyperliquidConfig: HyperliquidConfig = {
@@ -116,7 +104,7 @@ export const hyperliquidConfig: HyperliquidConfig = {
 };
 ```
 
-3. Run the command:
+4. Run the command:
 
 ```bash
 npm run action
@@ -197,9 +185,11 @@ npm run action
 - Set `toSpot: true` to transfer from Perps to Spot DEX
 - Set `toSpot: false` to transfer from Spot to Perps DEX
 
-### Approve Agent Wallet
+### Approve Agent Wallet (Optional)
 
-Before an agent wallet can perform L1 actions, it must be approved by your master account (Fordefi vault):
+> **Note**: Agent wallets are **not required** for this Fordefi integration. Since Fordefi now supports signing with chainId 1337, all Hyperliquid actions can be performed directly with your Fordefi vault. The agent wallet functionality is documented here for advanced use cases where you may want to delegate signing to a separate key.
+
+To approve an agent wallet:
 
 1. Change the action to `"approve_agent"` in `src/config.ts`:
 ```typescript
@@ -230,7 +220,7 @@ This will:
 
 **Important**: Store the generated private key VERY securely.
 
-### Revoke Agent Wallet
+### Revoke Agent Wallet (Optional)
 
 To revoke an agent wallet's approval:
 
@@ -255,50 +245,42 @@ export const agentWalletConfig: AgentWalletConfig = {
 npm run action
 ```
 
-### Vault Transfer (L1 Action - Requires Agent Wallet)
+### Vault Transfer
 
 To deposit or withdraw from a Hyperliquid vault:
 
-1. Ensure you have set up your agent wallet private key in `.env`:
-```bash
-HYPERCORE_AGENT_PK=0x...
-```
+1. Change the action to `"vault_transfer"` in `src/config.ts`:
 
-2. Change the action to `"vault_transfer"` in `src/config.ts`:
 ```typescript
 export const hyperliquidConfig: HyperliquidConfig = {
     action: "vault_transfer",
     isTestnet: false,
-    destination: "0x...", // Not used but required
+    destination: fordefiConfig.address,
     amount: "1",
-    agentPk: process.env.HYPERCORE_AGENT_PK,
-    isDeposit: true // true for deposit, false for withdrawal,
+    isDeposit: true, // true for deposit, false for withdrawal
     hyperliquid_vault_address: "0xdfc24b077bc1425ad1dea75bcb6f8158e10df303" // HLP Vault, can be changed
 };
 ```
 
-3. Run:
-```bash
-npm run start
-```
+2. Run:
 
-**Important Notes**:
-- Agent wallet must be approved by your master account first (see "Approve Agent Wallet" section)
-- Agent wallet signs on behalf of your Fordefi vault address
+```bash
+npm run action
+```
 
 ### Quick Action Reference
 
 Simply change the `action` field in `src/config.ts` and run `npm run action`:
 
-| Action | Description | Wallet Type | Config Example |
-|--------|-------------|-------------|----------------|
-| `deposit` | Deposit USDC to Hyperliquid | Fordefi | `action: "deposit", amount: "5"` |
-| `withdraw` | Withdraw from Hyperliquid | Fordefi | `action: "withdraw", destination: "0x...", amount: "1"` |
-| `sendUsd` | Send USDC within Hyperliquid | Fordefi | `action: "sendUsd", destination: "0x...", amount: "1"` |
-| `spotTransfer` | Transfer between Perps and Spot | Fordefi | `action: "spotTransfer", token: "USDC:0x...", toSpot: true` |
-| `approve_agent` | Approve agent wallet | Fordefi | `action: "approve_agent", agentName: "my_agent"` |
-| `revoke_agent` | Revoke agent wallet | Fordefi | `action: "revoke_agent", agentName: "my_agent"` |
-| `vault_transfer` | Vault deposit/withdrawal | Agent | `action: "vault_transfer", isDeposit: true, amount: "1"` |
+| Action | Description | Config Example |
+|--------|-------------|----------------|
+| `deposit` | Deposit USDC to Hyperliquid | `action: "deposit", amount: "5"` |
+| `withdraw` | Withdraw from Hyperliquid | `action: "withdraw", destination: "0x...", amount: "1"` |
+| `sendUsd` | Send USDC within Hyperliquid | `action: "sendUsd", destination: "0x...", amount: "1"` |
+| `spotTransfer` | Transfer between Perps and Spot | `action: "spotTransfer", token: "USDC:0x...", toSpot: true` |
+| `approve_agent` | Approve agent wallet | `action: "approve_agent", agentName: "my_agent"` |
+| `revoke_agent` | Revoke agent wallet | `action: "revoke_agent", agentName: "my_agent"` |
+| `vault_transfer` | Vault deposit/withdrawal | `action: "vault_transfer", isDeposit: true, amount: "1"` |
 
 ## Troubleshooting
 
@@ -308,7 +290,7 @@ Simply change the `action` field in `src/config.ts` and run `npm run action`:
    - Ensure your `.env` file contains a valid Fordefi API user token
 
 2. **"PEM_PRIVATE_KEY is not set"**
-   - Make sure your private key file exists at `./fordefi_secret/private.pem`
+   - Make sure your private key file exists at `./secret/private.pem`
 
 3. **"Insufficient balance"**
    - Your account doesn't have enough funds for the requested withdrawal amount
@@ -320,29 +302,13 @@ Simply change the `action` field in `src/config.ts` and run `npm run action`:
    - Ensure your Fordefi vault has enough USDC for the deposit
    - Check that your vault has approved the Hyperliquid bridge contract
 
-6. **"L1 Actions with chainId 1337 are not supported by Fordefi"**
-   - This error occurs when trying to use Fordefi wallet for L1 actions
-   - Solution: Use the agent wallet implementation (see `hl-vault-transfer-agent.ts`)
-   - Make sure `HYPERCORE_AGENT_PK` is set in your `.env` file
-
-7. **"User or API Wallet does not exist"**
-   - Your agent wallet has not been approved by the master account
-   - Solution: Run the `approveAgent` action first with your master account
-   - The agent wallet must be approved before it can sign on behalf of the master account
-
 ## Architecture Notes
 
-### Wallet Types
-This integration uses two different wallet types:
+### Wallet Implementation
 
-1. **Fordefi Wallet** (`wallet-adapter.ts`)
-   - Used for User-Signed Actions (usdSend, withdraw3, deposit)
-   - Managed through Fordefi's MPC infrastructure
-   - Requires API User Token and API Signer
-   - Cannot sign messages with chainId 1337
+This integration uses the **Fordefi Wallet** (`wallet-adapter.ts`) for all Hyperliquid actions:
 
-2. **Agent Wallet** (`hl-vault-transfer-agent.ts`)
-   - Used for L1 Actions (vaultTransfer, approveAgent, etc.)
-   - Standard Ethereum private key stored in `.env`
-   - Can sign with arbitrary chainIds including 1337
-   - Must be approved by master account to sign on its behalf
+- Managed through Fordefi's MPC infrastructure
+- Requires API User Token and API Signer
+- Supports all signing schemes including chainId 1337 for L1 Actions
+- No external agent wallets required

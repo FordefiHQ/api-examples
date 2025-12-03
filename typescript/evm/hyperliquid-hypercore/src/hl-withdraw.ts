@@ -23,11 +23,10 @@ export async function withdraw3(hyperliquidConfig: HyperliquidConfig) {
         const transport = new hl.HttpTransport();
 
         // Create ExchangeClient with the custom wallet
-        // IMPORTANT: Must explicitly set signatureChainId for Arbitrum in hex (0xa4b1)
         const exchClient = new hl.ExchangeClient({ 
             wallet, 
             transport,
-            signatureChainId: '0xa4b1' 
+            signatureChainId: '0x539' 
         });
         console.log("Exchange client created successfully");
 

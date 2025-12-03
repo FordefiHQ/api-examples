@@ -1,54 +1,59 @@
+import { ethers } from 'ethers';
 import * as hl from "@nktkas/hyperliquid";
+import { getProvider } from './get-provider';
 import { privateKeyToAccount } from 'viem/accounts';
+import { FordefiWalletAdapter } from './wallet-adapter';;
 import { HyperliquidConfig, fordefiConfig } from './config';
 
 /**
- * Vault transfer using Agent wallet (API wallet)
+ * Vault transfer using Fordefi wallet
  *
- * Agent wallets are necessary for L1 Actions like vault transfers.
- * The agent wallet signs on behalf of the master account (fordefiConfig.address).
+ * Fordefi now supports chainId 1337 signing, so L1 Actions like vault transfers
+ * can be performed directly with your Fordefi vault - no agent wallet required.
  *
- * IMPORTANT: The agent must be approved first by the master account.
- * The master account address goes in the vaultAddress parameter.
+ * Note: Agent wallets are still supported as an alternative if needed,
+ * but are no longer required for L1 Actions.
  */
 export async function vault_transfer_agent(hyperliquidConfig: HyperliquidConfig) {
     if (!hyperliquidConfig) {
         throw new Error("Config required!");
     }
 
-    if (!hyperliquidConfig.agentPk) {
-        throw new Error("An agent wallet private key is required for this operation, please approve an agent wallet first!");
-    }
+    // if (!hyperliquidConfig.agentPk) {
+    //     throw new Error("An agent wallet private key is required for this operation, please approve an agent wallet first!");
+    // }
 
     try {
         // Validate amount is not empty
         if (!hyperliquidConfig.amount) {
             throw new Error("Amount is required and cannot be empty");
         }
+        let provider = await getProvider(fordefiConfig);
+        if (!provider) {
+            throw new Error("Failed to initialize provider");
+        }
+        let web3Provider = new ethers.BrowserProvider(provider);
+        const signer = await web3Provider.getSigner();
 
-        // Create agent wallet from private key
-        const agentWallet = privateKeyToAccount(hyperliquidConfig.agentPk as `0x${string}`);
-        console.log(`Agent wallet address: ${agentWallet.address}`);
-        console.log(`Master account address: ${fordefiConfig.address}`);
-        console.log(`Vault address: ${hyperliquidConfig.hyperliquid_vault_address}`);
+        // Create custom wallet adapter
+        const wallet = new FordefiWalletAdapter(signer, fordefiConfig.address);
 
         // Create transport
         const transport = new hl.HttpTransport({
             isTestnet: hyperliquidConfig.isTestnet
         });
 
-        // Create ExchangeClient with agent wallet
-        // IMPORTANT: When using agent wallet, pass the MASTER ACCOUNT ADDRESS as vaultAddress
+        // signatureChainId 0x539 (1337) is required for vault transfers
+        // The wallet adapter will use fordefiConfig.chainId for signing
         const exchClient = new hl.ExchangeClient({
-            wallet: agentWallet,
+            wallet,
             transport,
-            defaultVaultAddress: fordefiConfig.address.toLowerCase()
+            signatureChainId: '0x539'
         });
 
         console.log("Exchange client created successfully");
 
         // Perform vault transfer
-        // The agent signs on behalf of the master account (vaultAddress)
         const result = await exchClient.vaultTransfer({
             vaultAddress: hyperliquidConfig.hyperliquid_vault_address!.toLowerCase() as `0x${string}`,
             isDeposit: hyperliquidConfig.isDeposit as boolean,
