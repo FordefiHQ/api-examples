@@ -1,30 +1,16 @@
 import { ethers } from 'ethers';
 import * as hl from "@nktkas/hyperliquid";
 import { getProvider } from './get-provider';
-import { privateKeyToAccount } from 'viem/accounts';
-import { FordefiWalletAdapter } from './wallet-adapter';;
+import { FordefiWalletAdapter } from './wallet-adapter';
 import { HyperliquidConfig, fordefiConfig } from './config';
 
-/**
- * Vault transfer using Fordefi wallet
- *
- * Fordefi now supports chainId 1337 signing, so L1 Actions like vault transfers
- * can be performed directly with your Fordefi vault - no agent wallet required.
- *
- * Note: Agent wallets are still supported as an alternative if needed,
- * but are no longer required for L1 Actions.
- */
+
 export async function vault_transfer_agent(hyperliquidConfig: HyperliquidConfig) {
     if (!hyperliquidConfig) {
         throw new Error("Config required!");
     }
 
-    // if (!hyperliquidConfig.agentPk) {
-    //     throw new Error("An agent wallet private key is required for this operation, please approve an agent wallet first!");
-    // }
-
     try {
-        // Validate amount is not empty
         if (!hyperliquidConfig.amount) {
             throw new Error("Amount is required and cannot be empty");
         }
@@ -43,8 +29,7 @@ export async function vault_transfer_agent(hyperliquidConfig: HyperliquidConfig)
             isTestnet: hyperliquidConfig.isTestnet
         });
 
-        // signatureChainId 0x539 (1337) is required for vault transfers
-        // The wallet adapter will use fordefiConfig.chainId for signing
+        // Create Exchange Client
         const exchClient = new hl.ExchangeClient({
             wallet,
             transport,

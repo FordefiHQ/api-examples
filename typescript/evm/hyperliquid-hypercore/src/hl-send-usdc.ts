@@ -24,7 +24,7 @@ export async function usdSend(hyperliquidConfig: HyperliquidConfig) {
             isTestnet: hyperliquidConfig.isTestnet
         });
 
-        // Create ExchangeClient with the custom wallet
+        // Create ExchangeClient
         const exchClient = new hl.ExchangeClient({
             wallet,
             transport,
@@ -40,7 +40,6 @@ export async function usdSend(hyperliquidConfig: HyperliquidConfig) {
             throw new Error("Destination must be a valid EVM address starting with '0x'");
         }
         // Perform USDC transfer
-        // IMPORTANT: Lowercase the destination address to avoid signature issues
         const result = await exchClient.usdSend({
             destination: hyperliquidConfig.destination.toLowerCase() as `0x${string}`,
             amount: String(hyperliquidConfig.amount),

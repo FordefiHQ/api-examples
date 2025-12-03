@@ -38,26 +38,21 @@ export async function approveAgentWallet(hyperliquidConfig: HyperliquidConfig, a
         let web3Provider = new ethers.BrowserProvider(provider);
         const signer = await web3Provider.getSigner();
 
-        // Create custom wallet adapter
         const wallet = new FordefiWalletAdapter(signer, fordefiConfig.address);
 
-        // Instantiate transport
         const transport = new hl.HttpTransport({
             isTestnet: hyperliquidConfig.isTestnet
         });
 
-        // Create ExchangeClient with the custom wallet
         const exchClient = new hl.ExchangeClient({
             wallet,
             transport,
             signatureChainId: '0x539' 
         });
         console.log("Exchange client created successfully");
-        // Validate amount is not empty
         if (!hyperliquidConfig.amount) {
             throw new Error("Amount is required and cannot be empty");
         }
-        // Add agent
         const result = await exchClient.approveAgent({
             agentAddress: agentWalletConfig.agentAddress.toLowerCase() as `0x${string}`,
             agentName: agentWalletConfig.agentName
@@ -82,27 +77,22 @@ export async function revokeAgentWallet(hyperliquidConfig: HyperliquidConfig, ag
         let web3Provider = new ethers.BrowserProvider(provider);
         const signer = await web3Provider.getSigner();
 
-        // Create custom wallet adapter
         const wallet = new FordefiWalletAdapter(signer, fordefiConfig.address);
 
-        // Instantiate transport
         const transport = new hl.HttpTransport({
             isTestnet: hyperliquidConfig.isTestnet
         });
 
-        // Create ExchangeClient with the custom wallet
-        // IMPORTANT: Must explicitly set signatureChainId for Arbitrum in hex (0xa4b1)
         const exchClient = new hl.ExchangeClient({
             wallet,
             transport,
-            signatureChainId: '0xa4b1' 
+            signatureChainId: '0x539' 
         });
         console.log("Exchange client created successfully");
-        // Validate amount is not empty
         if (!hyperliquidConfig.amount) {
             throw new Error("Amount is required and cannot be empty");
         }
-        // Remove agent
+        // remove agent
         const result = await exchClient.approveAgent({
             agentAddress: "0x0000000000000000000000000000000000000000",
             agentName: agentWalletConfig.agentName

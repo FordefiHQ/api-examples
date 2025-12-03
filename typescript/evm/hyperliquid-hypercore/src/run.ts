@@ -1,6 +1,6 @@
 import { approveAgentWallet, revokeAgentWallet } from "./hl-approve-or-revoke-agent";
 import { hyperliquidConfig, fordefiConfig, agentWalletConfig } from "./config";
-import { vault_transfer_agent } from "./hl-vault-transfer-agent";
+import { vault_transfer_agent } from "./hl-vault-transfer";
 import { spotTransfer } from "./hl-send-to-spot";
 import { withdraw3 } from "./hl-withdraw";
 import { usdSend } from "./hl-send-usdc";
