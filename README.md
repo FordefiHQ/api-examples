@@ -15,7 +15,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
   * ERC20 transfers with delegated gas payment from another vault ("sponsored" transactions)
   * Solana SOL transfers
   * Solana SPL token transfers
-  * Solana SPL token transfers with delegated gas payment from another vault ("sponsored" transactions)
+  * Solana SPL token transfers with delegated fee payment from another vault ("sponsored" transactions)
   * Solana SOL & SPL transfers with Solders
   * Tron TRX transfers
   * Tron TRC20 transfers

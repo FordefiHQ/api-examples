@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 async def sol_tx_tokens(vault_id: str, destination: str, custom_note: str, value: str, token: str, sponsor: str):
-    print(f"⛽ Gas sponsor: {sponsor}")
+    print(f"⛽ Fee sponsor: {sponsor}")
     request_json = {
         "signer_type": "api_signer",
         "type": "solana_transaction",
