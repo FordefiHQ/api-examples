@@ -14,7 +14,10 @@ async def sol_tx_tokens(vault_id: str, destination: str, custom_note: str, value
         "signer_type": "api_signer",
         "type": "solana_transaction",
         "details": {
-            "funder": sponsor,
+            "fee_payer": {
+                "type": "vault",
+                "vault_id": sponsor
+            },
             "fee": {
                 "type": "custom",
                 "unit_price": "100000000" # you can replace unit_price with priority_fee but NOT combine them
