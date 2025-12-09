@@ -1,11 +1,12 @@
 import fs from 'fs';
 import dotenv from 'dotenv';
+import { OrderParameters } from "@nktkas/hyperliquid";
 import { FordefiProviderConfig } from '@fordefi/web3-provider';
 
 dotenv.config()
 
 export interface HyperliquidConfig {
-    action: "deposit" | "withdraw" | "sendUsd" | "vault_transfer" | "approve_agent" | "revoke_agent" | "spotTransfer"
+    action: "deposit" | "withdraw" | "sendUsd" | "vault_transfer" | "approve_agent" | "revoke_agent" | "spotTransfer" | "placeOrder"
     isTestnet: boolean,
     destination?: `0x${string}`,
     amount?: string,
@@ -33,6 +34,7 @@ export interface AgentWalletConfig {
  *   - withdraw
  *   - sendUsd
  *   - spotTransfer
+ *   - placeOrder
  *
  * chainId: 42161 - REQUIRED for deposit (Arbitrum on-chain transaction)
  *   - deposit (USDC from Arbitrum to Hyperliquid)
@@ -64,7 +66,7 @@ export const agentWalletConfig: AgentWalletConfig = {
 };
 
 export const hyperliquidConfig: HyperliquidConfig = {
-    action: "deposit",
+    action: "vault_transfer",
     isTestnet: false,
     destination: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
     amount: "1",
@@ -72,4 +74,15 @@ export const hyperliquidConfig: HyperliquidConfig = {
     toSpot: true,
     isDeposit: true,
     hyperliquid_vault_address: "0xdfc24b077bc1425ad1dea75bcb6f8158e10df303"
+};
+
+export const orderConfig: OrderParameters = {
+    orders: [{
+        a: 0, // Asset index (BTC)
+        b: true, // Buy side
+        p: "", // Price, will be updated to the mid
+        s: "0.01", // Size
+        r: false, // Reduce only
+        t: { limit: { tif: "Gtc" } },
+    }],
 };
