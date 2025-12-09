@@ -21,15 +21,12 @@ export async function vault_transfer_agent(hyperliquidConfig: HyperliquidConfig)
         let web3Provider = new ethers.BrowserProvider(provider);
         const signer = await web3Provider.getSigner();
 
-        // Create custom wallet adapter
         const wallet = new FordefiWalletAdapter(signer, fordefiConfig.address);
 
-        // Create transport
         const transport = new hl.HttpTransport({
             isTestnet: hyperliquidConfig.isTestnet
         });
 
-        // Create Exchange Client
         const exchClient = new hl.ExchangeClient({
             wallet,
             transport,
@@ -38,7 +35,6 @@ export async function vault_transfer_agent(hyperliquidConfig: HyperliquidConfig)
 
         console.log("Exchange client created successfully");
 
-        // Perform vault transfer
         const result = await exchClient.vaultTransfer({
             vaultAddress: hyperliquidConfig.hyperliquid_vault_address!.toLowerCase() as `0x${string}`,
             isDeposit: hyperliquidConfig.isDeposit as boolean,

@@ -16,7 +16,7 @@ This application enables secure interactions with the Hyperliquid L1 DEX from a 
 
 Fordefi supports signing with chainId 1337 for most Hyperliquid actions. Configure the `chainId` in `fordefiConfig` based on the action you want to perform:
 
-> **Important**: Support for signing messages with chainId 1337 must be manually activated by the Fordefi team for your organization. Please contact Fordefi if you need this feature enabled.
+> **⚠️⚠️Important**: Support for signing messages with chainId 1337 must be manually activated by the Fordefi team for your organization. Please contact Fordefi if you need this feature enabled.
 
 ### chainId: 1337 (Default - works for most actions)
 
@@ -247,6 +247,49 @@ export const agentWalletConfig: AgentWalletConfig = {
 npm run action
 ```
 
+### Place Perpetual Orders
+
+To place orders on Hyperliquid's perpetual DEX:
+
+1. Change the action to `"placeOrder"` and configure the order in `src/config.ts`:
+
+```typescript
+export const hyperliquidConfig: HyperliquidConfig = {
+    action: "placeOrder",
+    isTestnet: false,
+    destination: fordefiConfig.address,
+    amount: "1" // Required by config but not used for orders
+};
+
+export const orderConfig: OrderParameters = {
+    orders: [{
+        a: 0,        // Asset index (0 = BTC, 1 = ETH, etc.)
+        b: true,     // Buy side (true = buy/long, false = sell/short)
+        p: "",       // Price (leave empty to use mid price)
+        s: "0.01",   // Size in asset units
+        r: false,    // Reduce only
+        t: { limit: { tif: "Gtc" } }, // Order type (Gtc, Alo, Ioc)
+    }],
+};
+```
+
+2. Run:
+
+```bash
+npm run action
+```
+
+**Order Parameters**:
+- `a`: Asset index - find the index for your desired asset from Hyperliquid's asset list
+- `b`: Side - `true` for buy/long, `false` for sell/short
+- `p`: Limit price - leave empty to automatically use the current mid price
+- `s`: Order size in asset units (e.g., "0.01" for 0.01 BTC)
+- `r`: Reduce only - set to `true` to only reduce existing positions
+- `t`: Order type - supports `limit` with time-in-force options:
+  - `Gtc` (Good til cancelled)
+  - `Alo` (Add liquidity only / post-only)
+  - `Ioc` (Immediate or cancel)
+
 ### Vault Transfer
 
 To deposit or withdraw from a Hyperliquid vault:
@@ -283,6 +326,7 @@ Simply change the `action` field in `src/config.ts` and run `npm run action`:
 | `approve_agent` | Approve agent wallet | `action: "approve_agent", agentName: "my_agent"` |
 | `revoke_agent` | Revoke agent wallet | `action: "revoke_agent", agentName: "my_agent"` |
 | `vault_transfer` | Vault deposit/withdrawal | `action: "vault_transfer", isDeposit: true, amount: "1"` |
+| `placeOrder` | Place perpetual orders | `action: "placeOrder"` + configure `orderConfig` |
 
 ## Troubleshooting
 

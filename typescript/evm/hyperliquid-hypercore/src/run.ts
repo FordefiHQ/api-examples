@@ -1,7 +1,8 @@
 import { approveAgentWallet, revokeAgentWallet } from "./hl-approve-or-revoke-agent";
-import { hyperliquidConfig, fordefiConfig, agentWalletConfig } from "./config";
+import { hyperliquidConfig, fordefiConfig, agentWalletConfig, orderConfig } from "./config";
 import { vault_transfer_agent } from "./hl-vault-transfer";
 import { spotTransfer } from "./hl-send-to-spot";
+import { place_perps_order } from './hl-place-perps-order';
 import { withdraw3 } from "./hl-withdraw";
 import { usdSend } from "./hl-send-usdc";
 import { deposit } from "./hl-deposit";
@@ -20,7 +21,10 @@ async function main() {
             await revokeAgentWallet(hyperliquidConfig, agentWalletConfig) 
         } else if (hyperliquidConfig.action == "spotTransfer") {
             await spotTransfer(hyperliquidConfig, fordefiConfig) 
-        } else {
+        } else if (hyperliquidConfig.action == "placeOrder") {
+            await place_perps_order(hyperliquidConfig, orderConfig) 
+        } 
+        else {
             await usdSend(hyperliquidConfig)
         }
     } catch (error) {
