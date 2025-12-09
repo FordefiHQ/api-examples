@@ -10,9 +10,6 @@ export async function place_perps_order(hyperliquidConfig: HyperliquidConfig, or
         throw new Error("Config required!");
     }
     try {
-        if (!hyperliquidConfig.amount) {
-            throw new Error("Amount is required and cannot be empty");
-        }
         let provider = await getProvider(fordefiConfig);
         if (!provider) {
             throw new Error("Failed to initialize provider");
