@@ -56,7 +56,7 @@ export async function buildPayload(fordefiConfig: FordefiAptosConfig, APTOS_NETW
         details: {
             skip_prediction: false,
             fail_on_prediction_failure: true,
-            with_fee_payer: true,
+            with_external_fee_payer: true,
             type: 'aptos_serialized_entry_point_payload',
             chain: 'aptos_mainnet',
             serialized_transaction_payload: base64EncodedTransaction,
