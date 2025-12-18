@@ -1,9 +1,9 @@
 import os
 import json
 import asyncio
+import requests
 import datetime
 from pathlib import Path
-import requests
 from utils.broadcast import broadcast_tx, get_tx
 from utils.sign_payload import sign
 from dotenv import load_dotenv
@@ -30,7 +30,7 @@ async def contract_call(evm_chain: str, vault_id: str, contract: str, custom_not
             "data": {
                 "type": "hex",
                 "hex_data": call_data
-            },
+            }
         }
     }
     
@@ -38,13 +38,13 @@ async def contract_call(evm_chain: str, vault_id: str, contract: str, custom_not
 
 ## Fordefi configuration
 API_USER_PRIVATE_KEY = Path("./secret/private.pem")
-USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-EVM_VAULT_ID = os.getenv("EVM_VAULT_ID")
+USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
+EVM_VAULT_ID = os.environ["EVM_VAULT_ID"]
 evm_chain = "ethereum"
 path = "/api/v1/transactions" # CHANGE
 contract = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
 custom_note = "It's a wrap!" # Optional note
-value = str(100_000_000_000) # 0.001 ETH (1 ETH = 0.000000000000000001 wei)
+value = str(1_000_000_000) # 0.00001 ETH (1 ETH = 0.000000000000000001 wei)
 hex_call_data = "0xd0e30db0"
 custom_rpc_url = os.getenv("CUSTOM_RPC_URL")  # Your custom RPC endpoint
 
@@ -69,20 +69,21 @@ async def main():
         ## Poll for raw_transaction to be available
         print("Waiting for transaction to be signed...")
         raw_transaction = None
-        get_path = f"/api/v1/transactions/{tx_id}"
-
         while raw_transaction is None:
             await asyncio.sleep(2)
-            timestamp = datetime.datetime.now().strftime("%s")
-            payload = f"{get_path}|{timestamp}|"
-            signature = await sign(payload=payload, api_user_private_key=API_USER_PRIVATE_KEY)
             tx_response = await get_tx(tx_id, USER_API_TOKEN, signature, timestamp)
             tx_details = tx_response.json()
+            tx_state = tx_details.get("state", "unknown")
+
+            if tx_state == "aborted":
+                print(f"Transaction was aborted!")
+                return
+
             raw_transaction = tx_details.get("raw_transaction")
             if raw_transaction is None:
-                print(f"  Status: {tx_details.get('state', 'unknown')}...")
+                print(f"  Status: {tx_state}...")
 
-        print(f"Raw transaction received: {raw_transaction[:50]}...")
+        print(f"Raw transaction received: {raw_transaction}...")
 
         ## Push raw transaction to custom RPC
         print(f"Pushing to custom RPC: {custom_rpc_url}")
