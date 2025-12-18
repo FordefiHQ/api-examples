@@ -1,13 +1,22 @@
-# EIP-712 Signing with Fordefi
+# EVM Message Signing with Fordefi
 
-This repository contains a Python implementation for signing EIP-712 typed data using the Fordefi API and your Fordefi EVM Vault as the signer.
+This repository contains Python implementations for signing EVM messages using the Fordefi API and your Fordefi EVM Vault as the signer.
 
 ## Overview
 
-The script allows you to:
+This project includes two scripts:
+
+### `sign_eip712.py` - EIP-712 Typed Data Signing
+
 - Construct EIP-712 typed data messages
-- Sign messages using a Fordefi EVM Vault.
-- Optionally, decode and extract signature components (r, s, v)
+- Sign structured data using a Fordefi EVM Vault
+- Decode and extract signature components (r, s, v)
+
+### `sign_personal_message.py` - Personal Message Signing (EIP-191)
+
+- Sign arbitrary text messages using a Fordefi EVM Vault
+- Supports any EVM-compatible chain
+- Decode and extract signature components (r, s, v)
 
 ## Prerequisites
 
@@ -34,7 +43,9 @@ The script allows you to:
    ```plaintext
    FORDEFI_API_USER_TOKEN="your_token"
    FORDEFI_EVM_VAULT_ID="your_vault_id"
+   EVM_CHAIN="evm_1"  # Optional: defaults to Ethereum mainnet for personal message signing
    ```
+
 4. Place your API Signer's `.pem` private key file in a `/secret` directory in the root folder.
 
 5. Start the Fordefi API Signer:
@@ -45,17 +56,25 @@ The script allows you to:
 
 ## Usage
 
-Run the script with:
+### Sign EIP-712 Typed Data
 
 ```bash
 uv run sign_eip712.py
 ```
 
+### Sign Personal Message
+
+Edit the `MESSAGE` variable in `sign_personal_message.py` with your message, then run:
+
+```bash
+uv run sign_personal_message.py
+```
+
 ## How It Works
 
 1. The script loads your Fordefi credentials from environment variables
-2. Constructs an EIP-712 typed data structure (in this example, a USDC token approval on Ethereum mainnet)
+2. Constructs the message (EIP-712 typed data or personal message)
 3. Creates a properly formatted request to the Fordefi API
 4. Signs the request payload
-5. Submits the transaction to Fordefi's `/api/v1/transactions/create-and-wait` API endpoint.
+5. Submits the transaction to Fordefi's API endpoint
 6. Waits for your EVM Vault to sign the message then displays the response, including the decoded signature components

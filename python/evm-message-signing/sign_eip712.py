@@ -86,22 +86,24 @@ def main():
         response_data = make_api_request(PATH, FORDEFI_API_USER_TOKEN, signature, timestamp, request_body, method=method)
 
         try:
-
             print("\nResponse Data:")
             print(json.dumps(response_data, indent=2))
 
-            # OPTIONAL -> decode the signature if returned
+            # Extract the signature if returned
             if "signatures" in response_data and response_data["signatures"]:
                 signature_b64 = response_data["signatures"][0]
-                
-                chain_id = typed_data["domain"]["chainId"]
-                r, s, v = decode_signature(signature_b64, chain_id)
-                
-                print("\nDecoded signature:")
+                signature_bytes = base64.b64decode(signature_b64)
+                signature_hex = '0x' + signature_bytes.hex()
+
+                print(f"\nSignature (hex): {signature_hex}")
+
+                # Show r, s, v components
+                r, s, v = decode_signature(signature_b64, typed_data["domain"]["chainId"])
+
+                print(f"\nDecoded signature components:")
                 print(f"r: {hex(r)}")
                 print(f"s: {hex(s)}")
                 print(f"v: {v}")
-
         except json.JSONDecodeError:
             print("Failed printing response data!")
     except requests.exceptions.HTTPError as e:
