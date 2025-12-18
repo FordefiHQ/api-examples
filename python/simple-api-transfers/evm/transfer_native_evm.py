@@ -41,7 +41,7 @@ async def evm_tx_native(evm_chain: str, vault_id: str, destination: str, custom_
 USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
 EVM_VAULT_ID = os.getenv("EVM_VAULT_ID")
 evm_chain = "bsc"
-path = "/api/v1/transactions" # CHANGE
+path = "/api/v1/transactions"
 destination = "0xF659feEE62120Ce669A5C45Eb6616319D552dD93" # CHANGE to your EVM address
 custom_note = "hello!" # Optional note
 value = str(10_000_000_000_000) # 0.00001 BNB (1 BNB = 0.000000000000000001 wei)

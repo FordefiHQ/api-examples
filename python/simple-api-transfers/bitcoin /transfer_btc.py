@@ -8,27 +8,25 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-async def btc_tx_native(vault_id: str, destination: str, value: str):
+async def build_payload(vault_id: str, destination: str, value: str, note: str):
     request_json = {
-    "vault_id": vault_id,
-    "signer_type": "api_signer",
-    "type": "utxo_transaction",
-    "details": {
-            "type": "utxo_transfer",
-            "outputs": [
-                {
-                    "to": {
-                        "type": "address",
-                        "address": destination
-                    },
-                    "value": value
-                }
-            ],
-            "fee_per_byte": {
-                "type": "priority",
-                "priority_level": "high"
+        "to": {
+            "type": "address",
+            "address": destination
+        },
+        "amount": {
+            "type": "value",
+            "value": value
+        },
+        "asset_identifier": {
+            "type": "utxo",
+            "details": {
+                "type": "native",
+                "chain": "bitcoin_mainnet"
             }
-        }
+        },
+        "note": note,
+        "vault_id": vault_id
     }
     
     return request_json
@@ -36,14 +34,15 @@ async def btc_tx_native(vault_id: str, destination: str, value: str):
 ## Fordefi configuration
 USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
 BTC_VAULT_ID = BTC_VAULT_ID = os.getenv("BTC_VAULT_ID")
-path = "/api/v1/transactions" # CHANGE
+path = "/api/v1/transactions/transfer" # https://docs.fordefi.com/api/latest/openapi/transactions/create_transfer_api_v1_transactions_transfer_post
 destination = "bc1p4m94zze0tv9kp7usnpha7u98lpanemufhshgv9nae4c3myanc5csly8ayl" # CHANGE to your Bitcoin address
-value = str(500) # 0.00001 BTC = 10000 satoshis (1 BTC = 100,000,000 satoshis)
+value = str(10000) # 0.00001 BTC = 10000 satoshis (1 BTC = 100,000,000 satoshis)
+optional_note = "We're all Satoshi!"
 
 async def main():
     try:
         ## Building transaction
-        request_json = await btc_tx_native(vault_id=BTC_VAULT_ID, destination=destination, value=value)
+        request_json = await build_payload(vault_id=BTC_VAULT_ID, destination=destination, value=value, note=optional_note)
         request_body = json.dumps(request_json)
         timestamp = datetime.datetime.now().strftime("%s")
         payload = f"{path}|{timestamp}|{request_body}"
