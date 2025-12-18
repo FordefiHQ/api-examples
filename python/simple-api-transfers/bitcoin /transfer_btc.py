@@ -32,10 +32,10 @@ async def build_payload(vault_id: str, destination: str, value: str, note: str):
     return request_json
 
 ## Fordefi configuration
-USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-BTC_VAULT_ID = BTC_VAULT_ID = os.getenv("BTC_VAULT_ID")
+USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
+BTC_VAULT_ID = os.environ["BTC_VAULT_ID"]
 path = "/api/v1/transactions/transfer" # https://docs.fordefi.com/api/latest/openapi/transactions/create_transfer_api_v1_transactions_transfer_post
-destination = "bc1p4m94zze0tv9kp7usnpha7u98lpanemufhshgv9nae4c3myanc5csly8ayl" # CHANGE to your Bitcoin address
+destination = "bc1p...." # CHANGE to your Bitcoin address
 value = str(10000) # 0.00001 BTC = 10000 satoshis (1 BTC = 100,000,000 satoshis)
 optional_note = "We're all Satoshi!"
 

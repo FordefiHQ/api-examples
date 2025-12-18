@@ -1,4 +1,4 @@
-def construct_request(vault_id: str, data: str, chain: str) -> dict:
+def construct_eip712_message_request(vault_id: str, data: str, chain: str) -> dict:
     
     print(f'Preparing transaction from Vault {vault_id}')
 

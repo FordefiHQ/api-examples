@@ -29,9 +29,9 @@ async def sol_tx_native(vault_id: str, custom_note: str, msg: Message):
 
 ## Fordefi configuration
 PRIVATE_KEY_FILE = "./secret/private.pem"
-USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-FORDEFI_SOLANA_VAULT_ID = os.getenv("SOL_VAULT_ID")
-FORDEFI_SOLANA_VAULT_ADDRESS = os.getenv("FORDEFI_SOLANA_VAULT_ADDRESS")
+USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
+FORDEFI_SOLANA_VAULT_ID = os.environ["SOL_VAULT_ID"]
+FORDEFI_SOLANA_VAULT_ADDRESS = os.environ["FORDEFI_SOLANA_VAULT_ADDRESS"]
 path = "/api/v1/transactions"
 destination = "9BgxwZMyNzGUgp6hYXMyRKv3kSkyYZAMPGisqJgnXCFS" # Change to your Fordefi Solana Vault
 custom_note = "hello!" # Optional note

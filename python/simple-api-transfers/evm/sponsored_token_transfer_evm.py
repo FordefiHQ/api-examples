@@ -43,9 +43,9 @@ async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, custom_
     return request_json
 
 ## Fordefi configuration
-USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-EVM_VAULT_ID = os.getenv("EVM_VAULT_ID")
-SPONSOR_VAULT_ID = os.getenv("SPONSOR_VAULT_ID_EVM")
+USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
+EVM_VAULT_ID = os.environ["EVM_VAULT_ID"]
+SPONSOR_VAULT_ID = os.environ["SPONSOR_VAULT_ID_EVM"]
 evm_chain = "ethereum"
 path = "/api/v1/transactions"
 destination = "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73" # CHANGE

@@ -37,8 +37,8 @@ async def apt_tx_native(vault_id: str, destination: str, custom_note: str, value
     return request_json
 
 ## Fordefi configuration
-USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-APTOS_VAULT_ID = os.getenv("APTOS_VAULT_ID")
+USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
+APTOS_VAULT_ID = os.environ["APTOS_VAULT_ID"]
 path = "/api/v1/transactions"
 destination = "0x...." # CHANGE to your destination address
 custom_note = "hello Aptos!" # Optional note

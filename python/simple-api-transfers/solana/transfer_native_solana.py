@@ -34,8 +34,8 @@ async def sol_tx_native(vault_id: str, destination: str, custom_note: str, value
     return request_json
 
 ## Fordefi configuration
-USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-SOL_VAULT_ID = os.getenv("SOL_VAULT_ID")
+USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
+SOL_VAULT_ID = os.environ["SOL_VAULT_ID"]
 path = "/api/v1/transactions"
 destination = "9BgxwZMyNzGUgp6hYXMyRKv3kSkyYZAMPGisqJgnXCFS" # CHANGE to your destination address
 custom_note = "hello!" # Optional note
