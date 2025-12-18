@@ -15,7 +15,8 @@ def make_api_request(path, access_token, signature, timestamp, request_body, met
         request_body (dict): Request payload
     """
     try:
-        print("Pushing signed payload to Fordefi 🏰")
+        print("Pushing payload to Fordefi 🏰")
+        print("Waiting for approvals and MPC signatures ⏳")
         resp_tx = requests.request(
             method=method,
             url=f"https://api.fordefi.com{path}",

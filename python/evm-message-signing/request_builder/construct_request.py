@@ -1,4 +1,4 @@
-def construct_request(vault_id, data):
+def construct_request(vault_id: str, data: str, chain: str) -> dict:
     
     print(f'Preparing transaction from Vault {vault_id}')
 
@@ -10,7 +10,7 @@ def construct_request(vault_id, data):
         "details": {
             "type": "typed_message_type",
             "raw_data": data,
-            "chain": "ethereum_mainnet"
+            "chain": chain
         },
         "vault_id": vault_id,
         "note": "Typed Data message, permit 1inch to spend USDC",

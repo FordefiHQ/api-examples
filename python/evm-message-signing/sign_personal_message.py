@@ -5,16 +5,15 @@ import json
 import requests
 from dotenv import load_dotenv
 from signing.signer import sign
-from api_requests.push_to_api import make_api_request
+from request_builder.push_to_api import make_api_request
 from request_builder.construct_request import construct_personal_message_request
 
 # Load Fordefi secrets
 load_dotenv()
-FORDEFI_API_USER_TOKEN = os.getenv("FORDEFI_API_USER_TOKEN")
-FORDEFI_EVM_VAULT_ID = os.getenv("FORDEFI_EVM_VAULT_ID")
 PATH = "/api/v1/transactions/create-and-wait"
-
-# EVM chain configuration - see Fordefi docs for supported chains
+FORDEFI_API_USER_TOKEN = os.environ["FORDEFI_API_USER_TOKEN"]
+FORDEFI_EVM_VAULT_ID = os.environ["FORDEFI_EVM_VAULT_ID"]
+# EVM chain configuration
 # Examples: "evm_1" (Ethereum), "evm_137" (Polygon), "evm_42161" (Arbitrum)
 EVM_CHAIN = os.getenv("EVM_CHAIN", "evm_1")
 
@@ -64,6 +63,16 @@ def main():
 
         print("\nResponse Data:")
         print(json.dumps(response_data, indent=2))
+
+        # Check if the request timed out waiting for approval
+        if response_data.get("has_timed_out") and response_data.get("state") == "waiting_for_approval":
+            tx_id = response_data.get("id")
+            print("\n⏳ Request timed out while waiting for approval.")
+            print("   Note: The transaction is NOT cancelled - it can still be approved and signed.")
+            print(f"   Transaction ID: {tx_id}")
+            print(f"   Track status: GET /api/v1/transactions/{tx_id}")
+            print("   Docs: https://docs.fordefi.com/api/latest/openapi/transactions/get_transaction_api_v1_transactions__id__get")
+            return
 
         # Extract the signature if returned
         if "signatures" in response_data and response_data["signatures"]:
