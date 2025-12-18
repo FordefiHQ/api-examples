@@ -37,8 +37,8 @@ async def move_tx_native(vault_id: str, destination: str, custom_note: str, valu
     return request_json
 
 ## Fordefi configuration
-USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-APTOS_VAULT_ID = os.getenv("APTOS_VAULT_ID")
+USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
+APTOS_VAULT_ID = os.environ["APTOS_VAULT_ID"]
 path = "/api/v1/transactions"
 destination = "0x448692f73804b89ed750284286aaa023165539f3a20858eeb65622cab6224557" # CHANGE to your destination address
 custom_note = "hello Movement!" # Optional note

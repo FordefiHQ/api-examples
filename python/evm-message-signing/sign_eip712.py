@@ -6,7 +6,7 @@ import requests
 from dotenv import load_dotenv
 from signing.signer import sign
 from request_builder.push_to_api import make_api_request
-from request_builder.construct_request import construct_request
+from request_builder.construct_request import construct_eip712_message_request
 
 # Load Fordefi secrets
 load_dotenv()
@@ -73,7 +73,7 @@ def main():
     hex_encoded_typed_message = '0x' + raw_typed_message_.encode('utf-8').hex()
 
     # You can pass the typed message in its raw version or hex-encoded
-    request_json = construct_request(FORDEFI_EVM_VAULT_ID, hex_encoded_typed_message, EVM_CHAIN)
+    request_json = construct_eip712_message_request(FORDEFI_EVM_VAULT_ID, hex_encoded_typed_message, EVM_CHAIN)
 
     request_body = json.dumps(request_json)
 

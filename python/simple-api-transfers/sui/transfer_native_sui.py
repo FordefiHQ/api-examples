@@ -37,8 +37,8 @@ async def sui_tx_native(vault_id: str, destination: str, custom_note: str, value
     return request_json
 
 ## Fordefi configuration
-USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-SUI_VAULT_ID = os.getenv("SUI_VAULT_ID")
+USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
+SUI_VAULT_ID = os.environ["SUI_VAULT_ID"]
 path = "/api/v1/transactions"
 destination = "0x20f2b0d2fe3ca33deba567a660d156b500ef7711d50be36aef71e5216d460b82" # CHANGE to your destination address
 custom_note = "hello Sui!" # Optional note

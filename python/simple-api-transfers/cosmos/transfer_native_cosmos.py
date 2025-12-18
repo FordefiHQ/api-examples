@@ -42,8 +42,8 @@ async def atom_tx_native(vault_id: str, chain: str, destination: str, amount: st
     return request_json
 
 ## Fordefi configuration
-USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-COSMOS_VAULT_ID = os.getenv("COSMOS_VAULT_ID")
+USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
+COSMOS_VAULT_ID = os.environ["COSMOS_VAULT_ID"]
 path = "/api/v1/transactions"
 chain="cosmos_cosmoshub-4"
 destination = "cosmos1c8296f7cq4nvwjfvjq2x2jmrxnmw7wjyscxamy" # CHANGE to your destination address

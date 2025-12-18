@@ -41,8 +41,8 @@ async def build_request(vault_id: str, destination: str, custom_note: str, jetto
     return request_json
 
 ## Fordefi configuration
-USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-TRON_VAULT_ID = os.getenv("TON_VAULT_ID")
+USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
+TRON_VAULT_ID = os.environ["TON_VAULT_ID"]
 path = "/api/v1/transactions"
 destination = "UQApn3xK3wVS5vH2LXMga1sJNY5QrcTNjDPFlyt3yR2aipwt" # CHANGE to your TON destination address
 custom_note = "hello TON!" # Optional note

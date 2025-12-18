@@ -40,8 +40,8 @@ async def build_request(vault_id: str, destination: str, custom_note: str, value
     return request_json
 
 ## Fordefi configuration
-USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-TRON_VAULT_ID = os.getenv("TRON_VAULT_ID")
+USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
+TRON_VAULT_ID = os.environ["TRON_VAULT_ID"]
 evm_chain = "bsc"
 path = "/api/v1/transactions"
 destination = "THpczdekw3n93u48ZCbdpimcFVW8Rx9jrj" # CHANGE to your Tron destination address

@@ -10,22 +10,22 @@ Code examples for using the Fordefi API in Python and TypeScript.
 * Programmatic swaps using Fordefi's In-app Swap feature
 * Programmatic EVM contract calls (with option to broadcast to a custom RPC)
 * Simple API Transfers:
+  * BTC transfers on Bitcoin mainnet
   * Native EVM assets (ETH, BNB, etc.) transfers
   * ERC20 token transfers
   * ERC20 transfers with delegated gas payment from another vault ("sponsored" transactions)
   * Solana SOL transfers
   * Solana SPL token transfers
   * Solana SPL token transfers with delegated fee payment from another vault ("sponsored" transactions)
-  * Solana SOL & SPL transfers with Solders
-  * Tron TRX transfers
-  * Tron TRC20 transfers
+  * Solana SOL and SPL transfers with Solders
+  * Tron TRX and TRC10/20 transfers
   * Native APT and MOVE transfers on Aptos and Movement 
   * Native SUI transfers
 * Exchange transfers
 * Setting up Fordefi Webhooks (Python)
 * Programatically signing Bitcoin PSBT with a Segwit or Taproot address
 * Approve Transactions via API
-* Signing EIP-712 typed messages with an EVM Fordefi vault
+* Signing EIP-712 typed messages and EIP-191 personal messages with an EVM Fordefi vault
 * Programmatically adding a contact address or a batch of contact addresses to your Fordefi organization's Address Book
 
 ## TypeScript Examples 🟦

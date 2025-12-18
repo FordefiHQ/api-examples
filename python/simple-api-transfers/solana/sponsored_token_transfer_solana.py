@@ -46,9 +46,9 @@ async def sol_tx_tokens(vault_id: str, destination: str, custom_note: str, value
     return request_json
 
 ## CONFIG
-USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-SOL_VAULT_ID = os.getenv("SOL_VAULT_ID")
-SPONSOR_VAULT_ID = os.getenv("SPONSOR_VAULT_ID_SOLANA")
+USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
+SOL_VAULT_ID = os.environ["SOL_VAULT_ID"]
+SPONSOR_VAULT_ID = os.environ["SPONSOR_VAULT_ID_SOLANA"]
 path = "/api/v1/transactions"
 destination = "EjL8jgiEMwuHT6xsDwm7HmF4uqv2cAjJULfXwUm6ZSSD" # Change to your destination address
 custom_note = "hello!" # Optional note
