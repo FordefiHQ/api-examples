@@ -1,21 +1,23 @@
 import os
-import datetime
-import base64
 import json
+import base64
+import datetime
 import requests
+from pathlib import Path
 from dotenv import load_dotenv
-from signing.signer import sign
+from signing.signer import sign_with_api_user_private_key
 from request_builder.push_to_api import make_api_request
 from request_builder.construct_request import construct_personal_message_request
 
 # Load Fordefi secrets
 load_dotenv()
+PRIVATE_KEY_PEM_FILE = Path("./secret/private.pem")
 PATH = "/api/v1/transactions/create-and-wait"
 FORDEFI_API_USER_TOKEN = os.environ["FORDEFI_API_USER_TOKEN"]
 FORDEFI_EVM_VAULT_ID = os.environ["FORDEFI_EVM_VAULT_ID"]
 # EVM chain configuration
 # Examples: "evm_1" (Ethereum), "evm_137" (Polygon), "evm_42161" (Arbitrum)
-EVM_CHAIN = os.getenv("EVM_CHAIN", "evm_1")
+EVM_CHAIN = os.environ["EVM_CHAIN"]
 
 # Example message - replace with your actual message
 MESSAGE = """Hello, this is a test message to sign.
@@ -54,7 +56,7 @@ def main():
     timestamp = datetime.datetime.now().strftime("%s")
     payload = f"{PATH}|{timestamp}|{request_body}"
 
-    signature = sign(payload=payload)
+    signature = sign_with_api_user_private_key(payload=payload, api_user_private_key=PRIVATE_KEY_PEM_FILE)
 
     try:
         print("Making API request to Fordefi")

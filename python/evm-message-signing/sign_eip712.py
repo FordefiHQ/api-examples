@@ -1,21 +1,23 @@
 import os
-import datetime
-import base64
 import json
+import base64
+import datetime
 import requests
+from pathlib import Path
 from dotenv import load_dotenv
-from signing.signer import sign
+from signing.signer import sign_with_api_user_private_key
 from request_builder.push_to_api import make_api_request
 from request_builder.construct_request import construct_eip712_message_request
 
 # Load Fordefi secrets
 load_dotenv()
+PRIVATE_KEY_PEM_FILE = Path("./secret/private.pem")
 PATH = "/api/v1/transactions/create-and-wait"
 FORDEFI_API_USER_TOKEN = os.environ["FORDEFI_API_USER_TOKEN"]
 FORDEFI_EVM_VAULT_ID = os.environ["FORDEFI_EVM_VAULT_ID"]
 # EVM chain configuration
 # Examples: "evm_1" (Ethereum), "evm_137" (Polygon), "evm_42161" (Arbitrum)
-EVM_CHAIN = os.getenv("EVM_CHAIN", "evm_1")
+EVM_CHAIN = os.environ["EVM_CHAIN"]
 
 # Example typed data
 typed_data = {
@@ -63,10 +65,7 @@ def decode_signature(signature_b64, chain_id):
     return r, s, v
 
 def main():
-
     """Main function to execute the EIP-712 signing process with Fordefi"""
-    
-
     raw_typed_message_ = json.dumps(typed_data)
 
     # OPTIONAL -> hex-encode the raw typed message
@@ -74,24 +73,19 @@ def main():
 
     # You can pass the typed message in its raw version or hex-encoded
     request_json = construct_eip712_message_request(FORDEFI_EVM_VAULT_ID, hex_encoded_typed_message, EVM_CHAIN)
-
     request_body = json.dumps(request_json)
 
     timestamp = datetime.datetime.now().strftime("%s")
     payload = f"{PATH}|{timestamp}|{request_body}"
-        
-    signature = sign(payload=payload)
+    signature = sign_with_api_user_private_key(payload=payload, api_user_private_key=PRIVATE_KEY_PEM_FILE)
 
     try: 
-  
         print("Making API request to Fordefi 📡")
         method = "post" 
         response_data = make_api_request(PATH, FORDEFI_API_USER_TOKEN, signature, timestamp, request_body, method=method)
-
         try:
             print("\nResponse Data:")
             print(json.dumps(response_data, indent=2))
-
             # Check if the request timed out waiting for approval
             if response_data.get("has_timed_out") and response_data.get("state") == "waiting_for_approval":
                 tx_id = response_data.get("id")
@@ -100,8 +94,9 @@ def main():
                 print(f"   Transaction ID: {tx_id}")
                 print(f"   Track status: GET /api/v1/transactions/{tx_id}")
                 print("   Docs: https://docs.fordefi.com/api/latest/openapi/transactions/get_transaction_api_v1_transactions__id__get")
+            
                 return
-
+            
             # Extract the signature if returned
             if "signatures" in response_data and response_data["signatures"]:
                 signature_b64 = response_data["signatures"][0]

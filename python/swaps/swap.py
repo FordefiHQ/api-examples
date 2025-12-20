@@ -3,18 +3,18 @@ import json
 import asyncio
 import datetime
 from pathlib import Path
-from sign_payload import sign
 from dotenv import load_dotenv
 from broadcast import broadcast_tx
 from get_provider_list import getSwapProviders 
+from sign_payload import sign_with_api_user_private_key
 from submit_quote import submit_native_to_erc20_quote, submit_erc20_to_erc20_quote
 from get_quote import get_native_to_erc20_quote, get_erc20_to_erc20_quote, get_best_quote
 
 load_dotenv()
 
 ## CONFIG
-USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
-FORDEFI_VAULT_ID = os.getenv("FORDEFI_VAULT_ID")
+USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
+FORDEFI_VAULT_ID = os.environ["FORDEFI_VAULT_ID"]
 PRIVATE_KEY_PEM_FILE = Path("./secret/private.pem")
 path = "/api/v1/swaps"
 sell_token_amount = str(1000000000000000) # in smallest units or decimals
@@ -95,7 +95,7 @@ async def main():
         payload = f"{path}|{timestamp}|{tx_payload_json}"
 
         ## Signing transaction payload with API User's private key  
-        signature = await sign(payload=payload, private_key_path=PRIVATE_KEY_PEM_FILE)
+        signature = await sign_with_api_user_private_key(payload=payload, api_user_private_key=PRIVATE_KEY_PEM_FILE)
 
         ## Sending transaction to Fordefi for MPC signature and broadcast
         print("Making API request to Fordefi for MPC signature 📡")
