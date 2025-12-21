@@ -29,7 +29,7 @@ async def evm_tx_native(evm_chain: str, vault_id: str, destination: str, custom_
                 "type": "evm",
                 "details": {
                     "type": "native",
-                    "chain": f"evm_{evm_chain}"
+                    "chain": f"evm_{evm_chain}" # for custom evms, the chain must be declared as evm_chainId
                 }
             },
             "value": {

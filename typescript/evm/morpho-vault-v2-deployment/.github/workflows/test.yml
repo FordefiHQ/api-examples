@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+
+env:
+  FOUNDRY_PROFILE: ci
+
+jobs:
+  check:
+    name: Foundry project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Show Forge version
+        run: |
+          forge --version
+
+      - name: Run Forge fmt
+        run: |
+          forge fmt --check
+        id: fmt
+
+      - name: Run Forge build
+        run: |
+          forge build --sizes
+        id: build
+
+      - name: Run Forge tests
+        run: |
+          forge test -vvv
+        id: forge-test
+
+      - name: Run VaultV2 deployment test on Anvil
+        run: |
+          echo "🧪 Starting VaultV2 deployment test on Anvil..."
+          ./deploy_anvil.sh
+          echo "✅ VaultV2 deployment test completed successfully!"
+        id: anvil-deployment-test

@@ -4,13 +4,13 @@ import asyncio
 import datetime
 from pathlib import Path
 from broadcast import broadcast_tx
-from sign_payload import sign
+from sign_payload import sign_with_api_user_private_key
 from dotenv import load_dotenv
 
 load_dotenv()
 
 ## CONFIG
-USER_API_TOKEN = os.getenv("FORDEFI_API_TOKEN")
+USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
 PRIVATE_KEY_PEM_FILE = Path("./secret/private.pem")
 path = "/api/v1/addressbook/contacts/batch"
 
@@ -44,7 +44,7 @@ async def main():
         payload = f"{path}|{timestamp}|{request_body}"
 
         ## Sign batch payload with API User's private key
-        signature = await sign(payload=payload, private_key_path=PRIVATE_KEY_PEM_FILE)
+        signature = await sign_with_api_user_private_key(payload=payload, private_key_path=PRIVATE_KEY_PEM_FILE)
 
         ## Send signed payload to Fordefi
         print("Making API request to Fordefi 📡")

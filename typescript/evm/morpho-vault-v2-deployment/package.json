@@ -1,0 +1,32 @@
+{
+  "name": "@fordefi-morpho-vault-v2-deployment",
+  "version": "1.0.0",
+  "description": "**This repository is provided for educational purposes only. The Morpho Association cannot be held responsible for any loss of funds, damages, or other consequences that may result from using this script or any associated code. Use at your own risk.**",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "deploy": "tsx script/deploy.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/morpho-org/vault-v2-deployment.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/morpho-org/vault-v2-deployment/issues"
+  },
+  "homepage": "https://github.com/morpho-org/vault-v2-deployment#readme",
+  "dependencies": {
+    "@fordefi/web3-provider": "^0.3.0",
+    "dotenv": "^17.2.3",
+    "ethers": "^6.16.0",
+    "tsx": "^4.21.0"
+  }
+}

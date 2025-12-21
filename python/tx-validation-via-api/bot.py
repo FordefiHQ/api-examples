@@ -15,12 +15,11 @@ from fastapi import FastAPI, Request, HTTPException
 app = FastAPI()
 
 load_dotenv()
-VALIDATOR_BOT_TOKEN = os.getenv("VALIDATOR_BOT_TOKEN")
+VALIDATOR_BOT_TOKEN = os.environ["VALIDATOR_BOT_TOKEN"]
 ORIGIN_VAULT = "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73" # Change to your Vault's address
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 with open('./public_key.pem', "r") as f:
     FORDEFI_PUBLIC_KEY = f.read()
-
 signature_pub_key = ecdsa.VerifyingKey.from_pem(FORDEFI_PUBLIC_KEY)
 
 class TransactionAbortError(Exception):
@@ -29,7 +28,6 @@ class TransactionAbortError(Exception):
 
 
 def verify_signature(signature: str, body: bytes) -> bool:
-    """Verify Fordefi signature using ECDSA"""
     try:
         return signature_pub_key.verify(
             signature=base64.b64decode(signature),
@@ -43,10 +41,8 @@ def verify_signature(signature: str, body: bytes) -> bool:
 
 
 def get_transaction_data(transaction_id: str) -> Dict:
-    """Fetch transaction data from Fordefi API"""
     url = f"https://api.fordefi.com/api/v1/transactions/{transaction_id}"
     headers = {"Authorization": f"Bearer {VALIDATOR_BOT_TOKEN}"}
-    
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
@@ -57,7 +53,6 @@ def get_transaction_data(transaction_id: str) -> Dict:
 
 
 def wait_for_transaction_creation(transaction_id: str, max_wait_time: int = 300) -> Dict:
-    """Poll until transaction is created and ready for validation"""
     target_states = ["waiting_for_approval"]
     terminal_states = ["aborted", "completed", "approved", "stuck", "mined"]
     start_time = time.time()

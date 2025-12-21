@@ -3,17 +3,6 @@ import base64
 import json
 
 def make_api_request(path, access_token, signature, timestamp, request_body, method):
-    """
-    Make HTTP request to Fordefi API
-    
-    Args:
-        method (str): HTTP method ('GET' or 'POST')
-        path (str): API endpoint path
-        access_token (str): Bearer token for authorization
-        signature (bytes): Request signature
-        timestamp (str): Request timestamp
-        request_body (dict): Request payload
-    """
     try:
         print("Pushing payload to Fordefi 🏰")
         print("Waiting for approvals and MPC signatures ⏳")
