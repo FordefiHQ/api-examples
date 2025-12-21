@@ -89,13 +89,12 @@ async def main():
                 providers=[best_quote["provider_info"]["provider_id"]],
                 slippage=slippage)
 
-        
         tx_payload_json = json.dumps(tx_payload) 
         timestamp = datetime.datetime.now().strftime("%s")
         payload = f"{path}|{timestamp}|{tx_payload_json}"
 
         ## Signing transaction payload with API User's private key  
-        signature = sign_with_api_user_private_key(payload=payload, api_user_private_key=PRIVATE_KEY_PEM_FILE)
+        signature = await sign_with_api_user_private_key(payload=payload, api_user_private_key=PRIVATE_KEY_PEM_FILE)
 
         ## Sending transaction to Fordefi for MPC signature and broadcast
         print("Making API request to Fordefi for MPC signature 📡")
