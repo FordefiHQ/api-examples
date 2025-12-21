@@ -58,7 +58,7 @@ async def main():
         timestamp = datetime.datetime.now().strftime("%s")
         payload = f"{path}|{timestamp}|{request_body}"
         ## Signing transaction with API User private key
-        signature = await sign_with_api_user_private_key(payload=payload, api_user_private_key=API_USER_PRIVATE_KEY)
+        signature = sign_with_api_user_private_key(payload=payload, api_user_private_key=API_USER_PRIVATE_KEY)
         ## Push tx to Fordefi for MPC signing and broadcast to network
         ok = await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
         tx_data = ok.json()
@@ -86,7 +86,7 @@ async def main():
         print(f"Raw transaction received: {raw_transaction}...")
 
         ## Push raw transaction to custom RPC
-        print(f"Pushing to custom RPC: {custom_rpc_url}")
+        print(f"Broadcast to custom RPC: {custom_rpc_url}")
         rpc_payload = {
             "jsonrpc": "2.0",
             "method": "eth_sendRawTransaction",
