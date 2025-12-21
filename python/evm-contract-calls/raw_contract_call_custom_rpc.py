@@ -58,7 +58,7 @@ async def main():
         timestamp = datetime.datetime.now().strftime("%s")
         payload = f"{path}|{timestamp}|{request_body}"
         ## Signing transaction with API User private key
-        signature = sign_with_api_user_private_key(payload=payload, api_user_private_key=API_USER_PRIVATE_KEY)
+        signature = await sign_with_api_user_private_key(payload=payload, api_user_private_key=API_USER_PRIVATE_KEY)
         ## Push tx to Fordefi for MPC signing and broadcast to network
         ok = await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
         tx_data = ok.json()
