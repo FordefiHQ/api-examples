@@ -39,6 +39,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
   * Swapping tokens programmatically with Uniswap v3
   * Minting/Redeeming USDe with Ethena
   * Programmatic EVM transfers using the Fordefi API
+  * Deploying and call contracts on a local Hardhat node for developers
 * On Solana:
   * With `@solana/web3.js`: 
     * Programmatic token swaps using Jupiter
