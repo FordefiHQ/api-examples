@@ -55,3 +55,65 @@ After setting the variable, you can run the deployment with the Sepolia network:
 ```shell
 npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
 ```
+
+## Using Fordefi as Signer
+
+This project supports using [Fordefi](https://fordefi.com) as the transaction signer for interacting with contracts on your local Hardhat network.
+
+### Setup
+
+1. **Install the Fordefi web3 provider:**
+
+```shell
+npm install @fordefi/web3-provider
+```
+
+2. **Configure your Fordefi provider** in `fordefi-scripts/config.ts`:
+   - Set your Fordefi EVM vault address
+   - Add your API user token to `.env` as `FORDEFI_API_USER_TOKEN`
+   - Place your API User private key (used to sign payloads) at `./fordefi_secret/private.pem`
+
+3. **Add Hardhat as a custom chain in Fordefi:**
+   - Follow the guide: https://docs.fordefi.com/user-guide/manage-chains/add-custom-chain
+   - Use chainID `31337`
+   - Use the RPC URL from ngrok (see below)
+
+4. **Expose your local Hardhat node via ngrok:**
+
+```shell
+ngrok http 8545
+```
+
+Copy the ngrok URL and set it as `NGROK_ENDPOINT` in your `.env` file.
+
+### Workflow
+
+1. **Start your local Hardhat node:**
+
+```shell
+npx hardhat node
+```
+
+2. **Airdrop ETH to your Fordefi vault:**
+
+```shell
+npx ts-node scripts/airdrop.ts
+```
+
+This sends 100 ETH from a Hardhat test account to your Fordefi vault.
+
+3. **Deploy the Counter contract:**
+
+```shell
+npx hardhat ignition deploy ignition/modules/Counter.ts --network localhost
+```
+
+4. **Update the contract address** in `fordefi-scripts/config.ts` with the deployed address.
+
+5. **Call the contract using Fordefi:**
+
+```shell
+npx ts-node fordefi-scripts/raw-contract-call.ts
+```
+
+This will sign and send a transaction through your Fordefi vault to interact with the deployed contract.

@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "airdrop": "npx tsx ./scripts/airdrop.ts",
-    "get-tx":"npx tsx ./scripts/get-tx.ts",
-    "node":"npx hardhat node",
-    "ngrok": "ngrok http 8545"
+    "get-tx": "npx tsx ./scripts/get-tx.ts",
+    "node": "npx hardhat node",
+    "ngrok": "ngrok http 8545",
+    "call": "npx tsx ./fordefi-scripts/raw-contract-call.ts"
   },
   "keywords": [],
   "author": "",
@@ -27,5 +28,8 @@
     "hardhat": "^3.1.0",
     "mocha": "^11.7.5",
     "typescript": "~5.8.0"
+  },
+  "dependencies": {
+    "@fordefi/web3-provider": "^0.3.0"
   }
 }
