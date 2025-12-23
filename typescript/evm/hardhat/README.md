@@ -1,68 +1,20 @@
-# Sample Hardhat 3 Beta Project (`mocha` and `ethers`)
+# Using Fordefi with Hardhat Local Development
 
-This project showcases a Hardhat 3 Beta project using `mocha` for tests and the `ethers` library for Ethereum interactions.
+This project shows how to use your Fordefi EVM vault to sign transactions on a local Hardhat node. This setup allows you to test contract deployments and interactions using Fordefi's MPC signing before deploying to production networks.
 
-To learn more about the Hardhat 3 Beta, please visit the [Getting Started guide](https://hardhat.org/docs/getting-started#getting-started-with-hardhat-3). To share your feedback, join our [Hardhat 3 Beta](https://hardhat.org/hardhat3-beta-telegram-group) Telegram group or [open an issue](https://github.com/NomicFoundation/hardhat/issues/new) in our GitHub issue tracker.
+## Prerequisites
 
-## Project Overview
+- A Fordefi EVM vault
+- Fordefi API user token
+- API User private key (PEM file)
+- Fordefi API Signer setup and running [see here](https://docs.fordefi.com/developers/getting-started/set-up-an-api-signer/api-signer-docker)
+- Node.js and npm installed
 
-This example project includes:
+## Setup
 
-- A simple Hardhat configuration file.
-- Foundry-compatible Solidity unit tests.
-- TypeScript integration tests using `mocha` and ethers.js
-- Examples demonstrating how to connect to different types of networks, including locally simulating OP mainnet.
+### 1. Configure Environment Variables
 
-## Usage
-
-### Running Tests
-
-To run all the tests in the project, execute the following command:
-
-```shell
-npx hardhat test
-```
-
-You can also selectively run the Solidity or `mocha` tests:
-
-```shell
-npx hardhat test solidity
-npx hardhat test mocha
-```
-
-### Make a deployment to Sepolia
-
-This project includes an example Ignition module to deploy the contract. You can deploy this module to a locally simulated chain or to Sepolia.
-
-To run the deployment to a local chain:
-
-```shell
-npx hardhat ignition deploy ignition/modules/Counter.ts
-```
-
-To run the deployment to Sepolia, you need an account with funds to send the transaction. The provided Hardhat configuration includes a Configuration Variable called `SEPOLIA_PRIVATE_KEY`, which you can use to set the private key of the account you want to use.
-
-You can set the `SEPOLIA_PRIVATE_KEY` variable using the `hardhat-keystore` plugin or by setting it as an environment variable.
-
-To set the `SEPOLIA_PRIVATE_KEY` config variable using `hardhat-keystore`:
-
-```shell
-npx hardhat keystore set SEPOLIA_PRIVATE_KEY
-```
-
-After setting the variable, you can run the deployment with the Sepolia network:
-
-```shell
-npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
-```
-
-## Using Fordefi as Signer
-
-This project supports using [Fordefi](https://fordefi.com) as the transaction signer for interacting with contracts on your local Hardhat network via the Fordefi API.
-
-### Setup
-
-1. **Set environment variables** in `.env`:
+Create a `.env` file with your Fordefi credentials:
 
 ```shell
 FORDEFI_API_USER_TOKEN=your_api_token
@@ -70,58 +22,108 @@ FORDEFI_EVM_VAULT_ID=your_vault_id
 FORDEFI_EVM_VAULT_ADDRESS=your_vault_address
 ```
 
-2. **Place your API User private key** (used to sign payloads) at `./fordefi_secret/private.pem`
+Place your API user private key at `./fordefi_secret/private.pem`.
 
-3. **Add Hardhat as a custom chain in Fordefi:**
-   - Follow the guide: https://docs.fordefi.com/user-guide/manage-chains/add-custom-chain
-   - Use chainID `31337`
-   - Use the RPC URL from ngrok (see below)
+### 2. Add Hardhat as a Custom Chain
 
-4. **Expose your local Hardhat node via ngrok:**
+Since Hardhat runs locally, you need to expose it via a tunnel and add it as a custom chain in Fordefi.
+
+1. Start ngrok to expose your local node:
 
 ```shell
 ngrok http 8545
 ```
 
-### Workflow
+2. In the Fordefi web console, add a custom chain:
+   - Chain ID: `31337`
+   - RPC URL: Your ngrok URL (e.g., `https://abc123.ngrok.io`)
 
-1. **Start your local Hardhat node:**
+See [Add Custom Chain](https://docs.fordefi.com/user-guide/manage-chains/add-custom-chain) for detailed instructions.
+
+## Workflow
+
+### 1. Start Your Hardhat Node
 
 ```shell
 npx hardhat node
 ```
 
-2. **Airdrop ETH to your Fordefi vault:**
+### 2. Fund Your Vault
 
-```shell
-npm run airdrop
+Transfer test ETH from a Hardhat account to your Fordefi vault:
+
+```typescript
+const sender = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"; // Hardhat account #0
+const recipient = "YOUR_FORDEFI_VAULT_ADDRESS";
+
+const tx = await provider.send("eth_sendTransaction", [{
+  from: sender,
+  to: recipient,
+  value: "0x56BC75E2D63100000" // 100 ETH
+}]);
 ```
 
-This sends 100 ETH from a Hardhat test account to your Fordefi vault.
-
-3. **Deploy the Counter contract:**
+### 3. Deploy Your Contract
 
 ```shell
-npx hardhat ignition deploy ignition/modules/Counter.ts --network localhost
+npx hardhat ignition deploy ignition/modules/YourContract.ts --network localhost
 ```
 
-4. **Configure the transaction** in `fordefi-scripts/config.ts`:
-   - Set `txParams.to` to the deployed contract address
-   - Update `contractAbi` with the function signatures you want to call
+### 4. Configure the Transaction
 
-5. **Call the contract using Fordefi:**
+In your config file, set:
+
+```typescript
+export const txParams = {
+  evmChain: "31337",
+  to: "YOUR_CONTRACT_ADDRESS",
+  amount: "0",
+  gas_limit: "50000",
+  max_fee_per_gas: "1000000000",
+  max_priority_fee_per_gas: "1000000000",
+};
+
+export const contractAbi = [
+  "function yourFunction(uint256 param)",
+];
+```
+
+### 5. Send the Transaction
+
+The transaction flow:
+
+1. Encode call data using ethers
+2. Sign the API payload with your private key
+3. Submit to Fordefi API for MPC signing
+4. Poll for the transaction hash
+5. Confirm on the local Hardhat node
+
+```typescript
+// Encode the function call
+const callData = encodeCallData(contractAbi, "yourFunction", [123]);
+
+// Submit to Fordefi
+const response = await createAndSignTx(config, txParams, callData);
+const txHash = await pollForTxHash(response.data.id, accessToken);
+
+// Wait for confirmation on Hardhat
+const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545");
+const receipt = await provider.waitForTransaction(txHash);
+```
+
+## Troubleshooting
+
+**Nonce mismatch:** If you restart the Hardhat node, Fordefi's cached nonce may be stale. Override it manually:
+
+```typescript
+export const txParams = {
+  // ...
+  custom_nonce: "0"
+};
+```
+
+Check the expected nonce with:
 
 ```shell
-npm run call
+cast nonce YOUR_VAULT_ADDRESS --rpc-url http://127.0.0.1:8545
 ```
-
-This will:
-
-- Encode the call data using ethers
-- Sign and submit the transaction to Fordefi
-- Poll the Fordefi API for the transaction hash
-- Track confirmation on the local Hardhat node
-
-### Troubleshooting
-
-**Nonce mismatch:** If the Hardhat node and Fordefi get out of sync (e.g., after restarting the node), you may see nonce errors. To fix this, set `custom_nonce` in `fordefi-scripts/config.ts` to override the nonce manually. You can check the expected nonce by querying the Hardhat node or viewing the error message from Fordefi.
