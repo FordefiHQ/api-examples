@@ -6,6 +6,7 @@
   "scripts": {
     "airdrop": "npx tsx ./scripts/airdrop.ts",
     "get-tx": "npx tsx ./scripts/get-tx.ts",
+    "clean": "npx hardhat clean",
     "node": "npx hardhat node",
     "ngrok": "ngrok http 8545",
     "call": "npx tsx ./fordefi-scripts/run.ts"
