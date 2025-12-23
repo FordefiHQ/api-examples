@@ -1,20 +1,45 @@
-import { FordefiProviderConfig } from '@fordefi/web3-provider';
-import dotenv from 'dotenv';
-import fs from 'fs';
+import dotenv from 'dotenv'
 
-dotenv.config();
+dotenv.config()
 
-// Configure the Fordefi provider
-export const fordefiConfig: FordefiProviderConfig = {
-  chainId: 31337, // Hardhat
-  address: '0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73', // The Fordefi EVM Vault that will sign the txs
-  apiUserToken: process.env.FORDEFI_API_USER_TOKEN ?? (() => { throw new Error('FORDEFI_API_USER_TOKEN is not set'); })(), 
-  apiPayloadSignKey: fs.readFileSync('./fordefi_secret/private.pem', 'utf8') ?? (() => { throw new Error('PEM_PRIVATE_KEY is not set'); })(),
-  rpcUrl: process.env.NGROK_ENDPOINT,
-  skipPrediction: false 
+export interface FordefiConfig {
+  accessToken: string;
+  vaultId: string;
+  senderAddress: string;
+  privateKeyPath: string;
+  pathEndpoint: string;
+}
+
+export interface TxParams {
+  evmChain: string;
+  to: string;
+  amount: string;
+  gas_limit: string;
+  max_fee_per_gas?: string; // only if you're using dynamic gas
+  max_priority_fee_per_gas?: string; // only if you're using dynamic gas
+  hex_call_data?: string
+  custom_nonce?: string
+}
+
+export const fordefiConfig: FordefiConfig = {
+  accessToken: process.env.FORDEFI_API_USER_TOKEN ?? "",
+  vaultId: process.env.FORDEFI_EVM_VAULT_ID || "",
+  senderAddress: process.env.FORDEFI_EVM_VAULT_ADDRESS || "",
+  privateKeyPath: "./fordefi_secret/private.pem",
+  pathEndpoint: "/api/v1/transactions"
+}
+
+export const txParams: TxParams = {
+  evmChain: "31337", // use chainID
+  to: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512", // contract or destination address
+  amount: "0", // in WEI (10^18 WEI = 1 ETH),
+  gas_limit: "50000",
+  max_fee_per_gas: "514164549", // in WEI
+  max_priority_fee_per_gas: "514164549", // in WEI per EIP-1559: max_fee_per_gas >= max_priority_fee_per_gas
+  // custom_nonce: "0" // Use only to fix nonce issues on Hardhat
 };
 
-export const callConfig = {
-  contractAddress: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512", // demo contract address
-  hex_call_data: "0x371303c0" // calls inc() on the demo contract
-}
+export const contractAbi = [
+  "function inc()",
+  // Add more function signatures as needed
+];

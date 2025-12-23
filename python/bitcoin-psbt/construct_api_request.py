@@ -22,14 +22,7 @@ async def build_request(vault_id: str, vault_address: str, psbt_hex_data: str, w
                 "type": "utxo_partially_signed_bitcoin_transaction",
                 "psbt_raw_data": psbt_hex_data,
                 "auto_finalize": will_auto_finalize,
-                "sender": { # The address that will sign the inputs
-                    "address": vault_address, # Must be from a Fordefi Vault
-                    "address_type": address_type,
-                    "chain": {
-                        "chain_type": "utxo",
-                        "unique_id": "bitcoin_mainnet" if is_bitcoin_mainnet else "bitcoin_testnet" ## testnet v3
-                    },
-                },
+                "signer": vault_address,
                 "inputs": [ # OPTIONAL array describing how each input will be signed
                     {
                         "index": 0,

@@ -58,20 +58,19 @@ npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
 
 ## Using Fordefi as Signer
 
-This project supports using [Fordefi](https://fordefi.com) as the transaction signer for interacting with contracts on your local Hardhat network.
+This project supports using [Fordefi](https://fordefi.com) as the transaction signer for interacting with contracts on your local Hardhat network via the Fordefi API.
 
 ### Setup
 
-1. **Install the Fordefi web3 provider:**
+1. **Set environment variables** in `.env`:
 
 ```shell
-npm install @fordefi/web3-provider
+FORDEFI_API_USER_TOKEN=your_api_token
+FORDEFI_EVM_VAULT_ID=your_vault_id
+FORDEFI_EVM_VAULT_ADDRESS=your_vault_address
 ```
 
-2. **Configure your Fordefi provider** in `fordefi-scripts/config.ts`:
-   - Set your Fordefi EVM vault address
-   - Add your API user token to `.env` as `FORDEFI_API_USER_TOKEN`
-   - Place your API User private key (used to sign payloads) at `./fordefi_secret/private.pem`
+2. **Place your API User private key** (used to sign payloads) at `./fordefi_secret/private.pem`
 
 3. **Add Hardhat as a custom chain in Fordefi:**
    - Follow the guide: https://docs.fordefi.com/user-guide/manage-chains/add-custom-chain
@@ -84,8 +83,6 @@ npm install @fordefi/web3-provider
 ngrok http 8545
 ```
 
-Copy the ngrok URL and set it as `NGROK_ENDPOINT` in your `.env` file.
-
 ### Workflow
 
 1. **Start your local Hardhat node:**
@@ -97,7 +94,7 @@ npx hardhat node
 2. **Airdrop ETH to your Fordefi vault:**
 
 ```shell
-npx ts-node scripts/airdrop.ts
+npm run airdrop
 ```
 
 This sends 100 ETH from a Hardhat test account to your Fordefi vault.
@@ -108,12 +105,23 @@ This sends 100 ETH from a Hardhat test account to your Fordefi vault.
 npx hardhat ignition deploy ignition/modules/Counter.ts --network localhost
 ```
 
-4. **Update the contract address** in `fordefi-scripts/config.ts` with the deployed address.
+4. **Configure the transaction** in `fordefi-scripts/config.ts`:
+   - Set `txParams.to` to the deployed contract address
+   - Update `contractAbi` with the function signatures you want to call
 
 5. **Call the contract using Fordefi:**
 
 ```shell
-npx ts-node fordefi-scripts/raw-contract-call.ts
+npm run call
 ```
 
-This will sign and send a transaction through your Fordefi vault to interact with the deployed contract.
+This will:
+
+- Encode the call data using ethers
+- Sign and submit the transaction to Fordefi
+- Poll the Fordefi API for the transaction hash
+- Track confirmation on the local Hardhat node
+
+### Troubleshooting
+
+**Nonce mismatch:** If the Hardhat node and Fordefi get out of sync (e.g., after restarting the node), you may see nonce errors. To fix this, set `custom_nonce` in `fordefi-scripts/config.ts` to override the nonce manually. You can check the expected nonce by querying the Hardhat node or viewing the error message from Fordefi.

@@ -8,7 +8,7 @@
     "get-tx": "npx tsx ./scripts/get-tx.ts",
     "node": "npx hardhat node",
     "ngrok": "ngrok http 8545",
-    "call": "npx tsx ./fordefi-scripts/raw-contract-call.ts"
+    "call": "npx tsx ./fordefi-scripts/run.ts"
   },
   "keywords": [],
   "author": "",
@@ -30,6 +30,7 @@
     "typescript": "~5.8.0"
   },
   "dependencies": {
-    "@fordefi/web3-provider": "^0.3.0"
+    "axios": "^1.13.2",
+    "dotenv": "^17.2.3"
   }
 }
