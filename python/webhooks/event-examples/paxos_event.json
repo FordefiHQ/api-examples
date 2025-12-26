@@ -1,0 +1,11 @@
+  {
+    "timestamp": "2025-12-26T12:10:02.945277+00:00",
+    "event": {
+      "id": "4034bca5-7085-43a2-82a6-a1b63fe021f2",
+      "type": "transfer.wire_deposit.completed",
+      "source": "com.paxos",
+      "time": "2025-12-26T12:10:02Z",
+      "is_test": false,
+      "object": "event"
+    }
+  }
