@@ -22,7 +22,7 @@ async function main(): Promise<void> {
 
       // Sign with Fordefi (includes getting blockhash)
       const rawSignedTxBase64 = await signWithFordefi(message, rpc);
-      console.log('Transaction signed by Fordefi MPC ✅');
+      console.log('Transaction signed by Fordefi MPC 🖋️✅');
 
       // Broadcast via RPC directly (the transaction is already fully signed)
       // Fordefi returns base64, so we need to specify the encoding
@@ -36,7 +36,7 @@ async function main(): Promise<void> {
         }
       ).send();
 
-      console.log(`Transaction sent ✅ Signature: ${txSignature}`);
+      console.log(`Transaction broadcast📡\nSignature: ${txSignature}`);
 
       // Decode the signed transaction to return a proper transaction object
       const txBytes = Buffer.from(rawSignedTxBase64, 'base64');
@@ -50,7 +50,7 @@ async function main(): Promise<void> {
   console.log('Executing transaction plan...');
   try {
     await transactionPlanExecutor(transactionPlan);
-    console.log('All transactions completed ✅');
+    console.log('Transaction plan executed ✅');
   } catch (error) {
     if (kit.isSolanaError(error, kit.SOLANA_ERROR__INSTRUCTION_PLANS__FAILED_TO_EXECUTE_TRANSACTION_PLAN)) {
       const result = error.context.transactionPlanResult as kit.TransactionPlanResult;
