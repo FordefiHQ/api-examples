@@ -36,7 +36,7 @@ export async function createTxPlan(fordefiConfig: FordefiSolanaConfig) {
     const [destAta2] = await deriveATA(destVault2, fordefiConfig);
     console.debug("Destination ATA 2", destAta2);
 
-    // Token transfer ixs (with ATA creation if needed)
+    // Tx instructions
     const ixes: any = [];
 
     // Create destination ATA 1 if it doesn't exist
