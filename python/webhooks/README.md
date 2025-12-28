@@ -51,7 +51,7 @@ It exposes a single POST endpoint which:
 
 Start the webhook server with:
 ```bash
-uvicorn app:app --host 0.0.0.0 --port 8080 --reload
+uvicorn fordefi_webhooks:app --host 0.0.0.0 --port 8080 --reload
 ```
 
 This will start a FastAPI server on port 8080 that listens for webhook events from Fordefi.

@@ -5,10 +5,10 @@ import base64
 import hashlib
 from pathlib import Path
 from http import HTTPStatus
-from datetime import datetime, timezone
 from threading import Lock
 from dotenv import load_dotenv
 from ecdsa.util import sigdecode_der
+from datetime import datetime, timezone
 from fastapi import FastAPI, Request, HTTPException
 
 load_dotenv()
@@ -22,10 +22,9 @@ signature_pub_key = ecdsa.VerifyingKey.from_pem(FORDEFI_PUBLIC_KEY)
 app = FastAPI()
 
 events_file_lock = Lock()
-events_file_path = Path("./live_events.json")
+events_file_path = Path("./live-events/live_fordefi_events.json")
 
-def log_event_to_file(event_data: dict):
-    """Thread-safe logging of events to JSON file"""
+def log_fordefi_event_to_file(event_data: dict):
     with events_file_lock:
         events = []
         if events_file_path.exists():
@@ -53,9 +52,13 @@ def verify_signature(signature: str, body: bytes) -> bool:
         print(f"Signature verification error: {e}")
         return False
 
+@app.get("/health")
+async def health_check():
+    return {"status": "online"}
+
 @app.post("/")
 async def fordefi_webhook(request: Request):
-    print(f"\n🌐 Client IP: {request.client.host}")
+    print(f"\n🌐 Client IP: {request.client.host}") # type: ignore
     print("\n📋 Incoming webhook headers:")
     for header_name, header_value in request.headers.items():
         print(f"  {header_name}: {header_value}")
@@ -83,14 +86,9 @@ async def fordefi_webhook(request: Request):
     print(json.dumps(event_data, indent=2))
 
     # Log event to file (OPTIONAL)
-    log_event_to_file(event_data)
+    log_fordefi_event_to_file(event_data)
     print(f"✅ Event logged to {events_file_path}")
 
-    return {"status": "success"}
-
-@app.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    return {"status": "online"}
+    return {"status": "ok"}
 
 # uvicorn app:app --host 0.0.0.0 --port 8080 --reload
