@@ -16,10 +16,7 @@ async function deriveATA(owner: kit.Address, fordefiConfig: FordefiSolanaConfig)
     return [ata]
 }
 
-/**
- * Creates a transaction plan ready for execution.
- * The plan contains transaction messages that will be signed by Fordefi.
- */
+// our tx plan, a in this case a batch that will execute atomically
 export async function createTxPlan(fordefiConfig: FordefiSolanaConfig) {
     const sourceVault = kit.address(fordefiConfig.originAddress);
     const destVault = kit.address(fordefiConfig.destAddress);
@@ -83,11 +80,10 @@ export async function createTxPlan(fordefiConfig: FordefiSolanaConfig) {
       })
     );
 
-    // Create instruction plan - this will auto-split if needed
+    // create instruction plan - this will auto-split if needed
     const instructionPlan = kit.nonDivisibleSequentialInstructionPlan(ixes);
 
-    // Transaction planner creates messages WITHOUT blockhash
-    // The executor will add a fresh blockhash at signing time
+    // note we don't add a blockhash yet, we'll add it when signing with Fordefi
     const transactionPlanner = kit.createTransactionPlanner({
         createTransactionMessage: () =>
             kit.pipe(

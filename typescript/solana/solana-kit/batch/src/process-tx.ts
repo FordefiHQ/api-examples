@@ -94,7 +94,7 @@ export async function getTx(
 export async function pollForSignedTransaction(
   txId: string,
   accessToken: string,
-  maxAttempts = 30,
+  maxAttempts = 50,
   intervalMs = 2000
 ): Promise<string> {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {

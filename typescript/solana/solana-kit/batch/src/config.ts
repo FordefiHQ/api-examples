@@ -25,7 +25,7 @@ export const fordefiConfig: FordefiSolanaConfig = {
   destAddress: process.env.DESTINATION_ADDRES || "",
   destAddress2: process.env.DESTINATION_ADDRES_2 || "",
   privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
-  apiPathEndpoint: '/api/v1/transactions/create-and-wait',
+  apiPathEndpoint: '/api/v1/transactions',
   mainnetRpc: 'https://api.mainnet-beta.solana.com',
   ws: 'ws://api.mainnet-beta.solana.com',
   mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',

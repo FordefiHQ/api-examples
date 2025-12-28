@@ -11,7 +11,6 @@ async function main(): Promise<void> {
 
   const rpc = kit.createSolanaRpc(fordefiConfig.mainnetRpc);
 
-  // Create the transaction plan
   const transactionPlan = await createTxPlan(fordefiConfig);
 
   // Create executor that uses Fordefi for signing
