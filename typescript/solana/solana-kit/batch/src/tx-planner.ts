@@ -16,6 +16,21 @@ async function deriveATA(owner: kit.Address, fordefiConfig: FordefiSolanaConfig)
     return [ata]
 }
 
+function createAtaInstruction(
+    payer: kit.TransactionSigner,
+    owner: kit.Address,
+    mint: kit.Address,
+    ata: kit.Address
+) {
+    return getCreateAssociatedTokenIdempotentInstruction({
+        payer,
+        owner,
+        mint,
+        ata,
+        tokenProgram: TOKEN_PROGRAM_ADDRESS,
+    });
+}
+
 // our tx plan, a in this case a batch that will execute atomically
 export async function createTxPlan(fordefiConfig: FordefiSolanaConfig) {
     const sourceVault = kit.address(fordefiConfig.originAddress);
@@ -37,16 +52,8 @@ export async function createTxPlan(fordefiConfig: FordefiSolanaConfig) {
     const ixes: any = [];
 
     // Create destination ATA 1 if it doesn't exist
-    ixes.push(
-      getCreateAssociatedTokenIdempotentInstruction({
-        payer: signerVault,
-        owner: destVault,
-        mint: usdcMint,
-        ata: destAta!,
-        tokenProgram: TOKEN_PROGRAM_ADDRESS,
-      })
-    );
-
+    ixes.push(createAtaInstruction(signerVault, destVault, usdcMint, destAta!));
+    // Adding first tranfer instructions to our batch
     ixes.push(
       getTransferCheckedInstruction({
         source:      sourceAta!,
@@ -59,16 +66,8 @@ export async function createTxPlan(fordefiConfig: FordefiSolanaConfig) {
     );
 
     // Create destination ATA 2 if it doesn't exist
-    ixes.push(
-      getCreateAssociatedTokenIdempotentInstruction({
-        payer: signerVault,
-        owner: destVault2,
-        mint: usdcMint,
-        ata: destAta2!,
-        tokenProgram: TOKEN_PROGRAM_ADDRESS,
-      })
-    );
-
+    ixes.push(createAtaInstruction(signerVault, destVault2, usdcMint, destAta2!));
+    // Adding second tranfer instructions to our batch
     ixes.push(
       getTransferCheckedInstruction({
         source:      sourceAta!,

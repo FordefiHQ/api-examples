@@ -8,9 +8,7 @@ async function main(): Promise<void> {
     console.error('Error: FORDEFI_API_TOKEN environment variable is not set');
     return;
   }
-
   const rpc = kit.createSolanaRpc(fordefiConfig.mainnetRpc);
-
   const transactionPlan = await createTxPlan(fordefiConfig);
 
   // Create executor that uses Fordefi for signing
@@ -38,15 +36,12 @@ async function main(): Promise<void> {
 
       console.log(`Transaction broadcast📡\nSignature: ${txSignature}`);
 
-      // Decode the signed transaction to return a proper transaction object
       const txBytes = Buffer.from(rawSignedTxBase64, 'base64');
       const transaction = kit.getTransactionDecoder().decode(txBytes);
 
       return { transaction };
     },
   });
-
-  // Execute the transaction plan with error handling
   console.log('Executing transaction plan...');
   try {
     await transactionPlanExecutor(transactionPlan);
