@@ -1,68 +1,133 @@
 import * as kit from '@solana/kit';
-import { FordefiSolanaConfig, TransferConfig } from './config';
-import { TOKEN_PROGRAM_ADDRESS, findAssociatedTokenPda, getTransferCheckedInstruction } from '@solana-program/token';
+import { FordefiSolanaConfig } from './config';
+import {
+    TOKEN_PROGRAM_ADDRESS,
+    findAssociatedTokenPda,
+    getTransferCheckedInstruction,
+    getCreateAssociatedTokenIdempotentInstruction
+} from '@solana-program/token';
 
-export async function createTx(fordefiConfig: FordefiSolanaConfig, transferConfig: TransferConfig){
-    const mainnetRpc = kit.createSolanaRpc(transferConfig.mainnetRpc);
+async function deriveATA(owner: kit.Address, fordefiConfig: FordefiSolanaConfig) {
+    const [ata] = await findAssociatedTokenPda({
+      owner:      owner,
+      mint:       kit.address(fordefiConfig.mint),
+      tokenProgram: TOKEN_PROGRAM_ADDRESS,
+    });
+    return [ata] 
+}
+
+export async function createTx(fordefiConfig: FordefiSolanaConfig){
+    const rpc = kit.createSolanaRpc(fordefiConfig.mainnetRpc);
+    const rpcSubscriptions = kit.createSolanaRpcSubscriptions(fordefiConfig.ws);
     const sourceVault = kit.address(fordefiConfig.originAddress);
     const destVault = kit.address(fordefiConfig.destAddress);
-    const usdcMint = kit.address(transferConfig.mint);
+    const destVault2 = kit.address(fordefiConfig.destAddress2);
+    const usdcMint = kit.address(fordefiConfig.mint);
+    const signerVault = kit.createNoopSigner(sourceVault)
 
-    const [sourceAta] = await findAssociatedTokenPda({
-      owner:      sourceVault,
-      mint:       usdcMint,
-      tokenProgram: TOKEN_PROGRAM_ADDRESS,
-    });
-    console.debug("Source ATA", sourceAta);  
-    
-    const [destAta] = await findAssociatedTokenPda({
-      owner:        destVault,
-      mint:         usdcMint,
-      tokenProgram: TOKEN_PROGRAM_ADDRESS,
-    });
-    console.debug("Destination ATA", destAta);
+    const [sourceAta] = await deriveATA(sourceVault, fordefiConfig);
+    console.debug("Source ATA", sourceAta); 
 
-    // Token transfer ixs
+    const [destAta] = await deriveATA(destVault, fordefiConfig);
+    console.debug("Destination ATA 1", destAta);
+
+    const [destAta2] = await deriveATA(destVault2, fordefiConfig);
+    console.debug("Destination ATA 2", destAta2);
+
+    // Token transfer ixs (with ATA creation if needed)
     const ixes: any = [];
+
+    // Create destination ATA 1 if it doesn't exist
     ixes.push(
-      getTransferCheckedInstruction({
-        source:      sourceAta,
-        destination: destAta,
-        mint:        usdcMint,
-        authority:   sourceVault,       
-        amount:      transferConfig.amount,
-        decimals:    Number(transferConfig.decimals)
+      getCreateAssociatedTokenIdempotentInstruction({
+        payer: signerVault,
+        owner: destVault,
+        mint: usdcMint,
+        ata: destAta!,
+        tokenProgram: TOKEN_PROGRAM_ADDRESS,
       })
     );
 
-    const { value: latestBlockhash } = await mainnetRpc.getLatestBlockhash().send();
-
-    const txMessage = kit.pipe(
-      kit.createTransactionMessage({ version: 0 }),
-      message => kit.setTransactionMessageFeePayer(sourceVault, message),
-      message => kit.setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, message),
-      message => {
-        return kit.appendTransactionMessageInstruction(ixes[0], message);
-      }
+    ixes.push(
+      getTransferCheckedInstruction({
+        source:      sourceAta!,
+        destination: destAta!,
+        mint:        usdcMint,
+        authority:   sourceVault,
+        amount:      fordefiConfig.amount,
+        decimals:    Number(fordefiConfig.decimals)
+      })
     );
 
-    const signedTx = await kit.partiallySignTransactionMessageWithSigners(txMessage);
-    const base64EncodedData = Buffer.from(signedTx.messageBytes).toString('base64');
+    // Create destination ATA 2 if it doesn't exist
+    ixes.push(
+      getCreateAssociatedTokenIdempotentInstruction({
+        payer: signerVault,
+        owner: destVault2,
+        mint: usdcMint,
+        ata: destAta2!,
+        tokenProgram: TOKEN_PROGRAM_ADDRESS,
+      })
+    );
 
-    const pushMode = transferConfig.useJito ? "manual" : "auto";
-    const jsonBody = {
+    ixes.push(
+      getTransferCheckedInstruction({
+        source:      sourceAta!,
+        destination: destAta2!,
+        mint:        usdcMint,
+        authority:   sourceVault,
+        amount:      fordefiConfig.amount,
+        decimals:    Number(fordefiConfig.decimals)
+      })
+    );
+
+    // Create instruction plan - this will auto-split if needed
+    const instructionPlan = kit.nonDivisibleSequentialInstructionPlan(ixes);
+
+    const transactionPlanner = kit.createTransactionPlanner({
+        createTransactionMessage: () =>{
+            const message = kit.pipe(
+                kit.createTransactionMessage({ version: 0 }),
+                message => kit.setTransactionMessageFeePayerSigner(signerVault, message),
+            )
+            return message
+        }
+    });
+
+    const transactionPlan = await transactionPlanner(instructionPlan);
+
+    const sendAndConfirmTransaction = kit.sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
+ 
+    const transactionPlanExecutor = kit.createTransactionPlanExecutor({
+        executeTransactionMessage: async (
+            message: kit.BaseTransactionMessage & kit.TransactionMessageWithFeePayer,
+        ) => {
+            const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
+            const messageWithBlockhash = kit.setTransactionMessageLifetimeUsingBlockhash(
+                latestBlockhash,
+                message,
+            );
+            const transaction = await signTransactionMessageWithSigners(messageWithBlockhash);
+            await sendAndConfirmTransaction(transaction, { commitment: 'confirmed' });
+            return { transaction };
+        },
+    });
+
+    const signedTx = await kit.partiallySignTransactionMessageWithSigners(message);
+    const base64EncodedData = Buffer.from(signedTx.messageBytes).toString('base64');
+    const jsonBodies = {
         "vault_id": fordefiConfig.originVault,
         "signer_type": "api_signer",
         "sign_mode": "auto",
         "type": "solana_transaction",
         "details": {
             "type": "solana_serialized_transaction_message",
-            "push_mode": pushMode,
+            "push_mode": "auto ",
             "chain": "solana_mainnet",
             "data": base64EncodedData
         },
-        "wait_for_state": "signed" // only use this field for create-and-wait
+        "wait_for_state": "signed"
     };
 
-    return jsonBody
+    return jsonBodies
 }
