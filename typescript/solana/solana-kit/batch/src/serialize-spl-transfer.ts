@@ -13,20 +13,22 @@ async function deriveATA(owner: kit.Address, fordefiConfig: FordefiSolanaConfig)
       mint:       kit.address(fordefiConfig.mint),
       tokenProgram: TOKEN_PROGRAM_ADDRESS,
     });
-    return [ata] 
+    return [ata]
 }
 
-export async function createTx(fordefiConfig: FordefiSolanaConfig){
-    const rpc = kit.createSolanaRpc(fordefiConfig.mainnetRpc);
-    const rpcSubscriptions = kit.createSolanaRpcSubscriptions(fordefiConfig.ws);
+/**
+ * Creates a transaction plan ready for execution.
+ * The plan contains transaction messages that will be signed by Fordefi.
+ */
+export async function createTxPlan(fordefiConfig: FordefiSolanaConfig) {
     const sourceVault = kit.address(fordefiConfig.originAddress);
     const destVault = kit.address(fordefiConfig.destAddress);
     const destVault2 = kit.address(fordefiConfig.destAddress2);
     const usdcMint = kit.address(fordefiConfig.mint);
-    const signerVault = kit.createNoopSigner(sourceVault)
+    const signerVault = kit.createNoopSigner(sourceVault);
 
     const [sourceAta] = await deriveATA(sourceVault, fordefiConfig);
-    console.debug("Source ATA", sourceAta); 
+    console.debug("Source ATA", sourceAta);
 
     const [destAta] = await deriveATA(destVault, fordefiConfig);
     console.debug("Destination ATA 1", destAta);
@@ -84,50 +86,17 @@ export async function createTx(fordefiConfig: FordefiSolanaConfig){
     // Create instruction plan - this will auto-split if needed
     const instructionPlan = kit.nonDivisibleSequentialInstructionPlan(ixes);
 
+    // Transaction planner creates messages WITHOUT blockhash
+    // The executor will add a fresh blockhash at signing time
     const transactionPlanner = kit.createTransactionPlanner({
-        createTransactionMessage: () =>{
-            const message = kit.pipe(
+        createTransactionMessage: () =>
+            kit.pipe(
                 kit.createTransactionMessage({ version: 0 }),
-                message => kit.setTransactionMessageFeePayerSigner(signerVault, message),
-            )
-            return message
-        }
+                msg => kit.setTransactionMessageFeePayerSigner(signerVault, msg),
+            ),
     });
 
     const transactionPlan = await transactionPlanner(instructionPlan);
 
-    const sendAndConfirmTransaction = kit.sendAndConfirmTransactionFactory({ rpc, rpcSubscriptions });
- 
-    const transactionPlanExecutor = kit.createTransactionPlanExecutor({
-        executeTransactionMessage: async (
-            message: kit.BaseTransactionMessage & kit.TransactionMessageWithFeePayer,
-        ) => {
-            const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
-            const messageWithBlockhash = kit.setTransactionMessageLifetimeUsingBlockhash(
-                latestBlockhash,
-                message,
-            );
-            const transaction = await signTransactionMessageWithSigners(messageWithBlockhash);
-            await sendAndConfirmTransaction(transaction, { commitment: 'confirmed' });
-            return { transaction };
-        },
-    });
-
-    const signedTx = await kit.partiallySignTransactionMessageWithSigners(message);
-    const base64EncodedData = Buffer.from(signedTx.messageBytes).toString('base64');
-    const jsonBodies = {
-        "vault_id": fordefiConfig.originVault,
-        "signer_type": "api_signer",
-        "sign_mode": "auto",
-        "type": "solana_transaction",
-        "details": {
-            "type": "solana_serialized_transaction_message",
-            "push_mode": "auto ",
-            "chain": "solana_mainnet",
-            "data": base64EncodedData
-        },
-        "wait_for_state": "signed"
-    };
-
-    return jsonBodies
+    return transactionPlan;
 }
