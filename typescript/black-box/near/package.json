@@ -1,0 +1,21 @@
+{
+  "name": "typescript-near-black-box",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "address": "tsx ./src/derive_near_address",
+    "transfer": "tsx ./src/near-transfer-run",
+    "stake": "tsx ./src/near-staking-run"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.13.2",
+    "bs58": "^6.0.0",
+    "dotenv": "^17.2.3",
+    "near-api-js": "^6.5.1"
+  }
+}
