@@ -97,3 +97,34 @@ export async function get_tx(
     throw new Error(`Network error occurred: ${error.message ?? error}`);
   }
 }
+
+export async function pollForSignedTransaction(
+  txId: string,
+  accessToken: string,
+  maxAttempts = 50,
+  intervalMs = 2000
+): Promise<string> {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const txData = await get_tx(`/api/v1/transactions/${txId}`, accessToken);
+
+    if (txData.state === 'signed' || txData.state === 'pushed' || txData.state === 'mined') {
+      const rawTx = txData.solana_transaction?.raw_transaction
+        || txData.raw_transaction
+        || txData.details?.raw_transaction;
+
+      if (rawTx) {
+        return rawTx;
+      }
+      throw new Error(`Transaction ${txId} is signed but no raw_transaction found in response`);
+    }
+
+    if (txData.state === 'failed' || txData.state === 'aborted') {
+      throw new Error(`Transaction ${txId} failed with state: ${txData.state}`);
+    }
+
+    console.log(`Waiting for signature... (attempt ${attempt + 1}/${maxAttempts}, state: ${txData.state})`);
+    await new Promise(resolve => setTimeout(resolve, intervalMs));
+  }
+
+  throw new Error(`Timed out waiting for transaction ${txId} to be signed`);
+}

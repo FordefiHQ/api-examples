@@ -1,6 +1,6 @@
 # Solana Batch Token Transfers
 
-A tool for creating atomic batches of SPL token transfers using the Solana Kit library's transaction planner and executor features.
+A tool for creating atomic batches of SPL token transfers using the Solana Kit library's [transaction planner and executor features](https://www.solanakit.com/docs/concepts/instruction-plans).
 
 ## Overview
 
@@ -14,7 +14,7 @@ This example demonstrates how to batch multiple token transfer instructions into
 ## How It Works
 
 1. **Transaction Planning** (`tx-planner.ts`): Builds instruction sets for creating ATAs and transferring tokens to multiple destinations
-2. **Transaction Execution** (`process-tx.ts`): Signs and broadcasts the planned transaction via Fordefi
+2. **Transaction Execution** (`process-tx.ts`): Signs via Fordefi and broadcasts the planned transaction via any custom RPC endpoint
 
 ## Usage
 

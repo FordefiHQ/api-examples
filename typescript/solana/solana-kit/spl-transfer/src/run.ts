@@ -1,5 +1,5 @@
+import { createAndSignTx, pollForSignedTransaction } from '../utils/process_tx';
 import { fordefiConfig, transferConfig } from './config';
-import { createAndSignTx } from '../utils/process_tx';
 import { signWithApiUserPrivateKey } from './signer';
 import { createTx } from './serialize-spl-transfer';
 import { pushToJito } from '../utils/push_to_jito';
@@ -25,7 +25,6 @@ async function main(): Promise<void> {
     // Send signed payload to Fordefi for MPC signature
     const response = await createAndSignTx(fordefiConfig, signature, timestamp, requestBody);
     const data = response.data;
-    console.log(data);
 
     // Optional push to Jito
     if(transferConfig.useJito){
@@ -39,8 +38,10 @@ async function main(): Promise<void> {
         console.error(`Failed to push the transaction to Jito: ${error.message}`);
       }
     } else {
-      console.log("Transaction signed by source vault and submitted to network ✅");
-      console.log(`Final transaction ID: ${data.id}`);
+      console.log("Transaction signed by source vault and submitted to network 📡");
+      console.log(`Transaction ID: ${data.id}`);
+      const rawTxResult = await pollForSignedTransaction(data.id, fordefiConfig.accessToken);
+      console.log(`Raw transaction: \n${rawTxResult}`);
     }
 
   } catch (error: any) {

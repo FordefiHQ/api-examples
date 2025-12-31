@@ -2,13 +2,14 @@ import * as kit from '@solana/kit';
 import { fordefiConfig } from './config';
 import { createTxPlan } from './tx-planner';
 import { signWithFordefi } from './signers';
+import { createClient, Client } from "./solana-client-utils";
 
 async function main(): Promise<void> {
   if (!fordefiConfig.accessToken) {
     console.error('Error: FORDEFI_API_TOKEN environment variable is not set');
     return;
   }
-  const rpc = kit.createSolanaRpc(fordefiConfig.mainnetRpc);
+  const solana_client: Client = await createClient();
   const transactionPlan = await createTxPlan(fordefiConfig);
 
   // Create executor that uses Fordefi for signing
@@ -19,13 +20,13 @@ async function main(): Promise<void> {
       console.log('Signing transaction with Fordefi...');
 
       // Sign with Fordefi (includes getting blockhash)
-      const rawSignedTxBase64 = await signWithFordefi(message, rpc);
+      const rawSignedTxBase64 = await signWithFordefi(message, solana_client.rpc);
       console.log('Transaction signed by Fordefi MPC 🖋️✅');
 
       // Broadcast via RPC directly (the transaction is already fully signed)
       // Fordefi returns base64, so we need to specify the encoding
       console.log('Broadcasting transaction...');
-      const txSignature = await rpc.sendTransaction(
+      const txSignature = await solana_client.rpc.sendTransaction(
         rawSignedTxBase64 as kit.Base64EncodedWireTransaction,
         {
           skipPreflight: false,
