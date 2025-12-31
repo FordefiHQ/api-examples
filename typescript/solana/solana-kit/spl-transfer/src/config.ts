@@ -9,16 +9,17 @@ export interface FordefiSolanaConfig {
   originAddress: string;
   destAddress: string;
   privateKeyPem: string;
-  apiPathEndpoint: string
+  apiPathEndpoint: string;
+  mainnetRpc: string;
+  ws: string
 }
 
 export interface TransferConfig {
-  mainnetRpc: string;
   mint: string;
   decimals: number;
   amount: number;
   useJito: boolean;
-  jitoTip: number
+  jitoTip?: number
 }
 
 export const fordefiConfig: FordefiSolanaConfig = {
@@ -27,14 +28,15 @@ export const fordefiConfig: FordefiSolanaConfig = {
   originAddress: process.env.ORIGIN_ADDRESS || "",
   destAddress: process.env.DESTINATION_ADDRES || "",
   privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
-  apiPathEndpoint: '/api/v1/transactions/create-and-wait'
+  apiPathEndpoint: '/api/v1/transactions',
+  mainnetRpc: 'https://api.mainnet-beta.solana.com',
+  ws: 'ws://api.mainnet-beta.solana.com'
 };
 
 export const transferConfig: TransferConfig = {
-  mainnetRpc: 'https://api.mainnet-beta.solana.com',
   mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
   decimals: 6,                                            
   amount: 100, // 1 USDC = 1_000_000
-  useJito: true,
-  jitoTip: 1000  
+  useJito: false,
+  // jitoTip: 1000  // only required if useJito: true
 };
