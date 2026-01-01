@@ -52,7 +52,8 @@ Code examples for using the Fordefi API in Python and TypeScript.
     * Programmatic token swaps and pool management using Orca
     * Programmatic SPL token transfers
     * Programmatically restake SOL for fragSOL using Fragmetric
-    * Programmatic SPL token batch transfers using tx planner and executor
+    * Programmatic SPL token batch transfers using a transaction planner and executor
+    * Programmatically deploy an Anchor program using a transaction planner and executor 
   * With `gill`:
     * Sponsored transaction for delegating gas fees payment to a different Solana vault
     * SPL token transfers

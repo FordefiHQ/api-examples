@@ -30,7 +30,7 @@ export const fordefiConfig: FordefiSolanaConfig = {
   privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
   apiPathEndpoint: '/api/v1/transactions',
   mainnetRpc: 'https://api.mainnet-beta.solana.com',
-  ws: 'ws://api.mainnet-beta.solana.com'
+  ws: 'wss://api.mainnet-beta.solana.com'
 };
 
 export const transferConfig: TransferConfig = {
