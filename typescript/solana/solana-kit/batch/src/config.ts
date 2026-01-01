@@ -27,7 +27,7 @@ export const fordefiConfig: FordefiSolanaConfig = {
   privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
   apiPathEndpoint: '/api/v1/transactions',
   mainnetRpc: 'https://api.mainnet-beta.solana.com',
-  ws: 'ws://api.mainnet-beta.solana.com',
+  ws: 'wss://api.mainnet-beta.solana.com',
   mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
   decimals: 6,                                            
   amount: 100, // 1 USDC = 1_000_000

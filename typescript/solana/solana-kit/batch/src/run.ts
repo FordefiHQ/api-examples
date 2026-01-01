@@ -2,7 +2,7 @@ import * as kit from '@solana/kit';
 import { fordefiConfig } from './config';
 import { createTxPlan } from './tx-planner';
 import { signWithFordefi } from './signers';
-import { createClient, Client } from "./solana-client-utils";
+import { createClient, Client } from "./solana-client-util";
 
 async function main(): Promise<void> {
   if (!fordefiConfig.accessToken) {
