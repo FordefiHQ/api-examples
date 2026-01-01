@@ -28,25 +28,26 @@ export async function createTxPlan(fordefiConfig: FordefiSolanaConfig, client: C
     const ixs = [];
 
     // create buffer account and initialize buffer
-    ixs.push(
+    const createBuffer = 
       system.getCreateAccountInstruction({
         payer: deployerVaultSigner,
         newAccount: bufferSigner,
         lamports,
         space: bufferSize,
         programAddress: kit.address(loader.LOADER_V3_PROGRAM_ADDRESS),
-      }),
+      })
+    const initBuffer =
       loader.getInitializeBufferInstruction({
         bufferAuthority: deployerVault,
         sourceAccount: bufferSigner.address
       })
-    );
+    ixs.push(createBuffer, initBuffer)
 
     // write to buffer in chunks
     // max tx size is 1232 bytes, need room for header, signatures, accounts, etc.
+    const writeBufferIxs = [];
     const chunkSize = 900;
     let offset = 0;
-    const writeBufferIxs = [];
     while (offset < dataSize.length) {
       const chunk = dataSize.slice(offset, offset + chunkSize);
       writeBufferIxs.push(
@@ -59,13 +60,10 @@ export async function createTxPlan(fordefiConfig: FordefiSolanaConfig, client: C
       );
       offset += chunkSize;
     }
-
     ixs.push(...writeBufferIxs);
 
-    // Deploy the buffer to a program
-    // we add some buffer for future upgrades
-    const maxDataLen = dataSize.length + 10000;
-
+    // deploy the buffer to a program
+    const maxDataLen = dataSize.length + 10000;    // we add some extra buffer for future upgrades
     const PROGRAM_ACCOUNT_SIZE = 36;
     const programAccountRent = await client.rpc.getMinimumBalanceForRentExemption(BigInt(PROGRAM_ACCOUNT_SIZE)).send();
     console.log(`Program account rent: ${Number(programAccountRent) / 1e9} SOL for ${PROGRAM_ACCOUNT_SIZE} bytes`);
@@ -93,13 +91,11 @@ export async function createTxPlan(fordefiConfig: FordefiSolanaConfig, client: C
       programAccount: programSigner.address,
       maxDataLen,
     });
-
     ixs.push(createProgramAccount, deployInstruction);
 
-    console.log(`Created ${ixs.length} instructions (2 setup + ${ixs.length - 4} writes + 1 create program + 1 deploy)`)
-    console.log(`Program ID will be: ${programSigner.address}`)
-
-    // create instruction plan - this will auto-split if needed
+    // put plan together
+    console.log(`Program ID: ${programSigner.address}`);
+    console.log(`Buffer account: ${bufferSigner.address}`);
     const instructionPlan = kit.sequentialInstructionPlan(ixs);
 
     // note we don't add a blockhash yet, we'll add it when signing with Fordefi

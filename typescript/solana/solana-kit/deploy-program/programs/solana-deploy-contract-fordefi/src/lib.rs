@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("9Weyw3FD5WuXdXMcMMiCRusTQwNLZaMeWQPBKBpFFjwa");
+declare_id!("PrgCyaCv6daK4wtWTVTmeNZjbTiwnckQfySPrApxv4E");
 
 #[program]
 pub mod solana_deploy_contract_fordefi {

@@ -60,8 +60,15 @@ All deployment settings are centralized in `src/config.ts`:
 Grind fresh keypairs for the buffer and program:
 
 ```bash
-solana-keygen new --no-bip39-passphrase -o buffer-keypair.json --force
-solana-keygen new --no-bip39-passphrase -o program-keypair.json --force
+solana-keygen grind --no-bip39-passphrase --starts-with Buff:1
+solana-keygen grind --no-bip39-passphrase --starts-with Prg:1
+```
+
+Copy the public keys and rename your keys to:
+
+```bash
+buffer-keypair.json
+program-keypair.json
 ```
 
 ### 2. Update Program ID
@@ -78,10 +85,20 @@ declare_id!("YOUR_PROGRAM_KEYPAIR_PUBKEY");
 anchor build
 ```
 
-### 4. Deploy
+### 4. Make sure your Fordefi Signer is running
+
+If not run the following command in the docker container:
 
 ```bash
-npx tsx src/run.ts
+docker run --rm --log-driver local --mount source=vol,destination=/storage -it fordefi.jfrog.io/fordefi/api-signer:latest
+```
+
+Then select `Run signer`.
+
+### 5. Deploy
+
+```bash
+npm run deploy
 ```
 
 ## Notable Gotchas

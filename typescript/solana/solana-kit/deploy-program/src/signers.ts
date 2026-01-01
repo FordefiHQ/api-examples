@@ -26,7 +26,6 @@ export async function signWithFordefi(
 
   // Build signatures array for Fordefi
   // First signature is always the fee payer (Fordefi vault) - must be null placeholder
-  // Subsequent signatures are from local signers
   const signatures: Array<{ data: string | null }> = [];
 
   const feePayerAddress = message.feePayer.address;
