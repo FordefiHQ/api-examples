@@ -25,9 +25,8 @@ export async function createTxPlan(fordefiConfig: FordefiSolanaConfig, client: C
     const lamports = await client.rpc.getMinimumBalanceForRentExemption(BigInt(bufferSize)).send();
     console.log(`Buffer rent: ${Number(lamports) / 1e9} SOL for ${bufferSize} bytes`);
 
-    const ixs = [];
-
     // create buffer account and initialize buffer
+    const initBufferIxs = [];
     const createBuffer = 
       system.getCreateAccountInstruction({
         payer: deployerVaultSigner,
@@ -41,26 +40,26 @@ export async function createTxPlan(fordefiConfig: FordefiSolanaConfig, client: C
         bufferAuthority: deployerVault,
         sourceAccount: bufferSigner.address
       })
-    ixs.push(createBuffer, initBuffer)
+    initBufferIxs.push(createBuffer, initBuffer)
 
-    // write to buffer in chunks
-    // max tx size is 1232 bytes, need room for header, signatures, accounts, etc.
-    const writeBufferIxs = [];
-    const chunkSize = 900;
-    let offset = 0;
-    while (offset < dataSize.length) {
-      const chunk = dataSize.slice(offset, offset + chunkSize);
-      writeBufferIxs.push(
-        loader.getWriteInstruction({
+    // write to buffer using linear message packer
+    const writeIxs = [];
+    const programData = dataSize;
+    const payer = deployerVaultSigner;
+    const MAX_CHUNK_SIZE = 900;
+    const writeBufferIx = kit.getLinearMessagePackerInstructionPlan({
+      totalLength: programData.length,
+      getInstruction: (offset, length) => {
+        const clampedLength = Math.min(length, MAX_CHUNK_SIZE);
+        return loader.getWriteInstruction({
           bufferAccount: bufferSigner.address,
-          bufferAuthority: deployerVaultSigner,
-          offset,
-          bytes: chunk,
-        })
-      );
-      offset += chunkSize;
-    }
-    ixs.push(...writeBufferIxs);
+          bufferAuthority: payer,
+          offset: offset,
+          bytes: programData.subarray(offset, offset + clampedLength),
+        });
+      }
+    });
+    writeIxs.push(writeBufferIx);
 
     // deploy the buffer to a program
     const maxDataLen = dataSize.length + 10000;    // we add some extra buffer for future upgrades
@@ -73,7 +72,8 @@ export async function createTxPlan(fordefiConfig: FordefiSolanaConfig, client: C
       seeds: [kit.getAddressEncoder().encode(programSigner.address)],
     });
 
-    // create program account
+    // create and deploy program account
+    const deployIxs = [];
     const createProgramAccount = system.getCreateAccountInstruction({
       newAccount: programSigner,
       payer: deployerVaultSigner,
@@ -81,8 +81,6 @@ export async function createTxPlan(fordefiConfig: FordefiSolanaConfig, client: C
       space: PROGRAM_ACCOUNT_SIZE,
       lamports: programAccountRent,
     });
-
-    // deploy the program
     const deployInstruction = loader.getDeployWithMaxDataLenInstruction({
       authority: deployerVaultSigner,
       bufferAccount: bufferSigner.address,
@@ -91,12 +89,15 @@ export async function createTxPlan(fordefiConfig: FordefiSolanaConfig, client: C
       programAccount: programSigner.address,
       maxDataLen,
     });
-    ixs.push(createProgramAccount, deployInstruction);
+    deployIxs.push(createProgramAccount, deployInstruction);
 
     // put plan together
     console.log(`Program ID: ${programSigner.address}`);
     console.log(`Buffer account: ${bufferSigner.address}`);
-    const instructionPlan = kit.sequentialInstructionPlan(ixs);
+    const bufferPlan = kit.sequentialInstructionPlan(initBufferIxs);
+    const writeBufferPlan = kit.sequentialInstructionPlan(writeIxs); // you can also use a kit.parallelInstructionPlan to speed writes if your custom RPC has high rate-limits
+    const deployPlan = kit.sequentialInstructionPlan(deployIxs);
+    const masterPlan = kit.sequentialInstructionPlan([bufferPlan, writeBufferPlan, deployPlan])
 
     // note we don't add a blockhash yet, we'll add it when signing with Fordefi
     const transactionPlanner = kit.createTransactionPlanner({
@@ -107,7 +108,7 @@ export async function createTxPlan(fordefiConfig: FordefiSolanaConfig, client: C
             ),
     });
 
-    const transactionPlan = await transactionPlanner(instructionPlan);
+    const transactionPlan = await transactionPlanner(masterPlan);
 
     return transactionPlan;
 }

@@ -6,7 +6,7 @@ import * as loader from '@solana-program/loader-v3';
 
 // this is a utility script to close buffers in case of a failed deployment
 // buffer address to close - pass as command line argument or hardcode here
-const BUFFER_ADDRESS = process.argv[2] || 'Buff4TZ4wNPbT4ByN5oX94YL9tAKJmga39iiiFLXFWHe';
+const BUFFER_ADDRESS = process.argv[2] || 'BuffKQ2WinjK52k5SoT2HLSk2LzC2mHQViEPMyjjzCCp';
 
 async function main(): Promise<void> {
   if (!fordefiConfig.accessToken) {

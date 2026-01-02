@@ -13,3 +13,4 @@ bin/
 buffer-keypair.json 
 program-keypair.json
 .claude
+cli-default-key.json
