@@ -101,7 +101,39 @@ Then select `Run signer`.
 npm run deploy
 ```
 
-### 6. Initialize the Program (Optional)
+### 6. Upgrade an Existing Program (Optional)
+
+If you need to deploy a new version of an already-deployed program, use the upgrade flow instead of a fresh deployment.
+
+**Before upgrading, you MUST rebuild your Anchor program:**
+
+1. Make your code changes in `programs/solana-deploy-contract-fordefi/src/lib.rs`
+2. Run `anchor build` to recompile the program
+3. Verify the new `.so` file is at the path specified in `config.programBinaryPath`
+
+**Then update `src/tx-planner.ts`:**
+
+1. Uncomment the `updatePlan` line:
+
+   ```typescript
+   const updatePlan = kit.sequentialInstructionPlan(upgradeIxs);
+   ```
+
+2. Swap `deployPlan` for `updatePlan` in the `masterPlan`:
+
+   ```typescript
+   const masterPlan = kit.sequentialInstructionPlan([bufferPlan, writeBufferPlan, updatePlan]);
+   ```
+
+3. Run the deployment:
+
+   ```bash
+   npm run deploy
+   ```
+
+The upgrade will write the new program binary to a buffer, then atomically upgrade the on-chain program to use the new code. Your program ID remains the same.
+
+### 7. Initialize the Program (Optional)
 
 After deployment, you can call the program's `initialize` instruction to verify it's working. First, update `Anchor.toml` with your deployed program ID and cluster:
 

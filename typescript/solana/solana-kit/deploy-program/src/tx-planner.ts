@@ -70,6 +70,7 @@ export async function createTxPlan(fordefiConfig: FordefiSolanaConfig, client: C
       programAddress: kit.address(loader.LOADER_V3_PROGRAM_ADDRESS),
       seeds: [kit.getAddressEncoder().encode(programSigner.address)],
     });
+    console.log(`Program data account: ${programDataAddress}`);
 
     // create and deploy program account
     const deployIxs = [];
@@ -90,13 +91,25 @@ export async function createTxPlan(fordefiConfig: FordefiSolanaConfig, client: C
     });
     deployIxs.push(createProgramAccount, deployInstruction);
 
+    // OPTIONAL upgrade plan for upgrading the program to new version after deployment
+    const upgradeIxs = [];
+    const upgradeInstruction = loader.getUpgradeInstruction({
+      authority: deployerVaultSigner,
+      bufferAccount: bufferSigner.address,
+      programAccount: programSigner.address,
+      programDataAccount: programDataAddress,
+      spillAccount: deployerVaultSigner.address
+    })
+    upgradeIxs.push(upgradeInstruction);
+
     // put plan together
     console.log(`Program ID: ${programSigner.address}`);
     console.log(`Buffer account: ${bufferSigner.address}`);
     const bufferPlan = kit.sequentialInstructionPlan(initBufferIxs);
     const writeBufferPlan = kit.sequentialInstructionPlan(writeBufferIxs); // you can also use a kit.parallelInstructionPlan to speed writes if your custom RPC has high rate-limits
     const deployPlan = kit.sequentialInstructionPlan(deployIxs);
-    const masterPlan = kit.sequentialInstructionPlan([bufferPlan, writeBufferPlan, deployPlan])
+    //const updatePlan = kit.sequentialInstructionPlan(upgradeIxs); // OPTIONAL, use only for deploying new versions of your program
+    const masterPlan = kit.sequentialInstructionPlan([bufferPlan, writeBufferPlan, deployPlan]) // switch from deployPlan to updatePlan to deploy an upgrade
 
     // note we don't add a blockhash yet, we'll add it when signing with Fordefi
     const transactionPlanner = kit.createTransactionPlanner({

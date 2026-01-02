@@ -1,13 +1,13 @@
 use anchor_lang::prelude::*;
 
-declare_id!("PrgNpJSDC11uEMRjW7iVT1gYDPBCq3ocbVFt6GTZF2E");
+declare_id!("Prg1GzogBqdvQTx2fNBBcdVnRKUQYCWP73CcQrjYcr7");
 
 #[program]
 pub mod solana_deploy_contract_fordefi {
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        msg!("This program was deployed with Fordefi!");
+        msg!("This program was updated with Fordefi!");
         Ok(())
     }
 }
