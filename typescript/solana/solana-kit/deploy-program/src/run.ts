@@ -27,6 +27,10 @@ async function main(): Promise<void> {
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
           console.log(`\n[TX ${currentTx}] Signing with Fordefi (attempt ${attempt}/${maxRetries})...`);
+          const txSize = Buffer.from(kit.getCompiledTransactionMessageEncoder().encode(
+            kit.compileTransactionMessage(message)
+          )).length;
+          console.log(`[TX ${currentTx}] Message size: ${txSize} bytes`);
 
           // sign with Fordefi (we get a fresh blockhash for each attempt)
           const rawSignedTxBase64 = await signWithFordefi(message, solana_client.rpc);

@@ -101,6 +101,28 @@ Then select `Run signer`.
 npm run deploy
 ```
 
+### 6. Initialize the Program (Optional)
+
+After deployment, you can call the program's `initialize` instruction to verify it's working. First, update `Anchor.toml` with your deployed program ID and cluster:
+
+```toml
+[programs.devnet]
+solana_deploy_contract_fordefi = "YOUR_DEPLOYED_PROGRAM_ID"
+
+[provider]
+cluster = "devnet"
+```
+
+Also update the `PROGRAM_ID` in `tests/initialize-deployed-program.ts` to match your deployed program ID.
+
+Then run:
+
+```bash
+npm run initialize
+```
+
+This will call the `initialize` instruction and you should see "This program was deployed with Fordefi!" in the transaction logs on the explorer.
+
 ## Notable Gotchas
 
 ### 1. Custom Fees are CRITICAL
