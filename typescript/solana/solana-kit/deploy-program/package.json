@@ -6,7 +6,8 @@
     "deploy": "npx tsx ./src/run.ts",
     "close-buffer": "npx tsx src/utils/close-buffer-util.ts",
     "build": "anchor build",
-    "clean": "anchor clean"
+    "clean": "anchor clean",
+    "initialize": "npx tsx tests/initialize-deployed-program.ts" 
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.31.1",

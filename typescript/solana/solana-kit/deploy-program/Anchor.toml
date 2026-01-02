@@ -8,11 +8,14 @@ skip-lint = false
 [programs.localnet]
 solana_deploy_contract_fordefi = "GQxHpCW7Uv7DS2LxLS9sh7Tkstug27Ho14JiZTFJ3n2H"
 
+[programs.devnet]
+solana_deploy_contract_fordefi = "Prg1GzogBqdvQTx2fNBBcdVnRKUQYCWP73CcQrjYcr7"
+
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
