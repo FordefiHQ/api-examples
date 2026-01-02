@@ -46,7 +46,7 @@ export async function createTxPlan(fordefiConfig: FordefiSolanaConfig, client: C
     const writeIxs = [];
     const programData = dataSize;
     const payer = deployerVaultSigner;
-    const MAX_CHUNK_SIZE = 900;
+    const MAX_CHUNK_SIZE = 900; // limit chink size to avoid errors in Fordefi
     const writeBufferIx = kit.getLinearMessagePackerInstructionPlan({
       totalLength: programData.length,
       getInstruction: (offset, length) => {
