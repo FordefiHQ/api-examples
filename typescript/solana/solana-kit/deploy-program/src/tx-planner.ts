@@ -42,24 +42,23 @@ export async function createTxPlan(fordefiConfig: FordefiSolanaConfig, client: C
       })
     initBufferIxs.push(createBuffer, initBuffer)
 
-    // write to buffer using linear message packer
-    const writeIxs = [];
-    const programData = dataSize;
-    const payer = deployerVaultSigner;
-    const MAX_CHUNK_SIZE = 900; // limit chink size to avoid errors in Fordefi
-    const writeBufferIx = kit.getLinearMessagePackerInstructionPlan({
-      totalLength: programData.length,
-      getInstruction: (offset, length) => {
-        const clampedLength = Math.min(length, MAX_CHUNK_SIZE);
-        return loader.getWriteInstruction({
+    // write to buffer in chunks
+    // max tx size is 1232 bytes, but we want to leave wiggle room for the Fordefi overhead or we'll get errors
+    const writeBufferIxs = [];
+    const chunkSize = 850;
+    let offset = 0;
+    while (offset < dataSize.length) {
+      const chunk = dataSize.slice(offset, offset + chunkSize);
+      writeBufferIxs.push(
+        loader.getWriteInstruction({
           bufferAccount: bufferSigner.address,
-          bufferAuthority: payer,
-          offset: offset,
-          bytes: programData.subarray(offset, offset + clampedLength),
-        });
-      }
-    });
-    writeIxs.push(writeBufferIx);
+          bufferAuthority: deployerVaultSigner,
+          offset,
+          bytes: chunk,
+        })
+      );
+      offset += chunkSize;
+    }
 
     // deploy the buffer to a program
     const maxDataLen = dataSize.length + 10000;    // we add some extra buffer for future upgrades
@@ -95,7 +94,7 @@ export async function createTxPlan(fordefiConfig: FordefiSolanaConfig, client: C
     console.log(`Program ID: ${programSigner.address}`);
     console.log(`Buffer account: ${bufferSigner.address}`);
     const bufferPlan = kit.sequentialInstructionPlan(initBufferIxs);
-    const writeBufferPlan = kit.sequentialInstructionPlan(writeIxs); // you can also use a kit.parallelInstructionPlan to speed writes if your custom RPC has high rate-limits
+    const writeBufferPlan = kit.sequentialInstructionPlan(writeBufferIxs); // you can also use a kit.parallelInstructionPlan to speed writes if your custom RPC has high rate-limits
     const deployPlan = kit.sequentialInstructionPlan(deployIxs);
     const masterPlan = kit.sequentialInstructionPlan([bufferPlan, writeBufferPlan, deployPlan])
 
