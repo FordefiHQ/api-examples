@@ -1,5 +1,5 @@
 import * as kit from '@solana/kit';
-import { postTx, pollForSignedTransaction } from '../src/process-tx';
+import { postTx, pollForSignedTransaction, getTx } from '../src/process-tx';
 import { signPayloadWithApiUserPrivateKey } from "../src/signers";
 import { fordefiConfig, FordefiSolanaConfig } from '../src/config';
 import { getInitializeInstruction } from '../clients/js/src/generated/instructions/initialize';
@@ -19,11 +19,12 @@ describe('it creates a new counter account', () => {
             const signature = await signPayloadWithApiUserPrivateKey(payload, fordefiConfig.privateKeyPem);
             const response = await postTx(fordefiConfig, signature, timestamp, requestBody);
             const data = response.data;
-            console.log(data);
             console.log("Transaction submitted to Fordefi for broadcast ✅");
             console.log(`Transaction ID: ${data.id}`);
-            const tracking = await pollForSignedTransaction(data.id, fordefiConfig.accessToken);
-            console.log(tracking);
+            const result = await pollForSignedTransaction(data.id, fordefiConfig.accessToken);
+            console.log(result);
+            const broadcastTx = await getTx(data.id, fordefiConfig.accessToken)
+            console.log(`Link to explorer:\n${broadcastTx.explorer_url}`);
 
         } catch (error: any) {
             console.error(`Failed to sign the transaction: ${error.message}`);

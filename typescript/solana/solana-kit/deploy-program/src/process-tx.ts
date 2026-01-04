@@ -48,10 +48,10 @@ export async function postTx(
 };
 
 export async function getTx(
-  path: string,
+  txId: string,
   accessToken: string,
 ): Promise<any> {
-  const url = `https://api.fordefi.com${path}`;
+  const url = `https://api.fordefi.com/api/v1/transactions/${txId}`;
 
   try {
     const respTx = await axios.request({
@@ -98,7 +98,7 @@ export async function pollForSignedTransaction(
   intervalMs = 2000
 ): Promise<string> {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const txData = await getTx(`/api/v1/transactions/${txId}`, accessToken);
+    const txData = await getTx(txId, accessToken);
 
     if (txData.state === 'signed' || txData.state === 'pushed' || txData.state === 'mined') {
       const rawTx = txData.solana_transaction?.raw_transaction
