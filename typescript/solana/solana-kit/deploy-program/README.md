@@ -230,3 +230,69 @@ For a ~190KB program:
 | Transaction fees | ~0.001 SOL | With custom 5000 lamport fee |
 | **Total** | **~2.7 SOL** | Actual rent ~1.4 SOL |
 
+## Client Generation & Testing
+
+This project uses [Codama](https://github.com/codama-idl/codama) to generate type-safe TypeScript clients from the Anchor IDL. The generated client integrates with `@solana/kit` and provides fully typed instruction builders.
+
+### Generate the TypeScript Client
+
+After building your Anchor program, generate the client:
+
+```bash
+anchor run generate-clients
+```
+
+This runs `scripts/generate-clients.ts` which:
+
+1. Reads the Anchor IDL from `target/idl/solana_deploy_contract_fordefi.json`
+2. Uses Codama to parse the IDL and generate TypeScript code
+3. Outputs the generated client to `clients/js/src/generated/`
+
+The generated client includes:
+
+- **Instructions**: Type-safe instruction builders (e.g., `getInitializeInstruction()`)
+- **Programs**: Program address constants and metadata
+- **Accounts**: Account type definitions and codecs (if your program has accounts)
+- **Types**: Custom type definitions from your IDL
+
+### Using the Generated Client
+
+Import and use the generated instructions in your code:
+
+```typescript
+import { getInitializeInstruction } from './clients/js/src/generated/instructions/initialize';
+import * as kit from '@solana/kit';
+
+// Build the instruction
+const ix = getInitializeInstruction();
+
+// Add to a transaction message
+const message = kit.pipe(
+  kit.createTransactionMessage({ version: 0 }),
+  msg => kit.setTransactionMessageFeePayerSigner(signer, msg),
+  msg => kit.appendTransactionMessageInstructions([ix], msg),
+);
+```
+
+### Running Tests
+
+The project includes Mocha-based integration tests that call the deployed program through Fordefi:
+
+```bash
+# Run all tests
+anchor test
+# or
+npm run test
+```
+
+Tests are located in `tests/` and use the generated Codama client to build transactions that are signed and broadcast via the Fordefi API.
+
+**Test file structure:**
+
+- `tests/call-initialize.ts` - Calls the `initialize` instruction on the deployed program
+
+**Prerequisites for running tests:**
+
+1. Program must be deployed (see Deployment Flow above)
+2. Fordefi API signer must be running
+3. `.env` configured with valid Fordefi credentials
