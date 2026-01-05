@@ -14,10 +14,8 @@ export interface FordefiSolanaConfig {
   bufferKeypairPath: string;
   programKeypairPath: string;
   programBinaryPath: string;
-  // Custom fee in lamports to prevent Fordefi from using its own fee estimation.
-  // Fordefi's default estimation can charge ~0.07 SOL per transaction, which
-  // with 212+ write transactions (that's for a small Anchor program) would result in 15+ SOL in fees alone!
-  defaultFeeLamports: string;
+  defaultFeeLamports: string; // Custom fee in lamports to prevent Fordefi from using its own fee estimation.
+  
 }
 
 export const fordefiConfig: FordefiSolanaConfig = {

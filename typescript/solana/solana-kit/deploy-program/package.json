@@ -7,9 +7,11 @@
     "close-buffer": "npx tsx src/utils/close-buffer-util.ts",
     "build": "anchor build",
     "clean": "anchor clean",
-    "initialize": "npx tsx tests/initialize-deployed-program.ts" 
+    "test": "anchor test"
   },
   "dependencies": {
+    "@codama/nodes-from-anchor": "^1.3.8",
+    "@codama/renderers-js": "^1.5.5",
     "@coral-xyz/anchor": "^0.31.1",
     "@noble/ed25519": "^2.1.0",
     "@noble/hashes": "^1.4.0",
@@ -19,6 +21,7 @@
     "@solana/kit": "^5.1.0",
     "axios": "^1.13.2",
     "bs58": "^6.0.0",
+    "codama": "^1.5.0",
     "dotenv": "^16.4.5"
   },
   "devDependencies": {

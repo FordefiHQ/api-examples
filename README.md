@@ -48,6 +48,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
     * Programmatic token swaps and pool management using Raydium
     * Programmatic SOL and SPL batch transfers
     * Programmatically buying and selling PT tokens on Exponent Finance
+    * Programmatically stake, unstake and withdraw SOL from any validator
   * With `@solana/kit`:
     * Programmatic token swaps and pool management using Orca
     * Programmatic SPL token transfers

@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
-import { FordefiSolanaConfig } from './config';
+import { FordefiSolanaConfig } from '../config';
 
-export async function postTx(
+export async function createAndSignTx(
   fordefiConfig: FordefiSolanaConfig,
   signature: string,
   timestamp: number,
@@ -22,10 +22,12 @@ export async function postTx(
 
     if (respTx.status < 200 || respTx.status >= 300) {
       let errorMessage = `HTTP error occurred: status = ${respTx.status}`;
+      // Attempt to parse the response body for additional error info
       try {
         const errorDetail = respTx.data;
         errorMessage += `\nError details: ${JSON.stringify(errorDetail)}`;
       } catch {
+        // If not JSON, include raw text
         errorMessage += `\nRaw response: ${respTx.data}`;
       }
       throw new Error(errorMessage);
@@ -33,6 +35,7 @@ export async function postTx(
 
     return respTx;
   } catch (error: any) {
+    // If we have an Axios error with a response, parse it
     if (error.response) {
       let errorMessage = `HTTP error occurred: status = ${error.response.status}`;
       try {
@@ -43,11 +46,13 @@ export async function postTx(
       }
       throw new Error(errorMessage);
     }
+
+    // Otherwise, it's a network or unknown error
     throw new Error(`Network error occurred: ${error.message ?? error}`);
   }
-};
+}
 
-export async function getTx(
+export async function get_tx(
   txId: string,
   accessToken: string,
 ): Promise<any> {
@@ -77,6 +82,7 @@ export async function getTx(
 
     return respTx.data;
   } catch (error: any) {
+    // If we have an Axios error with a response, parse it
     if (error.response) {
       let errorMessage = `HTTP error occurred: status = ${error.response.status}`;
       try {
@@ -87,6 +93,7 @@ export async function getTx(
       }
       throw new Error(errorMessage);
     }
+    // Otherwise, it's a network or unknown error
     throw new Error(`Network error occurred: ${error.message ?? error}`);
   }
 }
@@ -98,7 +105,7 @@ export async function pollForSignedTransaction(
   intervalMs = 2000
 ): Promise<string> {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const txData = await getTx(txId, accessToken);
+    const txData = await get_tx(txId, accessToken);
 
     if (txData.state === 'signed' || txData.state === 'pushed' || txData.state === 'mined') {
       const rawTx = txData.solana_transaction?.raw_transaction
