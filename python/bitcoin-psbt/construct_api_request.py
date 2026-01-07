@@ -1,6 +1,6 @@
 from typing import Any
 
-async def build_request(vault_id: str, vault_address: str, psbt_hex_data: str, will_auto_finalize: bool, is_bitcoin_mainnet: bool) -> dict[str, Any]:
+async def build_psbt_request(vault_id: str, vault_address: str, psbt_hex_data: str, will_auto_finalize: bool, uses_custom_rpc: bool = False) -> dict[str, Any]:
     print(f'Preparing transaction from Vault {vault_id}')
     print(f"Vault address: {vault_address}")
     if vault_address.startswith(('bc1q', 'tb1q')):
@@ -33,7 +33,11 @@ async def build_request(vault_id: str, vault_address: str, psbt_hex_data: str, w
                     }
                     # OPTIONAL -> add more inputs here as needed
                 ],
-                "push_mode": "auto"
+                "fee_per_byte": {
+                    "fee_per_byte": "1",
+                    "type": "custom"
+                },
+                "push_mode": "manual" if uses_custom_rpc else "auto"
             }
     }
     return request_json

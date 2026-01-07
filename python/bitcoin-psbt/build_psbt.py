@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 from bitcoin import SelectParams
 from typing import List, Optional
 from bitcoin.wallet import CBitcoinAddress
-from bitcoin.core.script import CScript, OP_1
 from bitcoin.core import CTransaction, CTxIn, CTxOut, COutPoint, lx
+from bitcoin.core.script import CScript
 
 load_dotenv()
 
@@ -139,17 +139,20 @@ def address_to_scriptpubkey(address: str) -> bytes:
         # Create witness program scriptPubKey: OP_<version> <program>
         if witness_version == 0:
             # SegWit v0: OP_0 <20 or 32 bytes>
-            script = CScript([0, witness_program])
+            # OP_0 = 0x00, then push length, then data
+            script = bytes([0x00, len(witness_program)]) + witness_program
         else:
             # SegWit v1+ (including Taproot): OP_1 <32 bytes>
-            script = CScript([OP_1 if witness_version == 1 else witness_version, witness_program])
+            # OP_1 = 0x51, OP_2 = 0x52, etc. (0x50 + version)
+            version_opcode = 0x50 + witness_version
+            script = bytes([version_opcode, len(witness_program)]) + witness_program
 
-        return bytes(script)
+        return script
     else:
         # Try as legacy address (P2PKH or P2SH)
         try:
             addr = CBitcoinAddress(address)
-            return bytes(addr.to_scriptPubKey())
+            return bytes(addr.to_scriptPubKey())  # type: ignore[attr-defined]
         except Exception as e:
             raise ValueError(f"Invalid Bitcoin address: {address}") from e
 
@@ -306,7 +309,7 @@ def create_psbt_hex(tx: CTransaction, utxos: List[UTXO]) -> str:
 
         # Create the witness UTXO (CTxOut)
         script_bytes = bytes.fromhex(utxo.script_pub_key)
-        witness_utxo = CTxOut(utxo.value, script_bytes)
+        witness_utxo = CTxOut(utxo.value, CScript(script_bytes))
         utxo_bytes = witness_utxo.serialize()
 
         psbt.write(compact_size(len(utxo_bytes)))
@@ -419,13 +422,13 @@ def create_psbt_from_utxos(
 
     # Output 1: Payment to recipient
     recipient_scriptPubKey = address_to_scriptpubkey(recipient_address)
-    txout_recipient = CTxOut(send_amount, recipient_scriptPubKey)
+    txout_recipient = CTxOut(send_amount, CScript(recipient_scriptPubKey))
     txouts.append(txout_recipient)
 
     # Output 2: Change back to sender (if any)
     if change_amount > 0:
         sender_scriptPubKey = address_to_scriptpubkey(sender_address)
-        txout_change = CTxOut(change_amount, sender_scriptPubKey)
+        txout_change = CTxOut(change_amount, CScript(sender_scriptPubKey))
         txouts.append(txout_change)
 
     # Create the transaction

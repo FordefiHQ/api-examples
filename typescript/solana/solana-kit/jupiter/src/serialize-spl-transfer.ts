@@ -1,24 +1,22 @@
 import axios from 'axios';
-import * as web3 from '@solana/web3.js'
-import * as jito from 'jito-ts'
-import { PublicKey } from '@solana/web3.js';
-import { getJitoTipAccount } from '../utils/get_jito_tip_account'
-
-const connection = new web3.Connection("https://api.mainnet-beta.solana.com")
+import { Client } from 
+// import * as web3 from '@solana/web3.js'
+// import * as jito from 'jito-ts'
+// import { PublicKey } from '@solana/web3.js';
+// import { getJitoTipAccount } from '../utils/get_jito_tip_account'
 
 // Get quote from Jupiter
-async function getSwapQuote(swap_amount: string, slippage: string, input_token: string, output_token: string): Promise<any> {
+async function getSwapQuote(swap_amount: string, slippage: string, input_token: string, output_token: string, ): Promise<any> {
     console.log("Input token", input_token )
     console.log("Output token", output_token )
 
-    const quoteResponse = await axios.get('https://api.jup.ag/swap/v1/quote', {
+    const quoteResponse = await axios.get('https://api.jup.ag/ultra/v1/order', {
         params: {
             inputMint:input_token,
             outputMint: output_token,
             amount: swap_amount,
             slippageBps: slippage,
-            maxAccounts: 32, // Limit accounts involved
-            restrictIntermediateTokens: false, 
+            taker
         }
     });
     
@@ -64,26 +62,26 @@ async function getSwapTxIx(quote: any, user: PublicKey) {
     ];
 }
 
-async function createJitoInstructions(fordefiSolanaVaultAddress: string, jitoTip: number): Promise<web3.TransactionInstruction[]> {
-    // Create Jito client instance
-    const client = jito.searcher.searcherClient("frankfurt.mainnet.block-engine.jito.wtf")
+// async function createJitoInstructions(fordefiSolanaVaultAddress: string, jitoTip: number): Promise<web3.TransactionInstruction[]> {
+//     // Create Jito client instance
+//     const client = jito.searcher.searcherClient("frankfurt.mainnet.block-engine.jito.wtf")
 
-    // Get Jito Tip Account
-    const jitoTipAccount = await getJitoTipAccount(client)
-    console.log(`Tip amount -> ${jitoTip}`)
+//     // Get Jito Tip Account
+//     const jitoTipAccount = await getJitoTipAccount(client)
+//     console.log(`Tip amount -> ${jitoTip}`)
 
-    // Create and return Jito tip instruction
-    return [
-        web3.SystemProgram.transfer({
-            fromPubkey: new web3.PublicKey(fordefiSolanaVaultAddress),
-            toPubkey: jitoTipAccount,
-            lamports: jitoTip,
-        })
-    ];
-}
+//     // Create and return Jito tip instruction
+//     return [
+//         web3.SystemProgram.transfer({
+//             fromPubkey: new web3.PublicKey(fordefiSolanaVaultAddress),
+//             toPubkey: jitoTipAccount,
+//             lamports: jitoTip,
+//         })
+//     ];
+// }
 
 export async function createJupiterSwapTx(vaultId: string, fordefiSolanaVaultAddress: string, swapConfig: any){
-
+    const solana_client = await createClient()
     console.log("SwapConfig", swapConfig)
 
     // We generate a quote from Jupiter
