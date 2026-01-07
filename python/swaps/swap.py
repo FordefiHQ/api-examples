@@ -14,7 +14,7 @@ load_dotenv()
 
 ## CONFIG
 USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
-FORDEFI_VAULT_ID = os.environ["FORDEFI_VAULT_ID"]
+FORDEFI_EVM_VAULT_ID = os.environ["FORDEFI_VAULT_ID"]
 PRIVATE_KEY_PEM_FILE = Path("./secret/private.pem")
 path = "/api/v1/swaps"
 sell_token_amount = str(1000000000000000) # in smallest units or decimals
@@ -34,7 +34,7 @@ async def main():
         if is_erc20_to_erc20_swap is True:
         # Getting quotes from providers
             quotes_response = await get_erc20_to_erc20_quote(
-                vault_id=FORDEFI_VAULT_ID, 
+                vault_id=FORDEFI_EVM_VAULT_ID, 
                 chain_type=chain_type, 
                 network=network, 
                 sell_token_amount=sell_token_amount,
@@ -45,7 +45,7 @@ async def main():
                 access_token=USER_API_TOKEN)
         else:
             quotes_response = await get_native_to_erc20_quote(
-                vault_id=FORDEFI_VAULT_ID, 
+                vault_id=FORDEFI_EVM_VAULT_ID, 
                 chain_type=chain_type, 
                 network=network, 
                 sell_token_amount=sell_token_amount, 
@@ -70,7 +70,7 @@ async def main():
         if is_erc20_to_erc20_swap is True:    
             tx_payload = await submit_erc20_to_erc20_quote(
                 quote_id=best_quote["quote_id"],
-                vault_id=FORDEFI_VAULT_ID, 
+                vault_id=FORDEFI_EVM_VAULT_ID, 
                 chain_type=chain_type, 
                 network=network, 
                 sell_token_amount=sell_token_amount,
@@ -81,7 +81,7 @@ async def main():
         else:
             tx_payload = await submit_native_to_erc20_quote(
                 quote_id=best_quote["quote_id"],
-                vault_id=FORDEFI_VAULT_ID, 
+                vault_id=FORDEFI_EVM_VAULT_ID, 
                 chain_type=chain_type, 
                 network=network, 
                 sell_token_amount=sell_token_amount, 

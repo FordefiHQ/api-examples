@@ -83,8 +83,7 @@ export async function createTx(fordefiConfig: FordefiSolanaConfig, solana_client
   const txMessage = kit.pipe(
     kit.createTransactionMessage({ version: 0 }),
     (message) => kit.setTransactionMessageFeePayer(staker, message),
-    (message) =>
-      kit.setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, message),
+    (message) => kit.setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, message),
     (message) => kit.appendTransactionMessageInstructions(ixes, message)
   );
 
