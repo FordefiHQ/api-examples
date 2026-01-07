@@ -42,8 +42,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
   * Deploying and call contracts on a local Hardhat node for developers
 * On Solana:
   * With `@solana/web3.js`: 
-    * Programmatic token swaps using Jupiter
-    * Programmatic token swaps using Meteora
+    * Programmatic token swaps using Jupiter's Ultra API
     * Programmatic SOL staking with Marinade
     * Programmatic token swaps and pool management using Raydium
     * Programmatic SOL and SPL batch transfers
