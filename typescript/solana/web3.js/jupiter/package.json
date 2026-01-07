@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "swap": "npx tsx ./src/jupiter_swap.ts"
+    "ultra": "npx tsx ./src/swap_ultra.ts"
   },
   "keywords": [],
   "author": "",

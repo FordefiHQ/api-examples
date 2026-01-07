@@ -169,25 +169,28 @@ class UTXO:
         return f"UTXO(txid={self.txid[:8]}..., vout={self.vout}, value={self.value})"
 
 
-def fetch_utxos_blockstream(address: str, network: str = "testnet") -> List[UTXO]:
+def fetch_utxos(address: str, network: str = "testnet4") -> List[UTXO]:
     """
-    Fetch UTXOs for a given address using Blockstream's public API.
+    Fetch UTXOs for a given address using public APIs.
+    Uses mempool.space for testnet4, Blockstream for mainnet/testnet3.
 
     Args:
         address: Bitcoin address to query
-        network: 'mainnet' or 'testnet'
+        network: 'mainnet', 'testnet', 'testnet3', or 'testnet4'
 
     Returns:
         List of UTXO objects
     """
-    # Blockstream API endpoints
+    # API endpoints - mempool.space for testnet4, Blockstream for others
     base_urls = {
         "mainnet": "https://blockstream.info/api",
-        "testnet": "https://blockstream.info/testnet/api"
+        "testnet": "https://blockstream.info/testnet/api",  # testnet3
+        "testnet3": "https://blockstream.info/testnet/api",
+        "testnet4": "https://mempool.space/testnet4/api"
     }
 
     if network not in base_urls:
-        raise ValueError(f"Network must be 'mainnet' or 'testnet', got: {network}")
+        raise ValueError(f"Network must be 'mainnet', 'testnet', 'testnet3', or 'testnet4', got: {network}")
 
     base_url = base_urls[network]
 
@@ -361,7 +364,7 @@ def create_psbt_from_utxos(
     recipient_address: str,
     send_amount: int,
     fee: int,
-    network: str = "testnet"
+    network: str = "testnet4"
 ) -> Optional[tuple[str, CTransaction]]:
     """
     Create a PSBT using real UTXOs fetched from the blockchain.
@@ -371,18 +374,18 @@ def create_psbt_from_utxos(
         recipient_address: Address to send to
         send_amount: Amount to send in satoshis
         fee: Transaction fee in satoshis
-        network: 'mainnet' or 'testnet'
+        network: 'mainnet', 'testnet', 'testnet3', or 'testnet4'
 
     Returns:
         Tuple of (PSBT hex string, unsigned transaction) or None if failed
     """
-    # Set network parameters
-    SelectParams('testnet' if network == 'testnet' else 'mainnet')
+    # Set network parameters (testnet3 and testnet4 use same address format)
+    SelectParams('testnet' if network in ('testnet', 'testnet3', 'testnet4') else 'mainnet')
 
     print("=== Bitcoin PSBT Construction with Real UTXOs ===\n")
 
     # Fetch UTXOs
-    utxos = fetch_utxos_blockstream(sender_address, network)
+    utxos = fetch_utxos(sender_address, network)
 
     if not utxos:
         print("No UTXOs available. Cannot create transaction.")
@@ -458,26 +461,26 @@ def create_psbt_from_utxos(
 
 
 def main():
-    sender_address = os.getenv('BTC_SENDER_ADDRESS_TESTNET_V3')
-    recipient_address = os.getenv('BTC_RECIPIENT_ADDRESS_TESTNET_V3')
-    send_amount = os.getenv('BTC_SEND_AMOUNT')
+    sender_address = os.getenv('BTC_SENDER_ADDRESS_TESTNET_V4')
+    recipient_address = os.getenv('BTC_RECIPIENT_ADDRESS_TESTNET_V4')
+    send_amount = os.getenv('BTC_TRANSFER_AMOUNT')
     fee = os.getenv('BTC_FEE', '200')
-    network = os.getenv('BTC_NETWORK', 'testnet')
+    network = os.getenv('BTC_NETWORK', 'testnet4')
 
     if not sender_address:
-        print("Error: BTC_SENDER_ADDRESS environment variable not set")
+        print("Error: BTC_SENDER_ADDRESS_TESTNET_V4 environment variable not set")
         print("\nExample usage:")
-        print("export BTC_SENDER_ADDRESS='tb1q...'")
-        print("export BTC_RECIPIENT_ADDRESS='tb1q...'")
-        print("export BTC_SEND_AMOUNT='50000'  # in satoshis")
+        print("export BTC_SENDER_ADDRESS_TESTNET_V4='tb1q...'")
+        print("export BTC_RECIPIENT_ADDRESS_TESTNET_V4='tb1q...'")
+        print("export BTC_TRANSFER_AMOUNT='50000'  # in satoshis")
         print("export BTC_FEE='1000'  # optional, in satoshis")
-        print("export BTC_NETWORK='testnet'  # or 'mainnet'")
+        print("export BTC_NETWORK='testnet4'  # or 'mainnet', 'testnet3'")
         return
     if not recipient_address:
-        print("Error: BTC_RECIPIENT_ADDRESS environment variable not set")
+        print("Error: BTC_RECIPIENT_ADDRESS_TESTNET_V4 environment variable not set")
         return
     if not send_amount:
-        print("Error: BTC_SEND_AMOUNT environment variable not set")
+        print("Error: BTC_TRANSFER_AMOUNT environment variable not set")
         return
     # Validate that sender address is not a legacy address
     # Fordefi cannot sign PSBTs with legacy sender addresses
