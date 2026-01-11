@@ -72,4 +72,4 @@ async def paxos_webhook(request: Request):
         print(f"error reading request body: {e}")
         raise HTTPException(status_code=503, detail="Service error")
 
-# uvicorn app:app --host 0.0.0.0 --port 8080 --reload
+# uvicorn paxos_webhooks:app --host 0.0.0.0 --port 8080 --reload

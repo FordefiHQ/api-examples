@@ -3,7 +3,7 @@
 Code examples for using the Fordefi API in Python and TypeScript.
 
 ## Prerequisites
-- Fordefi API credentials (API user token and API Signer)
+- Fordefi API credentials (API User token and API Signer, [see here](https://docs.fordefi.com/developers/getting-started/set-up-an-api-signer/api-signer-docker))
 - Python 3.9+ or Node.js (depending on example)
 
 ## Python Examples 🐍
@@ -41,6 +41,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
   * Programmatic EVM transfers using the Fordefi API
   * Deploying and call contracts on a local Hardhat node for developers
 * On Solana:
+  * SPL token transfers with delegated fee payment from another vault ("sponsored" transactions)
   * With `@solana/web3.js`: 
     * Programmatic token swaps using Jupiter's Ultra API
     * Programmatic SOL staking with Marinade
@@ -55,7 +56,6 @@ Code examples for using the Fordefi API in Python and TypeScript.
     * Programmatically deploy an Anchor program using a transaction planner and executor
     * Programmatically stake, unstake and withdraw SOL from any validator
   * With `gill`:
-    * Sponsored transaction for delegating gas fees payment to a different Solana vault
     * SPL token transfers
 * On Sui:
   * Programmatic token swaps and pool creation using the Bluefin API

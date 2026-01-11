@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "airdrop": "npx tsx ./scripts/airdrop.ts",
+    "deploy-token": "npx hardhat compile && npx tsx ./scripts/deploy-token.ts",
     "get-tx": "npx tsx ./scripts/get-tx.ts",
     "clean": "npx hardhat clean",
     "node": "npx hardhat node",

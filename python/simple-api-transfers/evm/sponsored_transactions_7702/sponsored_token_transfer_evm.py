@@ -8,22 +8,25 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, custom_note: str, value: str, token_contract: str, sponsor: str):
-    print(f"⛽ Gas sponsor: {sponsor}")
+async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, value: str, token_contract: str, fee_payer: str):
+    print(f"⛽ Fee payer: {fee_payer}")
     request_json =  {
         "signer_type": "api_signer",
         "type": "evm_transaction",
         "details": {
-            "funder": sponsor,
+            "fee_payer": {
+                "type": "vault",
+                "vault_id": fee_payer
+            },
             "type": "evm_transfer",
             "gas": {
-            "type": "priority",
-            "priority_level": "medium"
+                "type": "priority",
+                "priority_level": "medium"
             },
             "to": destination,
             "value": {
-            "type": "value",
-            "value": value
+                "type": "value",
+                "value": value
             },
             "asset_identifier": {
                 "type": "evm",
@@ -36,7 +39,6 @@ async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, custom_
                 }
             }
         },
-        "note": custom_note,
         "vault_id": vault_id
     }
 
@@ -44,25 +46,23 @@ async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, custom_
 
 ## Fordefi configuration
 USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
-EVM_VAULT_ID = os.environ["EVM_VAULT_ID"]
-SPONSOR_VAULT_ID = os.environ["SPONSOR_VAULT_ID_EVM"]
+EVM_VAULT_ID_SPONSORED = os.environ["EVM_VAULT_ID_SPONSORED"] # your upgraded smart account 
+FEE_PAYER_VAULT_ID = os.environ["FEE_PAYER_VAULT_ID_EVM"] # the Fordefi vault that will pay the fee
 evm_chain = "ethereum"
 path = "/api/v1/transactions"
-destination = "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73" # CHANGE
-custom_note = "hello!" # Optional note
-token_contract_address = "0xdAC17F958D2ee523a2206206994597C13D831ec7" # USDT on Ethereum
-value = str(1_000_000) # 1 USDT
+destination = "0xED8315fA2Ec4Dd0dA9870Bf8CD57eBf256A90772" # CHANGE
+token_contract_address = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" # USDC on Ethereum
+value = str(100_000) # 0.1 USDT
 
 async def main():
     try:
         ## Building transaction
         request_json = await evm_tx_tokens(evm_chain=evm_chain, 
-                                           vault_id=EVM_VAULT_ID, 
-                                           destination=destination, 
-                                           custom_note=custom_note, 
+                                           vault_id=EVM_VAULT_ID_SPONSORED, 
+                                           destination=destination,
                                            value=value, 
                                            token_contract=token_contract_address,
-                                           sponsor=SPONSOR_VAULT_ID)
+                                           fee_payer=FEE_PAYER_VAULT_ID)
         request_body = json.dumps(request_json)
         timestamp = datetime.datetime.now().strftime("%s")
         payload = f"{path}|{timestamp}|{request_body}"
