@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, value: str, token_contract: str, fee_payer: str):
+async def build_sponsored_tx(evm_chain: str, vault_id: str, destination: str, value: str, token_contract: str, fee_payer: str):
     print(f"⛽ Fee payer: {fee_payer}")
     request_json =  {
         "signer_type": "api_signer",
@@ -46,7 +46,7 @@ async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, value: 
 
 ## Fordefi configuration
 USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
-EVM_VAULT_ID_SPONSORED = os.environ["EVM_VAULT_ID_SPONSORED"] # your upgraded smart account 
+EVM_VAULT_ID = os.environ["EVM_VAULT_ID"] # your upgraded smart account 
 FEE_PAYER_VAULT_ID = os.environ["FEE_PAYER_VAULT_ID_EVM"] # the Fordefi vault that will pay the fee
 evm_chain = "ethereum"
 path = "/api/v1/transactions"
@@ -57,8 +57,8 @@ value = str(100_000) # 0.1 USDT
 async def main():
     try:
         ## Building transaction
-        request_json = await evm_tx_tokens(evm_chain=evm_chain, 
-                                           vault_id=EVM_VAULT_ID_SPONSORED, 
+        request_json = await build_sponsored_tx(evm_chain=evm_chain, 
+                                           vault_id=EVM_VAULT_ID, 
                                            destination=destination,
                                            value=value, 
                                            token_contract=token_contract_address,
