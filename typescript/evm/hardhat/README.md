@@ -63,13 +63,41 @@ const tx = await provider.send("eth_sendTransaction", [{
 }]);
 ```
 
-### 3. Deploy Your Contract
+### 3. Deploy a Test Token
+
+Deploy an ERC20 token and airdrop tokens to your Fordefi wallet:
+
+```shell
+npm run deploy-token
+```
+
+This deploys the `Token.sol` contract and airdrops 10,000 MTK to the configured Fordefi wallet.
+
+To check the token balance:
+
+```shell
+curl -X POST http://127.0.0.1:8545 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "eth_call",
+    "params": [{
+      "to": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+      "data": "0x70a082310000000000000000000000008BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73"
+    }, "latest"],
+    "id": 1
+  }'
+```
+
+Replace `TOKEN_ADDRESS` with the deployed contract address and `YOUR_WALLET_ADDRESS_WITHOUT_0x` with your wallet address (without the `0x` prefix, padded to 32 bytes).
+
+### 4. Deploy Your Contract
 
 ```shell
 npx hardhat ignition deploy ignition/modules/YourContract.ts --network localhost
 ```
 
-### 4. Configure the Transaction
+### 5. Configure the Transaction
 
 In your config file, set:
 
@@ -88,7 +116,7 @@ export const contractAbi = [
 ];
 ```
 
-### 5. Send the Transaction
+### 6. Send the Transaction
 
 The transaction flow:
 

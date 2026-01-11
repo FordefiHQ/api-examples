@@ -91,4 +91,4 @@ async def fordefi_webhook(request: Request):
 
     return {"status": "ok"}
 
-# uvicorn app:app --host 0.0.0.0 --port 8080 --reload
+# uvicorn fordefi_webhooks:app --host 0.0.0.0 --port 8080 --reload
