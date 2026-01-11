@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-async def sol_tx_tokens(vault_id: str, destination: str, custom_note: str, value: str, token: str, sponsor: str):
+async def sol_tx_tokens(vault_id: str, destination: str, value: str, token: str, sponsor: str):
     print(f"⛽ Fee sponsor: {sponsor}")
     request_json = {
         "signer_type": "api_signer",
@@ -20,7 +20,7 @@ async def sol_tx_tokens(vault_id: str, destination: str, custom_note: str, value
             },
             "fee": {
                 "type": "custom",
-                "unit_price": "100000000" # you can replace unit_price with priority_fee but NOT combine them
+                "unit_price": "500" # you can replace unit_price with priority_fee but NOT combine them
             },
             "type": "solana_transfer",
             "to": destination,
@@ -39,7 +39,6 @@ async def sol_tx_tokens(vault_id: str, destination: str, custom_note: str, value
                 }
             }
         },
-        "note": custom_note,
         "vault_id": vault_id
     }
 
@@ -51,7 +50,6 @@ SOL_VAULT_ID = os.environ["SOL_VAULT_ID"]
 SPONSOR_VAULT_ID = os.environ["SPONSOR_VAULT_ID_SOLANA"]
 path = "/api/v1/transactions"
 destination = "EjL8jgiEMwuHT6xsDwm7HmF4uqv2cAjJULfXwUm6ZSSD" # Change to your destination address
-custom_note = "hello!" # Optional note
 value = str(100)  # in smallest units (1 USDC = 1_000_000 SOL)
 token_address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" # USDC on Solana
 
@@ -59,7 +57,7 @@ async def main():
     try:
         ## Building transaction
         request_json = await sol_tx_tokens(vault_id=SOL_VAULT_ID, destination=destination, 
-                                    custom_note=custom_note, value=value, token=token_address, sponsor=SPONSOR_VAULT_ID)
+                                    value=value, token=token_address, sponsor=SPONSOR_VAULT_ID)
         request_body = json.dumps(request_json)
         timestamp = datetime.datetime.now().strftime("%s")
         payload = f"{path}|{timestamp}|{request_body}"
