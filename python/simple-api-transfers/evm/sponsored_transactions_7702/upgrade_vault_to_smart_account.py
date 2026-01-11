@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-async def evm_tx_tokens(evm_chain: str, vault_id: str):
+async def upgrade_account_tx(evm_chain: str, vault_id: str):
     print(f"⬆️ Upgrading vault: {vault_id} on {evm_chain}")
     request_json =  {
         "signer_type": "api_signer",
@@ -30,15 +30,14 @@ async def evm_tx_tokens(evm_chain: str, vault_id: str):
 
 ## Fordefi configuration
 USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
-EVM_VAULT_ID = os.environ["EVM_VAULT_ID"]
-SPONSOR_VAULT_ID = os.environ["SPONSOR_VAULT_ID_EVM"]
+EVM_VAULT_ID = os.environ["EVM_VAULT_ID"] ## Vault to upgrade to a smart account
 evm_chain = "ethereum"
 path = "/api/v1/transactions"
 
 async def main():
     try:
         ## Building transaction
-        request_json = await evm_tx_tokens(evm_chain=evm_chain, 
+        request_json = await upgrade_account_tx(evm_chain=evm_chain, 
                                            vault_id=EVM_VAULT_ID)
         request_body = json.dumps(request_json)
         timestamp = datetime.datetime.now().strftime("%s")

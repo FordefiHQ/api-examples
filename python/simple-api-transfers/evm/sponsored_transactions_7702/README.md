@@ -37,8 +37,7 @@ Create a `.env` file with the following variables:
 
 ```env
 FORDEFI_API_TOKEN=your_api_token
-EVM_VAULT_ID=your_origin_vault_id
-EVM_VAULT_ID_SPONSORED=your_upgraded_smart_account_vault_id
+EVM_VAULT_ID=your_origin_vault ## will be upgraded to a smart account
 FEE_PAYER_VAULT_ID_EVM=your_fee_payer_vault_id
 ```
 
