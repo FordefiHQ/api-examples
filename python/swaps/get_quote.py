@@ -32,7 +32,7 @@ async def get_best_quote(quotes_response: Dict[str, Any]) -> Optional[Dict[str, 
         "provider_info": best_quote["provider_info"]
     }
 
-async def get_native_to_erc20_quote(vault_id: str, chain_type: str, network: str,  sell_token_amount: str, buy_token_address: str, providers: list, slippage: str, access_token: str) -> Dict[str, Any]:
+async def get_native_to_erc20_quote(vault_id: str, chain_type: str, origin_network: str, destination_network: str, sell_token_amount: str, buy_token_address: str, providers: list, slippage: str, access_token: str) -> Dict[str, Any]:
     print(f"Getting Native to ERC20 quote from: {providers}")
     quote_data = {
       "vault_id": vault_id,
@@ -40,7 +40,7 @@ async def get_native_to_erc20_quote(vault_id: str, chain_type: str, network: str
         "type": chain_type,
         "details": {
           "type": "native",
-          "chain": network
+          "chain": origin_network
         }
       },
       "output_asset_identifier": {
@@ -48,7 +48,7 @@ async def get_native_to_erc20_quote(vault_id: str, chain_type: str, network: str
         "details": {
           "type": "erc20",
           "token": {
-              "chain": network,
+              "chain": destination_network,
               "hex_repr": buy_token_address
           }
         }
@@ -85,7 +85,7 @@ async def get_native_to_erc20_quote(vault_id: str, chain_type: str, network: str
         print(f"Error parsing JSON response: {e}")
         raise
 
-async def get_erc20_to_erc20_quote(vault_id: str, chain_type: str, network: str,  sell_token_amount: str, buy_token_address: str, sell_token_address: str, providers: list, slippage: str, access_token: str) -> Dict[str, Any]:
+async def get_erc20_to_erc20_quote(vault_id: str, chain_type: str, origin_network: str, destination_network: str, sell_token_amount: str, buy_token_address: str, sell_token_address: str, providers: list, slippage: str, access_token: str) -> Dict[str, Any]:
     print(f"Getting ERC20 to ERC20 quote from: {providers}")
     quote_data = {
       "vault_id": vault_id,
@@ -94,7 +94,7 @@ async def get_erc20_to_erc20_quote(vault_id: str, chain_type: str, network: str,
         "details": {
           "type": "erc20",
           "token": {
-              "chain": network,
+              "chain": origin_network,
               "hex_repr": sell_token_address
           }
         }
@@ -104,7 +104,7 @@ async def get_erc20_to_erc20_quote(vault_id: str, chain_type: str, network: str,
         "details": {
           "type": "erc20",
           "token": {
-              "chain": network,
+              "chain": destination_network,
               "hex_repr": buy_token_address
           }
         }
@@ -141,7 +141,7 @@ async def get_erc20_to_erc20_quote(vault_id: str, chain_type: str, network: str,
         print(f"Error parsing JSON response: {e}")
         raise
     
-async def get_spl_to_spl_quote(vault_id: str, chain_type: str, network: str,  sell_token_amount: str, buy_token_address: str, sell_token_address: str, providers: list, slippage: str, access_token: str) -> Dict[str, Any]:
+async def get_spl_to_spl_quote(vault_id: str, chain_type: str, network: str, sell_token_amount: str, buy_token_address: str, sell_token_address: str, providers: list, slippage: str, access_token: str) -> Dict[str, Any]:
     print(f"Getting SPL to SPL quote from: {providers}")
     quote_data = {
       "vault_id": vault_id,

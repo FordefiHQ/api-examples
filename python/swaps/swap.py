@@ -14,14 +14,15 @@ load_dotenv()
 
 ## CONFIG
 USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
-FORDEFI_EVM_VAULT_ID = os.environ["FORDEFI_VAULT_ID"]
+FORDEFI_EVM_VAULT_ID = os.environ["FORDEFI_EVM_VAULT_ID"]
 PRIVATE_KEY_PEM_FILE = Path("./secret/private.pem")
 path = "/api/v1/swaps"
 sell_token_amount = str(1000000000000000) # in smallest units or decimals
-sell_token_address = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2" # WETH on Ethereum - OPTIONAL: only if is_erc20_to_erc20_swap=True 
-buy_token_address = "0xdAC17F958D2ee523a2206206994597C13D831ec7" # USDT on Ethereum
+sell_token_address = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" # USDC on Ethereum
+buy_token_address = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831" # USDC on Arbitrum
 chain_type = "evm"
-network = "evm_ethereum_mainnet"
+origin_network = "evm_ethereum_mainnet"
+destination_network = "evm_arbitrum_mainnet"
 slippage = "500" # in bps
 is_erc20_to_erc20_swap = False # to configure
 
@@ -34,23 +35,25 @@ async def main():
         if is_erc20_to_erc20_swap is True:
         # Getting quotes from providers
             quotes_response = await get_erc20_to_erc20_quote(
-                vault_id=FORDEFI_EVM_VAULT_ID, 
-                chain_type=chain_type, 
-                network=network, 
+                vault_id=FORDEFI_EVM_VAULT_ID,
+                chain_type=chain_type,
+                origin_network=origin_network,
+                destination_network=destination_network,
                 sell_token_amount=sell_token_amount,
                 sell_token_address=sell_token_address,
-                buy_token_address=buy_token_address, 
-                providers=provider_list, 
+                buy_token_address=buy_token_address,
+                providers=provider_list,
                 slippage=slippage,
                 access_token=USER_API_TOKEN)
         else:
             quotes_response = await get_native_to_erc20_quote(
-                vault_id=FORDEFI_EVM_VAULT_ID, 
-                chain_type=chain_type, 
-                network=network, 
-                sell_token_amount=sell_token_amount, 
-                buy_token_address=buy_token_address, 
-                providers=provider_list, 
+                vault_id=FORDEFI_EVM_VAULT_ID,
+                chain_type=chain_type,
+                origin_network=origin_network,
+                destination_network=destination_network,
+                sell_token_amount=sell_token_amount,
+                buy_token_address=buy_token_address,
+                providers=provider_list,
                 slippage=slippage,
                 access_token=USER_API_TOKEN)
         
@@ -67,25 +70,27 @@ async def main():
         print(f"Using quote ID: {best_quote['quote_id']} from {best_quote['provider_info']['provider_id']}")
 
         # Creating transaction payload using the best quote
-        if is_erc20_to_erc20_swap is True:    
+        if is_erc20_to_erc20_swap is True:
             tx_payload = await submit_erc20_to_erc20_quote(
                 quote_id=best_quote["quote_id"],
-                vault_id=FORDEFI_EVM_VAULT_ID, 
-                chain_type=chain_type, 
-                network=network, 
+                vault_id=FORDEFI_EVM_VAULT_ID,
+                chain_type=chain_type,
+                origin_network=origin_network,
+                destination_network=destination_network,
                 sell_token_amount=sell_token_amount,
-                sell_token_address=sell_token_address, 
-                buy_token_address=buy_token_address, 
+                sell_token_address=sell_token_address,
+                buy_token_address=buy_token_address,
                 providers=[best_quote["provider_info"]["provider_id"]],
                 slippage=slippage)
         else:
             tx_payload = await submit_native_to_erc20_quote(
                 quote_id=best_quote["quote_id"],
-                vault_id=FORDEFI_EVM_VAULT_ID, 
-                chain_type=chain_type, 
-                network=network, 
-                sell_token_amount=sell_token_amount, 
-                buy_token_address=buy_token_address, 
+                vault_id=FORDEFI_EVM_VAULT_ID,
+                chain_type=chain_type,
+                origin_network=origin_network,
+                destination_network=destination_network,
+                sell_token_amount=sell_token_amount,
+                buy_token_address=buy_token_address,
                 providers=[best_quote["provider_info"]["provider_id"]],
                 slippage=slippage)
 
