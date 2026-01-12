@@ -8,15 +8,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-async def sol_tx_tokens(vault_id: str, destination: str, value: str, token: str, sponsor: str):
-    print(f"⛽ Fee sponsor: {sponsor}")
+async def build_sponsored_tx(vault_id: str, destination: str, value: str, token: str, fee_payer: str):
+    print(f"⛽ Fee payer: {fee_payer}")
     request_json = {
         "signer_type": "api_signer",
         "type": "solana_transaction",
         "details": {
             "fee_payer": {
                 "type": "vault",
-                "vault_id": sponsor
+                "vault_id": fee_payer
             },
             "fee": {
                 "type": "custom",
@@ -47,7 +47,7 @@ async def sol_tx_tokens(vault_id: str, destination: str, value: str, token: str,
 ## CONFIG
 USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
 SOL_VAULT_ID = os.environ["SOL_VAULT_ID"]
-SPONSOR_VAULT_ID = os.environ["SPONSOR_VAULT_ID_SOLANA"]
+FEE_PAYER_VAULT_ID_SOLANA = os.environ["FEE_PAYER_VAULT_ID_SOLANA"]
 path = "/api/v1/transactions"
 destination = "EjL8jgiEMwuHT6xsDwm7HmF4uqv2cAjJULfXwUm6ZSSD" # Change to your destination address
 value = str(100)  # in smallest units (1 USDC = 1_000_000 SOL)
@@ -56,8 +56,8 @@ token_address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" # USDC on Solana
 async def main():
     try:
         ## Building transaction
-        request_json = await sol_tx_tokens(vault_id=SOL_VAULT_ID, destination=destination, 
-                                    value=value, token=token_address, sponsor=SPONSOR_VAULT_ID)
+        request_json = await build_sponsored_tx(vault_id=SOL_VAULT_ID, destination=destination, 
+                                    value=value, token=token_address, fee_payer=FEE_PAYER_VAULT_ID_SOLANA)
         request_body = json.dumps(request_json)
         timestamp = datetime.datetime.now().strftime("%s")
         payload = f"{path}|{timestamp}|{request_body}"
