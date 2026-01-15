@@ -5,11 +5,13 @@ import datetime
 import requests
 from pathlib import Path
 from dotenv import load_dotenv
+from eth_account.messages import encode_defunct
+from eth_account import Account
 from signing.signer import sign_with_api_user_private_key
 from request_builder.push_to_api import make_api_request
 from request_builder.construct_request import construct_personal_message_request
 
-# Load Fordefi secrets
+# Load Fordefi config
 load_dotenv()
 PRIVATE_KEY_PEM_FILE = Path("./secret/private.pem")
 PATH = "/api/v1/transactions/create-and-wait"
@@ -22,34 +24,25 @@ EVM_CHAIN = os.environ["EVM_CHAIN"]
 # Example message - replace with your actual message
 MESSAGE = """Hello, this is a test message to sign.
 
-You can put any content here that you want to sign with your EVM wallet."""
+You can put any content here that you want to sign with your Fordefi EVM wallet."""
 
 
 def decode_signature(signature_b64: str) -> tuple:
-    """
-    Decode a base64 signature into r, s, v components.
-
-    Args:
-        signature_b64: Base64 encoded signature from Fordefi
-
-    Returns:
-        tuple: (r, s, v) signature components
-    """
     signature_bytes = base64.b64decode(signature_b64)
     r = int.from_bytes(signature_bytes[0:32], byteorder='big')
     s = int.from_bytes(signature_bytes[32:64], byteorder='big')
     v = int(signature_bytes[64])
-
     return r, s, v
 
+def ecrecover(message: str, signature_hex: str) -> str:
+    signable_message = encode_defunct(text=message)
+    recovered_address = Account.recover_message(signable_message, signature=signature_hex)
+    return recovered_address
 
 def main():
-    """Main function to execute the personal message signing process with Fordefi."""
-
     print(f"Message to sign:\n{MESSAGE}\n")
     print("-" * 50)
 
-    # Build the request
     request_json = construct_personal_message_request(FORDEFI_EVM_VAULT_ID, MESSAGE, EVM_CHAIN)
     request_body = json.dumps(request_json)
 
@@ -66,7 +59,6 @@ def main():
         print("\nResponse Data:")
         print(json.dumps(response_data, indent=2))
 
-        # Check if the request timed out waiting for approval
         if response_data.get("has_timed_out") and response_data.get("state") == "waiting_for_approval":
             tx_id = response_data.get("id")
             print("\n⏳ Request timed out while waiting for approval.")
@@ -76,7 +68,6 @@ def main():
             print("   Docs: https://docs.fordefi.com/api/latest/openapi/transactions/get_transaction_api_v1_transactions__id__get")
             return
 
-        # Extract the signature if returned
         if "signatures" in response_data and response_data["signatures"]:
             signature_b64 = response_data["signatures"][0]
             signature_bytes = base64.b64decode(signature_b64)
@@ -84,13 +75,14 @@ def main():
 
             print(f"\nSignature (hex): {signature_hex}")
 
-            # Show r, s, v components
             r, s, v = decode_signature(signature_b64)
-
             print(f"\nDecoded signature components:")
             print(f"r: {hex(r)}")
             print(f"s: {hex(s)}")
             print(f"v: {v}")
+
+            recovered_address = ecrecover(MESSAGE, signature_hex)
+            print(f"\nRecovered signer address: {recovered_address}")
 
     except requests.exceptions.HTTPError as e:
         error_message = f"HTTP error occurred: {str(e)}"
