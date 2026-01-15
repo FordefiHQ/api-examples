@@ -5,8 +5,8 @@ import datetime
 import requests
 from pathlib import Path
 from dotenv import load_dotenv
-from eth_account.messages import encode_defunct
 from eth_account import Account
+from eth_account.messages import encode_defunct
 from signing.signer import sign_with_api_user_private_key
 from request_builder.push_to_api import make_api_request
 from request_builder.construct_request import construct_personal_message_request

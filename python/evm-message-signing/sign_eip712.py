@@ -5,8 +5,10 @@ import datetime
 import requests
 from pathlib import Path
 from dotenv import load_dotenv
-from signing.signer import sign_with_api_user_private_key
+from eth_account import Account
+from eth_account.messages import encode_typed_data
 from request_builder.push_to_api import make_api_request
+from signing.signer import sign_with_api_user_private_key
 from request_builder.construct_request import construct_eip712_message_request
 
 # Load Fordefi secrets
@@ -53,19 +55,19 @@ typed_data = {
 }
 
 def decode_signature(signature_b64, chain_id):
-
-    """Decode a base64 signature into r, s, v components."""
-
     signature = base64.b64decode(signature_b64)
     r = int.from_bytes(signature[0:32], byteorder='big')
     s = int.from_bytes(signature[32:64], byteorder='big')
     v_raw = int(signature[-1]) # 27 or 28
     v = v_raw + 35 + 2 * chain_id
-    
     return r, s, v
 
+def ecrecover(typed_data: dict, signature_hex: str) -> str:
+    signable_message = encode_typed_data(full_message=typed_data)
+    recovered_address = Account.recover_message(signable_message, signature=signature_hex)
+    return recovered_address
+
 def main():
-    """Main function to execute the EIP-712 signing process with Fordefi"""
     raw_typed_message_ = json.dumps(typed_data)
 
     # OPTIONAL -> hex-encode the raw typed message
@@ -86,18 +88,15 @@ def main():
         try:
             print("\nResponse Data:")
             print(json.dumps(response_data, indent=2))
-            # Check if the request timed out waiting for approval
             if response_data.get("has_timed_out") and response_data.get("state") == "waiting_for_approval":
                 tx_id = response_data.get("id")
                 print("\n⏳ Request timed out while waiting for approval.")
                 print("   Note: The transaction is NOT cancelled - it can still be approved and signed.")
                 print(f"   Transaction ID: {tx_id}")
                 print(f"   Track status: GET /api/v1/transactions/{tx_id}")
-                print("   Docs: https://docs.fordefi.com/api/latest/openapi/transactions/get_transaction_api_v1_transactions__id__get")
-            
+                print("   Docs: https://docs.fordefi.com/api/latest/openapi/transactions/get_transaction_api_v1_transactions__id__get")    
                 return
             
-            # Extract the signature if returned
             if "signatures" in response_data and response_data["signatures"]:
                 signature_b64 = response_data["signatures"][0]
                 signature_bytes = base64.b64decode(signature_b64)
@@ -105,13 +104,15 @@ def main():
 
                 print(f"\nSignature (hex): {signature_hex}")
 
-                # Show r, s, v components
                 r, s, v = decode_signature(signature_b64, typed_data["domain"]["chainId"])
-
                 print(f"\nDecoded signature components:")
                 print(f"r: {hex(r)}")
                 print(f"s: {hex(s)}")
                 print(f"v: {v}")
+
+                recovered_address = ecrecover(typed_data, signature_hex)
+                print(f"\nRecovered signer address: {recovered_address}")
+
         except json.JSONDecodeError:
             print("Failed printing response data!")
     except requests.exceptions.HTTPError as e:
