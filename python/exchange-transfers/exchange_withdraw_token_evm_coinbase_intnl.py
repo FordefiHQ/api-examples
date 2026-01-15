@@ -26,7 +26,7 @@ async def main():
     request_body = json.dumps(request_json)
     timestamp = datetime.datetime.now().strftime("%s")
     payload = f"{path}|{timestamp}|{request_body}"
-    ## Signing transaction payload with API Signer
+    ## Signing transaction with API User Private key
     signature = await sign(payload=payload)
     ## Broadcasting tx
     await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)

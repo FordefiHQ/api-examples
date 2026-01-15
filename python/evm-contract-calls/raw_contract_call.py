@@ -17,19 +17,25 @@ async def contract_call(evm_chain: str, vault_id: str, contract: str, custom_not
         "sign_mode": "auto",
         "type": "evm_transaction",
         "details": {
+            # "fail_on_prediction_failure": True,
+            # "skip_prediction": False,
             "push_mode": "auto",
             "type": "evm_raw_transaction",
             "chain": f"evm_{evm_chain}_mainnet",
             "gas": {
-                "type": "priority",
-                "priority_level": "medium"
+                "gas_limit": "1000000",
+                "type": "custom",
+                "details": {
+                    "type": "legacy",
+                    "price": "100000000" # 0.1 GWEI
+                }
             },
             "to": contract,
-            "value":value,
+            "value": value,
             "data": {
                 "type": "hex",
                 "hex_data": call_data
-            }
+            },
         }
     }
     
@@ -38,7 +44,8 @@ async def contract_call(evm_chain: str, vault_id: str, contract: str, custom_not
 ## Fordefi configuration
 API_USER_PRIVATE_KEY = Path("./secret/private.pem")
 USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
-EVM_VAULT_ID = os.environ["EVM_VAULT_ID"]
+# EVM_VAULT_ID = os.environ["EVM_VAULT_ID"]
+EVM_VAULT_ID = "475ed95a-daa1-4005-9551-1ff83e474f6a"
 evm_chain = "ethereum"
 path = "/api/v1/transactions" # CHANGE
 contract = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"

@@ -22,11 +22,11 @@ async def contract_call(evm_chain: str, vault_id: str, contract: str, custom_not
             "type": "evm_raw_transaction",
             "chain": f"evm_{evm_chain}_mainnet",
             "gas": {
-                "type": "priority",
+                "type": "custom",
                 "priority_level": "medium"
             },
             "to": contract,
-            "value":value,
+            "value": value,
             "data": {
                 "type": "hex",
                 "hex_data": call_data
