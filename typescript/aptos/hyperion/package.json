@@ -1,0 +1,22 @@
+{
+  "name": "@fordefi/hyperion",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "withdraw": "npx tsx ./src/run.ts",
+    "positions": "npx tsx ./src/get-positions.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@aptos-labs/script-composer-sdk": "^0.3.1",
+    "@aptos-labs/ts-sdk": "^5.2.1",
+    "@hyperionxyz/sdk": "^0.0.25",
+    "axios": "^1.13.2",
+    "dotenv": "^17.2.3",
+    "tsx": "^4.21.0"
+  }
+}
