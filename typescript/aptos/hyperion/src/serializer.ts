@@ -1,5 +1,5 @@
 import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
-import { FordefiAptosConfig, sdk, POSITION_ID, removeRatio } from "./config";
+import { FordefiAptosConfig, sdk, POSITION_ID, removeRatio, slippage } from "./config";
 
 export async function buildPayload(fordefiConfig: FordefiAptosConfig, APTOS_NETWORK: Network) {
     const config = new AptosConfig({ network: APTOS_NETWORK });
@@ -31,7 +31,7 @@ export async function buildPayload(fordefiConfig: FordefiAptosConfig, APTOS_NETW
         currencyAAmount: Math.floor(currencyAAmount * removeRatio),
         currencyBAmount: Math.floor(currencyBAmount * removeRatio),
         deltaLiquidity: Math.floor(position[0].currentAmount * removeRatio),
-        slippage: 0.5, // in %
+        slippage: slippage,
         recipient: originVaultAddress,
     });
 
