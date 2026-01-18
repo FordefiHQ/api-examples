@@ -21,7 +21,7 @@ export const fordefiConfig: FordefiAptosConfig = {
     apiPathEndpoint: '/api/v1/transactions'
 };
 
-export const APTOS_NETWORK = Network.MAINNET
+export const APTOS_NETWORK = Network.MAINNET;
 
 export const sdk = new HyperionSDK({
     network: APTOS_NETWORK,
@@ -35,4 +35,5 @@ export const sdk = new HyperionSDK({
 
 export const POSITION_ID = process.env.POSITION_ID!;
 export const removeRatio = 1.0;  // 1 == Remove 100% of liquidity
+export const slippage = 0.1; // in %
     
