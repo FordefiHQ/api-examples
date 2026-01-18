@@ -18,13 +18,12 @@ async function main(): Promise<void> {
     requestBody
   );
 
-  await new Promise(resolve => setTimeout(resolve, 2000));
-
   const signedFordefiTx = await get_tx(fordefiConfig.apiPathEndpoint, fordefiConfig.accessToken, response.data.id)
 
   if (signedFordefiTx){
     console.log("Transaction signed by Fordefi ✅");
     console.log(`Fordefi transaction ID: ${signedFordefiTx.id}`);
+    await new Promise(resolve => setTimeout(resolve, 2000));
     const fullySignedTx = await get_tx(fordefiConfig.apiPathEndpoint, fordefiConfig.accessToken,signedFordefiTx.id)
     console.log(`Link to explorer:\n${fullySignedTx.explorer_url}`);
   }
