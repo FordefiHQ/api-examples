@@ -1,5 +1,4 @@
 import { FordefiProviderConfig } from "@fordefi/web3-provider";
-import { PublicKey } from "@solana/web3.js";
 import dotenv from "dotenv";
 import fs from "fs";
 
@@ -73,15 +72,9 @@ export const ARBITRUM_USDC = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
 // V2 MessageTransmitter addresses
 export const ARBITRUM_MESSAGE_TRANSMITTER_V2 = "0x81D40F21F12A8F0E3252Bccb954D722d4c464B64";
 // Solana CCTP Program IDs (Mainnet & Devnet)
-export const MESSAGE_TRANSMITTER_PROGRAM_ID = new PublicKey(
-  "CCTPV2Sm4AdWt5296sk4P66VBZ7bEhcARwFaaS9YPbeC",
-);
-export const TOKEN_MESSENGER_MINTER_PROGRAM_ID = new PublicKey(
-  "CCTPV2vPZJS2u2BBsUoscuikbYjnpFmbFsvVuJdgUMQe",
-);
-export const SOLANA_USDC_MINT = new PublicKey(
-  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-);
+export const MESSAGE_TRANSMITTER_PROGRAM_ID = "CCTPV2Sm4AdWt5296sk4P66VBZ7bEhcARwFaaS9YPbeC" as const;
+export const TOKEN_MESSENGER_MINTER_PROGRAM_ID = "CCTPV2vPZJS2u2BBsUoscuikbYjnpFmbFsvVuJdgUMQe" as const;
+export const SOLANA_USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" as const;
 // CCTP Domain IDs
 export const ETHEREUM_DOMAIN = 0;
 export const ARBITRUM_DOMAIN = 3;
@@ -104,7 +97,7 @@ export interface BridgeConfigSolana {
 
 export const bridgeConfigSolana: BridgeConfigSolana = {
   ethereumChain: bridgeCongfig.chainFrom,
-  amountUsdc: "0.1",
+  amountUsdc: "1",
   useFastTransfer: true, // Set to false for standard transfer (free but takes 13-19 minutes)
   solanaRpcUrl: "https://api.mainnet-beta.solana.com",
   solanaRecipientAddress: "CtvSEG7ph7SQumMtbnSKtDTLoUQoy8bxPUcjwvmNgGim",

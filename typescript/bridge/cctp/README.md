@@ -179,6 +179,61 @@ npm run evm2solana
 npm run solana2evm
 ```
 
+## Manual Claim (Recovery)
+
+If the EVM → Solana bridge burn succeeds but the Solana mint fails, use the manual claim script to complete the transfer.
+
+### When to Use
+
+- Bridge shows `state: error` with mint failure
+- Burn transaction succeeded on EVM (you have the tx hash)
+- Error message like `"AccountNotFound"` or `"Pre-flight simulation failed"`
+
+### Usage
+
+```bash
+npm run claim-solana -- --tx-hash <evm-burn-tx-hash>
+```
+
+### Example
+
+```bash
+# Using the burn transaction hash from Arbitrum
+npm run claim-solana -- --tx-hash 0x8b4bfcd37afb11285dceeaeef4ba000d4d5ad3e8bc706987a2fde38b921010a7
+```
+
+### What It Does
+
+1. **Fetches the CCTP message** from the EVM burn transaction
+2. **Retrieves the attestation** from Circle's API (polls until ready)
+3. **Completes the mint** on Solana using the Bridge Kit
+
+### Output
+
+```text
+=== CCTP Manual Claim for Solana ===
+
+Fetching burn transaction: 0x8b4bfcd...
+Message hash: 0x63853ccd...
+
+Fetching attestation from Circle...
+Attestation received (attempt 3)
+
+=== Completing Mint on Solana ===
+
+Recipient: CtvSEG7ph7SQumMtbnSKtDTLoUQoy8bxPUcjwvmNgGim
+Submitting receiveMessage transaction...
+
+Mint successful!
+TX: https://solscan.io/tx/...
+```
+
+### Requirements
+
+- Relayer wallet (`PHANTOM_PK`) must have SOL for transaction fees
+- Recipient's USDC token account must exist (created automatically by `evm2solana`)
+- Original burn transaction must have succeeded on EVM
+
 ## Common Issues
 
 1. **"Account not found"** - For Solana, ensure the Fordefi vault's USDC token account exists
