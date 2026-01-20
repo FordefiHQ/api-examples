@@ -1,18 +1,17 @@
 import "dotenv/config";
 import { getProvider } from "./get-provider";
-import {signWithApiSigner } from "./signer";
-import {createAndSignTx, get_tx} from './process_tx'
-import {
-  fordefiConfigFrom,
-  bridgeConfigSolana
-} from "./config";
+import { signWithApiSigner } from "./signer";
+import { createAndSignTx, get_tx } from "./process_tx";
+import { fordefiConfigFrom, bridgeConfigSolana } from "./config";
 import {
   createWalletClient,
   createPublicClient,
   custom,
-  http
+  http,
 } from "viem";
 import { arbitrum } from "viem/chains";
+
+// web3.js imports (still needed for Anchor compatibility)
 import {
   Connection,
   PublicKey,
@@ -24,14 +23,25 @@ import {
 } from "@solana/web3.js";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
 import * as spl from "@solana/spl-token";
-import { SOLANA_USDC_MINT, SOLANA_DOMAIN, ARBITRUM_DOMAIN, ARBITRUM_MESSAGE_TRANSMITTER_V2  } from "./config";
+
+// Config imports (SOLANA_USDC_MINT is now a string, convert to PublicKey below)
+import {
+  SOLANA_USDC_MINT,
+  SOLANA_DOMAIN,
+  ARBITRUM_MESSAGE_TRANSMITTER_V2,
+} from "./config";
+
+// CCTP program utilities
 import {
   getProgramsV2,
-  getDepositForBurnPdasV2
+  getDepositForBurnPdasV2,
 } from "../solana-cctp-contracts/examples/v2/utilsV2";
 import * as anchor from "@coral-xyz/anchor";
 import { BN } from "@coral-xyz/anchor";
 import { getBytes } from "ethers";
+
+// Convert string address to PublicKey for Anchor compatibility
+const USDC_MINT_PUBKEY = new PublicKey(SOLANA_USDC_MINT);
 
 // ============================================================================
 // Helper: Convert EVM address to bytes32
@@ -73,7 +83,7 @@ async function burnUsdcOnSolana(
   
   // Derive the ATA for the owner's USDC account (burn token account)
   const userTokenAccount = await getAssociatedTokenAddress(
-    SOLANA_USDC_MINT,
+    USDC_MINT_PUBKEY,
     ownerPubkey
   );
 
@@ -89,7 +99,7 @@ async function burnUsdcOnSolana(
       messageTransmitterProgram,
       tokenMessengerMinterProgram,
     },
-    SOLANA_USDC_MINT,
+    USDC_MINT_PUBKEY,
     bridgeConfigSolana.destinationDomain
   );
 
@@ -117,7 +127,7 @@ async function burnUsdcOnSolana(
       remoteTokenMessenger: pdas.remoteTokenMessengerKey.publicKey,
       tokenMinter: pdas.tokenMinterAccount.publicKey,
       localToken: pdas.localToken.publicKey,
-      burnTokenMint: SOLANA_USDC_MINT,
+      burnTokenMint: USDC_MINT_PUBKEY,
       messageSentEventData: messageSentEventAccountKeypair.publicKey,
       messageTransmitterProgram: messageTransmitterProgram.programId,
       tokenMessengerMinterProgram: tokenMessengerMinterProgram.programId,

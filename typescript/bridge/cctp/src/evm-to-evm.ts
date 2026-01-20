@@ -7,8 +7,6 @@ import { createAdapterFromProvider } from "@circle-fin/adapter-viem-v2";
 
 async function main(): Promise<void> {
   const kit = await new BridgeKit();
-  
-  // We need to initialize 2 providers (from and to) since the Fordefi provider doesn't support chain switching
   const from_provider = await getProvider(fordefiConfigFrom);
   if (!from_provider) {
     throw new Error("Failed to initialize provider");
@@ -36,18 +34,35 @@ async function main(): Promise<void> {
   console.log("---------------Starting Bridging---------------");
   const result = await kit.bridge({
     from: { adapter: adapterFrom, chain: bridgeCongfig.chainFrom },
-    to: { 
-      adapter: adapterTo, 
+    to: {
+      adapter: adapterTo,
       chain: bridgeCongfig.chainTo,
       recipientAddress: bridgeCongfig.destinationAddress
     },
     amount: bridgeCongfig.amount,
+    config: {
+      // Use SLOW for free transfers, or FAST with explicit maxFee
+      transferSpeed: 'FAST',
+      maxFee: "100000", // 0.1 USDC max fee in smallest units
+    },
   } as any);
 
-  console.log("RESULT", inspect(result, false, null, true));
+  if (result.state === 'success') {
+    const amount = (parseInt(result.amount) / 1e6).toFixed(2);
+    console.log(`\n✅ Bridge successful: ${amount} USDC`);
+    console.log(`   ${result.source.chain.name} → ${result.destination.chain.name}`);
+    result.steps.forEach((step: any) => {
+      if (step.explorerUrl) {
+        console.log(`   ${step.name}: ${step.explorerUrl}`);
+      }
+    });
+  } else {
+    console.log("\n❌ Bridge failed:");
+    console.log(inspect(result, false, null, true));
+  }
 }
 
 main().catch((err) => {
-  console.error("ERROR", inspect(err, false, null, true));
+  console.error("\n❌ Error:", err.message || err);
   process.exit(1);
 });

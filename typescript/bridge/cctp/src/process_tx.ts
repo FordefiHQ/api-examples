@@ -35,7 +35,6 @@ export async function createAndSignTx(
 
     return respTx;
   } catch (error: any) {
-    // If we have an Axios error with a response, parse it
     if (error.response) {
       let errorMessage = `HTTP error occurred: status = ${error.response.status}`;
       try {
@@ -46,8 +45,6 @@ export async function createAndSignTx(
       }
       throw new Error(errorMessage);
     }
-
-    // Otherwise, it's a network or unknown error
     throw new Error(`Network error occurred: ${error.message ?? error}`);
   }
 };
@@ -82,7 +79,6 @@ export async function get_tx(
 
     return respTx.data;
   } catch (error: any) {
-    // If we have an Axios error with a response, parse it
     if (error.response) {
       let errorMessage = `HTTP error occurred: status = ${error.response.status}`;
       try {
@@ -93,7 +89,6 @@ export async function get_tx(
       }
       throw new Error(errorMessage);
     }
-    // Otherwise, it's a network or unknown error
     throw new Error(`Network error occurred: ${error.message ?? error}`);
   }
 }
