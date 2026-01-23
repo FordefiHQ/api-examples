@@ -1,7 +1,6 @@
-
+import { withdrawWithLayerswap } from './withdraw-layerswap.js';
 import { fordefiConfig, paradexAction } from './config.js';
 import { getProvider } from './get-provider.js';
-import { withdraw } from './withdraw.js';
 import * as Paradex from '@paradex/sdk';
 import { ethers } from 'ethers';
 
@@ -27,8 +26,20 @@ async function main(){
     if (paradexAction.action == "balance"){
         const balance = await paradexClient!.getTokenBalance('USDC');
         console.log('Balance:', balance.size);
-    } else if (paradexAction.action == 'withdraw'){
-        await withdraw(paradexClient!, paradexAction);
+    } else if (paradexAction.action == 'withdraw-layerswap'){
+        if (!paradexAction.layerswapApiKey) {
+            throw new Error("LAYERSWAP_API_KEY is required for withdraw-layerswap action");
+        }
+        if (!paradexAction.destinationAddress) {
+            throw new Error("destinationAddress is required for withdraw-layerswap action");
+        }
+        await withdrawWithLayerswap({
+            paradexClient: paradexClient!,
+            paradexAction,
+            destinationAddress: paradexAction.destinationAddress,
+            layerswapApiKey: paradexAction.layerswapApiKey,
+            destinationNetwork: paradexAction.destinationNetwork
+        });
     }
 }
 main()

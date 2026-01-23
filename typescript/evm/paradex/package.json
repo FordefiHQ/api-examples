@@ -17,6 +17,7 @@
   "dependencies": {
     "@fordefi/web3-provider": "^0.3.0",
     "@paradex/sdk": "^0.8.1",
+    "axios": "^1.13.2",
     "dotenv": "^16.6.1",
     "ethers": "6.15",
     "tsx": "^4.21.0"
