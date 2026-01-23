@@ -105,6 +105,7 @@ npm run action
 |----------------------|------------------------------------------------|
 | `balance`            | Check your USDC balance on Paradex             |
 | `withdraw-layerswap` | Withdraw USDC via Layerswap (fast, minutes)    |
+| `onboard`            | Onboard account to Paradex (one-time setup)    |
 | `place-order`        | Place a limit or market order                  |
 | `account-status`     | View account info and open orders              |
 | `cancel-orders`      | Cancel all open orders (optionally by market)  |
@@ -167,10 +168,12 @@ export const orderDetails: OrderDetails = {
 
 When placing an order, the script:
 
-1. **Derives Starknet credentials** from your Fordefi Ethereum signature
-2. **Onboards** your account to Paradex (only needed once)
+1. **Derives Starknet credentials** from your Fordefi Ethereum signature (cached after first call)
+2. **Checks onboarding status** and onboards if needed (skipped if already onboarded)
 3. **Authenticates** to get a JWT token for the REST API
 4. **Signs and submits** the order using Starknet typed data signatures
+
+You can run `onboard` separately as a one-time setup, or let `place-order` handle it automatically.
 
 ### Available Markets
 

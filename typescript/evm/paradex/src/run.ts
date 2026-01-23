@@ -1,7 +1,7 @@
 import { withdrawWithLayerswap } from './withdraw-layerswap.js';
 import { fordefiConfig, paradexAction } from './config.js';
 import { getProvider } from './get-provider.js';
-import { placeOrder, getAccountStatus, cancelOrders } from './trading.js';
+import { placeOrder, getAccountStatus, cancelOrders, onboardAccount } from './trading.js';
 import * as Paradex from '@paradex/sdk';
 import { ethers } from 'ethers';
 
@@ -50,6 +50,8 @@ async function main(){
         await getAccountStatus(signer, paradexConfig);
     } else if (paradexAction.action == 'cancel-orders') {
         await cancelOrders(signer, paradexConfig, paradexAction.orderDetails?.market);
+    } else if (paradexAction.action == 'onboard') {
+        await onboardAccount(signer, paradexConfig);
     }
 }
 main()

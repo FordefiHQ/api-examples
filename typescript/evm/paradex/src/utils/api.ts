@@ -1,13 +1,12 @@
 import axios, { AxiosError } from "axios";
 
-import { Account, SystemConfig } from "./types";
-import { signAuthRequest, signOnboardingRequest, signOrder } from "./signature";
+import { Account, SystemConfig } from "./types.js";
+import { signAuthRequest, signOnboardingRequest, signOrder } from "./signature.js";
 
 function handleError(error: AxiosError) {
   console.error(error.response);
 }
 
-// Onboarding
 export async function onboardUser(config: SystemConfig, account: Account) {
   const timestamp = Date.now();
   const signature = signOnboardingRequest(config, account);
@@ -33,7 +32,6 @@ export async function onboardUser(config: SystemConfig, account: Account) {
   }
 }
 
-// Auth
 export async function authenticate(config: SystemConfig, account: Account) {
   const { signature, timestamp, expiration } = signAuthRequest(config, account);
   const headers = {
@@ -53,10 +51,28 @@ export async function authenticate(config: SystemConfig, account: Account) {
     return response.data.jwt_token;
   } catch (e) {
     handleError(e as AxiosError);
+    return null;
   }
 }
 
-// Orders - POST
+export async function isAccountOnboarded(config: SystemConfig, account: Account): Promise<boolean> {
+  const { signature, timestamp, expiration } = signAuthRequest(config, account);
+  const headers = {
+    Accept: "application/json",
+    "PARADEX-STARKNET-ACCOUNT": account.address,
+    "PARADEX-STARKNET-SIGNATURE": signature,
+    "PARADEX-TIMESTAMP": timestamp,
+    "PARADEX-SIGNATURE-EXPIRATION": expiration,
+  };
+
+  try {
+    await axios.post(`${config.apiBaseUrl}/auth`, {}, { headers });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 export async function createOrder(
   config: SystemConfig,
   account: Account,
@@ -89,7 +105,6 @@ export async function createOrder(
   }
 }
 
-// Orders - GET
 export async function getOpenOrders(config: SystemConfig, account: Account) {
   const headers = {
     Accept: "application/json",
@@ -106,7 +121,6 @@ export async function getOpenOrders(config: SystemConfig, account: Account) {
   }
 }
 
-// Orders - DELETE
 export async function cancelAllOpenOrders(
   config: SystemConfig,
   account: Account,
@@ -130,7 +144,6 @@ export async function cancelAllOpenOrders(
   }
 }
 
-// Markets - GET
 export async function listAvailableMarkets(
   config: SystemConfig,
   market?: string
@@ -140,7 +153,6 @@ export async function listAvailableMarkets(
   };
 
   try {
-    // If a specific market is provided, append it as a query parameter
     const url = market
       ? `${config.apiBaseUrl}/markets?market=${market}`
       : `${config.apiBaseUrl}/markets`;
@@ -152,7 +164,6 @@ export async function listAvailableMarkets(
   }
 }
 
-// Account - GET
 export async function getAccountInfo(config: SystemConfig, account: Account) {
   const headers = {
     Accept: "application/json",

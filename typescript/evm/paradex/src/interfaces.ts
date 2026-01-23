@@ -10,7 +10,7 @@ export interface OrderDetails {
 }
 
 export interface ParadexAction {
-  action: "balance" | "withdraw-layerswap" | "place-order" | "account-status" | "cancel-orders"
+  action: "balance" | "withdraw-layerswap" | "place-order" | "account-status" | "cancel-orders" | "onboard"
   amountToWithdraw: string
   // Layerswap config (required for withdraw-layerswap)
   layerswapApiKey?: string

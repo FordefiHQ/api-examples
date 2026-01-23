@@ -32,12 +32,12 @@ export const orderDetails: OrderDetails = {
   market: "ETH-USD-PERP",
   side: "BUY",
   type: "LIMIT",
-  size: "0.00001",
+  size: "0.0001", // minimum is 0.0001
   price: "2000"
 };
 
 export const paradexAction: ParadexAction = {
-  action: "withdraw-layerswap",
+  action: "place-order", //  "balance" | "withdraw-layerswap" | "place-order" | "account-status" | "cancel-orders" | "onboard"
   amountToWithdraw: "0.5",
   // Layerswap options (only used when action is "withdraw-layerswap")
   layerswapApiKey: LAYERSWAP_API_KEY,

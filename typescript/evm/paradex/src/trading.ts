@@ -1,15 +1,23 @@
-import * as Paradex from '@paradex/sdk';
-import { deriveFromEthSigner } from '@paradex/sdk/dist/account.js';
 import { ethers } from 'ethers';
-import { Account, SystemConfig } from './utils/types.js';
-import { authenticate, onboardUser, createOrder, getOpenOrders, cancelAllOpenOrders, getAccountInfo } from './utils/api.js';
-import { PARADEX_API_URL, PARADEX_CHAIN_ID } from './config.js';
+import * as Paradex from '@paradex/sdk';
 import { OrderDetails } from './interfaces.js';
+import { Account, SystemConfig } from './utils/types.js';
+import { PARADEX_API_URL, PARADEX_CHAIN_ID } from './config.js';
+import { deriveFromEthSigner } from '@paradex/sdk/dist/account.js';
+import { authenticate, onboardUser, isAccountOnboarded, createOrder, getOpenOrders, cancelAllOpenOrders, getAccountInfo } from './utils/api.js';
 
-export async function deriveParadexAccount(
+let cachedAccount: { account: Account; systemConfig: SystemConfig } | null = null;
+
+async function getOrCreateAccount(
     signer: ethers.Signer,
     paradexConfig: Paradex.ParadexConfig
 ): Promise<{ account: Account; systemConfig: SystemConfig }> {
+    if (cachedAccount) {
+        console.log(`Using cached Paradex account: ${cachedAccount.account.address}`);
+        return cachedAccount;
+    }
+
+    console.log("Deriving Paradex account...");
     const ethereumAddress = await signer.getAddress();
     const paradexSigner = Paradex.Signer.fromEthers(signer);
 
@@ -35,7 +43,27 @@ export async function deriveParadexAccount(
         }
     };
 
-    return { account, systemConfig };
+    cachedAccount = { account, systemConfig };
+    console.log(`Paradex address: ${account.address}`);
+    return cachedAccount;
+}
+
+export async function onboardAccount(
+    signer: ethers.Signer,
+    paradexConfig: Paradex.ParadexConfig
+) {
+    const { account, systemConfig } = await getOrCreateAccount(signer, paradexConfig);
+
+    console.log("Checking onboarding status...");
+    const alreadyOnboarded = await isAccountOnboarded(systemConfig, account);
+
+    if (alreadyOnboarded) {
+        console.log("Account already onboarded");
+        return;
+    }
+
+    console.log("Onboarding user...");
+    await onboardUser(systemConfig, account);
 }
 
 export async function placeOrder(
@@ -43,12 +71,17 @@ export async function placeOrder(
     paradexConfig: Paradex.ParadexConfig,
     orderDetails: OrderDetails
 ) {
-    console.log("Setting up trading account...");
-    const { account, systemConfig } = await deriveParadexAccount(signer, paradexConfig);
-    console.log(`Paradex address: ${account.address}`);
+    const { account, systemConfig } = await getOrCreateAccount(signer, paradexConfig);
 
-    console.log("Onboarding user...");
-    await onboardUser(systemConfig, account);
+    console.log("Checking onboarding status...");
+    const alreadyOnboarded = await isAccountOnboarded(systemConfig, account);
+
+    if (!alreadyOnboarded) {
+        console.log("Onboarding user...");
+        await onboardUser(systemConfig, account);
+    } else {
+        console.log("Account already onboarded");
+    }
 
     console.log("Authenticating...");
     const jwtToken = await authenticate(systemConfig, account);
@@ -77,7 +110,7 @@ export async function getAccountStatus(
     signer: ethers.Signer,
     paradexConfig: Paradex.ParadexConfig
 ) {
-    const { account, systemConfig } = await deriveParadexAccount(signer, paradexConfig);
+    const { account, systemConfig } = await getOrCreateAccount(signer, paradexConfig);
 
     const jwtToken = await authenticate(systemConfig, account);
     if (!jwtToken) {
@@ -94,7 +127,7 @@ export async function cancelOrders(
     paradexConfig: Paradex.ParadexConfig,
     market?: string
 ) {
-    const { account, systemConfig } = await deriveParadexAccount(signer, paradexConfig);
+    const { account, systemConfig } = await getOrCreateAccount(signer, paradexConfig);
 
     const jwtToken = await authenticate(systemConfig, account);
     if (!jwtToken) {
