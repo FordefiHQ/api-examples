@@ -59,13 +59,24 @@ LAYERSWAP_API_KEY=your_layerswap_api_key
 3. Edit `src/config.ts` to set your desired action:
 
 ```typescript
+// Order configuration (used when action is "place-order")
+export const orderDetails: OrderDetails = {
+  market: "ETH-USD-PERP",
+  side: "BUY",
+  type: "LIMIT",
+  size: "0.01",
+  price: "3000"
+};
+
 export const paradexAction: ParadexAction = {
-  action: "withdraw-layerswap",  // "balance" | "withdraw-layerswap"
-  amountToWithdraw: "1",         // Amount in USDC
-  // Layerswap options
+  action: "place-order",  // "balance" | "withdraw-layerswap" | "place-order" | "account-status" | "cancel-orders"
+  amountToWithdraw: "1",  // Amount in USDC (for withdrawals)
+  // Layerswap options (for withdraw-layerswap)
   layerswapApiKey: LAYERSWAP_API_KEY,
   destinationAddress: FORDEFI_EVM_VAULT_ADDRESS,
-  destinationNetwork: "ETHEREUM_MAINNET"
+  destinationNetwork: "ETHEREUM_MAINNET",
+  // Trading options (for place-order)
+  orderDetails: orderDetails
 };
 ```
 
@@ -94,6 +105,10 @@ npm run action
 |----------------------|------------------------------------------------|
 | `balance`            | Check your USDC balance on Paradex             |
 | `withdraw-layerswap` | Withdraw USDC via Layerswap (fast, minutes)    |
+| `onboard`            | Onboard account to Paradex (one-time setup)    |
+| `place-order`        | Place a limit or market order                  |
+| `account-status`     | View account info and open orders              |
+| `cancel-orders`      | Cancel all open orders (optionally by market)  |
 
 ## Withdrawal Process
 
@@ -133,6 +148,43 @@ if (Number(receivable.socializedLossFactor) !== 0) {
 }
 ```
 
+## Trading
+
+### Order Configuration
+
+Orders are configured via the `orderDetails` object in `src/config.ts`:
+
+```typescript
+export const orderDetails: OrderDetails = {
+  market: "ETH-USD-PERP",    // Trading pair
+  side: "BUY",               // "BUY" or "SELL"
+  type: "LIMIT",             // "LIMIT" or "MARKET"
+  size: "0.01",              // Position size
+  price: "3000"              // Required for LIMIT orders
+};
+```
+
+### Trading Flow
+
+When placing an order, the script:
+
+1. **Derives Starknet credentials** from your Fordefi Ethereum signature (cached after first call)
+2. **Checks onboarding status** and onboards if needed (skipped if already onboarded)
+3. **Authenticates** to get a JWT token for the REST API
+4. **Signs and submits** the order using Starknet typed data signatures
+
+You can run `onboard` separately as a one-time setup, or let `place-order` handle it automatically.
+
+### Available Markets
+
+Common perpetual markets on Paradex:
+
+- `ETH-USD-PERP`
+- `BTC-USD-PERP`
+- `SOL-USD-PERP`
+
+Check the [Paradex Markets API](https://docs.paradex.trade/api-reference/markets/list-all-markets) for the full list.
+
 ## File Structure
 
 ```
@@ -141,7 +193,14 @@ if (Number(receivable.socializedLossFactor) !== 0) {
 │   ├── config.ts              # Fordefi and action configuration
 │   ├── interfaces.ts          # TypeScript interfaces
 │   ├── get-provider.ts        # Fordefi provider initialization
-│   └── withdraw-layerswap.ts  # Layerswap withdrawal
+│   ├── withdraw-layerswap.ts  # Layerswap withdrawal
+│   ├── trading.ts             # Trading functions (place order, cancel, status)
+│   └── utils/
+│       ├── api.ts             # Paradex REST API functions
+│       ├── signature.ts       # Starknet typed data signing
+│       ├── typed_data.ts      # Typed data builders for orders
+│       ├── conversions.ts     # Amount/price conversions
+│       └── types.ts           # Account and config types
 ├── secret/
 │   └── private.pem            # Fordefi API signing key (gitignored)
 ├── .env                       # Environment variables (gitignored)
