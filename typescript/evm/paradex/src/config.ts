@@ -37,7 +37,7 @@ export const orderDetails: OrderDetails = {
 };
 
 export const paradexAction: ParadexAction = {
-  action: "place-order", //  "balance" | "withdraw-layerswap" | "place-order" | "account-status" | "cancel-orders" | "onboard"
+  action: "onboard", //  "balance" | "withdraw-layerswap" | "place-order" | "account-status" | "cancel-orders" | "onboard"
   amountToWithdraw: "0.5",
   // Layerswap options (only used when action is "withdraw-layerswap")
   layerswapApiKey: LAYERSWAP_API_KEY,
