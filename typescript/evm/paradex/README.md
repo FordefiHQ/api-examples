@@ -51,6 +51,7 @@ npm install
 ```env
 FORDEFI_API_USER_TOKEN=your_api_token
 FORDEFI_EVM_VAULT_ADDRESS=0x...
+LAYERSWAP_API_KEY=your_layerswap_api_key
 ```
 
 2. Place your Fordefi private key PEM file at `./secret/private.pem`
@@ -59,10 +60,27 @@ FORDEFI_EVM_VAULT_ADDRESS=0x...
 
 ```typescript
 export const paradexAction: ParadexAction = {
-  action: "balance",        // "balance" or "withdraw"
-  amountToWithdraw: "1"     // Amount in USDC (only used for withdraw)
+  action: "withdraw-layerswap",  // "balance" | "withdraw-layerswap"
+  amountToWithdraw: "1",         // Amount in USDC
+  // Layerswap options
+  layerswapApiKey: LAYERSWAP_API_KEY,
+  destinationAddress: FORDEFI_EVM_VAULT_ADDRESS,
+  destinationNetwork: "ETHEREUM_MAINNET"
 };
 ```
+
+### Getting a Layerswap API Key
+
+To use the fast `withdraw-layerswap` action, you need a Layerswap API key:
+
+1. Register at the [Layerswap Dashboard](https://www.layerswap.io/dashboard)
+2. Create an organization
+3. Create an app within that organization
+4. Copy your API key from the app settings
+
+The dashboard provides both **Mainnet** and **Testnet** keys. Use the appropriate one for your environment.
+
+See: [Layerswap API Keys Documentation](https://docs.layerswap.io/api-keys)
 
 ## Usage
 
@@ -72,46 +90,37 @@ npm run action
 
 ### Actions
 
-| Action | Description |
-|--------|-------------|
-| `balance` | Check your USDC balance on Paradex |
-| `withdraw` | Withdraw USDC from Paradex to Ethereum L1 |
+| Action               | Description                                    |
+|----------------------|------------------------------------------------|
+| `balance`            | Check your USDC balance on Paradex             |
+| `withdraw-layerswap` | Withdraw USDC via Layerswap (fast, minutes)    |
 
 ## Withdrawal Process
 
-### How Native Withdrawals Work
+### Why Layerswap?
 
-When you call `withdraw()` with an empty bridge call (`[]`), funds are withdrawn via **StarkGate** (the native Starknet<>Ethereum bridge):
+Native StarkGate withdrawals are **slow** (4-12+ hours) due to the ZK proof process. This script uses [Layerswap](https://layerswap.io) for fast withdrawals (minutes) with a small fee (~0.1-0.5%).
+
+| Method           | Speed        | Fee         |
+|------------------|--------------|-------------|
+| Native StarkGate | 4-12+ hours  | Gas only    |
+| Layerswap        | Minutes      | ~0.1-0.5%   |
+
+### Layerswap Withdrawal Flow
+
+When using `withdraw-layerswap`, the script:
+
+1. **Creates a swap** via Layerswap API (reserves the swap, gets a deposit address)
+2. **Executes Paradex withdrawal** with bridge calls:
+   - Transfers USDC to Layerswap's deposit address
+   - Calls Layerswap contract to initiate the bridge
+3. **Layerswap monitors** and sends funds to your L1 Ethereum address within minutes
 
 ```
-Paradex (L2) → StarkGate Bridge → Ethereum (L1)
+Paradex (L2) → Layerswap Contract → Layerswap Liquidity → Ethereum (L1)
 ```
 
-### Withdrawal Timeline
-
-Native StarkGate withdrawals are **slow** due to the ZK proof process:
-
-| Stage | Duration |
-|-------|----------|
-| L2 Transaction | Immediate |
-| Batching | Variable (depends on volume) |
-| Proof Generation | ~2 hours |
-| L1 Verification | ~30 minutes |
-| **Total** | **4-12+ hours** |
-
-You can monitor state updates at [L2BEAT Paradex](https://l2beat.com/scaling/projects/paradex) under "Liveness > State Updates".
-
-### Faster Alternatives
-
-For faster withdrawals, Paradex supports third-party bridges via the `bridgeCall` parameter:
-
-| Bridge | Speed | Fee |
-|--------|-------|-----|
-| Native StarkGate | 4-12+ hours | Gas only |
-| [rhino.fi](https://rhino.fi) | Minutes | ~0.1-0.3% |
-| [Layerswap](https://layerswap.io) | Minutes | ~0.1-0.5% |
-
-These liquidity bridges front you funds on L1 immediately.
+**Limit**: Withdrawals through Layerswap are limited to 60,000 USDC per transaction.
 
 ### Socialized Loss
 
@@ -128,13 +137,14 @@ if (Number(receivable.socializedLossFactor) !== 0) {
 
 ```
 ├── src/
-│   ├── run.ts           # Main entry point
-│   ├── config.ts        # Fordefi and action configuration
-│   ├── get-provider.ts  # Fordefi provider initialization
-│   └── withdraw.ts      # Withdrawal logic
+│   ├── run.ts                 # Main entry point
+│   ├── config.ts              # Fordefi and action configuration
+│   ├── interfaces.ts          # TypeScript interfaces
+│   ├── get-provider.ts        # Fordefi provider initialization
+│   └── withdraw-layerswap.ts  # Layerswap withdrawal
 ├── secret/
-│   └── private.pem      # Fordefi API signing key (gitignored)
-├── .env                 # Environment variables (gitignored)
+│   └── private.pem            # Fordefi API signing key (gitignored)
+├── .env                       # Environment variables (gitignored)
 └── package.json
 ```
 
@@ -142,5 +152,6 @@ if (Number(receivable.socializedLossFactor) !== 0) {
 
 - [Paradex Documentation](https://docs.paradex.trade)
 - [Paradex SDK (npm)](https://www.npmjs.com/package/@paradex/sdk)
-- [StarkGate Documentation](https://docs.starknet.io/learn/protocol/starkgate)
+- [Layerswap API Documentation](https://docs.layerswap.io/api)
 - [Fordefi Web3 Provider](https://www.npmjs.com/package/@fordefi/web3-provider)
+- [Fordefi Deterministic Signatures](https://docs.fordefi.com/user-guide/manage-transactions/deterministic-signatures)
