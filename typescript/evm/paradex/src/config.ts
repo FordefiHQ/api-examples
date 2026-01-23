@@ -1,6 +1,6 @@
 import fs from "fs";
 import dotenv from "dotenv";
-import { ParadexAction } from "./interfaces.js";
+import { ParadexAction, OrderDetails } from "./interfaces.js";
 import { FordefiProviderConfig } from "@fordefi/web3-provider";
 
 dotenv.config();
@@ -24,6 +24,17 @@ export const fordefiConfig: FordefiProviderConfig = {
 };
 
 export const LAYERSWAP_API_URL = "https://api.layerswap.io/api/v2";
+export const PARADEX_API_URL = "https://api.prod.paradex.trade/v1";
+export const PARADEX_CHAIN_ID = "PRIVATE_SN_PARACLEAR_MAINNET";
+
+// Example order configuration (used when action is "place-order")
+export const orderDetails: OrderDetails = {
+  market: "ETH-USD-PERP",
+  side: "BUY",
+  type: "LIMIT",
+  size: "0.00001",
+  price: "2000"
+};
 
 export const paradexAction: ParadexAction = {
   action: "withdraw-layerswap",
@@ -31,5 +42,7 @@ export const paradexAction: ParadexAction = {
   // Layerswap options (only used when action is "withdraw-layerswap")
   layerswapApiKey: LAYERSWAP_API_KEY,
   destinationAddress: FORDEFI_EVM_VAULT_ADDRESS,
-  destinationNetwork: "ETHEREUM_MAINNET"
+  destinationNetwork: "ETHEREUM_MAINNET",
+  // Trading options (only used when action is "place-order")
+  orderDetails: orderDetails
 }; 

@@ -1,6 +1,7 @@
 import { withdrawWithLayerswap } from './withdraw-layerswap.js';
 import { fordefiConfig, paradexAction } from './config.js';
 import { getProvider } from './get-provider.js';
+import { placeOrder, getAccountStatus, cancelOrders } from './trading.js';
 import * as Paradex from '@paradex/sdk';
 import { ethers } from 'ethers';
 
@@ -13,7 +14,7 @@ async function main(){
     const paradexConfig = await Paradex.Config.fetch('prod');
     const paradexSigner = Paradex.Signer.fromEthers(signer);
 
-    let paradexClient;
+    let paradexClient: Paradex.ParadexClient;
     try {
         paradexClient = await Paradex.Client.fromEthSigner(
             { config:paradexConfig, signer:paradexSigner }
@@ -40,6 +41,15 @@ async function main(){
             layerswapApiKey: paradexAction.layerswapApiKey,
             destinationNetwork: paradexAction.destinationNetwork
         });
+    } else if (paradexAction.action == 'place-order') {
+        if (!paradexAction.orderDetails) {
+            throw new Error("orderDetails is required for place-order action");
+        }
+        await placeOrder(signer, paradexConfig, paradexAction.orderDetails);
+    } else if (paradexAction.action == 'account-status') {
+        await getAccountStatus(signer, paradexConfig);
+    } else if (paradexAction.action == 'cancel-orders') {
+        await cancelOrders(signer, paradexConfig, paradexAction.orderDetails?.market);
     }
 }
 main()
