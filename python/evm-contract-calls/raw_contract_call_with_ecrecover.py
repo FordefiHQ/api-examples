@@ -1,11 +1,13 @@
 import os
 import json
+import base64
 import asyncio
 import datetime
 from pathlib import Path
+from dotenv import load_dotenv
+from eth_account import Account
 from utils.broadcast import broadcast_tx, get_tx
 from utils.sign_payload import sign_with_api_user_private_key
-from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -52,6 +54,19 @@ custom_note = "It's a wrap!" # Optional note
 value = str(1_000_000_000) # 0.00001 ETH (1 ETH = 0.000000000000000001 wei)
 hex_call_data = "0xd0e30db0"
 
+
+def decode_signature(signature_b64, chain_id):
+    signature = base64.b64decode(signature_b64)
+    r = int.from_bytes(signature[0:32], byteorder='big')
+    s = int.from_bytes(signature[32:64], byteorder='big')
+    v_raw = int(signature[-1]) # 27 or 28
+    v = v_raw + 35 + 2 * chain_id
+    return r, s, v
+
+def ecrecover_from_raw_tx(signed_tx_hex: str) -> str:
+    recovered_address = Account.recover_transaction(signed_tx_hex)
+    return recovered_address
+
 async def main():
     try:
         ## Building transaction
@@ -87,6 +102,10 @@ async def main():
 
         print(f"Transaction signed and broadcast successfully!")
         print(f"Raw transaction: {raw_transaction}")
+
+        # Recover signer from the signed raw transaction
+        recovered_address = ecrecover_from_raw_tx(raw_transaction)
+        print(f"\nRecovered signer address: {recovered_address}")
 
     except Exception as e:
         print(f"Transaction failed: {str(e)}")
