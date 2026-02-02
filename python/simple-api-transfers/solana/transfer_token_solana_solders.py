@@ -72,7 +72,7 @@ async def main():
         # Preparing payload
         request_json = await sol_tx_native(vault_id=FORDEFI_SOLANA_VAULT_ID, custom_note=custom_note, msg=msg)
         request_body = json.dumps(request_json)
-        timestamp = datetime.datetime.now().strftime("%s")
+        timestamp = str(int(datetime.datetime.now(datetime.timezone.utc).timestamp()))
         payload = f"{path}|{timestamp}|{request_body}"
         ## Signing transaction with API User private key
         signature = await sign(payload=payload)

@@ -11,7 +11,7 @@ from utils.sign_payload import sign_with_api_user_private_key
 
 load_dotenv()
 
-async def contract_call(evm_chain: str, vault_id: str, contract: str, custom_note: str, value: str, call_data: str):
+async def revoke(evm_chain: str, vault_id: str, custom_note: str, token_contract: str, spender_contract: str):
     request_json = {
         "signer_type": "api_signer",
         "vault_id": vault_id,
@@ -22,7 +22,7 @@ async def contract_call(evm_chain: str, vault_id: str, contract: str, custom_not
             # "fail_on_prediction_failure": True,
             # "skip_prediction": False,
             "push_mode": "auto",
-            "type": "evm_raw_transaction",
+            "type": "evm_revoke_allowance",
             "chain": f"evm_{evm_chain}_mainnet",
             "gas": {
                 "gas_limit": "1000000",
@@ -32,12 +32,8 @@ async def contract_call(evm_chain: str, vault_id: str, contract: str, custom_not
                     "price": "1000000000" # 1 GWEI
                 }
             },
-            "to": contract,
-            "value": value,
-            "data": {
-                "type": "hex",
-                "hex_data": call_data
-            },
+            "token": token_contract,
+            "spender": spender_contract
         }
     }
     
@@ -49,10 +45,9 @@ USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
 EVM_VAULT_ID = os.environ["EVM_VAULT_ID"]
 evm_chain = "ethereum"
 path = "/api/v1/transactions" # CHANGE
-contract = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
-custom_note = "It's a wrap!" # Optional note
-value = str(1_000_000_000) # 0.00001 ETH (1 ETH = 0.000000000000000001 wei)
-hex_call_data = "0xd0e30db0"
+token = "0xdAC17F958D2ee523a2206206994597C13D831ec7" ## USDT on Ethereum mainnet
+spender_contract = "0x933597a323Eb81cAe705C5bC29985172fd5A3973" ## StargatePoolMigratable 
+custom_note = "Revoking allowance!" # Optional note
 
 
 def decode_signature(signature_b64, chain_id):
@@ -70,9 +65,15 @@ def ecrecover_from_raw_tx(signed_tx_hex: str) -> str:
 async def main():
     try:
         ## Building transaction
-        request_json = await contract_call(evm_chain=evm_chain, vault_id=EVM_VAULT_ID, contract=contract, custom_note=custom_note, value=value, call_data=hex_call_data)
+        request_json = await revoke(
+            evm_chain=evm_chain, 
+            vault_id=EVM_VAULT_ID, 
+            custom_note=custom_note,
+            token_contract= token,
+            spender_contract=spender_contract
+        )
         request_body = json.dumps(request_json)
-        timestamp = datetime.datetime.now().strftime("%s")
+        timestamp = str(int(datetime.datetime.now(datetime.timezone.utc).timestamp()))
         payload = f"{path}|{timestamp}|{request_body}"
         ## Signing transaction with API User private key
         signature = await sign_with_api_user_private_key(payload=payload, api_user_private_key=API_USER_PRIVATE_KEY)
@@ -103,7 +104,7 @@ async def main():
         print(f"Transaction signed and broadcast successfully!")
         print(f"Raw transaction: {raw_transaction}")
 
-        # Recover signer from the signed raw transaction
+        # OPTIONAL Recover signer from the signed raw transaction
         recovered_address = ecrecover_from_raw_tx(raw_transaction)
         print(f"\nRecovered signer address: {recovered_address}")
 

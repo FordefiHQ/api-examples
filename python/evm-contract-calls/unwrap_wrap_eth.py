@@ -11,7 +11,7 @@ from utils.sign_payload import sign_with_api_user_private_key
 
 load_dotenv()
 
-async def contract_call(evm_chain: str, vault_id: str, contract: str, custom_note: str, value: str, call_data: str):
+async def wrap_unwrap(evm_chain: str, vault_id: str, custom_note: str, amount: str, is_wrap: bool):
     request_json = {
         "signer_type": "api_signer",
         "vault_id": vault_id,
@@ -22,22 +22,17 @@ async def contract_call(evm_chain: str, vault_id: str, contract: str, custom_not
             # "fail_on_prediction_failure": True,
             # "skip_prediction": False,
             "push_mode": "auto",
-            "type": "evm_raw_transaction",
+            "type": "evm_wrap_eth" if is_wrap else "evm_unwrap_eth",
             "chain": f"evm_{evm_chain}_mainnet",
             "gas": {
-                "gas_limit": "1000000",
+                "gas_limit": "100000",
                 "type": "custom",
                 "details": {
                     "type": "legacy",
                     "price": "1000000000" # 1 GWEI
                 }
             },
-            "to": contract,
-            "value": value,
-            "data": {
-                "type": "hex",
-                "hex_data": call_data
-            },
+            "amount": amount,
         }
     }
     
@@ -49,10 +44,9 @@ USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
 EVM_VAULT_ID = os.environ["EVM_VAULT_ID"]
 evm_chain = "ethereum"
 path = "/api/v1/transactions" # CHANGE
-contract = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+amount_to_wrap_or_unwrap = str(1_000_000_000) # 0.00001 ETH (1 ETH = 0.000000000000000001 wei)
 custom_note = "It's a wrap!" # Optional note
-value = str(1_000_000_000) # 0.00001 ETH (1 ETH = 0.000000000000000001 wei)
-hex_call_data = "0xd0e30db0"
+is_wrap = True
 
 
 def decode_signature(signature_b64, chain_id):
@@ -70,7 +64,13 @@ def ecrecover_from_raw_tx(signed_tx_hex: str) -> str:
 async def main():
     try:
         ## Building transaction
-        request_json = await contract_call(evm_chain=evm_chain, vault_id=EVM_VAULT_ID, contract=contract, custom_note=custom_note, value=value, call_data=hex_call_data)
+        request_json = await build_tx(
+            evm_chain=evm_chain, 
+            vault_id=EVM_VAULT_ID, 
+            custom_note=custom_note,
+            amount= amount_to_wrap_or_unwrap,
+            is_wrap=is_wrap
+        )
         request_body = json.dumps(request_json)
         timestamp = str(int(datetime.datetime.now(datetime.timezone.utc).timestamp()))
         payload = f"{path}|{timestamp}|{request_body}"
@@ -83,7 +83,6 @@ async def main():
         print(f"Transaction submitted successfully!")
         print(f"Transaction ID: {tx_id}")
 
-        ## Poll for raw_transaction to be available
         print("Waiting for transaction to be signed...")
         raw_transaction = None
         while raw_transaction is None:

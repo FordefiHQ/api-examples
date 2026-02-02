@@ -15,12 +15,11 @@ async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, custom_
         "details": {
             "type": "evm_transfer",
             "gas": {
-                    "gas_limit": "50000",
-                    "type": "custom",
-                    "details": {
-                        "type": "dynamic",
-                        "max_fee_per_gas": "1000", 
-                        "max_priority_fee_per_gas": "1000" # per EIP-1559: max_fee_per_gas >= max_priority_fee_per_gas
+                "gas_limit": "1000000",
+                "type": "custom",
+                "details": {
+                    "type": "legacy",
+                    "price": "1000000000" # 1 GWEI
                 }
             },
             "to": destination,
@@ -48,12 +47,12 @@ async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, custom_
 ## Fordefi configuration
 USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
 EVM_VAULT_ID = os.environ["EVM_VAULT_ID"]
-evm_chain = "ethereum"
+evm_chain = "arbitrum"
 path = "/api/v1/transactions"
 destination = "0xF659feEE62120Ce669A5C45Eb6616319D552dD93" # CHANGE
 custom_note = "hello!" # Optional note
-token_contract_address = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" # USDT on Ethereum mainnet
-value = "10" # 1 USDT = 1_000_000
+token_contract_address = "0x55d398326f99059fF775485246999027B3197955" # USDT on BSC
+value = "100000" # 1 USDT = 1_000_000_000_000_000_000
 
 async def main():
     try:
@@ -65,7 +64,7 @@ async def main():
                                            value=value, 
                                            token_contract=token_contract_address)
         request_body = json.dumps(request_json)
-        timestamp = datetime.datetime.now().strftime("%s")
+        timestamp = str(int(datetime.datetime.now(datetime.timezone.utc).timestamp()))
         payload = f"{path}|{timestamp}|{request_body}"
         ## Signing transaction with API User private key
         signature = await sign(payload=payload)

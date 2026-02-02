@@ -40,7 +40,7 @@ async def main():
                 ]
             }
         request_body = json.dumps(request_json)
-        timestamp = datetime.datetime.now().strftime("%s")
+        timestamp = str(int(datetime.datetime.now(datetime.timezone.utc).timestamp()))
         payload = f"{path}|{timestamp}|{request_body}"
 
         ## Sign batch payload with API User's private key

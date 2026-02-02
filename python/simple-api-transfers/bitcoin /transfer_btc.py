@@ -44,7 +44,7 @@ async def main():
         ## Building transaction
         request_json = await build_payload(vault_id=BTC_VAULT_ID, destination=destination, value=value, note=optional_note)
         request_body = json.dumps(request_json)
-        timestamp = datetime.datetime.now().strftime("%s")
+        timestamp = str(int(datetime.datetime.now(datetime.timezone.utc).timestamp()))
         payload = f"{path}|{timestamp}|{request_body}"
         ## Signing transaction with API User private key
         signature = await sign(payload=payload)

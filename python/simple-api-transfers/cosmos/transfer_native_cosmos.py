@@ -55,7 +55,7 @@ async def main():
         ## Building transaction
         request_json = await atom_tx_native(vault_id=COSMOS_VAULT_ID, chain=chain, destination=destination, amount=amount, memo=memo)
         request_body = json.dumps(request_json)
-        timestamp = datetime.datetime.now().strftime("%s")
+        timestamp = str(int(datetime.datetime.now(datetime.timezone.utc).timestamp()))
         payload = f"{path}|{timestamp}|{request_body}"
         ## Signing transaction with API User private key
         signature = await sign(payload=payload)
