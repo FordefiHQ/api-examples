@@ -77,7 +77,7 @@ def main():
     request_json = construct_eip712_message_request(FORDEFI_EVM_VAULT_ID, hex_encoded_typed_message, EVM_CHAIN)
     request_body = json.dumps(request_json)
 
-    timestamp = datetime.datetime.now().strftime("%s")
+    timestamp = str(int(datetime.datetime.now(datetime.timezone.utc).timestamp()))
     payload = f"{PATH}|{timestamp}|{request_body}"
     signature = sign_with_api_user_private_key(payload=payload, api_user_private_key=PRIVATE_KEY_PEM_FILE)
 

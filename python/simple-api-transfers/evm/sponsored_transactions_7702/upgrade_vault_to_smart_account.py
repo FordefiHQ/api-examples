@@ -40,7 +40,7 @@ async def main():
         request_json = await upgrade_account_tx(evm_chain=evm_chain, 
                                            vault_id=EVM_VAULT_ID)
         request_body = json.dumps(request_json)
-        timestamp = datetime.datetime.now().strftime("%s")
+        timestamp = str(int(datetime.datetime.now(datetime.timezone.utc).timestamp()))
         payload = f"{path}|{timestamp}|{request_body}"
          ## Signing transaction with API User private key
         signature = await sign(payload=payload)

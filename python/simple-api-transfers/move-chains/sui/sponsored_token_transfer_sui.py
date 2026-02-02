@@ -58,7 +58,7 @@ async def main():
         ## Building transaction
         request_json = await build_sponsored_tx(vault_id=SUI_VAULT_ID, destination=destination, custom_note=custom_note, value=value, fee_payer=FEE_PAYER_VAULT_ID, token_contract=token_contract)
         request_body = json.dumps(request_json)
-        timestamp = datetime.datetime.now().strftime("%s")
+        timestamp = str(int(datetime.datetime.now(datetime.timezone.utc).timestamp()))
         payload = f"{path}|{timestamp}|{request_body}"
          ## Signing transaction with API User private key
         signature = await sign(payload=payload)

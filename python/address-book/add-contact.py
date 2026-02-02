@@ -25,7 +25,7 @@ async def main():
             "chains": ["evm_ethereum_mainnet"] # for CUSTOM evm chains use "evm_chainId", for example evm_747474
         }
         request_body = json.dumps(request_json)
-        timestamp = datetime.datetime.now().strftime("%s")
+        timestamp = str(int(datetime.datetime.now(datetime.timezone.utc).timestamp()))
         payload = f"{path}|{timestamp}|{request_body}"
 
         ## Sign batch payload with API User's private key

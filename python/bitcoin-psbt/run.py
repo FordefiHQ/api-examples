@@ -32,7 +32,7 @@ async def main():
     request_json = await build_psbt_request(vault_id, sender_address, psbt_hex_data, will_auto_finalize, uses_custom_rpc)
 
     request_body = json.dumps(request_json)
-    timestamp = datetime.datetime.now().strftime("%s")
+    timestamp = str(int(datetime.datetime.now(datetime.timezone.utc).timestamp()))
     payload = f"{PATH}|{timestamp}|{request_body}"
     signature = await sign_wih_api_user_private_key(payload, PRIVATE_KEY_PEM_FILE)
     try:

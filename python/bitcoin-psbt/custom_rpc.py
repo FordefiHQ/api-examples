@@ -18,7 +18,7 @@ async def poll_for_signed_tx(
     for attempt in range(max_attempts):
         print(f"Polling for signed transaction (attempt {attempt + 1}/{max_attempts})...")
 
-        timestamp = datetime.datetime.now().strftime("%s")
+        timestamp = str(int(datetime.datetime.now(datetime.timezone.utc).timestamp()))
         payload = f"{poll_path}|{timestamp}|"
         signature = await sign_wih_api_user_private_key(payload, private_key_file)
 

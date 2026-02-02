@@ -46,7 +46,7 @@ def main():
     request_json = construct_personal_message_request(FORDEFI_EVM_VAULT_ID, MESSAGE, EVM_CHAIN)
     request_body = json.dumps(request_json)
 
-    timestamp = datetime.datetime.now().strftime("%s")
+    timestamp = str(int(datetime.datetime.now(datetime.timezone.utc).timestamp()))
     payload = f"{PATH}|{timestamp}|{request_body}"
 
     signature = sign_with_api_user_private_key(payload=payload, api_user_private_key=PRIVATE_KEY_PEM_FILE)

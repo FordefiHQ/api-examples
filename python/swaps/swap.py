@@ -95,7 +95,7 @@ async def main():
                 slippage=slippage)
 
         tx_payload_json = json.dumps(tx_payload) 
-        timestamp = datetime.datetime.now().strftime("%s")
+        timestamp = str(int(datetime.datetime.now(datetime.timezone.utc).timestamp()))
         payload = f"{path}|{timestamp}|{tx_payload_json}"
 
         ## Signing transaction payload with API User's private key  
