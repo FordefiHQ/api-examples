@@ -1,34 +1,23 @@
-# Approve Transactions via API
+# Fordefi Transaction Validator Bot
 
-A webhook-based validator bot. Validates and automatically approves or aborts transactions based on security rules.
+A FastAPI webhook server that validates and auto-approves Fordefi transactions based on security rules.
 
 ## Overview
 
-This bot acts as an automated transaction validator that:
-1. Receives webhook notifications from Fordefi
-2. Validates transactions against security rules
-3. Automatically approves valid transactions
-4. Aborts unauthorized or suspicious transactions
-
-## Features
-
-- **ECDSA Signature Verification**: Validates webhook authenticity using Fordefi's public key
-- **EIP-712 Order Validation**: Validates structured data for DEX orders (CoWSwap, 1inch, etc.)
-- **Hex Data Validation**: Decodes and validates transaction calldata using Foundry's `cast`
-- **Automatic Approval/Abort**: Takes immediate action based on validation results
-- **Health Check Endpoint**: Monitor bot status via `/health`
-- **Detailed Logging**: Comprehensive logging with emoji indicators for easy debugging
+This bot monitors Fordefi webhook events and validates transactions to prevent unauthorized fund movements by:
+- Validating EIP-712 order receivers (CoWSwap, 1inch, etc.)
+- Checking transaction calldata for authorized vault addresses
+- Automatically approving valid transactions or aborting suspicious ones
 
 ## Prerequisites
 
-- Python 3.8 or higher
-- Foundry installed (specifically the `cast` tool)
-- Fordefi API access tokens
-- Fordefi public key PEM file
+- Python 3.8+
+- [Foundry](https://getfoundry.sh/) (for the `cast` command)
+- Fordefi API access token
 
 ## Installation
 
-### 1. Install Python Dependencies
+### Python Dependencies
 
 ```bash
 pip install fastapi uvicorn requests python-dotenv ecdsa
@@ -39,193 +28,200 @@ Or using uv:
 uv sync
 ```
 
-### 2. Install Foundry
+### Foundry
 
 ```bash
 curl -L https://foundry.paradigm.xyz | bash
 foundryup
 ```
 
-### 3. Configure Environment Variables
-
-Create a `.env` file in the project root:
-
-```env
-VALIDATOR_BOT_TOKEN=your_validator_bot_token_here
-FORDEFI_PUBLIC_KEY_PATH=/path/to/public_key.pem
-```
-
-### 4. Update Origin Vault Address
-
-Edit [bot.py:15](bot.py#L15) to set your vault address:
-
-```python
-ORIGIN_VAULT = "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73"  # Change to your Fordefi EVM Vault's address
-```
-
 ## Configuration
 
-### Environment Variables
+Create a `.env` file:
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `VALIDATOR_BOT_TOKEN` | Fordefi API token for transaction validation and approval | Yes |
-| `FORDEFI_PUBLIC_KEY_PATH` | Path to Fordefi's public key PEM file | Yes |
+```env
+VALIDATOR_BOT_TOKEN=your_fordefi_api_token
+FORDEFI_PUBLIC_KEY_PATH=/path/to/fordefi_public_key.pem
+ORIGIN_VAULT=0xYourVaultAddress
+```
 
-### Security Constants
-
-- **ORIGIN_VAULT**: Your Fordefi EVM vault address that should receive funds
-- **ZERO_ADDRESS**: Ethereum zero address (valid receiver for some DEX orders)
+| Variable | Description |
+|----------|-------------|
+| `VALIDATOR_BOT_TOKEN` | Fordefi API token for validation and approval |
+| `FORDEFI_PUBLIC_KEY_PATH` | Path to Fordefi's public key PEM file |
+| `ORIGIN_VAULT` | Your authorized vault address |
 
 ## Usage
 
-### Starting the Bot
+### Start the Server
 
-Development mode (with auto-reload):
+Development:
 ```bash
 uvicorn bot:app --host 0.0.0.0 --port 8080 --reload
 ```
 
-Production mode:
+Production:
 ```bash
 uvicorn bot:app --host 0.0.0.0 --port 8080
 ```
 
-### Exposing for Testing (using ngrok)
+### Expose for Testing (ngrok)
 
 ```bash
 ngrok http 8080
 ```
 
-Then configure your Fordefi webhook URL to point to the ngrok URL.
+Configure your Fordefi webhook URL to the ngrok endpoint.
 
 ## API Endpoints
 
 ### POST `/`
 
-Main webhook endpoint that receives Fordefi transaction events.
+Main webhook endpoint for Fordefi transaction events.
 
-**Authentication**: Requires valid `X-Signature` header with ECDSA signature
+**Headers:**
+- `X-Signature`: ECDSA signature for authentication
+
+**Response:**
+- `200`: Transaction processed (approved or aborted)
+- `400`: Invalid JSON payload
+- `401`: Missing or invalid signature
 
 ### GET `/health`
 
-Health check endpoint to verify the bot is running.
-
-**Response**:
 ```json
-{
-  "status": "ok"
-}
+{"status": "online"}
 ```
 
-## Transaction Validation Flow
+## Validation Rules
+
+### EIP-712 Orders
+
+For DEX orders (CoWSwap, 1inch), the `receiver` field must be:
+- Zero address (`0x0000000000000000000000000000000000000000`)
+- The configured `ORIGIN_VAULT` address
+
+### Transaction Calldata
+
+For non-approval transactions with hex data:
+- Decoded calldata must contain `ORIGIN_VAULT` address
+- Uses Foundry's `cast 4byte-decode` for decoding
+
+### Hyperliquid SendAsset Messages
+
+Hyperliquid uses EIP-712 typed messages for asset transfers. The validator blocks `SendAsset` messages where the `destination` field doesn't match the signer's address.
+
+**What it prevents:**
+
+- Draining funds to unauthorized addresses via Hyperliquid transfers
+- Social engineering attacks that trick users into signing transfers to attacker wallets
+
+**How it works:**
+
+1. Detects Hyperliquid messages by checking `domain.name == "HyperliquidSignTransaction"`
+2. Extracts the `destination` field from the message
+3. Compares it to the vault/signer address
+4. Aborts if they don't match
+
+**Example abort:**
 
 ```
-Webhook Received
-      ↓
-Signature Verification
-      ↓
-Parse Webhook Data
-      ↓
-Check Transaction State
-      ↓
-[if waiting_for_approval]
-      ↓
-Validate EIP-712 Order
-      ↓
-Validate Hex Data
-      ↓
-All Validations Pass?
-   ↓         ↓
-  YES        NO
-   ↓         ↓
-Approve    Abort
+❌ Hyperliquid destination 0xattacker... does not match signer 0xvault...
 ```
 
-## Security Validations
+**Extending with a whitelist:**
 
-### 1. EIP-712 Order Validation
+To allow transfers to specific trusted addresses (e.g., your other vaults), modify `_validate_hyperliquid_destination` in `validators.py`:
 
-For transactions with `raw_data` field (typically DEX orders):
+```python
+# Add allowed destinations to config or hardcode
+ALLOWED_DESTINATIONS = [
+    "0xYourOtherVault1".lower(),
+    "0xYourOtherVault2".lower(),
+]
 
-- Parses the EIP-712 structured data
-- Extracts the `receiver` field from the message
-- Validates receiver is either:
-  - `0x0000000000000000000000000000000000000000` (zero address)
-  - Your configured `ORIGIN_VAULT` address
-- Aborts transaction if receiver is unauthorized
+# In the validation method, replace the strict check:
+if destination != signer_address:
+    # Allow if destination is in whitelist
+    if destination not in ALLOWED_DESTINATIONS:
+        raise TransactionAbortError(...)
+```
 
-**Why?** Prevents DEX orders from sending funds to unauthorized addresses.
+### Swap Destination Validation
 
-### 2. Hex Data Validation
+For DEX aggregator swaps (1inch-style), validates that the `dstReceiver` in the swap parameters matches the transaction initiator.
 
-For transactions with `hex_data` field:
+**What it prevents:**
 
-- Decodes the calldata using Foundry's `cast 4byte-decode`
-- Checks if `ORIGIN_VAULT` address appears in decoded data
-- Skips validation for `approve()` transactions
-- Aborts transaction if vault address not found
+- Swaps that send output tokens to a different address than the initiator
 
-**Why?** Ensures that complex contract interactions involve your authorized vault.
-
-## Transaction States
-
-The bot handles different transaction states:
+### Transaction States
 
 | State | Action |
 |-------|--------|
 | `waiting_for_approval` | Validates and approves/aborts |
-| `aborted` | Skipped (already terminated) |
-| `completed` | Skipped (already terminated) |
-| `approved` | Skipped (already approved) |
-| `stuck` | Skipped (terminal state) |
-| `signed` | Skipped (already signed) |
-| `pushed_to_blockchain` | Skipped (already on-chain) |
-| `mined` | Skipped (confirmed on-chain) |
-| Other states | Logged and skipped |
+| `aborted`, `completed`, `approved`, `stuck`, `signed`, `pushed_to_blockchain`, `mined` | Skipped |
+
+## Project Structure
+
+```
+bracket-bot/
+├── bot.py                    # FastAPI application
+├── fordefi/
+│   ├── __init__.py
+│   ├── config.py             # Configuration loading
+│   ├── api.py                # Fordefi API client
+│   ├── signature.py          # Webhook signature verification
+│   └── validators.py         # Transaction validators
+├── .env                      # Environment variables (not in repo)
+└── public_key.pem            # Fordefi public key (not in repo)
+```
 
 ## Troubleshooting
 
-### Issue: `cast: command not found`
+### `cast: command not found`
 
-**Solution**: Install Foundry
+Install Foundry:
 ```bash
 curl -L https://foundry.paradigm.xyz | bash
 foundryup
 ```
 
-### Issue: Signature verification fails
+### Signature verification fails
 
-**Solutions**:
-- Verify `FORDEFI_PUBLIC_KEY_PATH` is correct
-- Check that the PEM file format is valid
-- Ensure the public key matches your Fordefi organization
+- Verify `FORDEFI_PUBLIC_KEY_PATH` points to correct file
+- Check PEM file format is valid
+- Ensure public key matches your Fordefi organization
 
-### Issue: EIP-712 validation not working
+### 400 errors on approve/abort
 
-**Solutions**:
-- Verify `raw_data` field exists in webhook
-- Check that `raw_data` is valid JSON
-- Ensure the structured data has a `message.receiver` field
+Expected when transaction state changed between webhook and API call. Check logs for current state.
 
-## Development
+## Production Deployment
 
-### Project Structure
+### systemd Service
 
+```ini
+[Unit]
+Description=Fordefi Validator Bot
+After=network.target
+
+[Service]
+Type=simple
+User=youruser
+WorkingDirectory=/path/to/bracket-bot
+Environment="PATH=/path/to/.venv/bin"
+ExecStart=/path/to/.venv/bin/uvicorn bot:app --host 0.0.0.0 --port 8080
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
 ```
-tx-validation-via-api/
-├── bot.py       # Main application
-├── README.md                # General documentation
-├── .env                     # Environment variables (not in repo)
-├── public_key.pem          # Fordefi public key (not in repo)
-├── requirements.txt         # Python dependencies
-└── pyproject.toml          # Project metadata
-```
 
-### Testing Locally
+## Resources
 
-1. Start the bot locally
-2. Use ngrok to expose your local server
-3. Configure Fordefi webhook to point to ngrok URL
-4. Create test transactions in Fordefi
-5. Monitor logs for validation flow
+- [Fordefi Developer Documentation](https://docs.fordefi.com/developers/program-overview)
+- [Fordefi Transaction API](https://docs.fordefi.com/api/openapi/transactions)
+- [Fordefi Webhooks](https://docs.fordefi.com/developers/webhooks)
+- [FastAPI Documentation](https://fastapi.tiangolo.com/)
+- [Foundry Book](https://book.getfoundry.sh/)

@@ -11,7 +11,7 @@ from utils.sign_payload import sign_with_api_user_private_key
 
 load_dotenv()
 
-async def wrap_unwrap(evm_chain: str, vault_id: str, custom_note: str, amount: str, is_wrap: bool):
+async def build_tx(evm_chain: str, vault_id: str, custom_note: str, amount: str, is_wrap: bool):
     request_json = {
         "signer_type": "api_signer",
         "vault_id": vault_id,
