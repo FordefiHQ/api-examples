@@ -2,6 +2,9 @@ import os
 import json
 import asyncio
 import datetime
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../..'))
+from fordefi_protocol_types import TransactionType, SignerType, GasType, GasPriorityLevel, EvmTransactionDetailType
 from utils.broadcast import broadcast_tx
 from utils.sign_payload import sign
 from dotenv import load_dotenv
@@ -11,14 +14,14 @@ load_dotenv()
 async def upgrade_account_tx(evm_chain: str, vault_id: str):
     print(f"⬆️ Upgrading vault: {vault_id} on {evm_chain}")
     request_json =  {
-        "signer_type": "api_signer",
-        "type": "evm_transaction",
+        "signer_type": SignerType.API_SIGNER.value,
+        "type": TransactionType.EVM_TRANSACTION.value,
         "details": {
-            "type": "evm_set_code",
+            "type": EvmTransactionDetailType.EVM_SET_CODE.value,
             "gas": {
             "gas_limit": "50000", # we need at least 46000 gas to clear the transaction
-            "type": "priority",
-            "priority_level": "medium"
+            "type": GasType.PRIORITY.value,
+            "priority_level": GasPriorityLevel.MEDIUM.value
             },
             "chain": f"{evm_chain}_mainnet",
             "enable": True

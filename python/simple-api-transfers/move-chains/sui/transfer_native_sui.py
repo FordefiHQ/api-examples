@@ -2,6 +2,9 @@ import os
 import json
 import asyncio
 import datetime
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../..'))
+from fordefi_protocol_types import TransactionType, SignerType, SuiTransactionDetailType, AssetIdentifierType, AssetDetailType
 from utils.broadcast import broadcast_tx
 from utils.sign_payload import sign
 from dotenv import load_dotenv
@@ -10,10 +13,10 @@ load_dotenv()
 
 async def sui_tx_native(vault_id: str, destination: str, custom_note: str, value: str):
     request_json = {
-        "signer_type": "api_signer",
-        "type": "sui_transaction",
+        "signer_type": SignerType.API_SIGNER.value,
+        "type": TransactionType.SUI_TRANSACTION.value,
         "details": {
-            "type": "sui_transfer",
+            "type": SuiTransactionDetailType.SUI_TRANSFER.value,
             "to": {
                 "type": "hex",
                 "address": destination
@@ -23,9 +26,9 @@ async def sui_tx_native(vault_id: str, destination: str, custom_note: str, value
                 "value": value
             },
             "asset_identifier": {
-                "type": "sui",
+                "type": AssetIdentifierType.SUI.value,
                 "details": {
-                    "type": "native",
+                    "type": AssetDetailType.NATIVE.value,
                     "chain":"sui_mainnet"
                 }
             }

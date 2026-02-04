@@ -3,6 +3,9 @@ import json
 import base64
 import asyncio
 import datetime
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from fordefi_protocol_types import TransactionType, SignerType, PushMode, SignMode, GasType, GasDetailsType, EvmTransactionDetailType, TransactionState
 from pathlib import Path
 from dotenv import load_dotenv
 from eth_account import Account
@@ -13,22 +16,22 @@ load_dotenv()
 
 async def build_tx(evm_chain: str, vault_id: str, custom_note: str, amount: str, is_wrap: bool):
     request_json = {
-        "signer_type": "api_signer",
+        "signer_type": SignerType.API_SIGNER.value,
         "vault_id": vault_id,
         "note": custom_note,
-        "sign_mode": "auto",
-        "type": "evm_transaction",
+        "sign_mode": SignMode.AUTO.value,
+        "type": TransactionType.EVM_TRANSACTION.value,
         "details": {
             # "fail_on_prediction_failure": True,
             # "skip_prediction": False,
-            "push_mode": "auto",
-            "type": "evm_wrap_eth" if is_wrap else "evm_unwrap_eth",
+            "push_mode": PushMode.AUTO.value,
+            "type": EvmTransactionDetailType.EVM_WRAP_ETH.value if is_wrap else EvmTransactionDetailType.EVM_UNWRAP_ETH.value,
             "chain": f"evm_{evm_chain}_mainnet",
             "gas": {
                 "gas_limit": "100000",
-                "type": "custom",
+                "type": GasType.CUSTOM.value,
                 "details": {
-                    "type": "legacy",
+                    "type": GasDetailsType.LEGACY.value,
                     "price": "1000000000" # 1 GWEI
                 }
             },
@@ -91,7 +94,7 @@ async def main():
             tx_details = tx_response.json()
             tx_state = tx_details.get("state", "unknown")
 
-            if tx_state == "aborted":
+            if tx_state == TransactionState.ABORTED.value:
                 print(f"Transaction was aborted!")
                 return
 

@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from fordefi_protocol_types import TransactionType, SignerType, PushMode, SignMode, UtxoTransactionDetailType, GasType
 from typing import Any
 
 async def build_psbt_request(vault_id: str, vault_address: str, psbt_hex_data: str, will_auto_finalize: bool, uses_custom_rpc: bool = False) -> dict[str, Any]:
@@ -15,11 +19,11 @@ async def build_psbt_request(vault_id: str, vault_address: str, psbt_hex_data: s
     request_json = {
             "vault_id": vault_id,
             "note": "string",
-            "signer_type": "api_signer",
-            "sign_mode": "auto",
-            "type": "utxo_transaction",
+            "signer_type": SignerType.API_SIGNER.value,
+            "sign_mode": SignMode.AUTO.value,
+            "type": TransactionType.UTXO_TRANSACTION.value,
             "details": {
-                "type": "utxo_partially_signed_bitcoin_transaction",
+                "type": UtxoTransactionDetailType.UTXO_PARTIALLY_SIGNED_BITCOIN_TRANSACTION.value,
                 "psbt_raw_data": psbt_hex_data,
                 "auto_finalize": will_auto_finalize,
                 "signer": vault_address,
@@ -35,9 +39,9 @@ async def build_psbt_request(vault_id: str, vault_address: str, psbt_hex_data: s
                 ],
                 "fee_per_byte": {
                     "fee_per_byte": "1",
-                    "type": "custom"
+                    "type": GasType.CUSTOM.value
                 },
-                "push_mode": "manual" if uses_custom_rpc else "auto"
+                "push_mode": PushMode.MANUAL.value if uses_custom_rpc else PushMode.AUTO.value
             }
     }
     return request_json

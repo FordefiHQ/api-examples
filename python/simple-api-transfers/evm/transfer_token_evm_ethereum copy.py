@@ -2,6 +2,9 @@ import os
 import json
 import asyncio
 import datetime
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
+from fordefi_protocol_types import TransactionType, SignerType, GasType, GasDetailsType, EvmTransactionDetailType, AssetIdentifierType, AssetDetailType
 from utils.broadcast import broadcast_tx
 from utils.sign_payload import sign
 from dotenv import load_dotenv
@@ -10,16 +13,16 @@ load_dotenv()
 
 async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, custom_note: str, value: str, token_contract: str):
     request_json =  {
-        "signer_type": "api_signer",
-        "type": "evm_transaction",
+        "signer_type": SignerType.API_SIGNER.value,
+        "type": TransactionType.EVM_TRANSACTION.value,
         "details": {
-            "type": "evm_transfer",
+            "type": EvmTransactionDetailType.EVM_TRANSFER.value,
             "gas": {
                     "gas_limit": "50000",
-                    "type": "custom",
+                    "type": GasType.CUSTOM.value,
                     "details": {
-                        "type": "dynamic",
-                        "max_fee_per_gas": "1000", 
+                        "type": GasDetailsType.DYNAMIC.value,
+                        "max_fee_per_gas": "1000",
                         "max_priority_fee_per_gas": "1000" # per EIP-1559: max_fee_per_gas >= max_priority_fee_per_gas
                 }
             },
@@ -29,9 +32,9 @@ async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, custom_
             "value": value
             },
             "asset_identifier": {
-                "type": "evm",
+                "type": AssetIdentifierType.EVM.value,
                 "details": {
-                    "type": "erc20",
+                    "type": AssetDetailType.ERC20.value,
                     "token": {
                         "chain": f"evm_{evm_chain}_mainnet",
                         "hex_repr": token_contract
