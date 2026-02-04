@@ -2,6 +2,9 @@ import os
 import json
 import asyncio
 import datetime
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
+from fordefi_protocol_types import TransactionType, SignerType, PushMode, SignMode, CosmosTransactionDetailType, AssetIdentifierType, AssetDetailType
 from utils.broadcast import broadcast_tx
 from utils.sign_payload import sign
 from dotenv import load_dotenv
@@ -11,12 +14,12 @@ load_dotenv()
 async def atom_tx_native(vault_id: str, chain: str, destination: str, amount: str, memo: str):
     request_json = {
     "vault_id": vault_id,
-    "signer_type": "api_signer",
-    "sign_mode": "auto",
-    "type": "cosmos_transaction",
+    "signer_type": SignerType.API_SIGNER.value,
+    "sign_mode": SignMode.AUTO.value,
+    "type": TransactionType.COSMOS_TRANSACTION.value,
     "details": {
-      "type": "cosmos_transfer",
-      "push_mode": "auto",
+      "type": CosmosTransactionDetailType.COSMOS_TRANSFER.value,
+      "push_mode": PushMode.AUTO.value,
       "to": {
           "type": "address",
           "address": {
@@ -25,9 +28,9 @@ async def atom_tx_native(vault_id: str, chain: str, destination: str, amount: st
           }
       },
       "asset_identifier":{
-        "type": "cosmos",
+        "type": AssetIdentifierType.COSMOS.value,
         "details": {
-            "type": "native",
+            "type": AssetDetailType.NATIVE.value,
             "chain": chain,
         },
       },

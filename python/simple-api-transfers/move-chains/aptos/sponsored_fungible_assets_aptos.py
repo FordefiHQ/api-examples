@@ -2,6 +2,9 @@ import os
 import json
 import asyncio
 import datetime
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../..'))
+from fordefi_protocol_types import TransactionType, SignerType, AptosTransactionDetailType, AssetIdentifierType, AssetDetailType
 from utils.broadcast import broadcast_tx
 from utils.sign_payload import sign
 from dotenv import load_dotenv
@@ -10,14 +13,14 @@ load_dotenv()
 
 async def build_sponsored_tx(vault_id: str, destination: str, custom_note: str, value: str, fee_payer: str, token_contract: str):
     request_json = {
-        "signer_type": "api_signer",
-        "type": "aptos_transaction",
+        "signer_type": SignerType.API_SIGNER.value,
+        "type": TransactionType.APTOS_TRANSACTION.value,
         "details": {
             "fee_payer": {
                 "type": "vault",
                 "vault_id": fee_payer
             },
-            "type": "aptos_transfer",
+            "type": AptosTransactionDetailType.APTOS_TRANSFER.value,
             "to": {
                 "type": "hex",
                 "address": destination
@@ -27,9 +30,9 @@ async def build_sponsored_tx(vault_id: str, destination: str, custom_note: str, 
                 "value": value
             },
             "asset_identifier": {
-                "type": "aptos",
+                "type": AssetIdentifierType.APTOS.value,
                 "details": {
-                    "type": "new_coin",
+                    "type": AssetDetailType.NEW_COIN.value,
                     "new_coin_type":{
                         "chain": "aptos_mainnet",
                         "metadata_address": token_contract

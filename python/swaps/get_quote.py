@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from fordefi_protocol_types import SignerType, AssetDetailType
 import requests
 from typing import Dict, Any, Optional
 
@@ -39,14 +43,14 @@ async def get_native_to_erc20_quote(vault_id: str, chain_type: str, origin_netwo
       "input_asset_identifier": {
         "type": chain_type,
         "details": {
-          "type": "native",
+          "type": AssetDetailType.NATIVE.value,
           "chain": origin_network
         }
       },
       "output_asset_identifier": {
         "type": chain_type,
         "details": {
-          "type": "erc20",
+          "type": AssetDetailType.ERC20.value,
           "token": {
               "chain": destination_network,
               "hex_repr": buy_token_address
@@ -55,7 +59,7 @@ async def get_native_to_erc20_quote(vault_id: str, chain_type: str, origin_netwo
       },
       "amount": sell_token_amount,
       "slippage_bps": slippage,
-      "signer_type": "api_signer",
+      "signer_type": SignerType.API_SIGNER.value,
       "requested_provider_ids": providers
     }
 
@@ -92,7 +96,7 @@ async def get_erc20_to_erc20_quote(vault_id: str, chain_type: str, origin_networ
       "input_asset_identifier": {
         "type": chain_type,
         "details": {
-          "type": "erc20",
+          "type": AssetDetailType.ERC20.value,
           "token": {
               "chain": origin_network,
               "hex_repr": sell_token_address
@@ -102,7 +106,7 @@ async def get_erc20_to_erc20_quote(vault_id: str, chain_type: str, origin_networ
       "output_asset_identifier": {
         "type": chain_type,
         "details": {
-          "type": "erc20",
+          "type": AssetDetailType.ERC20.value,
           "token": {
               "chain": destination_network,
               "hex_repr": buy_token_address
@@ -111,7 +115,7 @@ async def get_erc20_to_erc20_quote(vault_id: str, chain_type: str, origin_networ
       },
       "amount": sell_token_amount,
       "slippage_bps": slippage,
-      "signer_type": "api_signer",
+      "signer_type": SignerType.API_SIGNER.value,
       "requested_provider_ids": providers
     }
 
@@ -148,7 +152,7 @@ async def get_spl_to_spl_quote(vault_id: str, chain_type: str, network: str, sel
       "input_asset_identifier": {
         "type": chain_type,
         "details": {
-          "type": "spl_token",
+          "type": AssetDetailType.SPL_TOKEN.value,
           "token": {
               "chain": network,
               "base58_repr": sell_token_address
@@ -158,7 +162,7 @@ async def get_spl_to_spl_quote(vault_id: str, chain_type: str, network: str, sel
       "output_asset_identifier": {
         "type": chain_type,
         "details": {
-          "type": "spl_token",
+          "type": AssetDetailType.SPL_TOKEN.value,
           "token": {
               "chain": network,
               "base58_repr": buy_token_address
@@ -167,7 +171,7 @@ async def get_spl_to_spl_quote(vault_id: str, chain_type: str, network: str, sel
       },
       "amount": sell_token_amount,
       "slippage_bps": slippage,
-      "signer_type": "api_signer",
+      "signer_type": SignerType.API_SIGNER.value,
       "requested_provider_ids": providers
     }
 

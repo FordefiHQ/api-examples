@@ -2,6 +2,9 @@ import os
 import json
 import asyncio
 import datetime
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
+from fordefi_protocol_types import TransactionType, SignerType, GasType, SolanaTransactionDetailType, AssetIdentifierType, AssetDetailType
 from utils.broadcast import broadcast_tx
 from utils.sign_payload import sign
 from dotenv import load_dotenv
@@ -11,27 +14,27 @@ load_dotenv()
 async def build_sponsored_tx(vault_id: str, destination: str, value: str, token: str, fee_payer: str):
     print(f"⛽ Fee payer: {fee_payer}")
     request_json = {
-        "signer_type": "api_signer",
-        "type": "solana_transaction",
+        "signer_type": SignerType.API_SIGNER.value,
+        "type": TransactionType.SOLANA_TRANSACTION.value,
         "details": {
             "fee_payer": {
                 "type": "vault",
                 "vault_id": fee_payer
             },
             "fee": {
-                "type": "custom",
+                "type": GasType.CUSTOM.value,
                 "unit_price": "500" # you can replace unit_price with priority_fee but NOT combine them
             },
-            "type": "solana_transfer",
+            "type": SolanaTransactionDetailType.SOLANA_TRANSFER.value,
             "to": destination,
             "value": {
                 "type": "value",
                 "value": value
             },
             "asset_identifier": {
-                "type": "solana",
+                "type": AssetIdentifierType.SOLANA.value,
                 "details": {
-                    "type": "spl_token",
+                    "type": AssetDetailType.SPL_TOKEN.value,
                     "token": {
                         "chain": "solana_mainnet",
                         "base58_repr": token

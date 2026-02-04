@@ -2,6 +2,9 @@ import os
 import json
 import asyncio
 import datetime
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
+from fordefi_protocol_types import TransactionType, SignerType, GasType, GasDetailsType, EvmTransactionDetailType, AssetIdentifierType, AssetDetailType
 from utils.broadcast import broadcast_tx
 from utils.sign_payload import sign
 from dotenv import load_dotenv
@@ -10,25 +13,25 @@ load_dotenv()
 
 async def evm_tx_native(evm_chain: str, vault_id: str, destination: str, custom_note: str, value: str):
     request_json = {
-        "signer_type": "api_signer",
+        "signer_type": SignerType.API_SIGNER.value,
         "vault_id": vault_id,
         "note": custom_note,
-        "type": "evm_transaction",
+        "type": TransactionType.EVM_TRANSACTION.value,
         "details": {
-            "type": "evm_transfer",
+            "type": EvmTransactionDetailType.EVM_TRANSFER.value,
             "gas": {
                 "gas_limit": "1000000",
-                "type": "custom",
+                "type": GasType.CUSTOM.value,
                 "details": {
-                    "type": "legacy",
+                    "type": GasDetailsType.LEGACY.value,
                     "price": "1000000000" # 1 GWEI
                 }
             },
             "to": destination,
             "asset_identifier": {
-                "type": "evm",
+                "type": AssetIdentifierType.EVM.value,
                 "details": {
-                    "type": "native",
+                    "type": AssetDetailType.NATIVE.value,
                     "chain": f"evm_{evm_chain}" # for custom evms, the chain must be declared as evm_chainId
                 }
             },

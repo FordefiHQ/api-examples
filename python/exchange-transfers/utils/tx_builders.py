@@ -1,16 +1,21 @@
+import os
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
+from fordefi_protocol_types import TransactionType, SignerType, SolanaTransactionDetailType, ExchangeTransactionDetailType, AssetIdentifierType, AssetDetailType
+
 async def format_deposit_native_sol(vault_id: str, destination: str, custom_note: str, value: str):
     request_json = {
-        "signer_type": "api_signer",
-        "type": "solana_transaction",
+        "signer_type": SignerType.API_SIGNER.value,
+        "type": TransactionType.SOLANA_TRANSACTION.value,
         "vault_id": vault_id,
         "note": custom_note,
         "details": {
-            "type": "solana_transfer",
+            "type": SolanaTransactionDetailType.SOLANA_TRANSFER.value,
             "to": destination,
             "asset_identifier": {
-                "type": "solana",
+                "type": AssetIdentifierType.SOLANA.value,
                 "details": {
-                    "type": "native",
+                    "type": AssetDetailType.NATIVE.value,
                     "chain": "solana_mainnet"
             }
             },
@@ -20,13 +25,13 @@ async def format_deposit_native_sol(vault_id: str, destination: str, custom_note
             }
         }
     }
-    
+
     return request_json
 
 async def format_ex_to_ex_withdrawal_token_evm(vault_id: str, destination: str, custom_note: str, value: str, origin_exchange: str, asset: str):
     request_json = {
-        "signer_type": "api_signer",
-        "type": "exchange_transaction",
+        "signer_type": SignerType.API_SIGNER.value,
+        "type": TransactionType.EXCHANGE_TRANSACTION.value,
         "details": {
             "asset_identifier": {
                 "asset_symbol": asset,
@@ -38,7 +43,7 @@ async def format_ex_to_ex_withdrawal_token_evm(vault_id: str, destination: str, 
                 "vault_id": destination,
                 "type": "vault"
             },
-            "type": "external_withdraw",
+            "type": ExchangeTransactionDetailType.EXTERNAL_WITHDRAW.value,
             "value": {
                 "is_net_amount": True,
                 "type": "value",
@@ -48,13 +53,13 @@ async def format_ex_to_ex_withdrawal_token_evm(vault_id: str, destination: str, 
         "vault_id": vault_id,
         "note": custom_note
     }
-    
+
     return request_json
 
 async def format_withdraw_native_sol(vault_id: str, destination: str, custom_note: str, value: str, exchange: str, asset: str):
     request_json = {
-        "signer_type": "api_signer",
-        "type": "exchange_transaction",
+        "signer_type": SignerType.API_SIGNER.value,
+        "type": TransactionType.EXCHANGE_TRANSACTION.value,
         "details": {
             "asset_identifier": {
                 "asset_symbol": asset,
@@ -66,7 +71,7 @@ async def format_withdraw_native_sol(vault_id: str, destination: str, custom_not
                 "address": destination,
                 "type": "address"
             },
-            "type": "external_withdraw",
+            "type": ExchangeTransactionDetailType.EXTERNAL_WITHDRAW.value,
             "value": {
                 "is_net_amount": True,
                 "type": "value",
@@ -76,13 +81,13 @@ async def format_withdraw_native_sol(vault_id: str, destination: str, custom_not
         "vault_id": vault_id,
         "note": custom_note
     }
-    
+
     return request_json
 
 async def format_withdraw_native_ethereum(vault_id: str, destination: str, custom_note: str, value: str, exchange: str, asset: str):
     request_json = {
-        "signer_type": "api_signer",
-        "type": "exchange_transaction",
+        "signer_type": SignerType.API_SIGNER.value,
+        "type": TransactionType.EXCHANGE_TRANSACTION.value,
         "details": {
             "asset_identifier": {
                 "asset_symbol": asset,
@@ -94,7 +99,7 @@ async def format_withdraw_native_ethereum(vault_id: str, destination: str, custo
                 "address": destination,
                 "type": "address"
             },
-            "type": "external_withdraw",
+            "type": ExchangeTransactionDetailType.EXTERNAL_WITHDRAW.value,
             "value": {
                 "is_net_amount": True,
                 "type": "value",
@@ -104,13 +109,13 @@ async def format_withdraw_native_ethereum(vault_id: str, destination: str, custo
         "vault_id": vault_id,
         "note": custom_note
     }
-    
+
     return request_json
 
 async def format_withdraw_token_evm(vault_id: str, destination: str, custom_note: str, value: str, exchange: str, chain: str, asset: str):
     request_json = {
-        "signer_type": "api_signer",
-        "type": "exchange_transaction",
+        "signer_type": SignerType.API_SIGNER.value,
+        "type": TransactionType.EXCHANGE_TRANSACTION.value,
         "details": {
             "asset_identifier": {
                 "asset_symbol": asset,
@@ -122,7 +127,7 @@ async def format_withdraw_token_evm(vault_id: str, destination: str, custom_note
                 "address": destination,
                 "type": "address"
             },
-            "type": "external_withdraw",
+            "type": ExchangeTransactionDetailType.EXTERNAL_WITHDRAW.value,
             "value": {
                 "is_net_amount": True,
                 "type": "value",
@@ -132,13 +137,13 @@ async def format_withdraw_token_evm(vault_id: str, destination: str, custom_note
         "vault_id": vault_id,
         "note": custom_note
     }
-    
+
     return request_json
 
 async def format_withdraw_trc20(vault_id: str, destination: str, custom_note: str, value: str, exchange: str, chain: str, asset: str):
     request_json = {
-        "signer_type": "api_signer",
-        "type": "exchange_transaction",
+        "signer_type": SignerType.API_SIGNER.value,
+        "type": TransactionType.EXCHANGE_TRANSACTION.value,
         "details": {
             "asset_identifier": {
                 "asset_symbol": asset,
@@ -150,7 +155,7 @@ async def format_withdraw_trc20(vault_id: str, destination: str, custom_note: st
                 "address": destination,
                 "type": "address"
             },
-            "type": "external_withdraw",
+            "type": ExchangeTransactionDetailType.EXTERNAL_WITHDRAW.value,
             "value": {
                 "is_net_amount": True,
                 "type": "value",
@@ -160,5 +165,5 @@ async def format_withdraw_trc20(vault_id: str, destination: str, custom_note: st
         "vault_id": vault_id,
         "note": custom_note
     }
-    
+
     return request_json

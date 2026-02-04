@@ -3,6 +3,9 @@ import base64
 import json
 import asyncio
 import datetime
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
+from fordefi_protocol_types import TransactionType, SignerType, SolanaTransactionDetailType
 from utils.broadcast import broadcast_tx
 from utils.sign_payload import sign
 from solders.pubkey import Pubkey
@@ -15,10 +18,10 @@ load_dotenv()
 
 async def sol_tx_native(vault_id: str, custom_note: str, msg: Message):
     request_json = {
-        "signer_type": "api_signer",
-        "type": "solana_transaction",
+        "signer_type": SignerType.API_SIGNER.value,
+        "type": TransactionType.SOLANA_TRANSACTION.value,
         "details": {
-            "type": "solana_serialized_transaction_message",
+            "type": SolanaTransactionDetailType.SOLANA_SERIALIZED_TRANSACTION_MESSAGE.value,
             "data": base64.b64encode(bytes(msg)).decode(),
             "chain": "solana_mainnet"
         },

@@ -2,6 +2,9 @@ import os
 import json
 import asyncio
 import datetime
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
+from fordefi_protocol_types import TransactionType, SignerType, PushMode, TonTransactionDetailType, AssetIdentifierType, AssetDetailType
 from utils.broadcast import broadcast_tx
 from utils.sign_payload import sign
 from dotenv import load_dotenv
@@ -10,21 +13,21 @@ load_dotenv()
 
 async def build_request(vault_id: str, destination: str, custom_note: str, jetton_master_raw_format_address: str, value: str):
     request_json = {
-        "signer_type": "api_signer",
+        "signer_type": SignerType.API_SIGNER.value,
         "vault_id": vault_id,
         "note": custom_note,
-        "type": "ton_transaction",
+        "type": TransactionType.TON_TRANSACTION.value,
         "details": {
-            "push_mode": "manual",
-            "type": "ton_transfer",
+            "push_mode": PushMode.MANUAL.value,
+            "type": TonTransactionDetailType.TON_TRANSFER.value,
             "to":{
                 "type": "hex",
                 "address": destination
             },
             "asset_identifier": {
-                "type": "ton",
+                "type": AssetIdentifierType.TON.value,
                 "details": {
-                    "type": "jetton",
+                    "type": AssetDetailType.JETTON.value,
                     "jetton": {
                         "chain": "ton_mainnet",
                         "address": jetton_master_raw_format_address
