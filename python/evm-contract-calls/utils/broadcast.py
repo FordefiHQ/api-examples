@@ -1,6 +1,7 @@
-import requests
-import base64
 import json
+import time
+import base64
+import requests
 
 async def broadcast_tx(
     path: str, 
@@ -66,3 +67,28 @@ async def get_tx(
         raise RuntimeError(error_message)
     except requests.exceptions.RequestException as e:
         raise RuntimeError(f"Network error occurred: {str(e)}")
+
+async def poll_until_waiting_for_signing(
+    api_access_token: str,
+    transaction_id: str,
+    max_attempts: int = 30,
+    poll_interval_seconds: int = 2,
+) -> dict:
+    for attempt in range(max_attempts):
+        response = requests.get(
+            f"https://api.fordefi.com/api/v1/transactions/{transaction_id}",
+            headers={"Authorization": f"Bearer {api_access_token}"},
+        )
+        response.raise_for_status()
+        transaction = response.json()
+        state = transaction["state"]
+        print(f"  Attempt {attempt + 1}: state = {state}")
+
+        if state == "waiting_for_signing_trigger":
+            return transaction
+        if state in ("completed", "failed", "aborted", "mined"):
+            raise RuntimeError(f"Transaction reached terminal state '{state}' before signing trigger")
+
+        time.sleep(poll_interval_seconds)
+
+    raise TimeoutError("Transaction did not reach 'waiting_for_signing_trigger' in time")

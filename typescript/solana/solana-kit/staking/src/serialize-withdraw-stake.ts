@@ -61,7 +61,7 @@ export async function createWithdrawStakeTx(
     type: 'solana_transaction',
     details: {
       type: 'solana_serialized_transaction_message',
-      push_mode: 'auto',
+      push_mode: 'manual',
       chain: 'solana_mainnet',
       data: base64EncodedData,
     },

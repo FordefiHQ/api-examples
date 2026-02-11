@@ -4,8 +4,8 @@ import ecdsa
 import base64
 import hashlib
 from pathlib import Path
-from http import HTTPStatus
 from threading import Lock
+from http import HTTPStatus
 from dotenv import load_dotenv
 from ecdsa.util import sigdecode_der
 from datetime import datetime, timezone

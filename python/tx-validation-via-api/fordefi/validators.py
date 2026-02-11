@@ -67,13 +67,20 @@ class TransactionValidator:
                 return
 
             message = parsed_eip712.get("message", {})
+
+            print(f"  Hyperliquid message detected: primaryType={parsed_eip712.get('primaryType', 'unknown')}, type={message.get('type', 'unknown')}")
+
             destination = message.get("destination", "").lower()
 
+            print(f"  Hyperliquid destination field: {destination or '(empty)'}")
+
             if not destination:
+                print("  ⚠️ No destination in Hyperliquid message, skipping validation")
                 return
 
             signer_address = self._get_signer_address(transaction_data)
             if not signer_address:
+                print("  ⚠️ No signer address resolved, skipping Hyperliquid destination validation")
                 return
 
             if destination != signer_address:
@@ -108,20 +115,21 @@ class TransactionValidator:
         return parsed_data.get("method") == "approve"
 
     def _get_signer_address(self, transaction_data: Dict) -> str:
-        # For regular transactions
-        from_address = transaction_data.get("from", {}).get("address", "")
-        if from_address:
-            return from_address.lower()
+        from_obj = transaction_data.get("from", {})
+        vault_obj = transaction_data.get("vault", {})
+        sender_obj = transaction_data.get("sender", {})
 
-        # For message signing (evm_message type)
-        vault_address = transaction_data.get("vault", {}).get("address", "")
+        from_address = from_obj.get("address", "") if isinstance(from_obj, dict) else ""
+        vault_address = vault_obj.get("address", "") if isinstance(vault_obj, dict) else ""
+        sender_address = sender_obj.get("address", "") if isinstance(sender_obj, dict) else ""
+
+        print(f"  Signer address lookup: from={from_address or '(empty)'}, vault={vault_address or '(empty)'}, sender={sender_address or '(empty)'}")
+
         if vault_address:
+            print(f"  Signer vault address: {vault_address}")
             return vault_address.lower()
 
-        sender_address = transaction_data.get("sender", {}).get("address", "")
-        if sender_address:
-            return sender_address.lower()
-
+        print("  ⚠️ No signer address found in from/vault/sender fields")
         return ""
 
     def _decode_calldata_with_cast(self, hex_data: str) -> str:
