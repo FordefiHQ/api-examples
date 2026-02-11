@@ -1,14 +1,14 @@
 import os
+import sys
 import json
 import asyncio
 import requests
 import datetime
-import sys
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-from fordefi_protocol_types import TransactionType, SignerType, PushMode, SignMode, GasType, GasPriorityLevel, EvmTransactionDetailType, TransactionState
 from pathlib import Path
 from utils.broadcast import broadcast_tx, get_tx
 from utils.sign_payload import sign_with_api_user_private_key
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from fordefi_protocol_types import TransactionType, SignerType, PushMode, SignMode, GasType, GasPriorityLevel, EvmTransactionDetailType, TransactionState
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -86,7 +86,7 @@ async def main():
             if raw_transaction is None:
                 print(f"  Status: {tx_state}...")
 
-        print(f"Raw transaction received: {raw_transaction}...")
+        print(f"Raw transaction received: {raw_transaction}")
 
         ## Push raw transaction to custom RPC
         print(f"Broadcast to custom RPC: {custom_rpc_url}")

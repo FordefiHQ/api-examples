@@ -28,7 +28,7 @@ export const fordefiConfig: FordefiSolanaConfig = {
   apiPathEndpoint: '/api/v1/transactions',
   mainnetRpc: 'https://api.mainnet-beta.solana.com',
   ws: 'wss://api.mainnet-beta.solana.com',
-  action: "unstake" as StakeAction,
+  action: process.env.ACTION as StakeAction,
   amountToStake: "0.001", // does NOT include rent fees
   amountToWithdraw: "0.001",
   validatorAddress: process.env.VALIDATOR_ADDRESS || "", // Validator vote account address, see here: https://staking.kiwi/

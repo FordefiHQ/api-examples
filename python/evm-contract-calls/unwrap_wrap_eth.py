@@ -1,16 +1,16 @@
+import sys
 import os
 import json
 import base64
 import asyncio
 import datetime
-import sys
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-from fordefi_protocol_types import TransactionType, SignerType, PushMode, SignMode, GasType, GasDetailsType, EvmTransactionDetailType, TransactionState
 from pathlib import Path
 from dotenv import load_dotenv
 from eth_account import Account
 from utils.broadcast import broadcast_tx, get_tx
 from utils.sign_payload import sign_with_api_user_private_key
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from fordefi_protocol_types import TransactionType, SignerType, PushMode, SignMode, GasType, GasDetailsType, EvmTransactionDetailType, TransactionState
 
 load_dotenv()
 

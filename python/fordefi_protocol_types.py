@@ -26,6 +26,7 @@ class PushMode(Enum):
 
 class SignMode(Enum):
     AUTO = "auto"
+    TRIGGERED = "triggered"
 
 
 class GasType(Enum):
