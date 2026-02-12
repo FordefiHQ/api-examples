@@ -17,11 +17,15 @@ Set up an API User and an API signer by following the [Fordefi API Signer docume
 
 ### 3. Enable Fee Sponsorship
 
-The origin vault must be upgraded to an EIP-7702 smart account. Note that only the origin vault needs to be upgraded—the fee payer vault does not require any upgrade. You can upgrade the origin vault in two ways:
+Enable fee sponsorship in your organization settings through the [Fordefi web console](https://docs.fordefi.com/user-guide/fee_sponsorship#activate-the-feature). Fee sponsorship is always enabled via the console.
+
+### 4. Upgrade Vault to Smart Account (EVM-specific)
+
+For EVM chains, the origin vault must be upgraded to an EIP-7702 smart account. Note that only the origin vault needs to be upgraded—the fee payer vault does not require any upgrade. You can upgrade the origin vault in two ways:
 
 **Option A: Via Fordefi Web Console**
 
-Enable fee sponsorship in your organization settings through the [Fordefi web console](https://docs.fordefi.com/user-guide/vaults/evm-vaults).
+Upgrade the vault to a smart account through the [Fordefi web console](https://docs.fordefi.com/user-guide/vaults/evm-vaults).
 
 **Option B: Via API**
 
@@ -43,7 +47,11 @@ FEE_PAYER_VAULT_ID_EVM=your_fee_payer_vault_id
 
 ## Usage
 
-### Step 1: Upgrade Vault to Smart Account (if not done via web console)
+### Step 1: Enable Fee Sponsorship
+
+Enable fee sponsorship in your organization settings via the [Fordefi web console](https://docs.fordefi.com/user-guide/vaults/evm-vaults).
+
+### Step 2: Upgrade Vault to Smart Account (if not done via web console)
 
 ```bash
 uv run upgrade_vault_to_smart_account.py
@@ -51,7 +59,7 @@ uv run upgrade_vault_to_smart_account.py
 
 This script sends an `evm_set_code` transaction to upgrade your vault to an EIP-7702 smart account.
 
-### Step 2: Create a Sponsored Token Transfer
+### Step 3: Create a Sponsored Token Transfer
 
 ```bash
 uv run sponsored_token_transfer_evm.py
