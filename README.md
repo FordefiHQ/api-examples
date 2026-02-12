@@ -21,6 +21,9 @@ Code examples for using the Fordefi API in Python and TypeScript.
   * Tron TRX and TRC10/20 transfers
   * Native APT and MOVE transfers on Aptos and Movement 
   * Native SUI transfers
+  * SUI token transfers with delegated fee payment from another vault ("sponsored" transactions)
+  * Aptos APT and Fungible Assets transfers
+  * Aptos Fungible Assets transfers with delegated fee payment from another vault ("sponsored" transactions) 
 * Exchange transfers
 * Setting up Fordefi Webhooks (Python)
 * Programatically signing Bitcoin PSBT with a Segwit or Taproot address
