@@ -19,7 +19,7 @@ async def contract_call(evm_chain: str, vault_id: str, contract: str, custom_not
         "signer_type": SignerType.API_SIGNER.value,
         "vault_id": vault_id,
         "note": custom_note,
-        "sign_mode": SignMode.AUTO.value,
+        "sign_mode": SignMode.TRIGGERED.value,
         "type": TransactionType.EVM_TRANSACTION.value,
         "details": {
             # "fail_on_prediction_failure": True,
