@@ -95,7 +95,7 @@ async def main():
     print(f"  Transaction {transaction_id} is ready for signing trigger.")
 
     # Optional: trigger signing after 5 seconds
-    if should_trigger == 'y':
+    if should_trigger:
         print("Step 3: Triggering signing...")
         trigger_signing(API_USER_TOKEN, transaction_id)
         print("  Signing triggered successfully.")
