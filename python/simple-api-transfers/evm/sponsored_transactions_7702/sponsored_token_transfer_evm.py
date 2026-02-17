@@ -56,7 +56,7 @@ evm_chain = "ethereum"
 path = "/api/v1/transactions"
 destination = "0xED8315fA2Ec4Dd0dA9870Bf8CD57eBf256A90772" # CHANGE
 token_contract_address = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" # USDC on Ethereum
-value = str(100_000) # 0.1 USDT
+value = str(100_000) # 0.1 USDC
 
 async def main():
     try:

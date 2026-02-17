@@ -32,7 +32,6 @@ async def sol_tx_native(vault_id: str, custom_note: str, msg: Message):
     return request_json
 
 ## Fordefi configuration
-PRIVATE_KEY_FILE = "./secret/private.pem"
 USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
 FORDEFI_SOLANA_VAULT_ID = os.environ["SOL_VAULT_ID"]
 FORDEFI_SOLANA_VAULT_ADDRESS = os.environ["FORDEFI_SOLANA_VAULT_ADDRESS"]
