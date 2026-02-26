@@ -1,0 +1,19 @@
+{
+  "name": "@fordefi/aptos-key-rotation",
+  "version": "1.0.0",
+  "description": "Aptos proven key rotation: rotate deployer auth key to a Fordefi vault key",
+  "main": "index.js",
+  "scripts": {
+    "rotate": "npx tsx ./src/run.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@aptos-labs/ts-sdk": "^5.2.1",
+    "axios": "^1.13.2",
+    "dotenv": "^17.2.3",
+    "tsx": "^4.21.0"
+  }
+}
