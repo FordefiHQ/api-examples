@@ -6,8 +6,9 @@ A set of Python scripts for creating and submitting Bitcoin PSBT (Partially Sign
 
 This project provides two main components:
 
-1. **PSBT Construction** (`build_psbt.py`) - A utility script that constructs a PSBT for transferring BTC from one address to another by fetching UTXOs from the blockchain
-2. **Fordefi API Submission** (`construct_api_request.py` + `run.py`) - Submits any PSBT to the Fordefi API for signing and broadcasting
+1. **PSBT Construction (Single Recipient)** (`build_psbt.py`) - Constructs a PSBT for transferring BTC from one address to a single recipient
+2. **PSBT Construction (Multi-Recipient)** (`build_psbt_multi.py`) - Constructs a PSBT for transferring BTC from one address to multiple recipients in a single transaction
+3. **Fordefi API Submission** (`construct_api_request.py` + `run.py`) - Submits any PSBT to the Fordefi API for signing and broadcasting
 
 **Note:** You can use the provided PSBT construction script OR provide your own pre-constructed PSBT hex data.
 
@@ -42,13 +43,29 @@ This project provides two main components:
    BTC_SENDER_ADDRESS="taproot_or_segwit_address_from_btc_vault"
    ```
 
-   **Option B: Using the PSBT construction script**
+   **Option B: Using the single-recipient PSBT construction script**
    ```plaintext
-   BTC_SENDER_ADDRESS="tb1q..."  # Bitcoin address to spend from
-   BTC_RECIPIENT_ADDRESS="tb1q..."  # SegWit (bc1q/tb1q) or Taproot (bc1p/tb1p) address to send to
-   BTC_SEND_AMOUNT="50000"  # Amount in satoshis
+   BTC_SENDER_ADDRESS_TESTNET_V4="tb1q..."  # Bitcoin address to spend from
+   BTC_RECIPIENT_ADDRESS_TESTNET_V4="tb1q..."  # SegWit or Taproot address to send to
+   BTC_TRANSFER_AMOUNT="50000"  # Amount in satoshis
    BTC_FEE="1000"  # Transaction fee in satoshis (optional, default: 200)
-   BTC_NETWORK="testnet"  # 'testnet' or 'mainnet' (optional, default: testnet)
+   BTC_NETWORK="testnet4"  # 'mainnet', 'testnet3', or 'testnet4' (optional, default: testnet4)
+   ```
+
+   **Option C: Using the multi-recipient PSBT construction script**
+   ```plaintext
+   BTC_SENDER_ADDRESS_TESTNET_V4="tb1q..."  # Bitcoin address to spend from
+   BTC_RECIPIENTS_FILE="recipients.json"  # Path to recipients JSON file (optional, default: recipients.json)
+   BTC_FEE="1000"  # Transaction fee in satoshis (optional, default: 200)
+   BTC_NETWORK="testnet4"  # 'mainnet', 'testnet3', or 'testnet4' (optional, default: testnet4)
+   ```
+
+   The recipients file should be a JSON array (see `recipients_example.json`):
+   ```json
+   [
+     {"address": "tb1q...", "amount": 50000},
+     {"address": "tb1p...", "amount": 30000}
+   ]
    ```
 
    **Important:** `BTC_SENDER_ADDRESS` must be a SegWit (bc1q/tb1q) or Taproot (bc1p/tb1p) address. Siging PSBTs with a legacy addresses (starting with '1', '3', 'm', 'n', or '2') is not supported by Fordefi and will be rejected.
@@ -62,15 +79,24 @@ This project provides two main components:
 
 ## Usage
 
-### Option 1: Construct a PSBT
+### Option 1: Construct a single-recipient PSBT
 
-If you want to create a PSBT from scratch, run the construction script:
+Create a PSBT that sends BTC to one recipient:
 
 ```bash
 uv run build_psbt.py
 ```
 
-This will:
+### Option 2: Construct a multi-recipient PSBT
+
+Create a PSBT that sends BTC to multiple recipients in a single transaction:
+
+```bash
+uv run build_psbt_multi.py
+```
+
+Both scripts will:
+
 - Fetch UTXOs from the blockchain for your sender address
 - Create an unsigned transaction
 - Generate a PSBT hex string
@@ -78,7 +104,7 @@ This will:
 
 You can then use this PSBT hex data with the Fordefi API submission script (set it as `PSBT_HEX_DATA` in your `.env` file).
 
-### Option 2: Submit a PSBT to Fordefi
+### Option 3: Submit a PSBT to Fordefi
 
 If you have a pre-constructed PSBT (either from the script above or your own), submit it to Fordefi:
 
@@ -90,30 +116,24 @@ This requires the Fordefi-specific environment variables (`FORDEFI_API_USER_TOKE
 
 ## Features
 
-### PSBT Construction Script
+### PSBT Construction Scripts
 
-The `build_psbt.py` script supports:
+Both `build_psbt.py` (single recipient) and `build_psbt_multi.py` (multiple recipients) support:
+
 - **Multiple address types**: Legacy P2PKH/P2SH, SegWit v0 (P2WPKH/P2WSH), and Taproot (P2TR)
-- **Automatic UTXO fetching**: Uses Blockstream API to fetch UTXOs for any Bitcoin address
+- **Automatic UTXO fetching**: Uses mempool.space (testnet4) or Blockstream (mainnet/testnet3) APIs
 - **Smart UTXO selection**: Automatically selects the optimal UTXOs to cover the transaction amount and fees
 - **Change handling**: Automatically creates change outputs when needed
-- **Both networks**: Supports Bitcoin mainnet and testnet
+- **Multiple networks**: Supports Bitcoin mainnet, testnet3, and testnet4
+
+The multi-recipient script (`build_psbt_multi.py`) reads recipients from a JSON file (default: `recipients.json`), where each entry specifies an `address` and `amount` in satoshis. See `recipients_example.json` for the expected format.
 
 ### Fordefi API Submission (Optional Parameters)
 
-You can optionally specify input parameters in `construct_api_request.py` when you need to explicitly define which addresses sign specific inputs. If not specified, Fordefi will auto-detect signers based on your PSBT data.
+The `run.py` script automatically generates signer identity entries for each transaction input. Set `PSBT_NUM_INPUTS` in your `.env` file to match the number of UTXOs (inputs) used in your PSBT:
 
-```python
-# Example input configuration
-inputs = [
-    {
-        "index": 0,  # Input index
-        "signer_identity": {
-            "type": "address",
-            "address": "bc1p..."  # Taproot or Segwit address that will sign this input
-        }
-    }
-]
+```plaintext
+PSBT_NUM_INPUTS="3"  # Number of inputs in the PSBT (default: 1)
 ```
 
-These inputs will be included in the API request to specify which addresses should sign particular transaction inputs.
+If not specified, it defaults to `1`, which is sufficient for single-input transactions. For multi-recipient transactions that consume multiple UTXOs, set this to the number of UTXOs reported by the construction script.
