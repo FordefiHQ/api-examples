@@ -15,6 +15,7 @@ FORDEFI_API_USER_TOKEN = os.environ["FORDEFI_API_USER_TOKEN"]
 PATH = "/api/v1/transactions"
 PRIVATE_KEY_PEM_FILE = Path("./secret/private.pem")
 psbt_hex_data = os.environ["PSBT_HEX_DATA"]
+num_inputs = int(os.environ.get("PSBT_NUM_INPUTS", "1"))
 vault_id = os.environ["FORDEFI_BTC_VAULT_ID_TESTNET_V4"]
 sender_address = os.environ["BTC_SENDER_ADDRESS_TESTNET_V4"]
 will_auto_finalize = True
@@ -29,7 +30,7 @@ CUSTOM_RPC_FORMAT = os.environ.get("CUSTOM_RPC_FORMAT", "rest")
 
 
 async def main():
-    request_json = await build_psbt_request(vault_id, sender_address, psbt_hex_data, will_auto_finalize, uses_custom_rpc)
+    request_json = await build_psbt_request(vault_id, sender_address, psbt_hex_data, will_auto_finalize, uses_custom_rpc, num_inputs)
 
     request_body = json.dumps(request_json)
     timestamp = str(int(datetime.datetime.now(datetime.timezone.utc).timestamp()))
