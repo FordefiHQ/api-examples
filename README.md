@@ -71,8 +71,9 @@ Code examples for using the Fordefi API in Python and TypeScript.
 * On NEAR:
   * Programmatic transfer and staking using Black Box signatures
 * On Aptos:
-  * Sponsored fungible asset transfer with external fee payer
+  * Sponsored fungible asset transfers with external Geomi gas station
   * Withdrawing an LP position on Hyperion
+  * Key rotation from external Aptos wallet to Fordefi Black Box vault
 
 ## Getting Started
 1. Clone this repository

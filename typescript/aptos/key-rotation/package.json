@@ -1,0 +1,26 @@
+{
+  "name": "@fordefi/aptos-key-rotation",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "transfer": "tsx ./src/run.ts",
+    "sign-raw": "tsx ./src/sign-raw-and-broadcast.ts",
+    "derive-aptos": "tsx ./src/derive_aptos_address.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@aptos-labs/gas-station-client": "^2.0.2",
+    "@aptos-labs/ts-sdk": "^3.1.3",
+    "@shinami/clients": "^0.9.6",
+    "axios": "^1.11.0",
+    "dotenv": "^17.2.1"
+  }
+}
