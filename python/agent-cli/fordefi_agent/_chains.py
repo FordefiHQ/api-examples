@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -509,3 +510,75 @@ def build_swap_submit_payload(
         }
 
     return body
+
+
+# ---------------------------------------------------------------------------
+# EVM message signing payload builders
+# ---------------------------------------------------------------------------
+
+_CREATE_AND_WAIT_PATH = "/api/v1/transactions/create-and-wait"
+
+
+def build_personal_message_payload(
+    chain: str,
+    vault_id: str,
+    message: str,
+) -> tuple[str, dict]:
+    """Build a personal message (EIP-191) signing payload.
+
+    Returns (api_path, request_body_dict).
+    """
+    cfg = resolve_chain(chain)
+    if cfg.family != "evm":
+        raise FordefiError(f"Message signing is only supported on EVM chains, got '{chain}'")
+
+    hex_encoded = "0x" + message.encode("utf-8").hex()
+
+    body = {
+        "signer_type": "api_signer",
+        "sign_mode": "auto",
+        "type": "evm_message",
+        "details": {
+            "type": "personal_message_type",
+            "raw_data": hex_encoded,
+            "chain": cfg.chain_id,
+        },
+        "vault_id": vault_id,
+        "wait_for_state": "signed",
+        "timeout": 45,
+    }
+    return _CREATE_AND_WAIT_PATH, body
+
+
+def build_typed_data_payload(
+    chain: str,
+    vault_id: str,
+    typed_data: dict,
+) -> tuple[str, dict]:
+    """Build a typed data (EIP-712) signing payload.
+
+    The typed_data dict is JSON-serialized and hex-encoded before sending.
+
+    Returns (api_path, request_body_dict).
+    """
+    cfg = resolve_chain(chain)
+    if cfg.family != "evm":
+        raise FordefiError(f"Message signing is only supported on EVM chains, got '{chain}'")
+
+    raw_json = json.dumps(typed_data)
+    hex_encoded = "0x" + raw_json.encode("utf-8").hex()
+
+    body = {
+        "signer_type": "api_signer",
+        "sign_mode": "auto",
+        "type": "evm_message",
+        "details": {
+            "type": "typed_message_type",
+            "raw_data": hex_encoded,
+            "chain": cfg.chain_id,
+        },
+        "vault_id": vault_id,
+        "wait_for_state": "signed",
+        "timeout": 45,
+    }
+    return _CREATE_AND_WAIT_PATH, body
