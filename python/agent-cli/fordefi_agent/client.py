@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 import time
 from typing import Any
 
@@ -9,9 +10,11 @@ from ._auth import ApiAuth
 from ._chains import (
     CHAINS,
     build_evm_contract_call_payload,
+    build_personal_message_payload,
     build_swap_quote_payload,
     build_swap_submit_payload,
     build_transfer_payload,
+    build_typed_data_payload,
     resolve_chain,
 )
 from ._types import FordefiError, FordefiTimeoutError
@@ -178,6 +181,85 @@ class FordefiClient:
             "state": raw.get("state", ""),
             "raw_response": raw,
         }
+
+    # ------------------------------------------------------------------
+    # EVM message signing
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _decode_signature(raw: dict) -> dict:
+        """Extract signature hex and r/s/v from a create-and-wait response."""
+        signatures = raw.get("signatures", [])
+        if not signatures:
+            raise FordefiError("No signature returned in the response")
+
+        sig_bytes = base64.b64decode(signatures[0])
+        sig_hex = "0x" + sig_bytes.hex()
+        r = hex(int.from_bytes(sig_bytes[0:32], byteorder="big"))
+        s = hex(int.from_bytes(sig_bytes[32:64], byteorder="big"))
+        v = int(sig_bytes[64])
+
+        return {
+            "signature": sig_hex,
+            "r": r,
+            "s": s,
+            "v": v,
+            "transaction_id": raw.get("id", ""),
+            "raw_response": raw,
+        }
+
+    def sign_personal_message(
+        self,
+        chain: str,
+        message: str,
+        vault_id: str | None = None,
+    ) -> dict:
+        """Sign a personal message (EIP-191) with an EVM vault.
+
+        Args:
+            chain: EVM chain name (e.g. "ethereum", "polygon", "arbitrum").
+            message: The plain-text message to sign.
+            vault_id: Override the default vault ID.
+
+        Returns:
+            dict with "signature", "r", "s", "v", "transaction_id",
+            and "raw_response".
+        """
+        vid = self._resolve_vault(vault_id)
+        api_path, body = build_personal_message_payload(
+            chain=chain,
+            vault_id=vid,
+            message=message,
+        )
+        raw = self._api.post_signed(api_path, body)
+        return self._decode_signature(raw)
+
+    def sign_typed_data(
+        self,
+        chain: str,
+        typed_data: dict,
+        vault_id: str | None = None,
+    ) -> dict:
+        """Sign EIP-712 typed data with an EVM vault.
+
+        Args:
+            chain: EVM chain name (e.g. "ethereum", "polygon", "arbitrum").
+            typed_data: The EIP-712 typed data dict (must include "types",
+                "domain", "primaryType", and "message").
+            vault_id: Override the default vault ID.
+
+        Returns:
+            dict with "signature", "r", "s", "v", "transaction_id",
+            and "raw_response".
+        """
+        vid = self._resolve_vault(vault_id)
+        api_path, body = build_typed_data_payload(
+            chain=chain,
+            vault_id=vid,
+            typed_data=typed_data,
+        )
+        raw = self._api.post_signed(api_path, body)
+        return self._decode_signature(raw)
 
     # ------------------------------------------------------------------
     # Swaps

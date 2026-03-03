@@ -29,9 +29,7 @@ client = FordefiClient(
 
 **Install dependencies:**
 ```bash
-pip install -r requirements.txt
-# or
-pip install ecdsa requests
+uv sync
 ```
 
 ## Transfers
@@ -143,6 +141,99 @@ result = client.evm_contract_call(
 - `web3.py`: `contract.functions.transfer(to, amount).build_transaction()['data']`
 - `eth_abi`: `'0x' + encode(['address', 'uint256'], [to, amount]).hex()`
 - Or use a pre-computed hex string
+
+## EVM Message Signing
+
+Sign messages with your EVM vault using Fordefi's MPC infrastructure. Supports both personal messages (EIP-191) and typed data (EIP-712). Message signing uses the `/api/v1/transactions/create-and-wait` endpoint and returns the signature once the signing process completes.
+
+### Sign a Personal Message (EIP-191)
+
+```python
+result = client.sign_personal_message(
+    chain="ethereum",
+    message="Hello, this is a message to sign.",
+)
+print(f"Signature (hex): {result['signature']}")
+print(f"r: {result['r']}, s: {result['s']}, v: {result['v']}")
+```
+
+The `message` parameter is a plain-text string. It is hex-encoded automatically before being sent to the API.
+
+**Parameters:**
+- `chain` - EVM chain name (e.g. `"ethereum"`, `"polygon"`, `"arbitrum"`)
+- `message` - The plain-text message to sign
+- `vault_id` - (optional) Override the default vault ID
+
+### Sign Typed Data (EIP-712)
+
+```python
+typed_data = {
+    "types": {
+        "EIP712Domain": [
+            {"name": "name", "type": "string"},
+            {"name": "version", "type": "string"},
+            {"name": "chainId", "type": "uint256"},
+            {"name": "verifyingContract", "type": "address"},
+        ],
+        "Permit": [
+            {"name": "owner", "type": "address"},
+            {"name": "spender", "type": "address"},
+            {"name": "value", "type": "uint256"},
+            {"name": "nonce", "type": "uint256"},
+            {"name": "deadline", "type": "uint256"},
+        ],
+    },
+    "domain": {
+        "name": "USD Coin",
+        "version": "2",
+        "chainId": 1,
+        "verifyingContract": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    },
+    "primaryType": "Permit",
+    "message": {
+        "owner": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+        "spender": "0x1111111254fb6c44bac0bed2854e76f90643097d",
+        "value": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "nonce": 1000,
+        "deadline": 1767166198,
+    },
+}
+
+result = client.sign_typed_data(
+    chain="ethereum",
+    typed_data=typed_data,
+)
+print(f"Signature (hex): {result['signature']}")
+```
+
+The `typed_data` parameter is a dict following the EIP-712 structure. It is JSON-serialized and hex-encoded before being sent to the API. Large `uint256` values in the message must be passed as strings.
+
+**Parameters:**
+- `chain` - EVM chain name (e.g. `"ethereum"`, `"polygon"`, `"arbitrum"`)
+- `typed_data` - The EIP-712 typed data dict (must include `types`, `domain`, `primaryType`, and `message`)
+- `vault_id` - (optional) Override the default vault ID
+
+### Return Values
+
+Both signing methods return:
+
+```python
+{
+    "signature": "0xabc123...",   # Full signature as hex string
+    "r": "0x...",                 # r component
+    "s": "0x...",                 # s component
+    "v": 27,                     # v component (27 or 28)
+    "transaction_id": "uuid",    # Fordefi transaction ID
+    "raw_response": { ... },     # Full API response
+}
+```
+
+### Common Use Cases
+
+- **EIP-2612 Permit**: Sign token approvals off-chain (gasless approvals)
+- **Login/Authentication**: Prove wallet ownership for dApp sign-in (SIWE)
+- **Off-chain Orders**: Sign orders for DEXs like 1inch, CoW Swap, or Seaport
+- **Governance**: Sign votes or proposals off-chain
 
 ## Swaps
 
