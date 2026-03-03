@@ -2,7 +2,7 @@
 
 ## What is Fordefi?
 
-Fordefi is an institutional MPC (Multi-Party Computation) wallet infrastructure. It provides secure, programmatic access to blockchain operations across multiple chains. When you send a transaction through Fordefi, the private key never exists in one place - it's split across multiple parties who collectively sign.
+Fordefi is an institutional MPC (Multi-Party Computation) wallet infrastructure for DeFi. It provides secure, programmatic access to blockchain operations across multiple blockchains. When you send a transaction through Fordefi, the private key never exists in one place - it's split across multiple parties (Fordefi and the Fordefi account users) who collectively sign.
 
 This CLI package gives you a single Python client to:
 - **Transfer** native assets and tokens on 16+ blockchains
