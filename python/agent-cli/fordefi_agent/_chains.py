@@ -6,6 +6,12 @@ import json
 from dataclasses import dataclass, field
 from typing import Any
 
+from ._sanitize import (
+    sanitize_address_for_chain,
+    sanitize_evm_address,
+    sanitize_hex_data,
+    sanitize_solana_address,
+)
 from ._types import FordefiError
 
 # ---------------------------------------------------------------------------
@@ -275,6 +281,9 @@ def _build_evm_transfer(
     cfg: ChainConfig, vault_id: str, to: str, amount: str,
     token: str | None, note: str, gas_priority: str,
 ) -> tuple[str, dict]:
+    to = sanitize_evm_address(to, "destination address")
+    if token is not None:
+        token = sanitize_evm_address(token, "token address")
     body = {
         "signer_type": "api_signer",
         "vault_id": vault_id,
@@ -298,6 +307,9 @@ def _build_solana_transfer(
     cfg: ChainConfig, vault_id: str, to: str, amount: str,
     token: str | None, note: str,
 ) -> tuple[str, dict]:
+    to = sanitize_solana_address(to, "destination address")
+    if token is not None:
+        token = sanitize_solana_address(token, "token address")
     details: dict[str, Any] = {
         "type": cfg.detail_type,
         "to": to,
@@ -322,6 +334,7 @@ def _build_btc_transfer(
     cfg: ChainConfig, vault_id: str, to: str, amount: str, note: str,
 ) -> tuple[str, dict]:
     """Bitcoin uses /api/v1/transactions/transfer with a flat body."""
+    to = sanitize_address_for_chain("utxo", to, "destination address")
     body = {
         "to": {"type": "address", "address": to},
         "amount": {"type": "value", "value": amount},
@@ -339,6 +352,7 @@ def _build_cosmos_transfer(
     cfg: ChainConfig, vault_id: str, to: str, amount: str,
     note: str, memo: str | None,
 ) -> tuple[str, dict]:
+    to = sanitize_address_for_chain("cosmos", to, "destination address")
     details: dict[str, Any] = {
         "type": cfg.detail_type,
         "push_mode": "auto",
@@ -367,6 +381,9 @@ def _build_generic_transfer(
     token: str | None, note: str,
 ) -> tuple[str, dict]:
     """Works for TON, TRON, Aptos, Sui - they share the same structure."""
+    to = sanitize_address_for_chain(cfg.family, to, "destination address")
+    if token is not None:
+        token = sanitize_address_for_chain(cfg.family, token, "token address")
     body = {
         "signer_type": "api_signer",
         "vault_id": vault_id,
@@ -399,6 +416,9 @@ def build_evm_contract_call_payload(
     cfg = resolve_chain(chain)
     if cfg.family != "evm":
         raise FordefiError(f"Contract calls are only supported on EVM chains, got '{chain}'")
+
+    contract = sanitize_evm_address(contract, "contract address")
+    call_data = sanitize_hex_data(call_data, "call_data")
 
     if gas_limit:
         gas = {
@@ -439,6 +459,12 @@ def _swap_asset_identifier(cfg: ChainConfig, token: str) -> dict:
             "type": cfg.asset_type,
             "details": {"type": "native", "chain": cfg.chain_id},
         }
+
+    # Sanitize non-native token addresses
+    if cfg.family == "evm":
+        token = sanitize_evm_address(token, "token address")
+    elif cfg.family == "solana":
+        token = sanitize_solana_address(token, "token address")
 
     if cfg.family == "evm":
         return {

@@ -7,6 +7,7 @@ import time
 from typing import Any
 
 from ._auth import ApiAuth
+from ._sanitize import sanitize_amount, sanitize_uuid
 from ._chains import (
     CHAINS,
     build_evm_contract_call_payload,
@@ -115,7 +116,8 @@ class FordefiClient:
         Returns:
             dict with "transaction_id", "state", and "raw_response".
         """
-        vid = self._resolve_vault(vault_id)
+        vid = sanitize_uuid(self._resolve_vault(vault_id), "vault_id")
+        amount = sanitize_amount(amount)
         api_path, body = build_transfer_payload(
             chain=chain,
             vault_id=vid,
@@ -164,7 +166,7 @@ class FordefiClient:
         Returns:
             dict with "transaction_id", "state", and "raw_response".
         """
-        vid = self._resolve_vault(vault_id)
+        vid = sanitize_uuid(self._resolve_vault(vault_id), "vault_id")
         api_path, body = build_evm_contract_call_payload(
             chain=chain,
             vault_id=vid,
@@ -225,7 +227,7 @@ class FordefiClient:
             dict with "signature", "r", "s", "v", "transaction_id",
             and "raw_response".
         """
-        vid = self._resolve_vault(vault_id)
+        vid = sanitize_uuid(self._resolve_vault(vault_id), "vault_id")
         api_path, body = build_personal_message_payload(
             chain=chain,
             vault_id=vid,
@@ -252,7 +254,7 @@ class FordefiClient:
             dict with "signature", "r", "s", "v", "transaction_id",
             and "raw_response".
         """
-        vid = self._resolve_vault(vault_id)
+        vid = sanitize_uuid(self._resolve_vault(vault_id), "vault_id")
         api_path, body = build_typed_data_payload(
             chain=chain,
             vault_id=vid,
@@ -288,7 +290,8 @@ class FordefiClient:
         Returns:
             dict with "best_quote" (or None) and "all_quotes".
         """
-        vid = self._resolve_vault(vault_id)
+        vid = sanitize_uuid(self._resolve_vault(vault_id), "vault_id")
+        amount = sanitize_amount(amount)
         cfg = resolve_chain(chain)
 
         if not cfg.swap_chain_type:
@@ -356,7 +359,8 @@ class FordefiClient:
         Returns:
             dict with "transaction_id", "state", "quote", and "raw_response".
         """
-        vid = self._resolve_vault(vault_id)
+        vid = sanitize_uuid(self._resolve_vault(vault_id), "vault_id")
+        amount = sanitize_amount(amount)
         cfg = resolve_chain(chain)
 
         # Get quotes

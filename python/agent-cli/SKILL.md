@@ -42,7 +42,7 @@ Send the chain's native currency (ETH, SOL, BTC, etc.):
 # Send 0.01 ETH on Ethereum
 result = client.transfer(
     chain="ethereum",
-    to="0xRecipientAddress",
+    to="<evm-recipient-address>",
     amount="10000000000000000",  # 0.01 ETH in wei
 )
 print(result["transaction_id"])
@@ -50,21 +50,21 @@ print(result["transaction_id"])
 # Send 0.001 SOL on Solana
 result = client.transfer(
     chain="solana",
-    to="9BgxwZMyNzGUgp6hYXMyRKv3kSkyYZAMPGisqJgnXCFS",
+    to="<solana-recipient-address>",
     amount="1000000",  # 0.001 SOL in lamports
 )
 
 # Send 10000 satoshis of BTC
 result = client.transfer(
     chain="bitcoin",
-    to="bc1p...",
+    to="<btc-recipient-address>",
     amount="10000",
 )
 
 # Send ATOM on Cosmos with memo
 result = client.transfer(
     chain="cosmos",
-    to="cosmos1abc...",
+    to="<cosmos-recipient-address>",
     amount="100",  # in uatom
     memo="1234",
 )
@@ -78,33 +78,33 @@ Provide the `token` parameter with the token's contract/mint address:
 # Send 10 USDC on Ethereum (USDC has 6 decimals)
 result = client.transfer(
     chain="ethereum",
-    to="0xRecipient",
+    to="<evm-recipient-address>",
     amount="10000000",  # 10 USDC = 10 * 10^6
-    token="0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    token="<usdc-contract-address>",
 )
 
 # Send 1 USDC on Solana
 result = client.transfer(
     chain="solana",
-    to="9BgxwZ...",
+    to="<solana-recipient-address>",
     amount="1000000",
-    token="EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    token="<usdc-mint-address>",
 )
 
 # Send USDT on TRON
 result = client.transfer(
     chain="tron",
-    to="THpczdekw3n93u48ZCbdpimcFVW8Rx9jrj",
+    to="<tron-recipient-address>",
     amount="1000000",  # 1 USDT
-    token="TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+    token="<usdt-trc20-contract-address>",
 )
 
 # Send USDT jetton on TON
 result = client.transfer(
     chain="ton",
-    to="UQApn3xK3wVS5vH2LXMga1sJNY5QrcTNjDPFlyt3yR2aipwt",
+    to="<ton-recipient-address>",
     amount="100000",  # 0.1 USDT
-    token="0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe",
+    token="<usdt-jetton-address>",
 )
 ```
 
@@ -116,7 +116,7 @@ Call any smart contract on any EVM chain:
 # Wrap ETH to WETH
 result = client.evm_contract_call(
     chain="ethereum",
-    contract="0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",  # WETH contract
+    contract="<weth-contract-address>",
     call_data="0xd0e30db0",  # deposit() function selector
     value="1000000000000000000",  # 1 ETH in wei
 )
@@ -124,16 +124,16 @@ result = client.evm_contract_call(
 # Call with custom gas limit
 result = client.evm_contract_call(
     chain="arbitrum",
-    contract="0xContractAddress",
-    call_data="0xabcdef1234...",
+    contract="<contract-address>",
+    call_data="<abi-encoded-calldata>",
     gas_limit="500000",
 )
 
 # Call on a custom EVM chain by chain ID
 result = client.evm_contract_call(
     chain="42793",  # custom chain ID
-    contract="0xContractAddress",
-    call_data="0x...",
+    contract="<contract-address>",
+    call_data="<abi-encoded-calldata>",
 )
 ```
 
@@ -187,12 +187,12 @@ typed_data = {
         "name": "USD Coin",
         "version": "2",
         "chainId": 1,
-        "verifyingContract": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "verifyingContract": "<verifying-contract-address>",
     },
     "primaryType": "Permit",
     "message": {
-        "owner": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
-        "spender": "0x1111111254fb6c44bac0bed2854e76f90643097d",
+        "owner": "<owner-address>",
+        "spender": "<spender-address>",
         "value": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
         "nonce": 1000,
         "deadline": 1767166198,
@@ -244,7 +244,7 @@ Swap tokens on EVM chains and Solana. The client automatically fetches providers
 result = client.swap(
     chain="ethereum",
     sell_token="native",  # "native" means the chain's native asset
-    buy_token="0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",  # USDC
+    buy_token="<usdc-contract-address>",
     amount="1000000000000000",  # 0.001 ETH
     slippage_bps="300",  # 3% slippage tolerance
 )
@@ -254,16 +254,16 @@ print(f"Expected output: {result['quote']['output_amount']}")
 # Swap USDC for USDT on Ethereum (ERC20 to ERC20)
 result = client.swap(
     chain="ethereum",
-    sell_token="0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",  # USDC
-    buy_token="0xdAC17F958D2ee523a2206206994597C13D831ec7",  # USDT
+    sell_token="<usdc-contract-address>",
+    buy_token="<usdt-contract-address>",
     amount="1000000",  # 1 USDC
 )
 
 # Swap on Solana (SPL to SPL)
 result = client.swap(
     chain="solana",
-    sell_token="So11111111111111111111111111111111111111112",  # Wrapped SOL
-    buy_token="EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",  # USDC
+    sell_token="<wsol-mint-address>",
+    buy_token="<usdc-mint-address>",
     amount="100000000",  # 0.1 SOL in lamports
 )
 ```
@@ -274,7 +274,7 @@ result = client.swap(
 quotes = client.get_swap_quote(
     chain="ethereum",
     sell_token="native",
-    buy_token="0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    buy_token="<usdc-contract-address>",
     amount="1000000000000000000",
 )
 print(f"Best: {quotes['best_quote']['output_amount']} from {quotes['best_quote']['provider_info']['provider_id']}")
@@ -305,7 +305,7 @@ txs = client.list_transactions(state="completed")
 After submitting, you can poll until the transaction completes:
 
 ```python
-result = client.transfer(chain="ethereum", to="0x...", amount="1000000000000000")
+result = client.transfer(chain="ethereum", to="<evm-recipient-address>", amount="1000000000000000")
 
 # Wait up to 2 minutes for completion
 final = client.wait_for_transaction(
@@ -366,7 +366,7 @@ All errors raise `FordefiError` with structured information:
 from fordefi_agent import FordefiClient, FordefiError, FordefiTimeoutError
 
 try:
-    result = client.transfer(chain="ethereum", to="0x...", amount="1000")
+    result = client.transfer(chain="ethereum", to="<evm-recipient-address>", amount="1000")
 except FordefiError as e:
     print(e.message)       # "POST /api/v1/transactions failed"
     print(e.status_code)   # 400
@@ -408,10 +408,10 @@ The default `vault_id` is set at initialization. Override per-call:
 client = FordefiClient(api_token="...", pem_path="...", vault_id="evm-vault-uuid")
 
 # Uses default vault
-client.transfer(chain="ethereum", to="0x...", amount="1000")
+client.transfer(chain="ethereum", to="<evm-recipient-address>", amount="1000")
 
 # Uses a different vault
-client.transfer(chain="solana", to="...", amount="1000", vault_id="solana-vault-uuid")
+client.transfer(chain="solana", to="<solana-recipient-address>", amount="1000", vault_id="solana-vault-uuid")
 ```
 
 ## Tips
