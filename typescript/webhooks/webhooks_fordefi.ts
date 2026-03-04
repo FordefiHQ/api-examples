@@ -5,7 +5,6 @@ import { fileURLToPath } from 'url';
 import { p256 } from '@noble/curves/nist.js';
 import express, { Request, Response } from 'express';
 
-// SECRETS and ENV VARIABLES
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -13,148 +12,119 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 app.set('trust proxy', true);
+app.use(express.raw({ type: 'application/json' }));
 const PORT = Number(process.env.PORT) || 8080;
 
-const publicKeyPath = path.join(__dirname, 'keys', 'fordefi_public_key.pem')
+const fordefiPublicKeyPath = path.join(__dirname, 'keys', 'fordefi_public_key.pem');
 let FORDEFI_PUBLIC_KEY: string;
 
 try {
-    FORDEFI_PUBLIC_KEY = fs.readFileSync(publicKeyPath, 'utf8');
-  } catch (error) {
-    console.error('Error loading public key:', error);
-    process.exit(1);
-  }
-  
-app.use(express.raw({ type: 'application/json' }));
-
-interface WebhookEvent {
-  event?: {
-    transaction_id?: string;
-    [key: string]: any;
-  };
-  [key: string]: any;
+  FORDEFI_PUBLIC_KEY = process.env.FORDEFI_PUBLIC_KEY
+    ?? fs.readFileSync(fordefiPublicKeyPath, 'utf8');
+} catch (error) {
+  console.error('Error loading Fordefi public key:', error);
+  process.exit(1);
 }
 
-/**
- * Parse and convert from DER format to IEEE P1363
- */
 function derToP1363(derSig: Uint8Array): Uint8Array {
-  const signature = p256.Signature.fromBytes(derSig, 'der').toBytes();
-
-  return signature;
+  return p256.Signature.fromBytes(derSig, 'der').toBytes();
 }
 
-/**
- * Verify webhook signature using ECDSA with SHA-256
- */
-async function verifySignature(signature: string, body: Buffer): Promise<boolean> {
+async function verifyEcdsaSignature(base64Signature: string, data: Buffer): Promise<boolean> {
   try {
-    const normalizedPem = FORDEFI_PUBLIC_KEY.replace(/\\n/g, '\n');
-    const pemContents = normalizedPem
+    const pemContents = FORDEFI_PUBLIC_KEY
+      .replace(/\\n/g, '\n')
       .replace('-----BEGIN PUBLIC KEY-----', '')
       .replace('-----END PUBLIC KEY-----', '')
       .replace(/\s/g, '');
-    
-    const publicKeyBytes = new Uint8Array(
-      Buffer.from(pemContents, 'base64')
-    );
 
     const publicKey = await crypto.subtle.importKey(
       'spki',
-      publicKeyBytes,
-      {
-        name: 'ECDSA',
-        namedCurve: 'P-256'
-      },
+      new Uint8Array(Buffer.from(pemContents, 'base64')),
+      { name: 'ECDSA', namedCurve: 'P-256' },
       false,
       ['verify']
     );
 
-    // Decode the base64 signature (DER format)
-    const derSignatureBytes = new Uint8Array(
-      Buffer.from(signature, 'base64')
-    );
+    const derBytes = new Uint8Array(Buffer.from(base64Signature, 'base64'));
+    const ieeeSignature = derToP1363(derBytes);
 
-    console.log('Signature verification debug:', {
-      signatureLength: derSignatureBytes.length,
-      dataLength: body.length,
-      signature: signature.substring(0, 20) + '...',
-      dataPreview: body.slice(0, 50).toString() + '...'
-    });
-
-    // Convert DER signature to IEEE P1363 format
-    const ieeeSignature = derToP1363(derSignatureBytes);
-
-    // Verify using IEEE P1363 format signature
-    const isValid = await crypto.subtle.verify(
-      {
-        name: 'ECDSA',
-        hash: 'SHA-256'
-      },
+    return await crypto.subtle.verify(
+      { name: 'ECDSA', hash: 'SHA-256' },
       publicKey,
       new Uint8Array(ieeeSignature),
-      new Uint8Array(body)
+      new Uint8Array(data)
     );
-
-    console.log(`Signature verification result: ${isValid}`);
-    return isValid;
-
   } catch (error) {
     console.error('Signature verification error:', error);
     return false;
   }
 }
 
-app.get('/health', (req: Request, res: Response) => {
+function logFordefiEvent(event: any) {
+  const tx = event.managed_transaction_data ?? event;
+  const vault = tx.vault ?? tx.managed_transaction_data?.vault;
+  const stateChanges = event.state_changes ?? [];
+  const latestState = stateChanges.at(-1);
+
+  console.log('\n━━━ Fordefi Event ━━━');
+  console.log(`  ID:      ${event.id}`);
+  console.log(`  State:   ${event.state}`);
+  if (vault) {
+    console.log(`  Vault:   ${vault.name} (${vault.address})`);
+  }
+  if (event.direction) {
+    console.log(`  Direction: ${event.direction}`);
+  }
+  if (tx.created_by) {
+    console.log(`  Created by: ${tx.created_by.name} (${tx.created_by.email})`);
+  }
+  if (tx.policy_match) {
+    console.log(`  Policy:  ${tx.policy_match.rule_name || 'default'} → ${tx.policy_match.action_type}`);
+  }
+  if (latestState) {
+    console.log(`  Latest state change: ${latestState.new_state} at ${latestState.changed_at}`);
+  }
+  console.log('━━━━━━━━━━━━━━━━━━━━━');
+  console.log('Full payload:', JSON.stringify(event, null, 2));
+}
+
+app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 app.post('/', async (req: Request, res: Response): Promise<void> => {
-    try {
-      console.log(`\n🌐 Client IP: ${req.ip}`);
+  try {
+    const headerSignature = req.headers['x-signature'] as string;
+    if (!headerSignature) {
+      res.status(401).json({ error: 'Missing signature' });
+      return;
+    }
 
-      // 1. Get the signature from headers
-      const signature = req.headers['x-signature'] as string;
-      if (!signature) {
-        console.error('Missing X-Signature header');
-        res.status(401).json({ error: 'Missing signature' });
-        return;
-      }
-  
-      // 2. Get the raw body
-      const rawBody = req.body as Buffer;
-      if (!rawBody || rawBody.length === 0) {
-        console.error('Empty request body');
-        res.status(400).json({ error: 'Empty request body' });
-        return;
-      }
-  
-      // 3. Verify the signature
-      const isValidSignature = await verifySignature(signature, rawBody);
-      if (!isValidSignature) {
-        console.error('Invalid signature');
-        res.status(401).json({ error: 'Invalid signature' });
-        return;
-      }
+    const rawBody = req.body as Buffer;
+    if (!rawBody || rawBody.length === 0) {
+      res.status(400).json({ error: 'Empty request body' });
+      return;
+    }
 
-    console.log('\n📝 Received event:');
-    const eventData: WebhookEvent = JSON.parse(rawBody.toString());
-    console.log(JSON.stringify(eventData, null, 2));
+    const isValid = await verifyEcdsaSignature(headerSignature, rawBody);
+    if (!isValid) {
+      res.status(401).json({ error: 'Invalid signature' });
+      return;
+    }
 
-    // 4. Respond Ok
-    res.status(200).json({ 
-      status: 'success',
-      message: 'Webhook received and processed'
-    });
+    console.log('✅ Signature verified');
+    const event = JSON.parse(rawBody.toString());
+    logFordefiEvent(event);
 
+    res.status(200).json({ status: 'success' });
   } catch (error) {
     console.error('Error processing webhook:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-app.use((error: Error, req: Request, res: Response, next: any) => {
-  console.error('Unhandled error:', error);
+app.use((_error: Error, _req: Request, res: Response, _next: any) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 

@@ -1,320 +1,198 @@
-# Fordefi Webhook Handler (TypeScript)
+# Fordefi Webhook Handlers (TypeScript)
 
-Two TypeScript Express.js webhook server implementations to choose from:
+Two TypeScript Express.js webhook servers:
 
 ## Implementation Options
 
-### 1. **Basic Fordefi Handler** (`webhooks_fordefi.ts`)
-- ✅ **Fordefi webhooks only**: Processes transaction events and notifications from your Fordefi organization
-- ✅ **Simple setup**: Only requires Fordefi public key for signature validation
-- ✅ **Read-only**: Receives and logs webhook events without API interactions
+### 1. Fordefi Handler (`webhooks_fordefi.ts`)
+- Receives and logs Fordefi transaction webhook events
+- Verifies `X-Signature` header using ECDSA P-256
+- Read-only — no API calls, only requires Fordefi public key
 
-### 2. **Advanced Handler with Hypernative** (`webhooks_hypernative.ts`)
-- ✅ **Fordefi webhooks**: Processes transaction events and notifications from your Fordefi organization
-- ✅ **Hypernative integration**: Receives real-time Web3 security alerts and automatically triggers transaction signing via Fordefi API
-- ✅ **Smart routing**: Automatically detects and routes between Fordefi and Hypernative events
-- ⚠️ **Requires API token**: Needs Fordefi API User Token for transaction signing functionality
-
-## Which Implementation Should I Choose?
-
-### Choose **Basic Handler** (`webhooks_fordefi.ts`) if:
-- ✅ You only need to receive and log Fordefi webhook events
-- ✅ You want a simple, minimal setup
-- ✅ You don't need Hypernative integration
-
-### Choose **Advanced Handler** (`webhooks_hypernative.ts`) if:
-- ✅ You already have a Hypernative account
-- ✅ You want Hypernative security monitoring integration
-- ✅ You need automated transaction signing based on security alerts
+### 2. Hypernative Handler (`webhooks_hypernative.ts`)
+- Dedicated to Hypernative events — handles two types:
+  - **Webhook Actions** (`/hypernative`) — Hypernative sends a pre-created Fordefi transaction ID in the `fordefi-transaction-id` header. The server verifies the signature and triggers signing via the Fordefi API. Uses `keys/hypernative_public_key.pem`.
+  - **Risk Insights** (`/hypernative/risk-insights`) — Hypernative sends a risk insight event with the signature embedded in the body. The server verifies it and responds by executing a contract call through Fordefi's web3 provider (configured in `fordefi-response/`). Uses `keys/hypernative_public_key_2.pem`.
+- Auto-routing on `POST /` detects the event type by checking for `fordefi-transaction-id` header
 
 ## Prerequisites
 
-### For Both Implementations:
-- **Node.js 18+** 
+### For Both:
+- **Node.js 18+**
 - **npm** or **yarn**
-- **Fordefi Public Key** - [Download from webhook docs](https://docs.fordefi.com/developers/webhooks#validate-a-webhook)
 
-### Additional for Advanced Handler (`webhooks_hypernative.ts`):
-- **Fordefi API User Token** - [Get your token here](https://docs.fordefi.com/developers/getting-started/create-an-api-user)
-- **Fordefi API Signer up and running** - [Learn more here](https://docs.fordefi.com/developers/getting-started/set-up-an-api-signer/api-signer-docker)
-- **Hypernative Account** - [Sign up here](https://app.hypernative.xyz/)
+### For `webhooks_fordefi.ts`:
+- **Fordefi Public Key** — [Download from webhook docs](https://docs.fordefi.com/developers/webhooks#validate-a-webhook)
+
+### For `webhooks_hypernative.ts`:
+- **Fordefi API User Token** — [Get your token here](https://docs.fordefi.com/developers/getting-started/create-an-api-user)
+- **Fordefi API Signer** — [Set up here](https://docs.fordefi.com/developers/getting-started/set-up-an-api-signer/api-signer-docker)
+- **Hypernative Account** — [Sign up here](https://app.hypernative.xyz/)
+- **Hypernative Public Keys** — Contact Hypernative support for both keys
 
 ## Installation
 
-1. **Clone and navigate**
-   ```bash
-   cd api-examples/typescript/webhooks
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install express axios dotenv
-   npm install -D typescript @types/express @types/node ts-node nodemon
-   ```
-
-3. **Initialize TypeScript config**
-   ```bash
-   npx tsc --init
-   ```
+```bash
+cd api-examples/typescript/webhooks
+npm install
+```
 
 ## Configuration
 
-### Basic Handler (`webhooks_fordefi.ts`) Configuration
+### `webhooks_fordefi.ts`
 
-**Minimal setup - only needs Fordefi public key:**
+Save the Fordefi public key to `keys/fordefi_public_key.pem` ([download here](https://docs.fordefi.com/developers/webhooks#validate-a-webhook)), or set it via the `FORDEFI_PUBLIC_KEY` env var.
 
-   ```bash
-   # Create keys directory
-   mkdir keys
-   
-   # Save Fordefi public key
-   # Download from: https://docs.fordefi.com/developers/webhooks#validate-a-webhook
-   # Save as: keys/fordefi_public_key.pem
-   ```
+### `webhooks_hypernative.ts`
 
-### Advanced Handler (`webhooks_hypernative.ts`) Configuration
-
-**Full setup with API token and multiple keys:**
-
-1. **Environment Variables**  
-   Create a `.env` file:
+1. Create a `.env` file:
    ```env
-   # Fordefi Configuration
    FORDEFI_API_USER_TOKEN=your_fordefi_api_token_here
-   FORDEFI_PUBLIC_KEY=your_fordefi_public_key_pem_content_here
-   
-   # Hypernative Configuration (optional - will use file if not provided)
-   HYPERNATIVE_PUBLIC_KEY=your_hypernative_public_key_pem_content_here
    ```
 
-2. **Public Key Setup**  
-   The server supports loading public keys from both environment variables and files:
-   
-   **Option A: Environment Variables** (Recommended for production)
-   ```env
-   FORDEFI_PUBLIC_KEY=-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkq...\n-----END PUBLIC KEY-----
-   HYPERNATIVE_PUBLIC_KEY=-----BEGIN PUBLIC KEY-----\nMFkwEwYHKo...\n-----END PUBLIC KEY-----
-   ```
-   
-   **Option B: Key Files** (Good for development)
-   ```bash
-   # Create keys directory
-   mkdir keys
-   
-   # Save Fordefi public key
-   # Download from: https://docs.fordefi.com/developers/webhooks#validate-a-webhook
-   # Save as: keys/fordefi_public_key.pem
-   
-   # Save Hypernative public key (optional)
-   # Contact Hypernative support to get this key
-   # Save as: keys/hypernative_public_key.pem
-   ```
+2. Place Hypernative public keys in `keys/`:
+   - `keys/hypernative_public_key.pem` — for webhook actions (or set `HYPERNATIVE_PUBLIC_KEY` env var)
+   - `keys/hypernative_public_key_2.pem` — for risk insights (or set `HYPERNATIVE_PUBLIC_KEY_2` env var)
 
-3. **Package.json Scripts**  
-   Add these scripts to your `package.json`:
-   ```json
-   {
-   "scripts": {
-      "dev": "nodemon --exec ts-node webhooks_hypernative.ts",
-      "build": "tsc",
-      "fordefi_server": "npx tsx webhooks_fordefi.ts",
-      "hypernative_server": "npx tsx webhooks_hypernative.ts"
-   },
-   }
-   ```
+3. Configure the contract call response in `fordefi-response/config.ts`:
+   - Set the vault address, chain ID, contract address, destination, and ABI parameters
+   - Place your Fordefi API signer private key at `fordefi-response/fordefi_secret/private.pem`
 
 ## Usage
 
-### Choose Your Implementation
-
-**For Basic Fordefi-only webhooks:**
 ```bash
+# Fordefi-only webhooks
 npm run fordefi_server
-```
 
-**For Advanced handler with Hypernative integration:**
-```bash
-# Development
-npm run dev
-# Production
+# Hypernative webhooks
 npm run hypernative_server
 ```
+
 ## API Endpoints
 
-### Basic Handler (`webhooks_fordefi.ts`)
+### `webhooks_fordefi.ts`
+
 | Method | Endpoint | Description |
-|---------|----------|-------------|
-| `GET` | `/health` | Health check endpoint |
-| `POST` | `/` | Webhook endpoint for Fordefi events only |
+|--------|----------|-------------|
+| `GET` | `/health` | Health check |
+| `POST` | `/` | Fordefi webhook events |
 
-### Advanced Handler (`webhooks_hypernative.ts`)
+### `webhooks_hypernative.ts`
+
 | Method | Endpoint | Description |
-|---------|----------|-------------|
-| `GET` | `/health` | Health check endpoint |
-| `POST` | `/` | Smart webhook endpoint that routes Fordefi and Hypernative events automatically |
+|--------|----------|-------------|
+| `GET` | `/health` | Health check |
+| `POST` | `/` | Auto-routes between webhook actions and risk insights |
+| `POST` | `/hypernative` | Webhook actions — verifies signature, triggers Fordefi transaction signing |
+| `POST` | `/hypernative/risk-insights` | Risk insights — verifies signature, executes contract call via Fordefi |
 
-### Fordefi Webhook Flow (`POST /`)
+## Hypernative Event Types
 
-**Basic Handler:**
-1. **Signature Verification** - Validates `X-Signature` header using ECDSA P-256
-2. **Event Processing** - Parses webhook payload and extracts transaction data
-3. **Logging** - Logs complete transaction event details
-4. **Response** - Returns success confirmation
+### Webhook Actions (Fordefi-triggered transactions)
 
-**Advanced Handler:**
-1. **Smart Detection** - Automatically detects if incoming webhook is from Fordefi or Hypernative
-2. **Signature Verification** - Validates `X-Signature` header using ECDSA P-256 (for Fordefi events)
-3. **Event Processing** - Parses webhook payload and extracts transaction data
-4. **Logging** - Logs complete transaction event details
-5. **Response** - Returns success confirmation
+Hypernative sends these when a policy triggers a pre-created Fordefi transaction. The server verifies the signature and calls Fordefi's `/trigger-signing` API to approve it.
 
-### Hypernative Webhook Flow (`POST /`) *(Advanced Handler Only)*
-
-1. **Header Extraction** - Retrieves `fordefi-transaction-id` from headers
-2. **Signature Verification** - Validates `digitalSignature` from request body using ECDSA P-256
-3. **Alert Processing** - Parses risk insight data and security alerts
-4. **Logging** - Logs detailed security alert information
-5. **Transaction Signing** - Automatically triggers signing for the associated Fordefi transaction using the API
-6. **Response** - Returns success confirmation with transaction ID and signing status
-
-#### Hypernative Webhook Headers
+**Headers:**
 ```http
 Content-Type: application/json
 fordefi-transaction-id: d8f907cd-438a-45b4-a22c-0851338a7678
 ```
 
-#### Hypernative Webhook Payload Structure
+**Payload:**
 ```json
 {
   "id": "unique-webhook-message-id",
   "data": "{...JSON string containing riskInsight data...}",
-  "digitalSignature": "MEYCIQCLpMfKwuubxs73AZ4l58+MGmpjVViiBiHOq5iDhQlc+Q..."
+  "digitalSignature": "MEYCIQCLpMfKwuubxs73AZ4l58+..."
 }
 ```
 
-#### Hypernative Response Examples
-
-**Successful Processing with Signing Trigger:**
+**Response:**
 ```json
 {
   "status": "success",
-  "message": "Hypernative webhook received, processed, and signing triggered",
   "transactionId": "d8f907cd-438a-45b4-a22c-0851338a7678",
   "signingTriggered": true
 }
 ```
 
-**Processing Success but Signing Failed:**
+### Risk Insights (Custom contract call response)
+
+Hypernative sends these as standalone risk insight alerts (no `fordefi-transaction-id` header). The server verifies the signature using a separate public key and responds by executing a contract call through Fordefi's web3 provider. The contract call is configured in `fordefi-response/config.ts`.
+
+**Payload:**
 ```json
 {
-  "status": "partial_success",
-  "message": "Hypernative webhook received and processed, but signing trigger failed",
-  "transactionId": "d8f907cd-438a-45b4-a22c-0851338a7678",
-  "signingTriggered": false
+  "id": "unique-webhook-message-id",
+  "data": "{...JSON string containing riskInsight data...}",
+  "digitalSignature": "MEUCIQDIJuxkKN6lxJFKD/9FtMz7eK..."
 }
 ```
 
-**Processing Success without Transaction ID:**
-```json
-{
-  "status": "success",
-  "message": "Hypernative webhook received and processed (no transaction ID to trigger)",
-  "signingTriggered": false
-}
-```
-
-### Fordefi Webhook Response Example
+**Response:**
 ```json
 {
   "status": "success",
-  "message": "Fordefi webhook received and processed"
+  "txHash": "0xabc123..."
 }
 ```
-
-## Testing with ngrok
-
-1. **Install ngrok**
-   ```bash
-   # Install ngrok: https://ngrok.com/download
-   ```
-
-2. **Start your webhook server**
-   ```bash
-   npm run dev
-   ```
-
-3. **Expose locally with ngrok**
-   ```bash
-   ngrok http 8080
-   ```
-
-4. **Configure Fordefi Webhook**
-   - Go to [Fordefi Console](https://app.fordefi.com) → Settings → Webhooks
-   - Add webhook URL: `https://your-ngrok-url.ngrok.io/`
-   - Save and test
 
 ## Project Structure
 
 ```
 webhooks/
-├── webhooks_fordefi.ts             # Main application file (doesn't support Hypernative event )
-├── webhooks_hypernative.ts         # Alternative application file (supports both Fordefi and Hypernative events)
-├── package.json                    # Dependencies and scripts
-├── tsconfig.json                   # TypeScript configuration
-├── .env                           # Environment variables (optional)
-├── keys/                          # Public keys directory
-│   ├── fordefi_public_key.pem     # Fordefi webhook signature validation
-│   └── hypernative_public_key.pem # Hypernative webhook signature validation (optional)
-└── README.md                      # This file
+├── webhooks_fordefi.ts              # Fordefi-only webhook server
+├── webhooks_hypernative.ts          # Hypernative webhook server (actions + risk insights)
+├── fordefi-response/                # Contract call response module
+│   ├── config.ts                    # Vault, contract, and chain configuration
+│   ├── get-provider.ts              # Fordefi web3 provider setup
+│   ├── abi-call.ts                  # Contract call execution
+│   └── trigger-signing.ts           # Fordefi trigger-signing API call
+├── keys/                            # Public keys for signature verification
+│   ├── fordefi_public_key.pem       # Fordefi webhook signature key
+│   ├── hypernative_public_key.pem   # Hypernative webhook action signature key
+│   └── hypernative_public_key_2.pem # Hypernative risk insight signature key
+├── event-examples/                  # Example payloads for reference
+├── package.json
+├── tsconfig.json
+└── .env                             # Environment variables
 ```
 
 ## Environment Variables
 
-### Basic Handler (`webhooks_fordefi.ts`)
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `PORT` | No | Server port (default: 8080) |
+### `webhooks_fordefi.ts`
 
-### Advanced Handler (`webhooks_hypernative.ts`)
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `FORDEFI_API_USER_TOKEN` | Yes | Your Fordefi API access token (required for transaction signing triggers) |
 | `FORDEFI_PUBLIC_KEY` | No* | Fordefi public key PEM content (fallback to file) |
-| `HYPERNATIVE_PUBLIC_KEY` | No* | Hypernative public key PEM content (fallback to file) |
 | `PORT` | No | Server port (default: 8080) |
 
-*\*Required only if not using key files*
+### `webhooks_hypernative.ts`
 
-## Automated Transaction Signing *(Advanced Handler Only)*
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `FORDEFI_API_USER_TOKEN` | Yes | Fordefi API access token |
+| `HYPERNATIVE_PUBLIC_KEY` | No* | Webhook action public key (fallback to file) |
+| `HYPERNATIVE_PUBLIC_KEY_2` | No* | Risk insight public key (fallback to file) |
+| `PORT` | No | Server port (default: 8080) |
 
-The Advanced Handler (`webhooks_hypernative.ts`) includes automated transaction signing functionality that allows Hypernative security alerts to trigger immediate transaction approval in Fordefi. This enables rapid response to security events.
+*\*Falls back to the corresponding file in `keys/` if not set*
 
-> **Note:** This feature is **not available** in the Basic Handler (`webhooks_fordefi.ts`) which is read-only.
+## Testing with ngrok
 
-### How It Works
+1. Start your webhook server: `npm run hypernative_server`
+2. Expose locally: `ngrok http 8080`
+3. Configure the ngrok URL in:
+   - [Fordefi Console](https://app.fordefi.com) → Settings → Webhooks (for Fordefi events)
+   - [Hypernative Console](https://app.hypernative.xyz) → Alert Channels (for Hypernative events)
 
-1. **Alert Reception**: Hypernative sends a security alert with a `fordefi-transaction-id` header
-2. **Signature Validation**: The webhook verifies the alert's authenticity using ECDSA P-256
-3. **API Call**: Upon successful validation, the server calls Fordefi's `/trigger-signing` API endpoint [see reference here](https://docs.fordefi.com/api/latest/openapi/transactions/trigger_transaction_signing_api_v1_transactions__id__trigger_signing_post)
-4. **Response**: The webhook returns the signing trigger status along with alert processing confirmation
-
-### API Endpoint Used
-
-```http
-POST https://api.fordefi.com/api/v1/transactions/{transactionId}/trigger-signing
-Authorization: Bearer {FORDEFI_API_USER_TOKEN}
-Content-Type: application/json
-``
 ## Learn More
 
-📚 **Documentation Links:**
-
 **Fordefi:**
-- [Fordefi Webhook Guide](https://docs.fordefi.com/developers/webhooks)
-- [Fordefi API Reference](https://docs.fordefi.com/api/openapi/transactions)
+- [Webhook Guide](https://docs.fordefi.com/developers/webhooks)
+- [API Reference](https://docs.fordefi.com/api/openapi/transactions)
 - [Signature Validation](https://docs.fordefi.com/developers/webhooks#validate-a-webhook)
 
-**Hypernative (all links require a Hypernative account):**
+**Hypernative (requires account):**
 - [Hypernative Platform](https://app.hypernative.xyz)
 - [Fordefi Integration Guide](https://docs.hypernative.xyz/hypernative-product-docs/hypernative-web-application/configure-external-alert-channels/fordefi)
- 
