@@ -25,6 +25,7 @@ export async function createTx(fordefiConfig: FordefiSolanaConfig, transferConfi
 
     const signedTx = await gill.compileTransaction(transferTokensTx);
     const base64EncodedData = Buffer.from(signedTx.messageBytes).toString('base64');
+    console.log(`Raw tx payload: \n${base64EncodedData}`);
 
     const jsonBody = {
         vault_id: fordefiConfig.originVault,

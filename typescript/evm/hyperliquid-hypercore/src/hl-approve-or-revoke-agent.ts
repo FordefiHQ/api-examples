@@ -61,6 +61,9 @@ export async function approveAgentWallet(hyperliquidConfig: HyperliquidConfig, a
         
     } catch (error: any) {
         console.error("Error during agent operation:", error.message || String(error));
+        if (error.cause) {
+            console.error("Cause:", error.cause);
+        }
     };
 };
 
