@@ -19,7 +19,7 @@ async def sol_tx_tokens(vault_id: str, destination: str, custom_note: str, value
         "details": {
             "fee": {
                 "type": GasType.CUSTOM.value,
-                "unit_price": "100000000" # you can replace unit_price with priority_fee but NOT combine them
+                "unit_price": "500" # you can replace unit_price with priority_fee but NOT combine them
             },
             "type": SolanaTransactionDetailType.SOLANA_TRANSFER.value,
             "to": destination,
@@ -50,7 +50,7 @@ SOL_VAULT_ID = os.environ["SOL_VAULT_ID"]
 path = "/api/v1/transactions"
 destination = "9BgxwZMyNzGUgp6hYXMyRKv3kSkyYZAMPGisqJgnXCFS" # Change to your destination address
 custom_note = "hello!" # Optional note
-value = str(100)  # in smallest units (1 USDC = 1_000_000 SOL)
+value = str(1)  # in smallest units (1 USDC = 1_000_000 SOL)
 token_address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" # USDC on Solana
 
 async def main():

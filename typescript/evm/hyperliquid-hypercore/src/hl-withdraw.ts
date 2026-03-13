@@ -51,5 +51,8 @@ export async function withdraw3(hyperliquidConfig: HyperliquidConfig) {
         } else {
             console.error("ERROR:", errorMessage);
         };
+        if (error.cause) {
+            console.error("Cause:", error.cause);
+        }
     };
 };

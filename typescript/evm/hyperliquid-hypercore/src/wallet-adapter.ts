@@ -59,6 +59,7 @@ export class FordefiWalletAdapter {
             ...domain,
             chainId: fordefiConfig.chainId
         };
+
         console.log("✅ Signing with chainId:", fordefiConfig.chainId);
         return this.signer.signTypedData(modifiedDomain, types, value);
     }
