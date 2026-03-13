@@ -4,11 +4,6 @@ import fs from 'fs'
 
 dotenv.config();
 
-// PLACEHOLDERS TO CONFIGURE
-export const CONTRACT_ADDRESS = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
-export const DESTINATION_ADDRESS = "0xF659feEE62120Ce669A5C45Eb6616319D552dD93"; 
-export const DECIMALS = 6;
-
 export const fordefiConfig: FordefiProviderConfig = {
     chainId: 1,
     address: '0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73', // The Fordefi EVM Vault that will call the contract
