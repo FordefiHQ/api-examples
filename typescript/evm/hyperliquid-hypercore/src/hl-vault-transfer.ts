@@ -46,6 +46,9 @@ export async function vault_transfer_agent(hyperliquidConfig: HyperliquidConfig)
 
     } catch (error: any) {
         console.error("Error during Vault transfer:", error.message || String(error));
+        if (error.cause) {
+            console.error("Cause:", error.cause);
+        }
         throw error;
     }
 }

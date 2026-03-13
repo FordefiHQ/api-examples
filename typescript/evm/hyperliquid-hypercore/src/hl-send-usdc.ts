@@ -48,5 +48,8 @@ export async function usdSend(hyperliquidConfig: HyperliquidConfig) {
         
     } catch (error: any) {
         console.error("Error during USDC transfer:", error.message || String(error));
+        if (error.cause) {
+            console.error("Cause:", error.cause);
+        }
     };
 };

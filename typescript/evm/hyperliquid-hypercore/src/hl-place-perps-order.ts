@@ -70,6 +70,9 @@ export async function place_perps_order(hyperliquidConfig: HyperliquidConfig, or
 
     } catch (error: any) {
         console.error("Error while placing order:", error.message || String(error));
+        if (error.cause) {
+            console.error("Cause:", error.cause);
+        }
         throw error;
     }
 }

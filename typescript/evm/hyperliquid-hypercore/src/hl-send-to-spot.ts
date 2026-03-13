@@ -54,5 +54,8 @@ export async function spotTransfer(hyperliquidConfig: HyperliquidConfig, fordefi
 
     } catch (error: any) {
         console.error("Error during asset transfer:", error.message || String(error));
+        if (error.cause) {
+            console.error("Cause:", error.cause);
+        }
     };
 };
