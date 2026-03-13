@@ -54,8 +54,8 @@ Save the Fordefi public key to `keys/fordefi_public_key.pem` ([download here](ht
    - `keys/hypernative_public_key.pem` — for webhook actions (or set `HYPERNATIVE_PUBLIC_KEY` env var)
    - `keys/hypernative_public_key_2.pem` — for risk insights (or set `HYPERNATIVE_PUBLIC_KEY_2` env var)
 
-3. Configure the contract call response in `fordefi-response/config.ts`:
-   - Set the vault address, chain ID, contract address, destination, and ABI parameters
+3. Configure the Fordefi web3 provider in `fordefi-response/config.ts`:
+   - Set the vault address and chain ID (the target contract is extracted dynamically from each Hypernative alert)
    - Place your Fordefi API signer private key at `fordefi-response/fordefi_secret/private.pem`
 
 ## Usage
@@ -116,24 +116,41 @@ fordefi-transaction-id: d8f907cd-438a-45b4-a22c-0851338a7678
 }
 ```
 
-### Risk Insights (Custom contract call response)
+### Risk Insights (Dynamic contract call response)
 
-Hypernative sends these as standalone risk insight alerts (no `fordefi-transaction-id` header). The server verifies the signature using a separate public key and responds by executing a contract call through Fordefi's web3 provider. The contract call is configured in `fordefi-response/config.ts`.
+Hypernative sends these as standalone risk insight alerts (no `fordefi-transaction-id` header). The server verifies the signature using a separate public key, then **extracts the victim contract address** from the alert's `details` field and executes an emergency response through Fordefi's web3 provider.
+
+**How it works:**
+
+1. The server parses the `Suspected Victim <...|0xADDRESS>` pattern from the risk insight details
+2. Uses the extracted address as the target contract (e.g., a Curve pool under exploit)
+3. Calls `remove_liquidity` on that contract to emergency-withdraw all LP tokens held by the configured Fordefi vault
+
+The vault and chain are configured in `fordefi-response/config.ts`. The target contract is determined dynamically from each alert — no hardcoded contract address is needed.
 
 **Payload:**
 ```json
 {
   "id": "unique-webhook-message-id",
-  "data": "{...JSON string containing riskInsight data...}",
+  "data": "{...JSON string containing riskInsight with details like 'Suspected Victim <0x32e6...|0x32e616f4f17d43f9a5cd9be0e294727187064cb3>'...}",
   "digitalSignature": "MEUCIQDIJuxkKN6lxJFKD/9FtMz7eK..."
 }
 ```
 
-**Response:**
+**Response (success):**
 ```json
 {
   "status": "success",
-  "txHash": "0xabc123..."
+  "txHash": "0xabc123...",
+  "victimAddress": "0x32e616f4f17d43f9a5cd9be0e294727187064cb3"
+}
+```
+
+**Response (no victim address found):**
+```json
+{
+  "status": "success",
+  "contractCallSkipped": "no victim address found"
 }
 ```
 
@@ -146,7 +163,7 @@ webhooks/
 ├── fordefi-response/                # Contract call response module
 │   ├── config.ts                    # Vault, contract, and chain configuration
 │   ├── get-provider.ts              # Fordefi web3 provider setup
-│   ├── abi-call.ts                  # Contract call execution
+│   ├── abi-call.ts                  # Emergency remove_liquidity call on victim contract
 │   └── trigger-signing.ts           # Fordefi trigger-signing API call
 ├── keys/                            # Public keys for signature verification
 │   ├── fordefi_public_key.pem       # Fordefi webhook signature key
@@ -191,8 +208,6 @@ webhooks/
 **Fordefi:**
 - [Webhook Guide](https://docs.fordefi.com/developers/webhooks)
 - [API Reference](https://docs.fordefi.com/api/openapi/transactions)
-- [Signature Validation](https://docs.fordefi.com/developers/webhooks#validate-a-webhook)
 
 **Hypernative (requires account):**
 - [Hypernative Platform](https://app.hypernative.xyz)
-- [Fordefi Integration Guide](https://docs.hypernative.xyz/hypernative-product-docs/hypernative-web-application/configure-external-alert-channels/fordefi)

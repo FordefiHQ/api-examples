@@ -175,6 +175,12 @@ function logRiskInsight(body: any) {
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 }
 
+function extractVictimAddress(details?: string): string | null {
+  if (!details) return null;
+  const match = details.match(/Suspected Victim\s*<[^|]*\|(0x[0-9a-fA-F]{40})>/);
+  return match?.[1] ?? null;
+}
+
 function tryParseJson(str: string): any | null {
   try {
     return JSON.parse(str);
@@ -277,10 +283,21 @@ async function handleRiskInsight(req: Request, res: Response): Promise<void> {
     console.log('✅ Signature verified');
     logRiskInsight(body);
 
+    const parsed = typeof body.data === 'string' ? tryParseJson(body.data) : body.data;
+    const victimAddress = extractVictimAddress(parsed?.riskInsight?.details);
+
+    if (!victimAddress) {
+      console.warn('⚠️  Could not extract victim address from payload');
+      res.status(200).json({ status: 'success', contractCallSkipped: 'no victim address found' });
+      return;
+    }
+
+    console.log(`🎯 Victim address extracted: ${victimAddress}`);
+
     try {
-      const txHash = await executeContractCall();
+      const txHash = await executeContractCall(victimAddress);
       console.log(`✅ Contract call executed: ${txHash}`);
-      res.status(200).json({ status: 'success', txHash });
+      res.status(200).json({ status: 'success', txHash, victimAddress });
     } catch (callError) {
       console.error('Contract call failed:', callError);
       res.status(200).json({ status: 'partial_success', contractCallError: String(callError) });
