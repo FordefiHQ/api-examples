@@ -16,6 +16,9 @@ app.use(express.raw({ type: 'application/json' }));
 const PORT = Number(process.env.PORT) || 8080;
 
 const fordefiPublicKeyPath = path.join(__dirname, 'keys', 'fordefi_public_key.pem');
+const liveLogsDir = path.join(__dirname, 'live_logs', 'fordefi');
+fs.mkdirSync(liveLogsDir, { recursive: true });
+
 let FORDEFI_PUBLIC_KEY: string;
 
 try {
@@ -116,6 +119,11 @@ app.post('/', async (req: Request, res: Response): Promise<void> => {
     console.log('✅ Signature verified');
     const event = JSON.parse(rawBody.toString());
     logFordefiEvent(event);
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const logFile = path.join(liveLogsDir, `${timestamp}_${event.id ?? 'unknown'}.json`);
+    fs.writeFileSync(logFile, JSON.stringify(event, null, 2));
+    console.log(`📄 Logged to ${logFile}`);
 
     res.status(200).json({ status: 'success' });
   } catch (error) {
