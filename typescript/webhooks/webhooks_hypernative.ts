@@ -20,6 +20,11 @@ const __dirname = path.dirname(__filename);
 const webhookActionKeyPath = path.join(__dirname, 'keys', 'hypernative_public_key.pem');
 const riskInsightKeyPath = path.join(__dirname, 'keys', 'hypernative_public_key_2.pem');
 
+const webhookActionsLogDir = path.join(__dirname, 'live_logs', 'hypernative', 'webhook_actions');
+const riskInsightsLogDir = path.join(__dirname, 'live_logs', 'hypernative', 'risk_insights');
+fs.mkdirSync(webhookActionsLogDir, { recursive: true });
+fs.mkdirSync(riskInsightsLogDir, { recursive: true });
+
 let WEBHOOK_ACTION_PUBLIC_KEY: string;
 let RISK_INSIGHT_PUBLIC_KEY: string;
 let FORDEFI_API_USER_TOKEN: string;
@@ -247,6 +252,11 @@ async function handleWebhookAction(req: Request, res: Response): Promise<void> {
     console.log('✅ Signature verified');
     logFordefiTriggeredAction(body, req.headers['fordefi-transaction-id'] as string);
 
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const logFile = path.join(webhookActionsLogDir, `${timestamp}_${body.id ?? 'unknown'}.json`);
+    fs.writeFileSync(logFile, JSON.stringify(body, null, 2));
+    console.log(`📄 Logged to ${logFile}`);
+
     const transactionId = req.headers['fordefi-transaction-id'] as string;
     if (transactionId) {
       const signingTriggered = await triggerFordefiSigning(transactionId, FORDEFI_API_USER_TOKEN);
@@ -282,6 +292,11 @@ async function handleRiskInsight(req: Request, res: Response): Promise<void> {
 
     console.log('✅ Signature verified');
     logRiskInsight(body);
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const logFile = path.join(riskInsightsLogDir, `${timestamp}_${body.id ?? 'unknown'}.json`);
+    fs.writeFileSync(logFile, JSON.stringify(body, null, 2));
+    console.log(`📄 Logged to ${logFile}`);
 
     const parsed = typeof body.data === 'string' ? tryParseJson(body.data) : body.data;
     const victimAddress = extractVictimAddress(parsed?.riskInsight?.details);
