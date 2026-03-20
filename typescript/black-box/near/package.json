@@ -6,7 +6,8 @@
   "scripts": {
     "address": "tsx ./src/derive_near_address",
     "transfer": "tsx ./src/near-transfer-run",
-    "stake": "tsx ./src/near-staking-run"
+    "stake": "tsx ./src/near-staking-run",
+    "intents": "tsx ./src/intents/near-intents-run"
   },
   "keywords": [],
   "author": "",
