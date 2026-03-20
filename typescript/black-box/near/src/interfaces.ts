@@ -8,15 +8,6 @@ export interface NearTransferConfig {
     apiPathEndpoint: string;
 }
 
-export interface IntentsEnvConfig {
-    originAsset: string;        // 1Click asset ID, e.g. "near:mainnet:native"
-    destinationAsset: string;   // 1Click asset ID, e.g. "eth:1:native"
-    amount: string;             // Amount in smallest unit of origin asset
-    recipient: string;          // Destination address on target chain
-    slippage: number;           // Basis points, e.g. 100 = 1%
-    apiKey?: string;            // Optional 1Click API key
-}
-
 export interface FordefiNearConfig {
     accessToken: string;
     originVault: string;
@@ -26,7 +17,6 @@ export interface FordefiNearConfig {
     transferAmount: number; // Amount in NEAR to transfer
     stakeAmount: number; // Amount in NEAR to stake
     stakingPoolId: string; // Staking pool contract (e.g., "pool.near" suffix)
-    intents?: IntentsEnvConfig; // 1Click intents configuration
 }
 
 export interface NearStakingConfig {

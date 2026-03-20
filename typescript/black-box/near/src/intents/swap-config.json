@@ -1,0 +1,7 @@
+{
+  "originAsset": "nep141:wrap.near",
+  "destinationAsset": "nep141:sol.omft.near",
+  "amount": "1.0",
+  "recipient": "CtvSEG7ph7SQumMtbnSKtDTLoUQoy8bxPUcjwvmNgGim",
+  "slippageBps": 100
+}
