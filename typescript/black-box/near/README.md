@@ -1,6 +1,6 @@
 # NEAR Black Box Signing with Fordefi
 
-This project demonstrates how to derive NEAR addresses, transfer NEAR tokens, and stake NEAR using Fordefi's black box signing.
+This project demonstrates how to derive NEAR addresses, transfer NEAR tokens, stake NEAR, and perform cross-chain swaps using Fordefi's black box signing.
 
 ## Prerequisites
 
@@ -39,6 +39,9 @@ VAULT_PUBLIC_KEY=your_vault_public_key_base64
 NEAR_NETWORK=mainnet  # or testnet
 DESTINATION_ADDRESS=recipient.near
 STAKING_POOL_ID=figment.poolv1.near
+
+# For Intents (optional)
+ONECLICK_API_KEY=     # JWT from https://partners.near-intents.org — avoids 0.1% fee
 ```
 
 Place your API signer private key at `./secret/private.pem`.
@@ -75,6 +78,16 @@ npm run stake
 
 Configure the stake amount in [near-config.ts](src/near-config.ts) via `stakeAmount` and set `STAKING_POOL_ID` in your `.env`.
 
+### 4. Cross-Chain Swap (Intents)
+
+Swap tokens across chains (NEAR, Ethereum, Solana, TON, and others) via the [NEAR Intents 1Click API](https://docs.near-intents.org/integration/distribution-channels/1click-api/quickstart):
+
+```bash
+npm run intents
+```
+
+Configure the swap in [`src/intents/swap-config.json`](src/intents/swap-config.json). See the [intents README](src/intents/README.md) for details.
+
 ## Configuration Options
 
 Edit [near-config.ts](src/near-config.ts) to adjust:
@@ -84,3 +97,13 @@ Edit [near-config.ts](src/near-config.ts) to adjust:
 | `transferAmount` | Amount in NEAR to transfer (default: 0.001) |
 | `stakeAmount` | Amount in NEAR to stake (default: 0.001) |
 | `stakingPoolId` | Validator pool ID (e.g., `figment.poolv1.near`) |
+
+Edit [swap-config.json](src/intents/swap-config.json) for intents:
+
+| Field | Description |
+|-------|-------------|
+| `swap.originAsset` | Token key from the `tokens` map (e.g., `near:mainnet:native`) |
+| `swap.destinationAsset` | Token key from the `tokens` map (e.g., `eth:1:native`) |
+| `swap.amount` | Human-readable amount (e.g., `"1.0"` for 1 NEAR) |
+| `swap.recipient` | Destination address on target chain |
+| `swap.slippageBps` | Slippage tolerance in basis points (100 = 1%) |

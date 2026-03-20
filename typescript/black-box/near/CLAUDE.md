@@ -20,9 +20,10 @@ No tests or linter configured.
 
 ## Configuration
 
-- `.env` — Fordefi credentials (`FORDEFI_API_USER_TOKEN`, `BLACKBOX_VAULT_ID`, `VAULT_PUBLIC_KEY`), NEAR settings (`NEAR_ADDRESS`, `NEAR_NETWORK`, `DESTINATION_ADDRESS`, `STAKING_POOL_ID`), intents settings (`INTENTS_*`). See `.env.example`.
+- `.env` — Fordefi credentials (`FORDEFI_API_USER_TOKEN`, `BLACKBOX_VAULT_ID`, `VAULT_PUBLIC_KEY`), NEAR settings (`NEAR_ADDRESS`, `NEAR_NETWORK`, `DESTINATION_ADDRESS`, `STAKING_POOL_ID`), optional `ONECLICK_API_KEY`. See `.env.example`.
 - `secret/private.pem` — API signer private key (never committed).
 - `src/near-config.ts` — `transferAmount` and `stakeAmount` (in NEAR) are hardcoded here, not in `.env`.
+- `src/intents/swap-config.json` — Swap parameters for intents flow: origin/destination tokens, human-readable amount, recipient, slippage. Also contains a `tokens` map that maps friendly keys (e.g. `near:mainnet:native`) to 1Click `assetId` values and decimals.
 
 ## Architecture
 
