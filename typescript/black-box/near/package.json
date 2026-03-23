@@ -7,7 +7,11 @@
     "address": "tsx ./src/derive_near_address",
     "transfer": "tsx ./src/near-transfer-run",
     "stake": "tsx ./src/near-staking-run",
-    "intents": "tsx ./src/intents/near-intents-run"
+    "intents": "tsx ./src/intents/near-intents-run",
+    "intents-solver": "tsx ./src/intents-solver/solver-run",
+    "solver-deposit": "tsx ./src/intents-solver/reserves-manager deposit",
+    "solver-withdraw": "tsx ./src/intents-solver/reserves-manager withdraw",
+    "solver-balance": "tsx ./src/intents-solver/reserves-manager balance"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +21,10 @@
     "axios": "^1.13.2",
     "bs58": "^6.0.0",
     "dotenv": "^17.2.3",
-    "near-api-js": "^6.5.1"
+    "near-api-js": "^6.5.1",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.13"
   }
 }

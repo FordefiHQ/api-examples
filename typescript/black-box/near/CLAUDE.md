@@ -14,16 +14,21 @@ npm run address          # derive NEAR implicit address from vault public key
 npm run transfer         # transfer NEAR tokens to DESTINATION_ADDRESS
 npm run stake            # stake NEAR with a validator pool
 npm run intents          # cross-chain swap via NEAR Intents (1Click API)
+npm run intents-solver   # run the solver (listen for RFQs, sign quotes)
+npm run solver-balance   # check solver balances on intents contract
+npm run solver-deposit   # deposit tokens into intents contract reserves
+npm run solver-withdraw  # withdraw tokens from intents contract reserves
 ```
 
 No tests or linter configured.
 
 ## Configuration
 
-- `.env` — Fordefi credentials (`FORDEFI_API_USER_TOKEN`, `BLACKBOX_VAULT_ID`, `VAULT_PUBLIC_KEY`), NEAR settings (`NEAR_ADDRESS`, `NEAR_NETWORK`, `DESTINATION_ADDRESS`, `STAKING_POOL_ID`), optional `ONECLICK_API_KEY`. See `.env.example`.
+- `.env` — Fordefi credentials (`FORDEFI_API_USER_TOKEN`, `BLACKBOX_VAULT_ID`, `VAULT_PUBLIC_KEY`), NEAR settings (`NEAR_ADDRESS`, `NEAR_NETWORK`, `DESTINATION_ADDRESS`, `STAKING_POOL_ID`), optional `ONECLICK_API_KEY`, solver relay key `SOLVER_API_KEY`. See `.env.example`.
 - `secret/private.pem` — API signer private key (never committed).
 - `src/near-config.ts` — `transferAmount` and `stakeAmount` (in NEAR) are hardcoded here, not in `.env`.
 - `src/intents/swap-config.json` — Swap parameters for intents flow: origin/destination tokens, human-readable amount, recipient, slippage. Also contains a `tokens` map that maps friendly keys (e.g. `near:mainnet:native`) to 1Click `assetId` values and decimals.
+- `src/intents-solver/solver-config.json` — Solver parameters: supported pairs, pricing strategy, relay URL, intents contract.
 
 ## Architecture
 
@@ -49,6 +54,32 @@ Cross-chain swaps via [NEAR Intents 1Click API](https://1click.chaindefuser.com)
 - `near-wrap-serializer.ts` — builds `near_deposit` call on `wrap.near` to wrap NEAR → wNEAR
 - `intents-deposit-serializer.ts` — builds `ft_transfer` call to deposit tokens at 1Click address. Automatically adds `storage_deposit` if the deposit address is not registered on the token contract. Supports `nonceOverride` to avoid stale nonce after a preceding wrap TX.
 - `near-intents-run.ts` — orchestrator: derives address, resolves asset IDs (supports legacy `chain:network:address` format from `.env` or direct 1Click `assetId`), quotes, wraps (if needed), deposits, polls. Passes nonce between wrap and deposit TXs to avoid nonce conflicts.
+
+### Intents Solver module (`src/intents-solver/`)
+
+Solver/market maker side of NEAR Intents. Listens for RFQs on the Solver Relay WebSocket, calculates quotes via a pluggable pricing strategy, signs them with NEP-413 (via Fordefi black-box signing), and manages on-chain token reserves on the intents contract.
+
+- `solver-interfaces.ts` — all solver-domain types (relay protocol, NEP-413, pricing, reserves, config)
+- `solver-config.ts` — config loader: merges `.env` (Fordefi creds) + `solver-config.json` (static params)
+- `solver-config.json` — static config: supported pairs, strategy params, relay URL
+- `pricing-strategy.ts` — `PricingStrategy` interface + `FixedSpreadStrategy` default (applies basis-point spread)
+- `nep413-serializer.ts` — NEP-413 message construction → borsh serialize → SHA256 → Fordefi black-box sign → 64-byte ED25519 signature. This is message signing (not transaction signing).
+- `solver-relay.ts` — WebSocket client for Solver Relay v2 with auto-reconnect and exponential backoff
+- `reserves-serializer.ts` — TX builders: `storage_deposit` + `ft_transfer_call` (deposit into intents contract), `withdraw` (withdraw from intents contract)
+- `reserves-manager.ts` — balance queries via RPC `get_balance` view call + deposit/withdraw orchestration. Also serves as CLI entrypoint for `solver-deposit`, `solver-withdraw`, `solver-balance`.
+- `solver-run.ts` — main orchestrator: load config → derive address → init strategy → query balances → connect relay → event loop (RFQ → price → NEP-413 sign → respond)
+
+#### NEP-413 signing flow
+
+NEP-413 is a message signing standard (not transaction signing). The borsh struct contains a u32 tag (2^31 + 413), a JSON message string, a 32-byte random nonce, a recipient (intents verifier contract), and an optional callback URL. The struct is borsh-serialized, SHA256-hashed, and sent to Fordefi as a `black_box_signature` just like transaction hashes.
+
+#### Solver Relay protocol
+
+The solver connects via WebSocket, receives `rfq` messages with asset identifiers and amounts, and responds with signed quotes. The relay also sends `ping` messages (responded with `pong`) and `ack`/`error` messages.
+
+#### Known consideration: Fordefi signing latency
+
+Fordefi black-box signing takes ~2-4 seconds (POST + poll). The Solver Relay typically waits ~3 seconds for quote responses. This is tight but workable for a demo. A faster signer would slot in by replacing `nep413-serializer.ts` internals.
 
 ### Key patterns
 

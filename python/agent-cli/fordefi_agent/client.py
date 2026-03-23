@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import os
 import time
 from typing import Any
 
@@ -28,24 +29,25 @@ TERMINAL_STATES = {
 class FordefiClient:
     """Fordefi API client for AI agents.
 
-    Provides simple, synchronous methods for transfers, contract calls,
-    swaps, and read operations across all Fordefi-supported chains.
+    Credentials are loaded exclusively from the environment:
+    - FORDEFI_API_USER_TOKEN (required)
+    - FORDEFI_PEM_PATH (optional, defaults to secret/private.pem)
 
     Args:
-        api_token: Fordefi API user token (FORDEFI_API_USER_TOKEN).
-        pem_path: Path to the private.pem key file for request signing.
         vault_id: Default vault ID used when not specified per-call.
         base_url: Fordefi API base URL (default: https://api.fordefi.com).
     """
 
     def __init__(
         self,
-        api_token: str,
-        pem_path: str,
-        vault_id: str,
+        vault_id: str | None = None,
         base_url: str = "https://api.fordefi.com",
     ):
-        self._vault_id = vault_id
+        api_token = os.environ.get("FORDEFI_API_USER_TOKEN")
+        if not api_token:
+            raise FordefiError("FORDEFI_API_USER_TOKEN environment variable is not set")
+        pem_path = os.environ.get("FORDEFI_PEM_PATH", "secret/private.pem")
+        self._vault_id = vault_id or ""
         self._api = ApiAuth(api_token, pem_path, base_url)
 
     def _resolve_vault(self, vault_id: str | None) -> str:

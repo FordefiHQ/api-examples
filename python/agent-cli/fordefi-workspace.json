@@ -1,0 +1,65 @@
+{
+  "organization_id": "9d045bc6-e187-4fee-a4f2-243bba886dc9",
+  "vaults": [
+    {
+      "name": "EVM Vault",
+      "type": "EVM",
+      "id": "652a2334-a673-4851-ad86-627781689592",
+      "address": "0x5b7a034488F0BDE8bAD66f49cf9587ad40B6c757"
+    },
+    {
+      "name": "EVM Recipient",
+      "type": "EVM",
+      "id": "d8b88be5-4146-4ce7-a687-9da1123f8896",
+      "address": "0xe096291e93E56FCbF0A8f1c4b37b40945A8Ed51f"
+    },
+    {
+      "name": "I am a Vault!",
+      "type": "EVM",
+      "id": "66a7f33f-2027-490f-bb82-0b3270dab209",
+      "address": "0xA33fF29C83fBd727132158c880Fc2565DCBb7114"
+    },
+    {
+      "name": "Solana Vault",
+      "type": "SOLANA",
+      "id": "77555084-c518-4df3-af90-43ba003aef9c",
+      "address": "Y8KMXTHsSBLK65jHGEJ5BdcEcNyUu4ZXvPJVYv9a7Cc"
+    },
+    {
+      "name": "Solana Fee Payer Vault",
+      "type": "SOLANA",
+      "id": "b83bdb44-5b4c-4a96-b856-51c5e9c74cf2",
+      "address": "9ZXJKCtpBmUDCGpZWr2d4YKCANGCuxQCLRnVixPs8BWp"
+    },
+    {
+      "name": "ClawVault",
+      "type": "SOLANA",
+      "id": "32f5985e-dc97-4635-b8c9-4a47491abdbf",
+      "address": "5yhDjHanj7MrQuDy5SaGh5H1uFFPLFzXbUQQSCNvgTNm"
+    },
+    {
+      "name": "ClawVault2",
+      "type": "SOLANA",
+      "id": "a4f9c9c1-ba68-46ee-836a-1627ca6e05d8",
+      "address": "3EUZK6ie2FvqLc6YxVFrJGT91YMv3pNytemoyHFimbVc"
+    },
+    {
+      "name": "ClawdVault3",
+      "type": "SOLANA",
+      "id": "f6e71c42-9c6b-45fc-9857-97473764526e",
+      "address": "9ydfhguB9SKRjCjoFuWyzgb4Uz1QbUXb3weU9oztNoii"
+    },
+    {
+      "name": "Bitcoin Vault",
+      "type": "UTXO",
+      "id": "76e9567a-2d4d-4543-a010-fb7815c12ee4",
+      "address": "bc1pvdu50glrm4lhxy6r9d8eht36pg7kth83ygve0tnp849rfe2ujjnsre7s6v"
+    },
+    {
+      "name": "TON Vault",
+      "type": "TON",
+      "id": "4eee99cf-15d1-4378-92ab-040f10a1e159",
+      "address": "UQAFkYTpnbmfslZ9w9o_8DHcI-cETJsIc778PTpNlaD6lFf0"
+    }
+  ]
+}
