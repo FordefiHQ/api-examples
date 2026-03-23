@@ -15,17 +15,14 @@ This CLI package gives you a single Python client to:
 ```python
 from fordefi_agent import FordefiClient
 
-client = FordefiClient(
-    api_token="your-fordefi-api-user-token",
-    pem_path="/path/to/private.pem",
-    vault_id="your-default-vault-uuid",
-)
+client = FordefiClient()
+# Or with a default vault:
+client = FordefiClient(vault_id="your-default-vault-uuid")
 ```
 
-**You need three things:**
-1. `api_token` - The Fordefi API user token (starts with `fd-`)
-2. `pem_path` - Path to the ECDSA private key PEM file used to sign API requests
-3. `vault_id` - The UUID of the Fordefi vault to use (can be overridden per-call)
+Credentials are loaded exclusively from the environment (never passed as arguments):
+- `FORDEFI_API_USER_TOKEN` env var (required) — the Fordefi API user token
+- `FORDEFI_PEM_PATH` env var (optional, defaults to `secret/private.pem`) — path to the ECDSA private key PEM file
 
 **Install dependencies:**
 ```bash
@@ -413,6 +410,10 @@ client.transfer(chain="ethereum", to="<evm-recipient-address>", amount="1000")
 # Uses a different vault
 client.transfer(chain="solana", to="<solana-recipient-address>", amount="1000", vault_id="solana-vault-uuid")
 ```
+
+## Workspace Manifest
+
+The file `fordefi-workspace.json` (in this directory) contains a structured JSON directory of all vaults and addresses available in the Fordefi organization. Use it to resolve vault references by name — e.g., when the user says "swap ETH for USDC from EVM Vault", look up the vault name in the manifest to get the vault ID and address. Always read this file before executing transactions to ensure you're using the correct vault.
 
 ## Tips
 
