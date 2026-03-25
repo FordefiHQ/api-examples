@@ -6,6 +6,7 @@ class TransactionType(Enum):
     EVM_TRANSACTION = "evm_transaction"
     EVM_MESSAGE = "evm_message"
     SOLANA_TRANSACTION = "solana_transaction"
+    SOLANA_MESSAGE =  "solana_message"
     EXCHANGE_TRANSACTION = "exchange_transaction"
     COSMOS_TRANSACTION = "cosmos_transaction"
     APTOS_TRANSACTION = "aptos_transaction"
@@ -60,6 +61,8 @@ class EvmMessageType(Enum):
     TYPED_MESSAGE = "typed_message_type"
     PERSONAL_MESSAGE = "personal_message_type"
 
+class SolanaMessageType(Enum):
+    PERSONAL_MESSAGE = "personal_message_type"
 
 class TransactionState(Enum):
     SIGNED = "signed"
