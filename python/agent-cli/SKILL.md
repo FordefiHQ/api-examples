@@ -16,13 +16,13 @@ This CLI package gives you a single Python client to:
 from fordefi_agent import FordefiClient
 
 client = FordefiClient()
-# Or with a default vault:
-client = FordefiClient(vault_id="your-default-vault-uuid")
+# Or with a default vault and custom PEM path:
+client = FordefiClient(vault_id="your-default-vault-uuid", pem_path="path/to/private.pem")
 ```
 
-Credentials are loaded exclusively from the environment (never passed as arguments):
+Credentials:
 - `FORDEFI_API_USER_TOKEN` env var (required) — the Fordefi API user token
-- `FORDEFI_PEM_PATH` env var (optional, defaults to `secret/private.pem`) — path to the ECDSA private key PEM file
+- API signer private key at `secret/private.pem` (default path, override via `pem_path` argument)
 
 **Install dependencies:**
 ```bash
@@ -131,6 +131,14 @@ result = client.evm_contract_call(
     chain="42793",  # custom chain ID
     contract="<contract-address>",
     call_data="<abi-encoded-calldata>",
+)
+
+# Submit even if simulation predicts failure
+result = client.evm_contract_call(
+    chain="ethereum",
+    contract="<contract-address>",
+    call_data="<abi-encoded-calldata>",
+    fail_on_prediction_failure=False,
 )
 ```
 
@@ -402,7 +410,7 @@ The `swap` method also includes:
 The default `vault_id` is set at initialization. Override per-call:
 
 ```python
-client = FordefiClient(api_token="...", pem_path="...", vault_id="evm-vault-uuid")
+client = FordefiClient(vault_id="evm-vault-uuid")
 
 # Uses default vault
 client.transfer(chain="ethereum", to="<evm-recipient-address>", amount="1000")

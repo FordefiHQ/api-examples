@@ -29,24 +29,25 @@ TERMINAL_STATES = {
 class FordefiClient:
     """Fordefi API client for AI agents.
 
-    Credentials are loaded exclusively from the environment:
-    - FORDEFI_API_USER_TOKEN (required)
-    - FORDEFI_PEM_PATH (optional, defaults to secret/private.pem)
+    Credentials:
+    - FORDEFI_API_USER_TOKEN env var (required)
+    - API signer private key at secret/private.pem (or specify via pem_path)
 
     Args:
         vault_id: Default vault ID used when not specified per-call.
+        pem_path: Path to the API signer private key PEM file.
         base_url: Fordefi API base URL (default: https://api.fordefi.com).
     """
 
     def __init__(
         self,
         vault_id: str | None = None,
+        pem_path: str = "secret/private.pem",
         base_url: str = "https://api.fordefi.com",
     ):
         api_token = os.environ.get("FORDEFI_API_USER_TOKEN")
         if not api_token:
             raise FordefiError("FORDEFI_API_USER_TOKEN environment variable is not set")
-        pem_path = os.environ.get("FORDEFI_PEM_PATH", "secret/private.pem")
         self._vault_id = vault_id or ""
         self._api = ApiAuth(api_token, pem_path, base_url)
 
@@ -152,6 +153,7 @@ class FordefiClient:
         *,
         gas_limit: str | None = None,
         gas_priority: str = "medium",
+        fail_on_prediction_failure: bool = True,
     ) -> dict:
         """Execute a raw EVM contract call.
 
@@ -164,6 +166,8 @@ class FordefiClient:
             note: Optional transaction note.
             gas_limit: Custom gas limit. If None, uses priority-based estimation.
             gas_priority: Gas priority ("low"/"medium"/"high").
+            fail_on_prediction_failure: If False, submit the transaction even if
+                simulation predicts failure. Defaults to True.
 
         Returns:
             dict with "transaction_id", "state", and "raw_response".
@@ -178,6 +182,7 @@ class FordefiClient:
             note=note,
             gas_limit=gas_limit,
             gas_priority=gas_priority,
+            fail_on_prediction_failure=fail_on_prediction_failure,
         )
         raw = self._api.post_signed(api_path, body)
         return {

@@ -14,6 +14,7 @@ const app = express();
 app.set('trust proxy', true);
 app.use(express.raw({ type: 'application/json' }));
 const PORT = Number(process.env.PORT) || 8080;
+const ALLOWED_IPS = ['54.243.103.88']; // Fordefi's NAT IP
 
 const fordefiPublicKeyPath = path.join(__dirname, 'keys', 'fordefi_public_key.pem');
 const liveLogsDir = path.join(__dirname, 'live_logs', 'fordefi');
@@ -98,6 +99,15 @@ app.get('/health', (_req: Request, res: Response) => {
 
 app.post('/', async (req: Request, res: Response): Promise<void> => {
   try {
+    const sourceIp = req.ip ?? req.socket.remoteAddress ?? 'unknown';
+    console.log(`📡 Incoming webhook from IP: ${sourceIp}`);
+
+    if (!ALLOWED_IPS.includes(sourceIp)) {
+      console.warn(`⛔ Rejected request from unauthorized IP: ${sourceIp}`);
+      res.status(403).json({ error: 'Forbidden: IP not whitelisted' });
+      return;
+    }
+
     const headerSignature = req.headers['x-signature'] as string;
     if (!headerSignature) {
       res.status(401).json({ error: 'Missing signature' });

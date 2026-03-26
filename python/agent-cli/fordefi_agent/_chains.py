@@ -412,6 +412,7 @@ def build_evm_contract_call_payload(
     note: str = "",
     gas_limit: str | None = None,
     gas_priority: str = "medium",
+    fail_on_prediction_failure: bool = True,
 ) -> tuple[str, dict]:
     cfg = resolve_chain(chain)
     if cfg.family != "evm":
@@ -436,6 +437,7 @@ def build_evm_contract_call_payload(
         "sign_mode": "auto",
         "type": "evm_transaction",
         "details": {
+            "fail_on_prediction_failure": fail_on_prediction_failure,
             "push_mode": "auto",
             "type": "evm_raw_transaction",
             "chain": cfg.chain_id,
