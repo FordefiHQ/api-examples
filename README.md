@@ -25,14 +25,16 @@ Code examples for using the Fordefi API in Python and TypeScript.
   * Aptos APT and Fungible Assets transfers
   * Aptos Fungible Assets transfers with delegated fee payment from another vault ("sponsored" transactions) 
 * Exchange transfers
-* Setting up Fordefi Webhooks (Python)
+* Setting up Fordefi Webhooks
 * Programatically signing Bitcoin PSBT with a Segwit or Taproot address
-* Approve Transactions via API
+* Custom Co-Signer example
 * Signing EIP-712 typed messages and EIP-191 personal messages with an EVM Fordefi vault
+* Signing Solana Personal messages
 * Programmatically adding a contact address or a batch of contact addresses to your Fordefi organization's Address Book
 
 ## TypeScript Examples 🟦
-* Setting up Fordefi Webhooks (TypeScript)
+* Setting up Fordefi Webhooks
+* Setting up a server that listens and reacts to Hypernative Risk Insights
 * Calling EVM contracts with a Fordefi vault
 * Cross-chain USDC transfers using Circle's CCTP
 * On EVM chains (Ethereum, Base, Arbitrum, etc.):
@@ -70,6 +72,8 @@ Code examples for using the Fordefi API in Python and TypeScript.
   * Programmatic INIT transfers
 * On NEAR:
   * Programmatic transfer and staking using Black Box signatures
+* On Stacks:
+  * Calling smart contracts with a Fordefi Stacks Vault
 * On Aptos:
   * Sponsored fungible asset transfers with external Geomi gas station
   * Withdrawing an LP position on Hyperion
