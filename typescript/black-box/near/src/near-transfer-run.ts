@@ -61,6 +61,8 @@ async function main() {
         console.log("\n\nStep 2: Sending transaction to Fordefi for signing...");
         console.log("Vault ID:", transferConfig.originVault);
 
+        const signingStart = performance.now();
+
         const fordefiResponse = await createAndSignTx(
             transferConfig.apiPathEndpoint,
             transferConfig.accessToken,
@@ -73,10 +75,6 @@ async function main() {
         const transactionId = fordefiResponse.data.id;
         console.log(`Fordefi transaction ID: ${transactionId}`);
 
-        // Wait for signature
-        console.log("\nWaiting for signature...");
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
         // Step 3 & 4: Fetch signature and broadcast
         console.log("\nStep 3: Fetching signature and broadcasting to NEAR...");
 
@@ -88,9 +86,11 @@ async function main() {
             transferConfig.apiPathEndpoint
         );
 
+        const broadcastTime = performance.now() - signingStart;
+        console.log(`\n⏱  Time from createAndSignTx to broadcast: ${(broadcastTime / 1000).toFixed(2)}s`);
+
         console.log("\n\n=== SUCCESS ===");
         console.log("Transaction hash:", result.txId);
-        console.log("Transaction Status:", JSON.stringify(result.status, null, 2));
 
         const explorerUrl = NEAR_NETWORK === 'mainnet'
             ? `https://nearblocks.io/txns/${result.txId}`

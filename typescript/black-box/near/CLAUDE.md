@@ -14,10 +14,6 @@ npm run address          # derive NEAR implicit address from vault public key
 npm run transfer         # transfer NEAR tokens to DESTINATION_ADDRESS
 npm run stake            # stake NEAR with a validator pool
 npm run intents          # cross-chain swap via NEAR Intents (1Click API)
-npm run intents-solver   # run the solver (listen for RFQs, sign quotes)
-npm run solver-balance   # check solver balances on intents contract
-npm run solver-deposit   # deposit tokens into intents contract reserves
-npm run solver-withdraw  # withdraw tokens from intents contract reserves
 ```
 
 No tests or linter configured.
@@ -85,6 +81,9 @@ Fordefi black-box signing takes ~2-4 seconds (POST + poll). The Solver Relay typ
 
 - **Nonce management** — When multiple TXs are sent in sequence (e.g. wrap then deposit), the nonce from the first TX is incremented and passed to the next via `nonceOverride`, since the RPC may not have updated yet.
 - **Storage registration** — Before `ft_transfer` to a new account, the deposit serializer checks `storage_balance_of` and batches a `storage_deposit` action in the same TX if needed.
+- **ESM/CJS interop** — Uses CommonJS (`"type": "commonjs"`) with `near-api-js` loaded via dynamic `import()` for ESM compatibility. Each file that needs `near-api-js` has a `getNearApi()` helper that caches the dynamic import.
+- **Async broadcast** — Uses `broadcast_tx_async` (returns immediately, doesn't wait for finality).
+- **Implicit accounts** — NEAR implicit account = hex encoding of the 32-byte ED25519 public key (no hashing).
 
 ## Key Details
 

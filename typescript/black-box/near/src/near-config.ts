@@ -17,7 +17,7 @@ export const fordefiNearConfig: FordefiNearConfig = {
     originAddress: process.env.NEAR_ADDRESS || "", // 64-char hex implicit account or named account
     privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
     apiPathEndpoint: '/api/v1/transactions',
-    transferAmount: 0.001, // Amount in NEAR to transfer
-    stakeAmount: 0.001, // Amount in NEAR to stake
+    transferAmount: 0.05, // Amount in NEAR to transfer
+    stakeAmount: 0.05, // Amount in NEAR to stake
     stakingPoolId: process.env.STAKING_POOL_ID || "", // e.g., "figment.poolv1.near"
 };

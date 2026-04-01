@@ -22,7 +22,7 @@
     "@fordefi/web3-provider": "^0.3.0",
     "@noble/curves": "^1.4.2",
     "@types/express": "^5.0.3",
-    "axios": "^1.10.0",
+    "axios": "1.13.1",
     "dotenv": "^17.0.0",
     "express": "^5.1.0",
     "ts-node-dev": "^2.0.0"
