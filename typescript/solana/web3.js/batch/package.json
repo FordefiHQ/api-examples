@@ -20,7 +20,7 @@
   "dependencies": {
     "@solana/spl-token": "^0.4.13",
     "@solana/web3.js": "^1.98.0",
-    "axios": "^1.8.4",
+    "axios": "1.13.6",
     "bn.js": "^5.2.1",
     "decimal.js": "^10.5.0",
     "dotenv": "^16.5.0"

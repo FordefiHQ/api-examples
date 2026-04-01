@@ -91,7 +91,6 @@ async function main() {
 
         console.log("\n\n=== SUCCESS ===");
         console.log("Transaction hash:", result.txId);
-        console.log("Transaction Status:", JSON.stringify(result.status, null, 2));
 
         const explorerUrl = NEAR_NETWORK === 'mainnet'
             ? `https://nearblocks.io/txns/${result.txId}`

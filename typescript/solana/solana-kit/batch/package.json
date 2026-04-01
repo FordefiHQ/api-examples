@@ -15,7 +15,7 @@
     "@solana-program/token": "^0.9.0",
     "@solana/instruction-plans": "^5.1.0",
     "@solana/kit": "^5.1.0",
-    "axios": "^1.13.2",
+    "axios": "1.13.2",
     "dotenv": "^17.2.3",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"

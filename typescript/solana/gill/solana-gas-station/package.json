@@ -22,7 +22,7 @@
         "@solana-program/system": "^0.7.0",
         "@solana-program/token": "^0.5.1",
         "@solana-program/token-2022": "^0.4.2",
-        "axios": "^1.7.9",
+        "axios": "1.13.6",
         "base-64": "^1.0.0",
         "bs58": "^6.0.0",
         "dotenv": "^16.4.7",

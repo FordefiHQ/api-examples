@@ -83,18 +83,15 @@ export async function fetchAndBroadcastNearTransaction(
     // Encode the signed transaction
     const signedSerializedTx = signedTransaction.encode();
 
-    // Broadcast using RPC
-    const result = await provider.sendJsonRpc("broadcast_tx_commit", [
+    // Broadcast using async RPC (returns immediately after broadcast, doesn't wait for confirmation)
+    const txHashBase58 = await provider.sendJsonRpc("broadcast_tx_async", [
         Buffer.from(signedSerializedTx).toString("base64"),
     ]);
 
-    console.log("Transaction submitted successfully!");
-    const txHash = result.transaction.hash;
-    console.log("Transaction hash:", txHash);
+    console.log("Transaction broadcast successfully!");
+    console.log("Transaction hash:", txHashBase58);
 
     return {
-        txId: txHash,
-        status: result.status,
-        result,
+        txId: txHashBase58,
     };
 }
