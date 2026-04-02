@@ -10,7 +10,9 @@ This application enables secure interactions with the Hyperliquid L1 DEX from a 
 - Withdrawing funds from Hyperliquid to your Fordefi EVM Vault
 - Sending USDC within the Hyperliquid ecosystem
 - Transferring tokens from Perps to Spot DEX
+- Placing perpetual orders
 - Vault transfers (deposits/withdrawals to Hyperliquid vaults)
+- Approving and revoking agent wallets
 
 ## ChainId Configuration
 
@@ -73,15 +75,41 @@ npm install
 The application is configured through the `config.ts` file:
 
 ```typescript
-export const fordefiConfig: FordefiProviderConfig = {
+export const fordefiConfig: FordefiApiConfig = {
     chainId: 1337,  // Use 1337 for all actions except deposit (use 42161 for deposit)
-    address: '0x...', // Your Fordefi EVM Vault address
-    apiUserToken: process.env.FORDEFI_API_USER_TOKEN,
-    apiPayloadSignKey: fs.readFileSync('./secret/private.pem', 'utf8'),
+    address: process.env.FORDEFI_EVM_VAULT_ADDRESS ?? '0x...',
+    vaultId: process.env.FORDEFI_EVM_VAULT_ID ?? (() => { throw new Error('FORDEFI_EVM_VAULT_ID is not set'); })(),
+    accessToken: process.env.FORDEFI_API_USER_TOKEN ?? (() => { throw new Error('FORDEFI_API_USER_TOKEN is not set'); })(),
+    privateKeyPath: './secret/private.pem',
+    pathEndpoint: '/api/v1/transactions/create-and-wait',
     rpcUrl: 'https://1rpc.io/arb',
-    skipPrediction: false
+    pushMode: 'auto', // set to 'manual' to get the signed tx without broadcasting
 };
 ```
+
+### Push Mode
+
+The `pushMode` setting controls whether transactions are broadcast after MPC signing:
+
+- **`"auto"`** (default) — Fordefi broadcasts the transaction automatically after signing. The Hyperliquid SDK receives the signature and submits the action to Hyperliquid.
+- **`"manual"`** — Fordefi signs the transaction but does **not** broadcast it. The wallet adapter throws a `SignatureOnlyError` containing the raw signature hex, which aborts the SDK's broadcast step. This is useful when you need the raw signature for custom submission logic or inspection.
+
+Example: extracting a signature without broadcasting:
+
+```typescript
+import { findSignatureOnlyError } from './wallet-adapter';
+
+try {
+    await exchClient.withdraw3({ destination, amount });
+} catch (error) {
+    const sigOnly = findSignatureOnlyError(error);
+    if (sigOnly) {
+        console.log("Raw signature:", sigOnly.signature);
+    }
+}
+```
+
+> **Note**: `pushMode` applies to on-chain transactions (deposit). For EIP-712 L1 actions, the manual mode is handled by the wallet adapter's `SignatureOnlyError` mechanism.
 
 ## Usage
 
@@ -350,11 +378,19 @@ Simply change the `action` field in `src/config.ts` and run `npm run action`:
 
 ## Architecture Notes
 
-### Wallet Implementation
+### Direct API Integration
 
-This integration uses the **Fordefi Wallet** (`wallet-adapter.ts`) for all Hyperliquid actions:
+This integration calls the Fordefi API directly (no `@fordefi/web3-provider` or ethers.js signer). The `FordefiWalletAdapter` in `wallet-adapter.ts` implements the wallet interface expected by the `@nktkas/hyperliquid` SDK:
 
-- Managed through Fordefi's MPC infrastructure
-- Requires API User Token and API Signer
-- Supports all signing schemes including chainId 1337 for L1 Actions
-- No external agent wallets required
+1. The SDK calls `wallet.signTypedData()` with EIP-712 typed data
+2. The adapter constructs a Fordefi API payload, signs it with the API User's RSA private key, and POSTs to Fordefi
+3. Fordefi performs MPC signing and returns the raw signature
+4. The adapter returns the signature to the SDK, which submits the action to Hyperliquid
+
+Key details:
+- The adapter overrides the EIP-712 domain `chainId` with the configured value (1337 for L1 actions)
+- `ethers` v6 is used only for ABI encoding (deposit calldata) — not for signing or provider functionality
+- Two Fordefi API endpoints are used:
+  - `/api/v1/transactions/create-and-wait` — blocks until signed (EIP-712 L1 actions)
+  - `/api/v1/transactions` — returns immediately, requires polling (on-chain deposit)
+- No external agent wallets required — all actions can be performed directly with the Fordefi vault

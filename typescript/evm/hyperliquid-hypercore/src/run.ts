@@ -1,5 +1,5 @@
 import { approveAgentWallet, revokeAgentWallet } from "./hl-approve-or-revoke-agent";
-import { hyperliquidConfig, fordefiConfig, agentWalletConfig, orderConfig } from "./config";
+import { hyperliquidConfig, agentWalletConfig, orderConfig } from "./config";
 import { vault_transfer_agent } from "./hl-vault-transfer";
 import { spotTransfer } from "./hl-send-to-spot";
 import { place_perps_order } from './hl-place-perps-order';
@@ -18,19 +18,19 @@ async function main() {
         } else if (hyperliquidConfig.action == "approve_agent") {
             await approveAgentWallet(hyperliquidConfig, agentWalletConfig)
         } else if (hyperliquidConfig.action == "revoke_agent") {
-            await revokeAgentWallet(hyperliquidConfig, agentWalletConfig) 
+            await revokeAgentWallet(hyperliquidConfig, agentWalletConfig)
         } else if (hyperliquidConfig.action == "spotTransfer") {
-            await spotTransfer(hyperliquidConfig, fordefiConfig) 
+            await spotTransfer(hyperliquidConfig)
         } else if (hyperliquidConfig.action == "placeOrder") {
-            await place_perps_order(hyperliquidConfig, orderConfig) 
-        } 
+            await place_perps_order(hyperliquidConfig, orderConfig)
+        }
         else {
             await usdSend(hyperliquidConfig)
         }
     } catch (error) {
         console.error("Oops, an error occured: ", error)
     }
-} 
+}
 
 main().catch(error => {
     console.error("Unhandled error:", error);

@@ -1,15 +1,10 @@
-import { error } from 'console';
-import { HyperliquidConfig, fordefiConfig } from './config'
-import { getProvider } from './get-provider';
+import axios from 'axios';
 import { ethers, parseUnits, formatUnits } from 'ethers';
-
-interface PermitPayload {
-    owner: string;
-    spender: string;
-    value: string;
-    nonce: string;
-    deadline: string;
-};
+import { HyperliquidConfig, fordefiConfig } from './config'
+import { FordefiWalletAdapter } from './wallet-adapter';
+import { buildEvmTransactionPayload } from './api_request/buildPayload';
+import { signWithApiUserPrivateKey } from './api_request/signer';
+import { createAndSignTx } from './api_request/pushToApi';
 
 // Function to split signature into r, s, v components
 function splitSignatures(signature: string): { r: string; s: string; v: number } {
@@ -20,61 +15,44 @@ function splitSignatures(signature: string): { r: string; s: string; v: number }
 };
 
 export async function deposit(hyperliquidConfig: HyperliquidConfig) {
-    let provider = await getProvider(fordefiConfig);
-    if (!provider) {
-      throw new Error("Failed to initialize provider");
-    }
-    let web3Provider = new ethers.BrowserProvider(provider); 
-    const signer = await web3Provider.getSigner();
-    
-    // Get the USDC contract to fetch the nonce
-    const usdcAddress = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"; // Arbitrum USDC
-    const usdcAbi = ["function nonces(address owner) view returns (uint256)"]; // Minimal ABI for nonces
-    const usdcContract = new ethers.Contract(usdcAddress, usdcAbi, signer);
+    const usdcAddress = hyperliquidConfig.usdcAddress ?? "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
+    const hyperliquidBridgeAddress = hyperliquidConfig.bridgeAddress ?? "0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7";
+
+    // Read-only provider for fetching nonce
+    const provider = new ethers.JsonRpcProvider(fordefiConfig.rpcUrl);
+    const usdcContract = new ethers.Contract(
+        usdcAddress,
+        ["function nonces(address owner) view returns (uint256)"],
+        provider,
+    );
 
     const fordefiVault = fordefiConfig.address;
-    const hyperliquidBridgeAddress = "0x2df1c51e09aecf9cacb7bc98cb1742757f163df7"; // Mainnet bridge contract
-    
-    // Get the current nonce for the vault address
     const nonce = await (usdcContract as any).nonces(fordefiVault);
-    
+
     // Validate the amount is at least 5 USDC
-    const minAmount = 5; // Minimum 5 USDC required
-    const amount = hyperliquidConfig?.amount 
+    const minAmount = 5;
+    const amount = hyperliquidConfig?.amount
         ? parseFloat(hyperliquidConfig.amount)
-        : 5; // Default to 5 USDC if not specified
+        : 5;
 
     if (amount < minAmount) {
         throw new Error(`Deposit amount must be at least ${minAmount} USDC. Received: ${amount} USDC`);
     }
 
-    // Convert amount to smallest units (for example -> 1 USDC = 1000000)
     const value = parseUnits(amount.toString(), 6).toString();
-    
     const deadline = Math.floor(Date.now() / 1000 + 3600).toString(); // 1 hour from now
-    
-    const payload: PermitPayload = {
-        owner: fordefiVault, // The address of the user with funds they want to deposit
-        spender: hyperliquidBridgeAddress, // The address of the bridge 
-        value,
-        nonce,
-        deadline
-    };
-    
-    let isMainnet
-    if (hyperliquidConfig.isTestnet){
-        isMainnet = false
-    } else{
-        isMainnet = true
-    }
+
+    const isMainnet = !hyperliquidConfig.isTestnet;
 
     const domain = {
         name: isMainnet ? "USD Coin" : "USDC2",
         version: isMainnet ? "2" : "1",
         chainId: isMainnet ? 42161 : 421614,
-        verifyingContract: isMainnet ? "0xaf88d065e77c8cC2239327C5EDb3A432268e5831" : "0x1baAbB04529D43a73232B713C0FE471f7c7334d5",
+        verifyingContract: isMainnet
+            ? "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
+            : "0x1baAbB04529D43a73232B713C0FE471f7c7334d5",
     };
-    
+
     const permitTypes = {
         Permit: [
             { name: "owner", type: "address" },
@@ -84,69 +62,113 @@ export async function deposit(hyperliquidConfig: HyperliquidConfig) {
             { name: "deadline", type: "uint256" },
         ],
     };
-    
-    const dataToSign = {
-        domain,
-        types: permitTypes,
-        primaryType: "Permit",
-        message: payload,
-    } as const;
-    
-    // Sign message
-    const signature = await signer.signTypedData(
-        dataToSign.domain,
-        { Permit: dataToSign.types.Permit },
-        dataToSign.message
-    );
-    
-    // Fetch signature
-    console.log('Signature:', signature);
-    const splitSignature = splitSignatures(signature);
-    console.log('Split signature:', splitSignature);
 
-    // Instanciate Hyperliquid's Bridge ABI
-    const bridgeAbi = [
-        "function batchedDepositWithPermit(tuple(address user, uint64 usd, uint64 deadline, tuple(uint256 r, uint256 s, uint8 v) signature)[] deposits) external"
-    ];
-    
-    // Create bridge contract instance
-    const bridgeContract = await new ethers.Contract(
-        hyperliquidBridgeAddress,
-        bridgeAbi,
-        signer
-    );
-    
-    // Format signature for the contract call
-    const signatureStruct = {
-        r: splitSignature.r,
-        s: splitSignature.s,
-        v: splitSignature.v
+    const permitMessage = {
+        owner: fordefiVault,
+        spender: hyperliquidBridgeAddress,
+        value,
+        nonce: nonce.toString(),
+        deadline,
     };
-    
-    // Create the deposit struct as expected by the contract
+
+    // Sign the EIP-712 Permit via the Fordefi wallet adapter
+    // Override chainId to Arbitrum for the permit signing
+    const permitConfig = { ...fordefiConfig, chainId: isMainnet ? 42161 : 421614 };
+    const wallet = new FordefiWalletAdapter(permitConfig);
+    const signature = await wallet.signTypedData(domain, permitTypes, permitMessage);
+
+    const splitSignature = splitSignatures(signature);
+
+    // ABI-encode the batchedDepositWithPermit call
+    const bridgeInterface = new ethers.Interface([
+        "function batchedDepositWithPermit(tuple(address user, uint64 usd, uint64 deadline, tuple(uint256 r, uint256 s, uint8 v) signature)[] deposits)"
+    ]);
+
     const depositStruct = [{
         user: fordefiVault,
         usd: value,
         deadline,
-        signature: signatureStruct
+        signature: {
+            r: splitSignature.r,
+            s: splitSignature.s,
+            v: splitSignature.v,
+        },
     }];
-    
+
+    const calldata = bridgeInterface.encodeFunctionData('batchedDepositWithPermit', [depositStruct]);
+
     console.log(`Depositing ${formatUnits(value, 6)} USDC to Hyperliquid bridge...`);
-    
-    // Call batchedDepositWithPermit function with the deposit struct
-    const tx = await (bridgeContract as any).batchedDepositWithPermit(depositStruct);
-    
-    console.log(`Transaction submitted: ${tx.hash}`);
-    console.log("Waiting for confirmation...");
-    
-    // Wait for the transaction to be mined
-    const receipt = await tx.wait();
-    console.log(`Transaction confirmed! Block number: ${receipt.blockNumber}`);
-    
+
+    // Submit the bridge transaction via Fordefi API
+    const txEndpoint = '/api/v1/transactions';
+    const txPayload = buildEvmTransactionPayload(
+        fordefiConfig.vaultId,
+        'arbitrum_mainnet',
+        hyperliquidBridgeAddress,
+        calldata,
+        '0',
+        'auto', // deposit must always broadcast
+    );
+    const txBody = JSON.stringify(txPayload);
+
+    const txTimestamp = new Date().getTime();
+    const txSigningPayload = `${txEndpoint}|${txTimestamp}|${txBody}`;
+    const txApiSignature = await signWithApiUserPrivateKey(fordefiConfig.privateKeyPath, txSigningPayload);
+
+    console.log(`Sending batchedDepositWithPermit transaction to Fordefi API...`);
+    const txResponse = await createAndSignTx(
+        txEndpoint,
+        fordefiConfig.accessToken,
+        txApiSignature,
+        txTimestamp,
+        txBody,
+    );
+
+    let txData = txResponse.data;
+
+    // Poll for the transaction hash
+    const txId = txData.id;
+    console.log(`Transaction ID: ${txId} — polling for completion...`);
+    const pollEndpoint = `/api/v1/transactions/${txId}`;
+    const terminalStates = ['completed', 'mined', 'confirmed', 'failed', 'aborted', 'rejected'];
+    const failureStates = ['failed', 'aborted', 'rejected'];
+    const maxAttempts = 30;
+
+    for (let i = 0; i < maxAttempts; i++) {
+        await new Promise((r) => setTimeout(r, 3000));
+
+        const pollTimestamp = new Date().getTime();
+        const pollPayload = `${pollEndpoint}|${pollTimestamp}|`;
+        const pollSignature = await signWithApiUserPrivateKey(fordefiConfig.privateKeyPath, pollPayload);
+
+        const pollResponse = await axios.get(`https://api.fordefi.com${pollEndpoint}`, {
+            headers: {
+                Authorization: `Bearer ${fordefiConfig.accessToken}`,
+                'x-signature': pollSignature,
+                'x-timestamp': pollTimestamp,
+            },
+        });
+
+        txData = pollResponse.data;
+        const state = txData.state?.toLowerCase();
+        console.log(`  Poll ${i + 1}: state = ${txData.state}`);
+
+        if (failureStates.includes(state)) {
+            throw new Error(`Transaction ${txId} failed with state: ${txData.state}`);
+        }
+        if (terminalStates.includes(state)) break;
+    }
+
+    if (!terminalStates.includes(txData.state?.toLowerCase())) {
+        throw new Error(`Transaction ${txId} did not reach a terminal state after ${maxAttempts} polls. Last state: ${txData.state}`);
+    }
+
+    console.log(`Transaction confirmed! Hash: ${txData.hash ?? 'N/A'}`);
     return {
-        transactionHash: tx.hash,
-        blockNumber: receipt.blockNumber,
+        transactionId: txData.id,
+        transactionHash: txData.hash,
+        state: txData.state,
         amount: formatUnits(value, 6),
-        user: fordefiVault
+        user: fordefiVault,
     };
 };

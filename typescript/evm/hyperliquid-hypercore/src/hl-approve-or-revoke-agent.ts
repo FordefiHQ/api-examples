@@ -1,8 +1,7 @@
 import * as fs from 'fs';
 import { ethers } from 'ethers';
 import * as hl from "@nktkas/hyperliquid";
-import { getProvider } from './get-provider';
-import { FordefiWalletAdapter } from './wallet-adapter';
+import { FordefiWalletAdapter, findSignatureOnlyError } from './wallet-adapter';
 import { HyperliquidConfig, fordefiConfig, AgentWalletConfig } from './config';
 
 export function generateAgentKeypair(agentName: string) {
@@ -31,14 +30,7 @@ export async function approveAgentWallet(hyperliquidConfig: HyperliquidConfig, a
     console.log(`Agent address: ${agentWalletConfig.agentAddress}`)
 
     try {
-        let provider = await getProvider(fordefiConfig);
-        if (!provider) {
-          throw new Error("Failed to initialize provider");
-        }
-        let web3Provider = new ethers.BrowserProvider(provider);
-        const signer = await web3Provider.getSigner();
-
-        const wallet = new FordefiWalletAdapter(signer, fordefiConfig.address);
+        const wallet = new FordefiWalletAdapter(fordefiConfig);
 
         const transport = new hl.HttpTransport({
             isTestnet: hyperliquidConfig.isTestnet
@@ -47,7 +39,7 @@ export async function approveAgentWallet(hyperliquidConfig: HyperliquidConfig, a
         const exchClient = new hl.ExchangeClient({
             wallet,
             transport,
-            signatureChainId: '0x539' 
+            signatureChainId: '0x539'
         });
         console.log("Exchange client created successfully");
         if (!hyperliquidConfig.amount) {
@@ -58,8 +50,13 @@ export async function approveAgentWallet(hyperliquidConfig: HyperliquidConfig, a
             agentName: agentWalletConfig.agentName
         });
         console.log("Agent added successfully: ", result);
-        
+
     } catch (error: any) {
+        const sigOnly = findSignatureOnlyError(error);
+        if (sigOnly) {
+            console.log("Signature obtained (not broadcast):", sigOnly.signature);
+            return { signature: sigOnly.signature };
+        }
         console.error("Error during agent operation:", error.message || String(error));
         if (error.cause) {
             console.error("Cause:", error.cause);
@@ -73,14 +70,7 @@ export async function revokeAgentWallet(hyperliquidConfig: HyperliquidConfig, ag
     }
 
     try {
-        let provider = await getProvider(fordefiConfig);
-        if (!provider) {
-          throw new Error("Failed to initialize provider");
-        }
-        let web3Provider = new ethers.BrowserProvider(provider);
-        const signer = await web3Provider.getSigner();
-
-        const wallet = new FordefiWalletAdapter(signer, fordefiConfig.address);
+        const wallet = new FordefiWalletAdapter(fordefiConfig);
 
         const transport = new hl.HttpTransport({
             isTestnet: hyperliquidConfig.isTestnet
@@ -89,7 +79,7 @@ export async function revokeAgentWallet(hyperliquidConfig: HyperliquidConfig, ag
         const exchClient = new hl.ExchangeClient({
             wallet,
             transport,
-            signatureChainId: '0x539' 
+            signatureChainId: '0x539'
         });
         console.log("Exchange client created successfully");
         if (!hyperliquidConfig.amount) {
@@ -101,8 +91,13 @@ export async function revokeAgentWallet(hyperliquidConfig: HyperliquidConfig, ag
             agentName: agentWalletConfig.agentName
         });
         console.log("Agent revoked successfully: ", result);
-        
+
     } catch (error: any) {
+        const sigOnly = findSignatureOnlyError(error);
+        if (sigOnly) {
+            console.log("Signature obtained (not broadcast):", sigOnly.signature);
+            return { signature: sigOnly.signature };
+        }
         console.error("Error during agent operation:", error.message || String(error));
         if (error.cause) {
             console.error("Cause:", error.cause);
