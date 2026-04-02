@@ -1,7 +1,5 @@
 import { HyperliquidConfig, fordefiConfig } from './config'
-import { getProvider } from './get-provider';
 import * as hl from "@nktkas/hyperliquid";
-import { ethers } from 'ethers';
 import { FordefiWalletAdapter } from './wallet-adapter';
 
 export async function usdSend(hyperliquidConfig: HyperliquidConfig) {
@@ -9,15 +7,7 @@ export async function usdSend(hyperliquidConfig: HyperliquidConfig) {
         throw new Error("Config required!");
     }
     try {
-        let provider = await getProvider(fordefiConfig);
-        if (!provider) {
-          throw new Error("Failed to initialize provider");
-        }
-        let web3Provider = new ethers.BrowserProvider(provider);
-        const signer = await web3Provider.getSigner();
-
-        // Create custom wallet adapter
-        const wallet = new FordefiWalletAdapter(signer, fordefiConfig.address);
+        const wallet = new FordefiWalletAdapter(fordefiConfig);
 
         // Instantiate transport
         const transport = new hl.HttpTransport({
@@ -28,7 +18,7 @@ export async function usdSend(hyperliquidConfig: HyperliquidConfig) {
         const exchClient = new hl.ExchangeClient({
             wallet,
             transport,
-            signatureChainId: '0x539' 
+            signatureChainId: '0x539'
         });
         console.log("Exchange client created successfully");
         // Validate amount is not empty
@@ -45,7 +35,7 @@ export async function usdSend(hyperliquidConfig: HyperliquidConfig) {
             amount: String(hyperliquidConfig.amount),
         });
         console.log("USDC transfer successful: ", result);
-        
+
     } catch (error: any) {
         console.error("Error during USDC transfer:", error.message || String(error));
         if (error.cause) {

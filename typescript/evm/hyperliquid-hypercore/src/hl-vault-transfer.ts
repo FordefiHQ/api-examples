@@ -1,6 +1,4 @@
-import { ethers } from 'ethers';
 import * as hl from "@nktkas/hyperliquid";
-import { getProvider } from './get-provider';
 import { FordefiWalletAdapter } from './wallet-adapter';
 import { HyperliquidConfig, fordefiConfig } from './config';
 
@@ -14,14 +12,8 @@ export async function vault_transfer_agent(hyperliquidConfig: HyperliquidConfig)
         if (!hyperliquidConfig.amount) {
             throw new Error("Amount is required and cannot be empty");
         }
-        let provider = await getProvider(fordefiConfig);
-        if (!provider) {
-            throw new Error("Failed to initialize provider");
-        }
-        let web3Provider = new ethers.BrowserProvider(provider);
-        const signer = await web3Provider.getSigner();
 
-        const wallet = new FordefiWalletAdapter(signer, fordefiConfig.address);
+        const wallet = new FordefiWalletAdapter(fordefiConfig);
 
         const transport = new hl.HttpTransport({
             isTestnet: hyperliquidConfig.isTestnet

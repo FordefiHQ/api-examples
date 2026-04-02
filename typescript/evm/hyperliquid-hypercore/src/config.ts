@@ -1,9 +1,18 @@
-import fs from 'fs';
 import dotenv from 'dotenv';
 import { OrderParameters } from "@nktkas/hyperliquid";
-import { FordefiProviderConfig } from '@fordefi/web3-provider';
 
 dotenv.config()
+
+export interface FordefiApiConfig {
+    vaultId: string;
+    address: string;
+    accessToken: string;
+    privateKeyPath: string;
+    pathEndpoint: string;
+    rpcUrl: string;
+    chainId: number;
+    pushMode: "auto" | "manual";
+}
 
 export interface HyperliquidConfig {
     action: "deposit" | "withdraw" | "sendUsd" | "vault_transfer" | "approve_agent" | "revoke_agent" | "spotTransfer" | "placeOrder"
@@ -16,14 +25,14 @@ export interface HyperliquidConfig {
     toSpot?: boolean              // Required for "spotTransfer": true = Perps→Spot, false = Spot→Perps
 }
 
-export interface AgentWalletConfig { 
+export interface AgentWalletConfig {
     agentAddress: string,
     agentName: string,
     validUntil?: string // only required for a "approve_agent" action, MAX is 180 days in UNIX time
 }
 
 /**
- * Fordefi Provider Configuration
+ * Fordefi API Configuration
  *
  * IMPORTANT: chainId determines the signing scheme used.
  *
@@ -39,15 +48,19 @@ export interface AgentWalletConfig {
  * chainId: 42161 - REQUIRED for deposit (Arbitrum on-chain transaction)
  *   - deposit (USDC from Arbitrum to Hyperliquid)
  *
- * Recommendation: Use chainId 1337 (0x539) for most actions, switch to 42161 only for deposits.
+ * pushMode: "auto" broadcasts transactions automatically after MPC signature.
+ *           "manual" returns the signed transaction without broadcasting,
+ *           allowing you to poll and extract the raw signature.
  */
-export const fordefiConfig: FordefiProviderConfig = {
+export const fordefiConfig: FordefiApiConfig = {
     chainId: 1337,  // Use 1337 for all actions except deposit (use 42161 for deposit)
-    address: '0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73', // Your Fordefi EVM Vault address
-    apiUserToken: process.env.FORDEFI_API_USER_TOKEN ?? (() => { throw new Error('FORDEFI_API_USER_TOKEN is not set'); })(),
-    apiPayloadSignKey: fs.readFileSync('./secret/private.pem', 'utf8') ?? (() => { throw new Error('API User private key is not set!'); })(),
+    address: process.env.FORDEFI_EVM_VAULT_ADDRESS ?? '0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73',
+    vaultId: process.env.FORDEFI_EVM_VAULT_ID ?? (() => { throw new Error('FORDEFI_EVM_VAULT_ID is not set'); })(),
+    accessToken: process.env.FORDEFI_API_USER_TOKEN ?? (() => { throw new Error('FORDEFI_API_USER_TOKEN is not set'); })(),
+    privateKeyPath: './secret/private.pem',
+    pathEndpoint: '/api/v1/transactions',
     rpcUrl: 'https://1rpc.io/arb',
-    skipPrediction: false
+    pushMode: 'manual', // set to 'manual' if you just want the signed tx
 };
 
 /**
@@ -69,7 +82,7 @@ export const hyperliquidConfig: HyperliquidConfig = {
     action: "spotTransfer",
     isTestnet: false,
     destination: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
-    amount: "1",
+    amount: "5",
     token: "USDC:0x6d1e7cde53ba9467b783cb7c530ce054",
     toSpot: true,
     isDeposit: true,
