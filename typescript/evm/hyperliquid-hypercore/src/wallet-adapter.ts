@@ -5,6 +5,30 @@ import { signWithApiUserPrivateKey } from './api_request/signer';
 import { createAndSignTx } from './api_request/pushToApi';
 
 /**
+ * Thrown when pushMode is "manual" — the signature was obtained but the SDK
+ * should not broadcast to Hyperliquid. Callers catch this to retrieve the
+ * signature without submitting.
+ */
+export class SignatureOnlyError extends Error {
+    signature: string;
+    constructor(signature: string) {
+        super('Signature obtained (manual mode — not broadcasting)');
+        this.name = 'SignatureOnlyError';
+        this.signature = signature;
+    }
+}
+
+/** Walk the error cause chain to find a SignatureOnlyError (the SDK wraps it). */
+export function findSignatureOnlyError(error: unknown): SignatureOnlyError | null {
+    let current: unknown = error;
+    while (current) {
+        if (current instanceof SignatureOnlyError) return current;
+        current = (current as any)?.cause;
+    }
+    return null;
+}
+
+/**
  * Custom wallet adapter for Fordefi integration with Hyperliquid.
  *
  * Instead of wrapping an ethers.js signer, this adapter calls the Fordefi API
@@ -125,6 +149,12 @@ export class FordefiWalletAdapter {
         const signatureHex = '0x' + signatureBytes.toString('hex');
 
         console.log("Signature received:", signatureHex);
+
+        // In manual mode, abort before the SDK broadcasts to Hyperliquid
+        if (this.config.pushMode === 'manual') {
+            throw new SignatureOnlyError(signatureHex);
+        }
+
         return signatureHex;
     }
 }

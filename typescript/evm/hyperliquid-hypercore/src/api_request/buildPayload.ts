@@ -20,7 +20,7 @@ export function buildTypedMessagePayload(
       raw_data: rawData,
       chain,
     },
-    // wait_for_state: "signed",
+    wait_for_state: "signed",
     timeout: 45,
   };
 }

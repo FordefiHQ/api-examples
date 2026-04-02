@@ -23,6 +23,8 @@ export interface HyperliquidConfig {
     isDeposit?: boolean,          // Required for "vault_transfer" action
     hyperliquid_vault_address?: string
     toSpot?: boolean              // Required for "spotTransfer": true = Perps→Spot, false = Spot→Perps
+    usdcAddress?: string,         // Arbitrum USDC contract address (deposit action)
+    bridgeAddress?: string,       // Hyperliquid bridge contract address (deposit action)
 }
 
 export interface AgentWalletConfig {
@@ -58,9 +60,9 @@ export const fordefiConfig: FordefiApiConfig = {
     vaultId: process.env.FORDEFI_EVM_VAULT_ID ?? (() => { throw new Error('FORDEFI_EVM_VAULT_ID is not set'); })(),
     accessToken: process.env.FORDEFI_API_USER_TOKEN ?? (() => { throw new Error('FORDEFI_API_USER_TOKEN is not set'); })(),
     privateKeyPath: './secret/private.pem',
-    pathEndpoint: '/api/v1/transactions',
+    pathEndpoint: '/api/v1/transactions/create-and-wait',
     rpcUrl: 'https://1rpc.io/arb',
-    pushMode: 'manual', // set to 'manual' if you just want the signed tx
+    pushMode: 'auto', // set to 'manual' if you just want the signed tx
 };
 
 /**
@@ -82,11 +84,13 @@ export const hyperliquidConfig: HyperliquidConfig = {
     action: "spotTransfer",
     isTestnet: false,
     destination: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
-    amount: "5",
+    amount: "1",
     token: "USDC:0x6d1e7cde53ba9467b783cb7c530ce054",
     toSpot: true,
     isDeposit: true,
-    hyperliquid_vault_address: "0xdfc24b077bc1425ad1dea75bcb6f8158e10df303"
+    hyperliquid_vault_address: "0xdfc24b077bc1425ad1dea75bcb6f8158e10df303",
+    usdcAddress: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+    bridgeAddress: "0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7",
 };
 
 export const orderConfig: OrderParameters = {
