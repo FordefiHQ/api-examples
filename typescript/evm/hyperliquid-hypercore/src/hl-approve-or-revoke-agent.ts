@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { ethers } from 'ethers';
 import * as hl from "@nktkas/hyperliquid";
-import { FordefiWalletAdapter } from './wallet-adapter';
+import { FordefiWalletAdapter, findSignatureOnlyError } from './wallet-adapter';
 import { HyperliquidConfig, fordefiConfig, AgentWalletConfig } from './config';
 
 export function generateAgentKeypair(agentName: string) {
@@ -52,6 +52,11 @@ export async function approveAgentWallet(hyperliquidConfig: HyperliquidConfig, a
         console.log("Agent added successfully: ", result);
 
     } catch (error: any) {
+        const sigOnly = findSignatureOnlyError(error);
+        if (sigOnly) {
+            console.log("Signature obtained (not broadcast):", sigOnly.signature);
+            return { signature: sigOnly.signature };
+        }
         console.error("Error during agent operation:", error.message || String(error));
         if (error.cause) {
             console.error("Cause:", error.cause);
@@ -88,6 +93,11 @@ export async function revokeAgentWallet(hyperliquidConfig: HyperliquidConfig, ag
         console.log("Agent revoked successfully: ", result);
 
     } catch (error: any) {
+        const sigOnly = findSignatureOnlyError(error);
+        if (sigOnly) {
+            console.log("Signature obtained (not broadcast):", sigOnly.signature);
+            return { signature: sigOnly.signature };
+        }
         console.error("Error during agent operation:", error.message || String(error));
         if (error.cause) {
             console.error("Cause:", error.cause);

@@ -84,7 +84,7 @@ export const hyperliquidConfig: HyperliquidConfig = {
     action: "spotTransfer",
     isTestnet: false,
     destination: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
-    amount: "1",
+    amount: "5",
     token: "USDC:0x6d1e7cde53ba9467b783cb7c530ce054",
     toSpot: true,
     isDeposit: true,

@@ -148,8 +148,6 @@ export class FordefiWalletAdapter {
         const signatureBytes = Buffer.from(signatureB64, 'base64');
         const signatureHex = '0x' + signatureBytes.toString('hex');
 
-        console.log("Signature received:", signatureHex);
-
         // In manual mode, abort before the SDK broadcasts to Hyperliquid
         if (this.config.pushMode === 'manual') {
             throw new SignatureOnlyError(signatureHex);

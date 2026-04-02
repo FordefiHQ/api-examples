@@ -1,5 +1,5 @@
 import * as hl from "@nktkas/hyperliquid";
-import { FordefiWalletAdapter } from './wallet-adapter';
+import { FordefiWalletAdapter, findSignatureOnlyError } from './wallet-adapter';
 import { HyperliquidConfig, fordefiConfig } from './config'
 
 export async function withdraw3(hyperliquidConfig: HyperliquidConfig) {
@@ -32,6 +32,11 @@ export async function withdraw3(hyperliquidConfig: HyperliquidConfig) {
         console.log("Withdrawal successful:", result);
 
     } catch (error: any) {
+        const sigOnly = findSignatureOnlyError(error);
+        if (sigOnly) {
+            console.log("Signature obtained (not broadcast):", sigOnly.signature);
+            return { signature: sigOnly.signature };
+        }
 
         const errorMessage = error.message || String(error);
 

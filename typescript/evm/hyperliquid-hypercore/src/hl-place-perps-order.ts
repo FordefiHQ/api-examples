@@ -1,5 +1,5 @@
 import * as hl from "@nktkas/hyperliquid";
-import { FordefiWalletAdapter } from './wallet-adapter';
+import { FordefiWalletAdapter, findSignatureOnlyError } from './wallet-adapter';
 import { HyperliquidConfig, fordefiConfig } from './config';
 
 
@@ -60,6 +60,11 @@ export async function place_perps_order(hyperliquidConfig: HyperliquidConfig, or
         return result;
 
     } catch (error: any) {
+        const sigOnly = findSignatureOnlyError(error);
+        if (sigOnly) {
+            console.log("Signature obtained (not broadcast):", sigOnly.signature);
+            return { signature: sigOnly.signature };
+        }
         console.error("Error while placing order:", error.message || String(error));
         if (error.cause) {
             console.error("Cause:", error.cause);
