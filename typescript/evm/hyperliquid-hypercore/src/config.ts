@@ -62,7 +62,7 @@ export const fordefiConfig: FordefiApiConfig = {
     privateKeyPath: './secret/private.pem',
     pathEndpoint: '/api/v1/transactions/create-and-wait',
     rpcUrl: 'https://1rpc.io/arb',
-    pushMode: 'manual', // set to 'manual' if you just want the signed tx
+    pushMode: 'auto', // set to 'manual' if you just want the signed tx
 };
 
 /**
