@@ -1,12 +1,12 @@
 {
-  "name": "@fordefi/paradex",
+  "name": "@fordefi/starknet-contract-calls",
   "version": "1.0.0",
-  "description": "",
+  "description": "General-purpose Starknet contract calls via Fordefi",
   "main": "index.js",
   "scripts": {
-    "action": "npx tsx src/run.ts"
+    "call": "npx tsx src/run.ts"
   },
-  "keywords": [],
+  "keywords": ["fordefi", "starknet", "contract-call"],
   "author": "",
   "license": "ISC",
   "type": "module",
@@ -15,13 +15,8 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
-    "@fordefi/web3-provider": "0.3.1",
-    "@paradex/sdk": "^0.8.1",
-    "axios": "1.13.2",
-    "bignumber.js": "^9.3.1",
-    "date-fns": "^4.1.0",
+    "axios": "^1.13.2",
     "dotenv": "^16.6.1",
-    "ethers": "6.15",
     "tsx": "^4.21.0"
   }
 }
