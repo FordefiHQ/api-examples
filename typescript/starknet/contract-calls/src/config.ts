@@ -29,7 +29,7 @@ export interface ContractCallConfig {
 }
 
 export const contractCallConfig: ContractCallConfig = {
-  contractAddress: "0x...",
+  contractAddress: process.env.MY_CONTRACT!,
   methodName: "register_operator",
   methodArguments: ["0x5e0cce9382de6b18051f014f9078df73af85bcddb7ef158743cca7c484f5997"],
 };
