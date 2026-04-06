@@ -14,9 +14,6 @@ function readPrivateKeyFile(): string {
   return fs.readFileSync("./secret/private.pem", "utf8");
 }
 
-export const FORDEFI_API_BASE_URL = "https://api.fordefi.com";
-export const TRANSACTIONS_API_PATH = "/api/v1/transactions";
-
 export const fordefiConfig: FordefiStarknetConfig = {
   accessToken: requireEnv("FORDEFI_API_USER_TOKEN"),
   apiPayloadSignKey: readPrivateKeyFile(),
