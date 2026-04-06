@@ -5,8 +5,9 @@ import {
   StarknetTransactionResponse,
 } from "./interfaces.js";
 import { signFordefiApiPayload } from "./signer.js";
-import {FORDEFI_API_BASE_URL, TRANSACTIONS_API_PATH } from '../config.js'
 
+export const FORDEFI_API_BASE_URL = "https://api.fordefi.com";
+export const TRANSACTIONS_API_PATH = "/api/v1/transactions";
 
 function currentTimestampSeconds(): number {
   return Math.floor(Date.now() / 1000);
