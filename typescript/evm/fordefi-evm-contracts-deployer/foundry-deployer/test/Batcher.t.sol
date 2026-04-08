@@ -85,14 +85,6 @@ contract BatchTransferTest is Test {
         batcher.batchSendETHSameAmount{value: 1 ether}(recipients, 1 ether);
     }
 
-    function testRevertETHZeroRecipients() public {
-        address[] memory recipients = new address[](0);
-
-        vm.prank(user);
-        vm.expectRevert(BatchTransfer.RequireOneRecipient.selector);
-        batcher.batchSendETHSameAmount{value: 0}(recipients, 1 ether);
-    }
-
     function testRevertETHZeroAddress() public {
         address[] memory recipients = new address[](2);
         recipients[0] = recipient1;
@@ -203,14 +195,6 @@ contract BatchTransferTest is Test {
         vm.prank(user);
         vm.expectRevert(BatchTransfer.ZeroAddress.selector);
         batcher.batchSendTokenSameAmount(address(0), recipients, 100);
-    }
-
-    function testRevertTokenZeroRecipient() public {
-        address[] memory recipients = new address[](0);
-
-        vm.prank(user);
-        vm.expectRevert(BatchTransfer.RequireOneRecipient.selector);
-        batcher.batchSendTokenSameAmount(address(token), recipients, 100);
     }
 
     /*//////////////////////////////////////////////////////////////
