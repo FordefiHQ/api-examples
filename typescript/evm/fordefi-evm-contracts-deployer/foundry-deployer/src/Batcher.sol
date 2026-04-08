@@ -23,10 +23,13 @@ contract BatchTransfer is ReentrancyGuard, Ownable {
     error InsufficientTokenBalance();
     error NoTokenToRescue();
     error ETHSendFailed();
-    error RequireOneRecipient();
+    error RequireMinTwoRecipients();
     error NotEnoughETH();
     error MinimumSizeIsTen();
     error MaximumSizeExceeded();
+    error ZeroAmount();
+    error FeeOnTransferNotSupported();
+
 
     constructor(address owner_) Ownable(owner_){}
 
@@ -39,7 +42,7 @@ contract BatchTransfer is ReentrancyGuard, Ownable {
     function batchSendETHSameAmount(address[] calldata recipients, uint256 amountPerRecipient) external nonReentrant payable {
 
         uint256 n = recipients.length;
-        if (n == 0) revert RequireOneRecipient();
+        if (n < 2) revert RequireMinTwoRecipients();
         if (n > MAX_BATCH_SIZE) revert BatchSizeExceeded();
 
         uint256 total = amountPerRecipient * n;
@@ -60,7 +63,7 @@ contract BatchTransfer is ReentrancyGuard, Ownable {
     /// @dev Duplicate recipients are allowed and will receive multiple transfers
     function batchSendETHDifferentAmounts(address[] calldata recipients, uint256[] calldata amounts) external nonReentrant payable {
         uint256 n = recipients.length;
-        if (n == 0) revert RequireOneRecipient();
+        if (n < 2) revert RequireMinTwoRecipients();
         if (n != amounts.length) revert ArrayLengthMismatch();
         if (n > MAX_BATCH_SIZE) revert BatchSizeExceeded();
 
@@ -92,8 +95,9 @@ contract BatchTransfer is ReentrancyGuard, Ownable {
         if (token == address(0)) revert ZeroAddress();
 
         uint256 n = recipients.length;
-        if (n == 0) revert RequireOneRecipient();
+        if (n < 2) revert RequireMinTwoRecipients();
         if (n > MAX_BATCH_SIZE) revert BatchSizeExceeded();
+        if (amountPerRecipient == 0) revert ZeroAmount();
 
         uint256 total = amountPerRecipient * n;
 
@@ -104,7 +108,9 @@ contract BatchTransfer is ReentrancyGuard, Ownable {
         for (uint256 i; i < n; ) {
             address to = recipients[i];
             if (to == address(0)) revert ZeroAddress();
+            uint256 balBefore = tokenContract.balanceOf(to);
             tokenContract.safeTransferFrom(msg.sender, to, amountPerRecipient);
+            if (tokenContract.balanceOf(to) - balBefore != amountPerRecipient) revert FeeOnTransferNotSupported();
             unchecked { ++i; }
         }
         emit BatchTokenTransfer(msg.sender, token, total, n);
@@ -116,7 +122,8 @@ contract BatchTransfer is ReentrancyGuard, Ownable {
         if (token == address(0)) revert ZeroAddress();
 
         uint256 n = recipients.length;
-        if (n == 0) revert RequireOneRecipient();
+        require(n > 1);
+        if (n < 2) revert RequireMinTwoRecipients();
         if (n != amounts.length) revert ArrayLengthMismatch();
         if (n > MAX_BATCH_SIZE) revert BatchSizeExceeded();
 
@@ -133,7 +140,10 @@ contract BatchTransfer is ReentrancyGuard, Ownable {
         for (uint256 i; i < n; ) {
             address to = recipients[i];
             if (to == address(0)) revert ZeroAddress();
+            if (amounts[i] == 0) revert ZeroAmount();
+            uint256 balBefore = tokenContract.balanceOf(to);
             tokenContract.safeTransferFrom(msg.sender, to, amounts[i]);
+            if (tokenContract.balanceOf(to) - balBefore != amounts[i]) revert FeeOnTransferNotSupported();
             unchecked { ++i; }
         }
 
