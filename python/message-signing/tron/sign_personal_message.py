@@ -1,34 +1,35 @@
 import os
+import sys
 import json
 import datetime
 import requests
 from pathlib import Path
 from dotenv import load_dotenv
-from signing.signer import sign_with_api_user_private_key
-from request_builder.push_to_api import make_api_request
-from request_builder.construct_request import construct_personal_message_request
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+from shared.signer import sign_with_api_user_private_key
+from shared.api_client import make_api_request
+from tron.construct_request import construct_personal_message_request
 
 # Load Fordefi config
-load_dotenv()
-PRIVATE_KEY_PEM_FILE = Path("./secret/private.pem")
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+PRIVATE_KEY_PEM_FILE = Path(__file__).resolve().parent.parent / "secret" / "private.pem"
 PATH = "/api/v1/transactions/create-and-wait"
 FORDEFI_API_USER_TOKEN = os.environ["FORDEFI_API_USER_TOKEN"]
-FORDEFI_SOLANA_VAULT_ID = os.environ["FORDEFI_SOLANA_VAULT_ID"]
-# Solana chain configuration
-# Examples: "solana_mainnet", "solana_devnet"
-SOLANA_CHAIN = os.environ.get("SOLANA_CHAIN", "solana_mainnet")
+FORDEFI_TRON_VAULT_ID = os.environ["FORDEFI_TRON_VAULT_ID"]
+# Tron chain configuration
+TRON_CHAIN = os.environ.get("TRON_CHAIN", "tron_mainnet")
 
 # Example message - replace with your actual message
-MESSAGE = """Hello, this is a test message to sign.
-
-You can put any content here that you want to sign with your Fordefi Solana wallet."""
+MESSAGE = "Hello, this is a test message to sign."
 
 
 def main():
     print(f"Message to sign:\n{MESSAGE}\n")
     print("-" * 50)
 
-    request_json = construct_personal_message_request(FORDEFI_SOLANA_VAULT_ID, MESSAGE, SOLANA_CHAIN)
+    request_json = construct_personal_message_request(FORDEFI_TRON_VAULT_ID, MESSAGE, TRON_CHAIN)
     request_body = json.dumps(request_json)
 
     timestamp = str(int(datetime.datetime.now(datetime.timezone.utc).timestamp()))

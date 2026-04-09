@@ -1,11 +1,12 @@
 [project]
-name = "solana-message-signing"
+name = "message-signing"
 version = "0.1.0"
-description = "Sign personal messages using a Fordefi Solana Vault"
+description = "Sign messages across EVM, Solana, and Tron using Fordefi Vaults"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "ecdsa>=0.19.0",
+    "eth-account>=0.13.7",
     "pathlib>=1.0.1",
     "python-dotenv>=1.0.1",
     "requests>=2.32.3",
