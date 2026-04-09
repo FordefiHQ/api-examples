@@ -13,6 +13,7 @@ class TransactionType(Enum):
     SUI_TRANSACTION = "sui_transaction"
     TON_TRANSACTION = "ton_transaction"
     TRON_TRANSACTION = "tron_transaction"
+    TRON_MESSAGE = "tron_message"
 
 
 class SignerType(Enum):
@@ -63,6 +64,9 @@ class EvmMessageType(Enum):
 
 class SolanaMessageType(Enum):
     PERSONAL_MESSAGE = "personal_message_type"
+
+class TronMessageType(Enum):
+    PERSONAL_MESSAGE_V2 = "typed_message_type_v2"
 
 class TransactionState(Enum):
     SIGNED = "signed"

@@ -1,19 +1,23 @@
 import os
+import sys
 import json
 import base64
 import datetime
 import requests
 from pathlib import Path
 from dotenv import load_dotenv
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 from eth_account import Account
 from eth_account.messages import encode_typed_data
-from request_builder.push_to_api import make_api_request
-from signing.signer import sign_with_api_user_private_key
-from request_builder.construct_request import construct_eip712_message_request
+from shared.signer import sign_with_api_user_private_key
+from shared.api_client import make_api_request
+from evm.construct_request import construct_eip712_message_request
 
 # Load Fordefi secrets
-load_dotenv()
-PRIVATE_KEY_PEM_FILE = Path("./secret/private.pem")
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+PRIVATE_KEY_PEM_FILE = Path(__file__).resolve().parent.parent / "secret" / "private.pem"
 PATH = "/api/v1/transactions/create-and-wait"
 FORDEFI_API_USER_TOKEN = os.environ["FORDEFI_API_USER_TOKEN"]
 FORDEFI_EVM_VAULT_ID = os.environ["FORDEFI_EVM_VAULT_ID"]
@@ -81,9 +85,9 @@ def main():
     payload = f"{PATH}|{timestamp}|{request_body}"
     signature = sign_with_api_user_private_key(payload=payload, api_user_private_key=PRIVATE_KEY_PEM_FILE)
 
-    try: 
+    try:
         print("Making API request to Fordefi 📡")
-        method = "post" 
+        method = "post"
         response_data = make_api_request(PATH, FORDEFI_API_USER_TOKEN, signature, timestamp, request_body, method=method)
         try:
             print("\nResponse Data:")
@@ -94,9 +98,9 @@ def main():
                 print("   Note: The transaction is NOT cancelled - it can still be approved and signed.")
                 print(f"   Transaction ID: {tx_id}")
                 print(f"   Track status: GET /api/v1/transactions/{tx_id}")
-                print("   Docs: https://docs.fordefi.com/api/latest/openapi/transactions/get_transaction_api_v1_transactions__id__get")    
+                print("   Docs: https://docs.fordefi.com/api/latest/openapi/transactions/get_transaction_api_v1_transactions__id__get")
                 return
-            
+
             if "signatures" in response_data and response_data["signatures"]:
                 signature_b64 = response_data["signatures"][0]
                 signature_bytes = base64.b64decode(signature_b64)

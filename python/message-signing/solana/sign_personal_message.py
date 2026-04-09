@@ -1,49 +1,38 @@
 import os
+import sys
 import json
-import base64
 import datetime
 import requests
 from pathlib import Path
 from dotenv import load_dotenv
-from eth_account import Account
-from eth_account.messages import encode_defunct
-from signing.signer import sign_with_api_user_private_key
-from request_builder.push_to_api import make_api_request
-from request_builder.construct_request import construct_personal_message_request
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+from shared.signer import sign_with_api_user_private_key
+from shared.api_client import make_api_request
+from solana.construct_request import construct_personal_message_request
 
 # Load Fordefi config
-load_dotenv()
-PRIVATE_KEY_PEM_FILE = Path("./secret/private.pem")
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+PRIVATE_KEY_PEM_FILE = Path(__file__).resolve().parent.parent / "secret" / "private.pem"
 PATH = "/api/v1/transactions/create-and-wait"
 FORDEFI_API_USER_TOKEN = os.environ["FORDEFI_API_USER_TOKEN"]
-FORDEFI_EVM_VAULT_ID = os.environ["FORDEFI_EVM_VAULT_ID"]
-# EVM chain configuration
-# Examples: "evm_1" (Ethereum), "evm_137" (Polygon), "evm_42161" (Arbitrum)
-EVM_CHAIN = os.environ["EVM_CHAIN"]
+FORDEFI_SOLANA_VAULT_ID = os.environ["FORDEFI_SOLANA_VAULT_ID"]
+# Solana chain configuration
+# Examples: "solana_mainnet", "solana_devnet"
+SOLANA_CHAIN = os.environ.get("SOLANA_CHAIN", "solana_mainnet")
 
 # Example message - replace with your actual message
 MESSAGE = """Hello, this is a test message to sign.
 
-You can put any content here that you want to sign with your Fordefi EVM wallet."""
+You can put any content here that you want to sign with your Fordefi Solana wallet."""
 
-
-def decode_signature(signature_b64: str) -> tuple:
-    signature_bytes = base64.b64decode(signature_b64)
-    r = int.from_bytes(signature_bytes[0:32], byteorder='big')
-    s = int.from_bytes(signature_bytes[32:64], byteorder='big')
-    v = int(signature_bytes[64])
-    return r, s, v
-
-def ecrecover(message: str, signature_hex: str) -> str:
-    signable_message = encode_defunct(text=message)
-    recovered_address = Account.recover_message(signable_message, signature=signature_hex)
-    return recovered_address
 
 def main():
     print(f"Message to sign:\n{MESSAGE}\n")
     print("-" * 50)
 
-    request_json = construct_personal_message_request(FORDEFI_EVM_VAULT_ID, MESSAGE, EVM_CHAIN)
+    request_json = construct_personal_message_request(FORDEFI_SOLANA_VAULT_ID, MESSAGE, SOLANA_CHAIN)
     request_body = json.dumps(request_json)
 
     timestamp = str(int(datetime.datetime.now(datetime.timezone.utc).timestamp()))
@@ -67,22 +56,6 @@ def main():
             print(f"   Track status: GET /api/v1/transactions/{tx_id}")
             print("   Docs: https://docs.fordefi.com/api/latest/openapi/transactions/get_transaction_api_v1_transactions__id__get")
             return
-
-        if "signatures" in response_data and response_data["signatures"]:
-            signature_b64 = response_data["signatures"][0]
-            signature_bytes = base64.b64decode(signature_b64)
-            signature_hex = '0x' + signature_bytes.hex()
-
-            print(f"\nSignature (hex): {signature_hex}")
-
-            r, s, v = decode_signature(signature_b64)
-            print(f"\nDecoded signature components:")
-            print(f"r: {hex(r)}")
-            print(f"s: {hex(s)}")
-            print(f"v: {v}")
-
-            recovered_address = ecrecover(MESSAGE, signature_hex)
-            print(f"\nRecovered signer address: {recovered_address}")
 
     except requests.exceptions.HTTPError as e:
         error_message = f"HTTP error occurred: {str(e)}"
