@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/morpho-org/vault-v2-deployment#readme",
   "dependencies": {
-    "@fordefi/web3-provider": "^0.3.0",
+    "@fordefi/web3-provider": "0.3.2",
     "dotenv": "^17.2.3",
     "ethers": "^6.16.0",
     "tsx": "^4.21.0"
