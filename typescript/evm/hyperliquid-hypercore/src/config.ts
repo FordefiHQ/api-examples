@@ -15,7 +15,7 @@ export interface FordefiApiConfig {
 }
 
 export interface HyperliquidConfig {
-    action: "deposit" | "withdraw" | "sendUsd" | "vault_transfer" | "approve_agent" | "revoke_agent" | "spotTransfer" | "placeOrder"
+    action: string
     isTestnet: boolean,
     destination?: `0x${string}`,
     amount?: string,
@@ -81,7 +81,7 @@ export const agentWalletConfig: AgentWalletConfig = {
 };
 
 export const hyperliquidConfig: HyperliquidConfig = {
-    action: "spotTransfer",
+    action: process.env.ACTION!, // "deposit" | "withdraw" | "sendUsd" | "vault_transfer" | "approve_agent" | "revoke_agent" | "spotTransfer" | "placeOrder"
     isTestnet: false,
     destination: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
     amount: "5",
