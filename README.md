@@ -70,10 +70,12 @@ Code examples for using the Fordefi API in Python and TypeScript.
   * Programmatic smart contract deployments on Archway
 * On Initia:
   * Programmatic INIT transfers
-* On NEAR:
+* On NEAR (Black Box):
   * Programmatic transfer and staking using Black Box signatures
 * On Stacks:
   * Calling smart contracts with a Fordefi Stacks Vault
+* On Avalanche P-Chain (Black Box):
+  * Transfer and staking AVAX using Black Box signatures
 * On Aptos:
   * Sponsored fungible asset transfers with external Geomi gas station
   * Withdrawing an LP position on Hyperion
