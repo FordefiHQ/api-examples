@@ -17,6 +17,6 @@
     "@stacks/network": "^7.0.0",
     "@stacks/transactions": "^7.0.0",
     "axios": "1.13.6",
-    "dotenv": "^16.4.7"
+    "dotenv": "16.4.7"
   }
 }

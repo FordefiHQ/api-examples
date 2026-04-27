@@ -16,7 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "@fordefi/web3-provider": "0.3.2",
-    "dotenv": "^16.4.7",
+    "dotenv": "16.4.7",
     "ethers": "^6.15.0",
     "tsx": "^4.21.0",
     "viem": "^2.22.16"
