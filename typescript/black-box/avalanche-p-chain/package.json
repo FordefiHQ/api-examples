@@ -1,0 +1,27 @@
+{
+  "name": "@fordefi/avax-p-chain",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "call": "tsx ./src/run.ts",
+    "derive": "tsx ./src/derive_avalanche_p_chain_address.ts",
+    "stake": "tsx ./src/pchain-staking-run.ts",
+    "transfer": "tsx ./src/pchain-transfer-run.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@avalabs/avalanchejs": "5.0.0",
+    "axios": "1.15.2",
+    "bech32": "^2.0.0",
+    "bs58": "^6.0.0",
+    "dotenv": "17.2.3"
+  }
+}

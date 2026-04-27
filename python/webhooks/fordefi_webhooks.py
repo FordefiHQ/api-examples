@@ -14,6 +14,7 @@ from fastapi import FastAPI, Request, HTTPException
 load_dotenv()
 
 FORDEFI_API_USER_TOKEN = os.getenv("FORDEFI_API_USER_TOKEN")
+ALLOWED_IPS = {"54.243.103.88"}  # Fordefi's NAT IP
 public_key_path = Path("./public_key.pem")
 with open(public_key_path, "r") as f:
     FORDEFI_PUBLIC_KEY = f.read()
@@ -56,9 +57,24 @@ def verify_signature(signature: str, body: bytes) -> bool:
 async def health_check():
     return {"status": "online"}
 
+def get_source_ip(request: Request) -> str:
+    forwarded_for = request.headers.get("x-forwarded-for")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
 @app.post("/")
 async def fordefi_webhook(request: Request):
-    print(f"\n🌐 Client IP: {request.client.host}") # type: ignore
+    source_ip = get_source_ip(request)
+    print(f"\n📡 Incoming webhook from IP: {source_ip}")
+
+    if source_ip not in ALLOWED_IPS:
+        print(f"⛔ Rejected request from unauthorized IP: {source_ip}")
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN,
+            detail="Forbidden: IP not whitelisted"
+        )
+
     print("\n📋 Incoming webhook headers:")
     for header_name, header_value in request.headers.items():
         print(f"  {header_name}: {header_value}")
