@@ -25,5 +25,5 @@ export const stakingConfig = {
     rewardAddress: process.env.REWARD_ADDRESS,
     stakeAmount: 25_000_000_000n,
     startTime: BigInt(Math.floor(Date.now() / 1000) + 60),
-    endTime: BigInt(Math.floor(Date.now() / 1000) + 60 + 14 * 24 * 60 * 60),
+    endTime: BigInt(Math.floor(Date.now() / 1000) + 60 + 14 * 24 * 60 * 60), // 14 days, minimum delegation
 };

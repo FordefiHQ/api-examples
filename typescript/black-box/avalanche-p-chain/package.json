@@ -7,9 +7,9 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "derive": "tsx ./src/derive_avalanche_p_chain_address.ts",
-    "stake": "tsx ./src/pchain-staking-run.ts",
-    "transfer": "tsx ./src/pchain-transfer-run.ts"
+    "derive": "npx tsx ./src/derive_avalanche_p_chain_address.ts",
+    "stake": "npx tsx ./src/pchain-staking-run.ts",
+    "transfer": "npx tsx ./src/pchain-transfer-run.ts"
   },
   "devDependencies": {
     "@types/node": "^24.1.0",
