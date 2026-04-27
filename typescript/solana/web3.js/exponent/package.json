@@ -20,6 +20,6 @@
     "@exponent-labs/exponent-sdk": "^0.1.3",
     "@solana/web3.js": "^1.98.0",
     "axios": "1.10.0",
-    "dotenv": "^16.5.0"
+    "dotenv": "16.5.0"
   }
 }
