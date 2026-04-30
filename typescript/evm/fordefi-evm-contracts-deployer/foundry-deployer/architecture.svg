@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="565" height="490" viewBox="0 0 226 196" font-family="Arial, sans-serif">
+  <defs>
+    <marker id="ah" viewBox="0 0 8 6" refX="8" refY="3"
+      markerWidth="4" markerHeight="3" orient="auto">
+      <path d="M0.5,0.5 L7,3 L0.5,5.5" fill="none" stroke="#94A3B8"
+        stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"/>
+    </marker>
+    <filter id="shadow" x="-6%" y="-8%" width="112%" height="128%">
+      <feDropShadow dx="0" dy="0.5" stdDeviation="0.8"
+        flood-color="#000" flood-opacity="0.05"/>
+    </filter>
+  </defs>
+  <rect width="226" height="196" fill="#F8F9FB" rx="3"/>
+  <text x="113" y="11" text-anchor="middle" font-size="6" font-weight="700" fill="#1E293B">BatchTransfer Architecture</text>
+  <rect x="38" y="16" width="150" height="10" rx="3" fill="#fff" stroke="#E2E5EA" stroke-width="0.4"/>
+  <rect x="43" y="18.5" width="5" height="5" rx="2.5" fill="#fff" stroke="#E2E5EA" stroke-width="0.4"/>
+  <text x="51" y="22.5" font-size="3.5" fill="#1E293B">Actor</text>
+  <rect x="83" y="18.5" width="5" height="5" rx="1.5" fill="#fff" stroke="#E2E5EA" stroke-width="0.4"/>
+  <rect x="84" y="19.5" width="0.8" height="3" rx="0.4" fill="#3B82F6"/>
+  <text x="91" y="22.5" font-size="3.5" fill="#1E293B">Protocol</text>
+  <rect x="131" y="18.5" width="5" height="5" rx="1.5" fill="#fff" stroke="#E2E5EA" stroke-width="0.4"/>
+  <rect x="132" y="19.5" width="0.8" height="3" rx="0.4" fill="#F59E0B"/>
+  <text x="139" y="22.5" font-size="3.5" fill="#1E293B">External</text>
+  <path d="M61.6,46.0 C61.6,70.0 87.3,70.0 87.3,94.0" fill="none" stroke="#94A3B8" stroke-width="0.5" marker-end="url(#ah)"/>
+  <path d="M148.6,46.0 C148.6,70.0 87.3,70.0 87.3,94.0" fill="none" stroke="#94A3B8" stroke-width="0.5" marker-end="url(#ah)"/>
+  <path d="M87.3,114.0 C87.3,135.0 66.2,135.0 66.2,156.0" fill="none" stroke="#94A3B8" stroke-width="0.5" marker-end="url(#ah)"/>
+  <path d="M87.3,114.0 C87.3,135.0 159.8,135.0 159.8,156.0" fill="none" stroke="#94A3B8" stroke-width="0.5" marker-end="url(#ah)"/>
+  <path d="M123.4,174.0 C116.8,192.0 108.0,192.0 101.4,170.0" fill="none" stroke="#94A3B8" stroke-width="0.5" marker-end="url(#ah)"/>
+  <g filter="url(#shadow)">
+    <rect x="30.0" y="32.0" width="63.2" height="14" rx="7" fill="#fff" stroke="#E2E5EA" stroke-width="0.5"/>
+    <text x="61.6" y="40.8" text-anchor="middle" font-size="4.8" font-weight="600" fill="#1E293B">Sender</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="115.2" y="32.0" width="66.8" height="14" rx="7" fill="#fff" stroke="#E2E5EA" stroke-width="0.5"/>
+    <text x="148.6" y="40.8" text-anchor="middle" font-size="4.8" font-weight="600" fill="#1E293B">Owner</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="46.1" y="94.0" width="82.4" height="20" rx="3" fill="#fff" stroke="#E2E5EA" stroke-width="0.5"/>
+    <rect x="49.1" y="97.0" width="1.4" height="14" rx="0.6" fill="#3B82F6"/>
+    <text x="87.3" y="103.5" text-anchor="middle" font-size="4.8" font-weight="600" fill="#1E293B">BatchTransfer</text>
+    <text x="87.3" y="108.5" text-anchor="middle" font-size="3.5" fill="#64748B">Multisend router</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="31.0" y="156.0" width="70.4" height="14" rx="7" fill="#fff" stroke="#E2E5EA" stroke-width="0.5"/>
+    <text x="66.2" y="164.8" text-anchor="middle" font-size="4.8" font-weight="600" fill="#1E293B">Recipients</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="123.4" y="156.0" width="72.8" height="20" rx="3" fill="#fff" stroke="#E2E5EA" stroke-width="0.5"/>
+    <rect x="126.4" y="159.0" width="1.4" height="14" rx="0.6" fill="#F59E0B"/>
+    <text x="159.8" y="165.5" text-anchor="middle" font-size="4.8" font-weight="600" fill="#1E293B">ERC20 Token</text>
+    <text x="159.8" y="170.5" text-anchor="middle" font-size="3.5" fill="#64748B">External token</text>
+  </g>
+  <rect x="46.1" y="65.0" width="56.8" height="6.0" rx="1" fill="#F8F9FB"/>
+  <text x="74.5" y="70.0" font-size="4" fill="#1E293B" font-weight="500" text-anchor="middle">batchSend* (ETH/Token)</text>
+  <rect x="80.0" y="54.0" width="76.0" height="11.0" rx="1" fill="#F8F9FB"/>
+  <text x="118.0" y="58.5" font-size="4" fill="#1E293B" font-weight="500" text-anchor="middle">tokenRescue / ethRescue</text>
+  <text x="118.0" y="63.5" font-size="4" fill="#1E293B" font-weight="500" text-anchor="middle">adminPause / setMaxBatch</text>
+  <rect x="55.5" y="130.0" width="42.4" height="6.0" rx="1" fill="#F8F9FB"/>
+  <text x="76.7" y="135.0" font-size="4" fill="#1E293B" font-weight="500" text-anchor="middle">ETH push (.call)</text>
+  <rect x="102.3" y="130.0" width="42.4" height="6.0" rx="1" fill="#F8F9FB"/>
+  <text x="123.5" y="135.0" font-size="4" fill="#1E293B" font-weight="500" text-anchor="middle">safeTransferFrom</text>
+  <rect x="96.0" y="191.0" width="32.8" height="6.0" rx="1" fill="#F8F9FB"/>
+  <text x="112.4" y="196.0" font-size="4" fill="#1E293B" font-weight="500" text-anchor="middle">token credit</text>
+</svg>

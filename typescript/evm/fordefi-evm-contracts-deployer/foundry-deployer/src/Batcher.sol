@@ -4,16 +4,18 @@ pragma solidity 0.8.30;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 
-contract BatchTransfer is ReentrancyGuard, Ownable {
+contract BatchTransfer is ReentrancyGuard, Pausable, Ownable {
     using SafeERC20 for IERC20;
     uint16 public MAX_BATCH_SIZE = 200;
     
     event BatchETHTransfer(address indexed sender, uint256 totalAmount, uint256 recipients);
     event BatchTokenTransfer(address indexed sender, address indexed token, uint256 totalAmount, uint256 recipients);
     event TokenRescued(address indexed token, address indexed owner, uint amount);
+    event ETHRescued(address indexed to, uint256 amount);
     event NewMaxBatchSize(uint16 size);
 
     error ArrayLengthMismatch();
@@ -39,11 +41,12 @@ contract BatchTransfer is ReentrancyGuard, Ownable {
 
     /// @notice Send the same ETH amount to many recipients (EXACT funding required)
     /// @dev Duplicate recipients are allowed and will receive multiple transfers
-    function batchSendETHSameAmount(address[] calldata recipients, uint256 amountPerRecipient) external nonReentrant payable {
+    function batchSendETHSameAmount(address[] calldata recipients, uint256 amountPerRecipient) external nonReentrant whenNotPaused payable {
 
         uint256 n = recipients.length;
         if (n < 2) revert RequireMinTwoRecipients();
         if (n > MAX_BATCH_SIZE) revert BatchSizeExceeded();
+        if (amountPerRecipient == 0) revert ZeroAmount();
 
         uint256 total = amountPerRecipient * n;
         if(msg.value != total) revert NotEnoughETH();
@@ -61,7 +64,7 @@ contract BatchTransfer is ReentrancyGuard, Ownable {
 
     /// @notice Send different ETH amounts to many recipients (EXACT funding required)
     /// @dev Duplicate recipients are allowed and will receive multiple transfers
-    function batchSendETHDifferentAmounts(address[] calldata recipients, uint256[] calldata amounts) external nonReentrant payable {
+    function batchSendETHDifferentAmounts(address[] calldata recipients, uint256[] calldata amounts) external nonReentrant whenNotPaused payable {
         uint256 n = recipients.length;
         if (n < 2) revert RequireMinTwoRecipients();
         if (n != amounts.length) revert ArrayLengthMismatch();
@@ -69,6 +72,7 @@ contract BatchTransfer is ReentrancyGuard, Ownable {
 
         uint256 total;
         for (uint256 i; i < n; ) {
+            if (amounts[i] == 0) revert ZeroAmount();
             total += amounts[i];
             unchecked { ++i; }
         }
@@ -91,7 +95,7 @@ contract BatchTransfer is ReentrancyGuard, Ownable {
 
     /// @notice Send the SAME token amount to many recipients
     /// @dev Duplicate recipients are allowed and will receive multiple transfers
-    function batchSendTokenSameAmount(address token, address[] calldata recipients, uint256 amountPerRecipient) external nonReentrant {
+    function batchSendTokenSameAmount(address token, address[] calldata recipients, uint256 amountPerRecipient) external nonReentrant whenNotPaused {
         if (token == address(0)) revert ZeroAddress();
 
         uint256 n = recipients.length;
@@ -118,11 +122,10 @@ contract BatchTransfer is ReentrancyGuard, Ownable {
 
     /// @notice Send DIFFERENT token amounts to many recipients
     /// @dev Duplicate recipients are allowed and will receive multiple transfers
-    function batchSendTokenDifferentAmounts( address token, address[] calldata recipients, uint256[] calldata amounts) external nonReentrant {
+    function batchSendTokenDifferentAmounts( address token, address[] calldata recipients, uint256[] calldata amounts) external nonReentrant whenNotPaused {
         if (token == address(0)) revert ZeroAddress();
 
         uint256 n = recipients.length;
-        require(n > 1);
         if (n < 2) revert RequireMinTwoRecipients();
         if (n != amounts.length) revert ArrayLengthMismatch();
         if (n > MAX_BATCH_SIZE) revert BatchSizeExceeded();
@@ -157,6 +160,25 @@ contract BatchTransfer is ReentrancyGuard, Ownable {
 
         emit TokenRescued(token, to, amount);
 
+    }
+
+    /// @notice Rescues ETH forced into the contract (e.g., via selfdestruct):
+    function ethRescue(address to, uint256 amount) external onlyOwner nonReentrant {
+        if (to == address(0)) revert ZeroAddress();
+        (bool ok, ) = to.call{value: amount}("");
+        if (!ok) revert ETHSendFailed();
+
+        emit ETHRescued(to, amount);
+    }
+
+    /// @notice Pauses all value-moving batch functions (ETH and ERC20). Rescues remain available.
+    function adminPause() external onlyOwner {
+        _pause();
+    }
+
+    /// @notice Unpauses the contract.
+    function adminUnpause() external onlyOwner {
+        _unpause();
     }
 
     /// @notice Changes MAX_BATCH_SIZE
