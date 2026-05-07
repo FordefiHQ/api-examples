@@ -1,0 +1,22 @@
+{
+  "name": "@fordefi/stellar-sign-message",
+  "version": "1.0.0",
+  "description": "Sign a Stellar message via Fordefi",
+  "main": "index.js",
+  "scripts": {
+    "sign": "npx tsx src/run.ts"
+  },
+  "keywords": ["fordefi", "stellar", "message", "sign"],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^22.13.11",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "axios": "1.16.0",
+    "dotenv": "16.6.1",
+    "tsx": "^4.21.0"
+  }
+}

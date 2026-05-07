@@ -1,0 +1,23 @@
+{
+  "name": "@fordefi/stellar-raw-transaction",
+  "version": "1.0.0",
+  "description": "Submit a locally-built Stellar transaction (XDR) via Fordefi",
+  "main": "index.js",
+  "scripts": {
+    "raw": "npx tsx src/run.ts"
+  },
+  "keywords": ["fordefi", "stellar", "raw-transaction", "xdr"],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^22.13.11",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@stellar/stellar-sdk": "12.3.0",
+    "axios": "1.16.0",
+    "dotenv": "16.6.1",
+    "tsx": "^4.21.0"
+  }
+}
