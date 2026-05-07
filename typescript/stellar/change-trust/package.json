@@ -1,0 +1,22 @@
+{
+  "name": "@fordefi/stellar-change-trust",
+  "version": "1.0.0",
+  "description": "Establish a Stellar classic-asset trustline via Fordefi",
+  "main": "index.js",
+  "scripts": {
+    "trust": "npx tsx src/run.ts"
+  },
+  "keywords": ["fordefi", "stellar", "change-trust", "trustline"],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^22.13.11",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "axios": "1.16.0",
+    "dotenv": "16.6.1",
+    "tsx": "^4.21.0"
+  }
+}
