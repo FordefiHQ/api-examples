@@ -11,6 +11,7 @@ class TransactionType(Enum):
     COSMOS_TRANSACTION = "cosmos_transaction"
     APTOS_TRANSACTION = "aptos_transaction"
     SUI_TRANSACTION = "sui_transaction"
+    STARKNET_TRANSACTION = "starknet_transaction"
     TON_TRANSACTION = "ton_transaction"
     TRON_TRANSACTION = "tron_transaction"
     TRON_MESSAGE = "tron_message"
@@ -103,6 +104,9 @@ class AptosTransactionDetailType(Enum):
 class SuiTransactionDetailType(Enum):
     SUI_TRANSFER = "sui_transfer"
 
+class StarknetTransactionDetailType(Enum):
+    STARKNET_TRANSFER = "starknet_transfer"
+
 
 class TonTransactionDetailType(Enum):
     TON_TRANSFER = "ton_transfer"
@@ -123,10 +127,12 @@ class AssetIdentifierType(Enum):
     EVM = "evm"
     COSMOS = "cosmos"
     APTOS = "aptos"
+    STARKNET = "starknet"
     SUI = "sui"
     TON = "ton"
     TRON = "tron"
     UTXO = "utxo"
+
 
 
 class AssetDetailType(Enum):

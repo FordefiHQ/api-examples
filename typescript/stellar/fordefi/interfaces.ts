@@ -112,5 +112,11 @@ export interface StellarTransactionResponse {
   explorer_url?: string;
   signatures?: StellarSignature[];
   raw_data?: string;
+  // Fully-signed envelope produced by Fordefi (base64 XDR). Present for
+  // stellar_raw_transaction once the vault has signed; required for the
+  // mixed-signer multisig flow, where we recover Fordefi's mutated envelope
+  // (refreshed sequence + fee + Vault A's signature) and attach a second
+  // signature locally before broadcasting.
+  serialized_signed_transaction?: string;
   error?: string;
 }
