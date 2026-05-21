@@ -140,6 +140,30 @@ async def format_withdraw_token_evm(vault_id: str, destination: str, custom_note
 
     return request_json
 
+async def format_internal_transfer_token(vault_id: str, destination: str, custom_note: str, value: str, exchange: str, asset: str):
+    request_json = {
+        "signer_type": SignerType.API_SIGNER.value,
+        "type": TransactionType.EXCHANGE_TRANSACTION.value,
+        "details": {
+            "asset_identifier": {
+                "asset_symbol": asset,
+                "exchange_type": exchange,
+                "type": "exchange"
+            },
+            "to": destination,
+            "type": ExchangeTransactionDetailType.INTERNAL_TRANSFER.value,
+            "value": {
+                "is_net_amount": True,
+                "type": "value",
+                "value": value
+            }
+        },
+        "vault_id": vault_id,
+        "note": custom_note
+    }
+
+    return request_json
+
 async def format_withdraw_trc20(vault_id: str, destination: str, custom_note: str, value: str, exchange: str, chain: str, asset: str):
     request_json = {
         "signer_type": SignerType.API_SIGNER.value,

@@ -118,6 +118,7 @@ class TronTransactionDetailType(Enum):
 
 class ExchangeTransactionDetailType(Enum):
     EXTERNAL_WITHDRAW = "external_withdraw"
+    INTERNAL_TRANSFER = "internal_transfer"
 
 
 # Asset identifier types
