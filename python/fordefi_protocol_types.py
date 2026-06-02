@@ -12,6 +12,7 @@ class TransactionType(Enum):
     APTOS_TRANSACTION = "aptos_transaction"
     SUI_TRANSACTION = "sui_transaction"
     STARKNET_TRANSACTION = "starknet_transaction"
+    STARKNET_MESSAGE = "starknet_message"
     TON_TRANSACTION = "ton_transaction"
     TRON_TRANSACTION = "tron_transaction"
     TRON_MESSAGE = "tron_message"
@@ -68,6 +69,9 @@ class SolanaMessageType(Enum):
 
 class TronMessageType(Enum):
     PERSONAL_MESSAGE_V2 = "typed_message_type_v2"
+
+class StarknetMessageType(Enum):
+    TYPED_MESSAGE = "typed_message_type"  # SNIP-12 (formerly SNIP-712) typed data
 
 class TransactionState(Enum):
     SIGNED = "signed"
