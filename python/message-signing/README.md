@@ -1,14 +1,15 @@
 # Message Signing with Fordefi
 
-Sign messages across EVM, Solana, and Tron blockchains using Fordefi Vaults.
+Sign messages across EVM, Solana, Tron, and Starknet blockchains using Fordefi Vaults.
 
 ## Overview
 
-| Chain  | Scripts | Message Types |
-|--------|---------|---------------|
-| EVM    | `evm/sign_eip712.py`, `evm/sign_personal_message.py` | EIP-712 typed data, EIP-191 personal |
-| Solana | `solana/sign_personal_message.py` | Personal message |
-| Tron   | `tron/sign_personal_message.py` | Personal message (v2) |
+| Chain    | Scripts                                              | Message Types                        |
+|----------|------------------------------------------------------|--------------------------------------|
+| EVM      | `evm/sign_eip712.py`, `evm/sign_personal_message.py` | EIP-712 typed data, EIP-191 personal |
+| Solana   | `solana/sign_personal_message.py`                    | Personal message                     |
+| Tron     | `tron/sign_personal_message.py`                      | Personal message (v2)                |
+| Starknet | `starknet/sign_typed_message.py`                     | SNIP-12 typed data                   |
 
 ## Prerequisites
 
@@ -45,6 +46,10 @@ Sign messages across EVM, Solana, and Tron blockchains using Fordefi Vaults.
    # Tron (required for Tron scripts)
    FORDEFI_TRON_VAULT_ID="your_tron_vault_id"
    # TRON_CHAIN="tron_mainnet"  # optional, defaults to mainnet
+
+   # Starknet (required for Starknet scripts)
+   FORDEFI_STARKNET_VAULT_ID="your_starknet_vault_id"
+   # STARKNET_CHAIN="starknet_mainnet"  # optional, defaults to mainnet ("starknet_sepolia" for testnet)
    ```
 
 4. Place your API Signer's `.pem` private key in the `secret/` directory.
@@ -77,6 +82,12 @@ uv run python solana/sign_personal_message.py
 uv run python tron/sign_personal_message.py
 ```
 
+### Starknet
+
+```bash
+uv run python starknet/sign_typed_message.py
+```
+
 ## Project Structure
 
 ```
@@ -93,6 +104,9 @@ message-signing/
 │   └── construct_request.py
 ├── tron/                   # Tron message signing
 │   ├── sign_personal_message.py
+│   └── construct_request.py
+├── starknet/               # Starknet message signing
+│   ├── sign_typed_message.py    # SNIP-12 typed data signing
 │   └── construct_request.py
 └── secret/                 # API Signer private key (gitignored)
 ```

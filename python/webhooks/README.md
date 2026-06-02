@@ -72,6 +72,17 @@ Then configure your Fordefi webhook to use the ngrok URL.
 4. Save the webhook configuration
 5. Test the webhook
 
+## Webhook delivery timeout (how fast your server must respond)
+
+**Fordefi gives your endpoint ~5 seconds to return a `2xx` response.** If your server
+hasn't responded within that window, Fordefi closes the connection and treats the
+delivery as **failed / not handled**.
+
+Practical implication: do **not** do heavy work inline in the handler. Verify the
+signature, persist/enqueue the event, and return `200` immediately. Run any slow
+processing (API calls, DB writes, fetching full transaction details) asynchronously
+*after* responding.
+
 ## Learn More About the Fordefi API:
 
 - Using Webhooks: [https://docs.fordefi.com/developers/webhooks#validate-a-webhook](https://docs.fordefi.com/developers/webhooks#validate-a-webhook)

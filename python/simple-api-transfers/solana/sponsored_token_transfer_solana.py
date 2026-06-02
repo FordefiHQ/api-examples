@@ -54,7 +54,7 @@ SOL_VAULT_ID = os.environ["SOL_VAULT_ID"]
 FEE_PAYER_VAULT_ID_SOLANA = os.environ["FEE_PAYER_VAULT_ID_SOLANA"]
 path = "/api/v1/transactions"
 destination = "EjL8jgiEMwuHT6xsDwm7HmF4uqv2cAjJULfXwUm6ZSSD" # Change to your destination address
-value = str(100)  # in smallest units (1 USDC = 1_000_000 SOL)
+value = str(1)  # in smallest units (1 USDC = 1_000_000 SOL)
 token_address = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" # USDC on Solana
 
 async def main():

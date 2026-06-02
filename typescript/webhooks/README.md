@@ -86,6 +86,17 @@ npm run hypernative_server
 | `POST` | `/hypernative` | Webhook actions — verifies signature, triggers Fordefi transaction signing |
 | `POST` | `/hypernative/risk-insights` | Risk insights — verifies signature, executes contract call via Fordefi |
 
+## Fordefi webhook delivery timeout (how fast your server must respond)
+
+**Fordefi gives your endpoint ~5 seconds to return a `2xx` response.** If your server
+hasn't responded within that window, Fordefi closes the connection and treats the
+delivery as **failed / not handled**.
+
+Practical implication: do **not** do heavy work inline in the handler. Verify the
+signature, persist/enqueue the event, and return `200` immediately. Run any slow
+processing (API calls, DB writes, fetching full transaction details) asynchronously
+*after* responding.
+
 ## Hypernative Event Types
 
 ### Webhook Actions (Fordefi-triggered transactions)
