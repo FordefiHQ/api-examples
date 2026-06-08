@@ -26,9 +26,7 @@ FORDEFI_EVM_VAULT_ID = os.environ["FORDEFI_EVM_VAULT_ID"]
 EVM_CHAIN = os.environ["EVM_CHAIN"]
 
 # Example message - replace with your actual message
-MESSAGE = """Hello, this is a test message to sign.
-
-You can put any content here that you want to sign with your Fordefi EVM wallet."""
+MESSAGE = "Hello Fordefi!"
 
 
 def decode_signature(signature_b64: str) -> tuple:
