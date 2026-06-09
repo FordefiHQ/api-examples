@@ -1,6 +1,8 @@
 # Unit Protocol / Hyperunit Bridge
 
-A standalone Fordefi example for the **Unit protocol / Hyperunit** bridge, which mints Hyperliquid deposit addresses on native chains. This example bridges **Bitcoin → Hyperliquid**. It ships configured for **mainnet** (real BTC) and can be switched to testnet with a single setting — see [Switching networks](#switching-networks).
+A standalone Fordefi example for the **Unit protocol / Hyperunit** bridge, which mints Hyperliquid deposit addresses on native chains. This example bridges **Bitcoin → Hyperliquid**. It ships configured for **mainnet** (real BTC) — see [Switching networks](#switching-networks).
+
+> ⚠️ **The Fordefi funding step is mainnet-only.** Unit **testnet uses Bitcoin Signet**, which Fordefi does not support. On testnet this script still generates and verifies a deposit address, but it will **not** fund it via Fordefi — you fund the verified Signet address yourself from an external Signet-capable Bitcoin wallet. See [Switching networks](#switching-networks).
 
 > ⚠️ **Loss of funds warning (Unit protocol policy):**
 > - Any deposit **under 0.0003 BTC** will result in a **loss of funds** — it is below the protocol's minimum and will not be credited or refunded.
@@ -12,7 +14,7 @@ The flow has three steps:
 
 1. **Generate** — request a BTC deposit address from the Hyperunit API for a given Hyperliquid destination address.
 2. **Verify** — confirm the deposit address is authentic by checking the ECDSA P-256 signatures returned by Hyperunit's guardian nodes against their known public keys. A quorum of at least 2 guardians must sign (`GUARDIAN_SIGNATURE_THRESHOLD`).
-3. **Fund** — *only if verification passes* — submit a native BTC transfer to the verified address via the Fordefi Direct API, then poll until the transaction is `pushed_to_blockchain` and print a [mempool.space](https://mempool.space) explorer link.
+3. **Fund** — *only if verification passes, and only on mainnet* — submit a native BTC transfer to the verified address via the Fordefi Direct API, then poll until the transaction is `pushed_to_blockchain` and print a [mempool.space](https://mempool.space) explorer link. On testnet (Bitcoin Signet) this step is skipped — Fordefi does not support Signet, so you fund the verified address from an external Signet wallet instead.
 
 Step 2 guards against a man-in-the-middle returning an attacker-controlled deposit address: you only fund an address that a threshold of guardians has signed.
 
@@ -42,7 +44,7 @@ Place your API Signer private key at `./secret/private.pem`.
 npm run fund   # generate + verify + fund a BTC deposit address
 ```
 
-> ⚠️ **As shipped (mainnet), this moves REAL BTC** once verification passes. Switch to testnet first (see below) if you don't intend to spend real funds.
+> ⚠️ **As shipped (mainnet), this moves REAL BTC** once verification passes. Switch to testnet first (see below) if you don't intend to spend real funds — on testnet the script generates + verifies only and never moves funds through Fordefi.
 
 ## Tracking your deposit
 
@@ -88,6 +90,14 @@ Network selection is a **single switch** — the `NETWORK` const in `src/config.
 const NETWORK: Network = "mainnet"   // or "testnet"
 ```
 
-Everything else is derived from it: the Bitcoin chain the vault funds on (`fordefiConfig.chain`), the Hyperunit API host, and the guardian key set used for verification. There's no second place to keep in sync — so you can't end up verifying a mainnet address while funding a testnet vault (or vice-versa). Always test end-to-end with small amounts after switching.
+Everything else is derived from it: the Hyperunit API host and the guardian key set used for verification (the Bitcoin chain itself is inferred from the Fordefi vault, not set here). There's no second place to keep in sync — so you can't end up verifying a mainnet address while funding a testnet vault (or vice-versa). Always test end-to-end with small amounts after switching.
+
+### Testnet is Bitcoin Signet — Fordefi funding is mainnet-only
+
+Unit **testnet mints Bitcoin [Signet](https://docs.hyperunit.xyz/developers/key-addresses/testnet) addresses**, and **Fordefi does not support Signet**. So with `NETWORK = "testnet"` the script does the *generate* and *verify* steps only — it will **not** submit a Fordefi transaction. To test the full path on testnet:
+
+1. Set `NETWORK = "testnet"` and run `npm run fund`.
+2. The script prints the verified Signet deposit address.
+3. Send BTC to that address (still ≥ 0.0003 BTC) from an **external Signet-capable Bitcoin wallet** — Fordefi can't do this step on Signet.
 
 > ⚠️ Wrong-network deposits are **lost, not refunded** under Unit's policy — only ever fund a deposit address on the same network it was generated and verified against.

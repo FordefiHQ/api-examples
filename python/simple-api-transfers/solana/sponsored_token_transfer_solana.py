@@ -1,12 +1,13 @@
 import os
 import json
+import time
 import asyncio
 import datetime
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))  # for simple-api-transfers (utils)
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))  # for python (fordefi_protocol_types)
 from fordefi_protocol_types import TransactionType, SignerType, GasType, SolanaTransactionDetailType, AssetIdentifierType, AssetDetailType
-from utils.broadcast import broadcast_tx
+from utils.broadcast import broadcast_tx, get_tx
 from utils.sign_payload import sign
 from dotenv import load_dotenv
 
@@ -48,6 +49,26 @@ async def build_sponsored_tx(vault_id: str, destination: str, value: str, token:
 
     return request_json
 
+def extract_signature(tx: dict):
+    sigs = tx.get("signatures")
+    if isinstance(sigs, list) and sigs:
+        s = sigs[0]
+        return s.get("data") if isinstance(s, dict) else s
+    return None
+
+async def poll_for_signature(tx_id: str, max_attempts: int = 30, poll_interval_seconds: int = 2):
+    state = None
+    for _ in range(max_attempts):
+        timestamp = str(int(datetime.datetime.now(datetime.timezone.utc).timestamp()))
+        signature = await sign(payload=f"{path}|{timestamp}|")
+        tx = (await get_tx(tx_id, USER_API_TOKEN, signature, timestamp)).json()
+        state = tx.get("state")
+        sig = extract_signature(tx)
+        if sig or state in ("completed", "mined", "failed", "aborted"):
+            return state, sig
+        time.sleep(poll_interval_seconds)
+    return state, None
+
 ## CONFIG
 USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
 SOL_VAULT_ID = os.environ["SOL_VAULT_ID"]
@@ -69,8 +90,17 @@ async def main():
          ## Signing transaction with API User private key
         signature = await sign(payload=payload)
         ## Push tx to Fordefi for MPC signing and broadcast to network
-        await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
+        resp = await broadcast_tx(path, USER_API_TOKEN, signature, timestamp, request_body)
+        tx = resp.json()
+        tx_id = tx.get("id")
         print("✅ Transaction submitted successfully!")
+        print(f"🆔 Transaction ID: {tx_id}")
+        ## Poll until the on-chain signature is available
+        state, onchain_sig = await poll_for_signature(tx_id)
+        if onchain_sig:
+            print(f"✍️  Signature: {onchain_sig}")
+        else:
+            print(f"⏳ Signature not yet available (last state: {state})")
     except Exception as e:
         print(f"❌ Transaction failed: {str(e)}")
 
