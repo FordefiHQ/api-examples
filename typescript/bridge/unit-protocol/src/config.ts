@@ -7,15 +7,14 @@ dotenv.config()
 export type UnitApiUrl = "https://api.hyperunit-testnet.xyz" | "https://api.hyperunit.xyz"
 
 type Network = "testnet" | "mainnet"
-const NETWORK: Network = "mainnet"
-
-const CHAIN_FOR_NETWORK: Record<Network, FordefiApiConfig["chain"]> = {
-    testnet: "bitcoin_testnet_v4",
-    mainnet: "bitcoin_mainnet",
-}
+// NOTE: Unit testnet mints Bitcoin **Signet** addresses, which Fordefi does NOT
+// support. So the Fordefi funding step is mainnet-only (gated in run.ts on this
+// value) — on testnet you generate + verify here, then fund manually from an
+// external Signet wallet. This is the single source of truth for the network:
+// it also derives the Hyperunit host and guardian set below.
+export const NETWORK: Network = "mainnet"
 
 export const fordefiConfig: FordefiApiConfig = {
-    chain: CHAIN_FOR_NETWORK[NETWORK],
     hyperliquid_address: process.env.HYPERLIQUID_ADDRESS!.trim(),
     address: process.env.FORDEFI_BITCOIN_VAULT_ADDRESS!,
     vaultId: process.env.FORDEFI_BITCOIN_VAULT_ID!,

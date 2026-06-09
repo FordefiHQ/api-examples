@@ -28,7 +28,6 @@ export interface FordefiApiConfig {
     accessToken: string;
     privateKeyPath: string;
     pathEndpoint: string;
-    chain: "bitcoin_mainnet" | "bitcoin_testnet_v4",
     pushMode: "auto";
     transferAmount: string;
 }  

@@ -1,7 +1,7 @@
 // Constants
 export const TESTNET_GUARDIAN_NODES = [
   {
-    nodeId: 'node-1',
+    nodeId: 'unit-node',
     publicKey: '04bab844e8620c4a1ec304df6284cd6fdffcde79b3330a7bffb1e4cecfee72d02a7c1f3a4415b253dc8d6ca2146db170e1617605cc8a4160f539890b8a24712152',
   },
   {

@@ -5,13 +5,14 @@ import { signWithApiUserPrivateKey } from './api_request/signer'
 import { createAndSignTx } from './api_request/pushToApi'
 import { getTransaction } from './api_request/getTransaction'
 import { Proposal } from './interfaces'
-import { fordefiConfig } from './config'
+import { fordefiConfig, NETWORK } from './config'
 import { MIN_BTC_DEPOSIT_SATS } from './constants'
 
 
 /**
- * Build, sign and submit a native testnet BTC transfer from the Fordefi vault
- * to the (already-verified) Hyperunit deposit address.
+ * Build, sign and submit a native (mainnet) BTC transfer from the Fordefi vault
+ * to the (already-verified) Hyperunit deposit address. Mainnet-only: Fordefi
+ * does not support Bitcoin Signet (Unit's testnet network).
  */
 async function fundDepositAddress(depositAddress: string) {
     const requestJson = buildBitcoinTransactionPayload(
@@ -40,7 +41,7 @@ async function fundDepositAddress(depositAddress: string) {
 
 /**
  * Poll the transaction until it reaches "pushed_to_blockchain" (when the on-chain
- * hash gets populated), then print the testnet4 mempool.space explorer link.
+ * hash gets populated), then print the mempool.space explorer link.
  * Short poll — just long enough to clear the signing states; the actual BTC
  * confirmation happens later on-chain.
  */
@@ -53,7 +54,7 @@ async function showExplorerLink(txId: string, maxAttempts = 20, intervalMs = 300
             const txHash: string = resp.data.hash
             const explorerUrl: string | undefined = resp.data.explorer_url
             console.log(`Hash: ${txHash}`)
-            console.log(`Track it here: ${explorerUrl ?? `https://mempool.space/testnet4/tx/${txHash}`}`)
+            console.log(`Track it here: ${explorerUrl ?? `https://mempool.space/tx/${txHash}`}`)
             return
         }
 
@@ -105,7 +106,21 @@ async function main() {
         console.log(`Verified deposit address (${result.verifiedCount} guardian signatures): ${data.address}`)
         console.log('Per-node results:', result.verificationDetails)
 
-        // Address is trusted by a quorum of guardians —> fund it through Fordefi
+        // Address is trusted by a quorum of guardians. Fund it — but only on
+        // mainnet: Unit testnet mints Bitcoin SIGNET addresses, which Fordefi
+        // does not support. Funding a Signet address from a non-Signet Fordefi
+        // vault would be a wrong-network deposit, which Unit treats as LOST.
+        if (NETWORK !== 'mainnet') {
+            console.log(
+                `\nTestnet (Bitcoin Signet) — Fordefi does not support Signet, so this script will NOT fund the address.\n` +
+                `To test the deposit, send ${fordefiConfig.transferAmount} sats (>= ${MIN_BTC_DEPOSIT_SATS}) to:\n` +
+                `  ${data.address}\n` +
+                `from an external Signet-capable Bitcoin wallet.\n` +
+                `Track it here: https://mempool.space/signet/address/${data.address}`,
+            )
+            return
+        }
+
         const txId = await fundDepositAddress(data.address)
         await showExplorerLink(txId)
     } catch (error) {
