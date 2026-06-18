@@ -1,37 +1,8 @@
 import dotenv from 'dotenv';
 import { OrderParameters } from "@nktkas/hyperliquid";
+import { FordefiApiConfig, HyperliquidConfig, AgentWalletConfig } from './interfaces';
 
 dotenv.config()
-
-export interface FordefiApiConfig {
-    vaultId: string;
-    address: string;
-    accessToken: string;
-    privateKeyPath: string;
-    pathEndpoint: string;
-    rpcUrl: string;
-    chainId: number;
-    pushMode: "auto" | "manual";
-}
-
-export interface HyperliquidConfig {
-    action: string
-    isTestnet: boolean,
-    destination?: `0x${string}`,
-    amount?: string,
-    token?: string,               // Required for "spotTransfer" action (format: "TOKEN:address")
-    isDeposit?: boolean,          // Required for "vault_transfer" action
-    hyperliquid_vault_address?: string
-    toSpot?: boolean              // Required for "spotTransfer": true = Perps→Spot, false = Spot→Perps
-    usdcAddress?: string,         // Arbitrum USDC contract address (deposit action)
-    bridgeAddress?: string,       // Hyperliquid bridge contract address (deposit action)
-}
-
-export interface AgentWalletConfig {
-    agentAddress: string,
-    agentName: string,
-    validUntil?: string // only required for a "approve_agent" action, MAX is 180 days in UNIX time
-}
 
 /**
  * Fordefi API Configuration
@@ -45,6 +16,7 @@ export interface AgentWalletConfig {
  *   - withdraw
  *   - sendUsd
  *   - spotTransfer
+ *   - subAccountTransfer
  *   - placeOrder
  *
  * chainId: 42161 - REQUIRED for deposit (Arbitrum on-chain transaction)
@@ -81,13 +53,14 @@ export const agentWalletConfig: AgentWalletConfig = {
 };
 
 export const hyperliquidConfig: HyperliquidConfig = {
-    action: process.env.ACTION!, // "deposit" | "withdraw" | "sendUsd" | "vault_transfer" | "approve_agent" | "revoke_agent" | "spotTransfer" | "placeOrder"
+    action: process.env.ACTION!, // "deposit" | "withdraw" | "sendUsd" | "vault_transfer" | "approve_agent" | "revoke_agent" | "spotTransfer" | "subAccountTransfer" | "placeOrder"
     isTestnet: false,
     destination: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
     amount: "5",
     token: "USDC:0x6d1e7cde53ba9467b783cb7c530ce054",
     toSpot: true,
     isDeposit: true,
+    subAccountDeposit: true, // for "subAccountTransfer": true = main → subaccount, false = subaccount → main
     hyperliquid_vault_address: "0xdfc24b077bc1425ad1dea75bcb6f8158e10df303",
     usdcAddress: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
     bridgeAddress: "0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7",
