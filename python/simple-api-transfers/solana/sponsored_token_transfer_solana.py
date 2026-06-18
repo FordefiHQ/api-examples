@@ -94,13 +94,13 @@ async def main():
         tx = resp.json()
         tx_id = tx.get("id")
         print("✅ Transaction submitted successfully!")
-        print(f"🆔 Transaction ID: {tx_id}")
+        print(f"Transaction ID: {tx_id}")
         ## Poll until the on-chain signature is available
         state, onchain_sig = await poll_for_signature(tx_id)
         if onchain_sig:
-            print(f"✍️  Signature: {onchain_sig}")
+            print(f"Signature: {onchain_sig}")
         else:
-            print(f"⏳ Signature not yet available (last state: {state})")
+            print(f"Signature not yet available (last state: {state})")
     except Exception as e:
         print(f"❌ Transaction failed: {str(e)}")
 
