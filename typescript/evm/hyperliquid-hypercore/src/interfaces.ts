@@ -9,18 +9,42 @@ export interface FordefiApiConfig {
     pushMode: "auto" | "manual";
 }
 
+export type TransferMarket = "spot" | "perps";
+export type AccountRef = "master" | `0x${string}`;   // "master" = the Fordefi vault
+
+/**
+ * Structured config for the "subAccountTransfer" action.
+ *
+ * The Fordefi vault is always the signer (the master account). A `from`/`to` pair
+ * — each either the literal "master" or a sub-account address — expresses the transfer,
+ * and the router picks the right SDK call:
+ *   - master → sub : isDeposit: true
+ *   - sub → master : isDeposit: false
+ *
+ * Exactly one of `from`/`to` must be "master" (Hyperliquid has no native sub→sub call;
+ * move between two sub-accounts with two transfers: sub → master, then master → sub).
+ */
+export interface SubAccountTransferConfig {
+    market: TransferMarket;
+    from: AccountRef;      // "master" or a sub-account address owned by the vault
+    to: AccountRef;        // "master" or a sub-account address owned by the vault
+    amount: string;
+    token?: string;        // required when market === "spot" (format "TOKEN:address")
+}
+
 export interface HyperliquidConfig {
     action: string
     isTestnet: boolean,
     destination?: `0x${string}`,
     amount?: string,
-    token?: string,               // Required for "spotTransfer" and Spot "subAccountTransfer" (format: "TOKEN:address")
+    token?: string,               // Required for "spotTransfer" (format: "TOKEN:address")
     isDeposit?: boolean,          // Required for "vault_transfer" action
-    subAccountDeposit?: boolean,  // Required for "subAccountTransfer": true = main → subaccount, false = subaccount → main
+    subAccountDeposit?: boolean,  // Deprecated for "subAccountTransfer" (use `transfer` instead)
     hyperliquid_vault_address?: string
-    toSpot?: boolean              // "spotTransfer": true = Perps→Spot, false = Spot→Perps. "subAccountTransfer": true = Spot balance, false = Perps balance
+    toSpot?: boolean              // "spotTransfer": true = Perps→Spot, false = Spot→Perps
     usdcAddress?: string,         // Arbitrum USDC contract address (deposit action)
     bridgeAddress?: string,       // Hyperliquid bridge contract address (deposit action)
+    transfer?: SubAccountTransferConfig,  // Required for "subAccountTransfer" action
 }
 
 export interface AgentWalletConfig {

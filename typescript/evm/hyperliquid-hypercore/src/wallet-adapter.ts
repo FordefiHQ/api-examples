@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { TypedDataDomain, TypedDataField } from 'ethers';
 import { FordefiApiConfig, fordefiConfig } from './config';
 import { buildTypedMessagePayload } from './api_request/buildPayload';
@@ -46,8 +47,55 @@ export function findSignatureOnlyError(error: unknown): SignatureOnlyError | nul
 export class FordefiWalletAdapter {
     private config: FordefiApiConfig;
 
+    /** Terminal states that mean the signing transaction will never produce a signature. */
+    static readonly FAILURE_STATES = ['failed', 'aborted', 'rejected', 'error'];
+
     constructor(config: FordefiApiConfig) {
         this.config = config;
+    }
+
+    /**
+     * Poll GET /api/v1/transactions/{id} until a signature is attached.
+     *
+     * `create-and-wait` occasionally returns once the tx is "approved" but before MPC signing
+     * has finished. This polls the same transaction until `signatures` is populated, it reaches
+     * a terminal failure state, or the attempt budget is exhausted.
+     */
+    private async pollForSignature(txId: string): Promise<string> {
+        const pollEndpoint = `/api/v1/transactions/${txId}`;
+        const maxAttempts = 15;
+
+        for (let i = 0; i < maxAttempts; i++) {
+            await new Promise((r) => setTimeout(r, 2000));
+
+            const pollTimestamp = new Date().getTime();
+            const pollPayload = `${pollEndpoint}|${pollTimestamp}|`;
+            const pollSignature = await signWithApiUserPrivateKey(this.config.privateKeyPath, pollPayload);
+
+            const pollResponse = await axios.get(`https://api.fordefi.com${pollEndpoint}`, {
+                headers: {
+                    Authorization: `Bearer ${this.config.accessToken}`,
+                    'x-signature': pollSignature,
+                    'x-timestamp': pollTimestamp,
+                },
+            });
+
+            const data = pollResponse.data;
+            const state = data.state?.toLowerCase();
+            console.log(`  Polling for signature (attempt ${i + 1}): state = ${data.state}`);
+
+            if (data.signatures && data.signatures.length > 0) {
+                return data.signatures[0];
+            }
+            if (FordefiWalletAdapter.FAILURE_STATES.includes(state)) {
+                throw new Error(`Signing transaction ${txId} failed with state: ${data.state}`);
+            }
+        }
+
+        throw new Error(
+            `No signature for transaction ${txId} after ${maxAttempts} polls. ` +
+            `Track status: GET /api/v1/transactions/${txId}`
+        );
     }
 
     async getAddress(): Promise<string> {
@@ -139,12 +187,18 @@ export class FordefiWalletAdapter {
             );
         }
 
-        // Extract the signature from the response
-        if (!response.data.signatures || response.data.signatures.length === 0) {
-            throw new Error(`No signatures returned from Fordefi API. Response state: ${response.data.state}`);
+        // Extract the signature. `create-and-wait` can return after the tx is "approved" but
+        // before the signature is attached, so fall back to polling rather than failing outright.
+        let signatureB64: string | undefined = response.data.signatures?.[0];
+        if (!signatureB64) {
+            const state = response.data.state?.toLowerCase();
+            if (FordefiWalletAdapter.FAILURE_STATES.includes(state)) {
+                throw new Error(`Signing request failed with state: ${response.data.state}`);
+            }
+            console.log(`No signature yet (state: ${response.data.state}); polling transaction ${response.data.id}...`);
+            signatureB64 = await this.pollForSignature(response.data.id);
         }
 
-        const signatureB64 = response.data.signatures[0];
         const signatureBytes = Buffer.from(signatureB64, 'base64');
         const signatureHex = '0x' + signatureBytes.toString('hex');
 
