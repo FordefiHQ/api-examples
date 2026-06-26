@@ -15,6 +15,13 @@ function splitSignatures(signature: string): { r: string; s: string; v: number }
 };
 
 export async function deposit(hyperliquidConfig: HyperliquidConfig) {
+    if (hyperliquidConfig.isTestnet) {
+        throw new Error(
+            "deposit is mainnet-only in this example (uses Arbitrum-mainnet bridge/USDC). " +
+            "For testnet, fund your account via the Hyperliquid testnet faucet instead."
+        );
+    }
+
     const usdcAddress = hyperliquidConfig.usdcAddress ?? "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
     const hyperliquidBridgeAddress = hyperliquidConfig.bridgeAddress ?? "0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7";
 

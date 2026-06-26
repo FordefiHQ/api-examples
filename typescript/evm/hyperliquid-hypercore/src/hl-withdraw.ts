@@ -9,7 +9,7 @@ export async function withdraw3(hyperliquidConfig: HyperliquidConfig) {
     try {
         const wallet = new FordefiWalletAdapter(fordefiConfig);
 
-        const transport = new hl.HttpTransport();
+        const transport = new hl.HttpTransport({ isTestnet: hyperliquidConfig.isTestnet });
 
         const exchClient = new hl.ExchangeClient({
             wallet,

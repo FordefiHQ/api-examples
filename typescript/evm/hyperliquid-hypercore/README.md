@@ -30,6 +30,7 @@ Use chainId 1337 for:
 - **withdraw** - Withdraw from Hyperliquid to Arbitrum
 - **sendUsd** - Send USDC within Hyperliquid
 - **spotTransfer** - Transfer tokens between Perps and Spot DEX
+- **subAccountTransfer** - Transfer between the master account and one of its sub-accounts
 
 ### chainId: 42161 (Required for deposit only)
 
@@ -38,6 +39,33 @@ Use chainId 42161 (Arbitrum) for:
 - **deposit** - Deposit USDC from Arbitrum to Hyperliquid (on-chain transaction)
 
 **Recommendation**: Keep chainId set to 1337 for most operations, and switch to 42161 only when performing deposits.
+
+## Testnet mode
+
+To run against Hyperliquid **testnet**, set `isTestnet: true` in `hyperliquidConfig` (`src/config.ts`):
+
+```typescript
+export const hyperliquidConfig: HyperliquidConfig = {
+    action: "subAccountTransfer",
+    isTestnet: true,   // routes all L1 actions to the Hyperliquid testnet API
+    // ...
+};
+```
+
+This routes every L1 action (`withdraw`, `sendUsd`, `spotTransfer`, `subAccountTransfer`,
+`vault_transfer`, `approve_agent`, `revoke_agent`, `placeOrder`) to the Hyperliquid testnet host.
+
+Notes:
+
+- **Signing is unchanged** — testnet L1 actions still sign with chainId `1337` (`0x539`), so no extra
+  Fordefi enablement is needed beyond what mainnet already requires.
+- **Funding**: use the [Hyperliquid testnet faucet](https://app.hyperliquid-testnet.xyz) to get mock
+  USDC. You do **not** bridge from Arbitrum — the `deposit` action is **disabled on testnet** (it uses
+  Arbitrum-mainnet bridge/USDC addresses) and will throw a clear error if `isTestnet: true`.
+- **Sub-accounts**: create the sub-account in the testnet UI first, then use its address as
+  `transfer.to`. (This example has no `createSubAccount` action.)
+- For a **spot** `subAccountTransfer` on testnet, the `token` id differs from mainnet — use the
+  testnet token id. For **perps** transfers no `token` is needed.
 
 ## Prerequisites
 
@@ -215,6 +243,49 @@ npm run action
 - Set `toSpot: true` to transfer from Perps to Spot DEX
 - Set `toSpot: false` to transfer from Spot to Perps DEX
 
+### Sub-account Transfers
+
+To move funds between your master account (the Fordefi vault) and one of its sub-accounts, use the `subAccountTransfer` action. You only describe *what* to move and *which* sub-account is involved; the integration routes to the correct Hyperliquid SDK call.
+
+1. Change the action to `"subAccountTransfer"` and configure `transfer` in `src/config.ts`:
+
+```typescript
+export const hyperliquidConfig: HyperliquidConfig = {
+    action: "subAccountTransfer",
+    isTestnet: false,
+    transfer: {
+        market: "perps",                    // "spot" | "perps"
+        from: "master",                     // "master" or "0x<subaccount>"
+        to: "0x<subaccount>",               // "master" or "0x<subaccount>"
+        amount: "5",
+        // token: "USDC:0x6d1e7cde53ba9467b783cb7c530ce054", // required when market: "spot"
+    },
+};
+```
+
+2. Run:
+
+```bash
+npm run action
+```
+
+The sub-account address can be set inline or via the `SUBACCOUNT_ADDRESS` env var (used as `transfer.to`):
+
+```bash
+ACTION=subAccountTransfer SUBACCOUNT_ADDRESS=0x<your-subaccount> npm run action
+```
+
+**How `from`/`to` routes** (the Fordefi vault is always the signer, i.e. the *master* account):
+
+| `from` | `to` | What happens |
+|--------|------|--------------|
+| `"master"` | `"0xSUB"` | master → sub-account (`isDeposit: true`) |
+| `"0xSUB"` | `"master"` | sub-account → master (`isDeposit: false`) |
+
+**Notes**:
+- `market: "perps"` moves USDC on the Perps DEX; `market: "spot"` moves a spot token and **requires** the `token` field (format `TOKEN_NAME:TOKEN_ADDRESS`).
+- Exactly one of `from`/`to` must be `"master"`. Hyperliquid has no native sub-account → sub-account call (a single action only names one sub-account plus a direction). To move between two sub-accounts, run two transfers: sub → master, then master → sub.
+
 ### Approve Agent Wallet (Optional)
 
 > **Note**: Agent wallets are **not required** for this Fordefi integration. Since Fordefi now supports signing with chainId 1337, all Hyperliquid actions can be performed directly with your Fordefi vault. The agent wallet functionality is documented here for advanced use cases where you may want to delegate signing to a separate key.
@@ -351,6 +422,7 @@ Simply change the `action` field in `src/config.ts` and run `npm run action`:
 | `withdraw` | Withdraw from Hyperliquid | `action: "withdraw", destination: "0x...", amount: "1"` |
 | `sendUsd` | Send USDC within Hyperliquid | `action: "sendUsd", destination: "0x...", amount: "1"` |
 | `spotTransfer` | Transfer between Perps and Spot | `action: "spotTransfer", token: "USDC:0x...", toSpot: true` |
+| `subAccountTransfer` | Transfer between master and a sub-account | `action: "subAccountTransfer"` + configure `transfer` |
 | `approve_agent` | Approve agent wallet | `action: "approve_agent", agentName: "my_agent"` |
 | `revoke_agent` | Revoke agent wallet | `action: "revoke_agent", agentName: "my_agent"` |
 | `vault_transfer` | Vault deposit/withdrawal | `action: "vault_transfer", isDeposit: true, amount: "1"` |

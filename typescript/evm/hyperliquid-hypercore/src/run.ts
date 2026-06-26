@@ -2,7 +2,7 @@ import { approveAgentWallet, revokeAgentWallet } from "./hl-approve-or-revoke-ag
 import { hyperliquidConfig, agentWalletConfig, orderConfig } from "./config";
 import { vault_transfer_agent } from "./hl-vault-transfer";
 import { spotTransfer } from "./hl-send-to-spot";
-import { sendToSubAccount } from "./hl-send-to-subaccount";
+import { subAccountTransferRouter } from "./hl-subaccount-transfer";
 import { place_perps_order } from './hl-place-perps-order';
 import { withdraw3 } from "./hl-withdraw";
 import { usdSend } from "./hl-send-usdc";
@@ -23,7 +23,7 @@ async function main() {
         } else if (hyperliquidConfig.action == "spotTransfer") {
             await spotTransfer(hyperliquidConfig)
         } else if (hyperliquidConfig.action == "subAccountTransfer") {
-            await sendToSubAccount(hyperliquidConfig)
+            await subAccountTransferRouter(hyperliquidConfig)
         } else if (hyperliquidConfig.action == "placeOrder") {
             await place_perps_order(hyperliquidConfig, orderConfig)
         }
