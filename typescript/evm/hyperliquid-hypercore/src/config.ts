@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import { OrderParameters } from "@nktkas/hyperliquid";
-import { FordefiApiConfig, HyperliquidConfig, AgentWalletConfig } from './interfaces';
+import { FordefiApiConfig, HyperliquidConfig, AgentWalletConfig, Action } from './interfaces';
 
 dotenv.config()
 
@@ -53,7 +53,7 @@ export const agentWalletConfig: AgentWalletConfig = {
 };
 
 export const hyperliquidConfig: HyperliquidConfig = {
-    action: process.env.ACTION!, // "deposit" | "withdraw" | "sendUsd" | "vault_transfer" | "approve_agent" | "revoke_agent" | "spotTransfer" | "subAccountTransfer" | "placeOrder"
+    action: process.env.ACTION as Action,
     isTestnet: true,  // flip to true to target Hyperliquid testnet (all L1 actions; deposit is mainnet-only)
     destination: "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
     amount: "5",

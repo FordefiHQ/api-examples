@@ -1,16 +1,6 @@
-export interface FordefiApiConfig {
-    vaultId: string;
-    address: string;
-    accessToken: string;
-    privateKeyPath: string;
-    pathEndpoint: string;
-    rpcUrl: string;
-    chainId: number;
-    pushMode: "auto" | "manual";
-}
-
 export type TransferMarket = "spot" | "perps";
 export type AccountRef = "master" | `0x${string}`;   // "master" = the Fordefi vault
+export type Action = "deposit" | "withdraw" | "sendUsd" | "vault_transfer" | "approve_agent" | "revoke_agent" | "spotTransfer" | "subAccountTransfer" | "placeOrder"
 
 /**
  * Structured config for the "subAccountTransfer" action.
@@ -33,7 +23,7 @@ export interface SubAccountTransferConfig {
 }
 
 export interface HyperliquidConfig {
-    action: string
+    action: Action
     isTestnet: boolean,
     destination?: `0x${string}`,
     amount?: string,
@@ -51,4 +41,15 @@ export interface AgentWalletConfig {
     agentAddress: string,
     agentName: string,
     validUntil?: string // only required for a "approve_agent" action, MAX is 180 days in UNIX time
+}
+
+export interface FordefiApiConfig {
+    vaultId: string;
+    address: string;
+    accessToken: string;
+    privateKeyPath: string;
+    pathEndpoint: string;
+    rpcUrl: string;
+    chainId: number;
+    pushMode: "auto" | "manual";
 }
