@@ -62,10 +62,14 @@ Code examples for using the Fordefi API in Python and TypeScript.
     * Programmatically stake, unstake and withdraw SOL from any validator
   * With `gill`:
     * SPL token transfers
+* On Stellar:
+  * Programmatic trustlines and claimable balances management, raw transactions and message signing
+* On Starknet:
+  * Programmatic contract calls
 * On Sui:
   * Programmatic token swaps and pool creation using the Bluefin API
 * On Hyperliquid L1 (HyperCore):
-  * Programmatic deposits, withdrawals, vault deposits and USDC transfers
+  * Programmatic deposits, withdrawals, vault deposits, transfers, orders and USDC transfers
 * On Cosmos:
   * Programmatic smart contract deployments on Archway
 * On Initia:
