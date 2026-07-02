@@ -21,7 +21,7 @@ Common script runners: `tsx` (solana-kit, gill examples) and `ts-node` (web3.js,
 ## SDK Organization
 
 - **`web3.js/`** — Legacy `@solana/web3.js` v1 examples (Jupiter, Raydium, Marinade, Exponent, batch transfers)
-- **`solana-kit/`** — Modern `@solana/kit` v2+ examples (SPL transfers, Orca DEX, batch transfers, staking, Anchor program deployment, Fragmetric)
+- **`solana-kit/`** — Modern `@solana/kit` v2+ examples (SPL transfers, Orca DEX, batch transfers, staking, Anchor program deployment, Fragmetric, fixed delegations)
 - **`gill/`** — `gill` SDK examples (SPL transfers, sponsored transactions, gas station)
 - **`dev/`** — Development/experimental scripts (gas station, Jito integration)
 

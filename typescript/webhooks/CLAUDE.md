@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Fordefi webhook handler examples — two Express.js (v5) servers in TypeScript that receive, verify, and respond to webhook events:
 
 - **`webhooks_fordefi.ts`** — Receives Fordefi transaction events, verifies `X-Signature` header using ECDSA P-256. Read-only (no API calls).
+- **`webhooks_audit_logs.ts`** — Audit-log security monitor. Receives Fordefi audit-log events on `POST /`, verifies `X-Signature`, and flags sensitive categories (policy, user_management, authentication, etc. — see `SENSITIVE_CATEGORIES`) as alerts logged to `live_logs/audit_alerts/`; other events go to `live_logs/audit/`. Admin routes: `GET /audit-logs` proxies `GET /api/v1/audit-log` (supports `page`, `size`, repeatable `category`, `created_after`, `created_before`), and `POST /replay/:recordId` re-delivers a record via `POST /api/v1/webhooks/trigger/audit-log/{id}`. Requires `FORDEFI_API_USER_TOKEN` (ADMIN or VIEWER role for the audit-log API).
 - **`webhooks_hypernative.ts`** — Receives Hypernative alerts on two routes:
   - `/hypernative` (webhook actions) — verifies signature, triggers Fordefi transaction signing via API
   - `/hypernative/risk-insights` — verifies signature (different key), extracts victim contract address from alert details, executes emergency `remove_liquidity` via Fordefi web3 provider
@@ -17,6 +18,7 @@ Fordefi webhook handler examples — two Express.js (v5) servers in TypeScript t
 ```bash
 npm install              # install dependencies
 npm run fordefi_server   # start Fordefi webhook server (npx tsx webhooks_fordefi.ts)
+npm run audit_logs_server   # start audit-log security monitor (npx tsx webhooks_audit_logs.ts)
 npm run hypernative_server  # start Hypernative webhook server (npx tsx webhooks_hypernative.ts)
 npm run dev              # dev mode with nodemon (hypernative server)
 npm run build            # tsc compile
