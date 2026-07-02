@@ -72,6 +72,24 @@ Then configure your Fordefi webhook to use the ngrok URL.
 4. Save the webhook configuration
 5. Test the webhook
 
+## Audit-Log Security Monitor (`audit_logs_webhooks.py`)
+
+A second server that monitors your organization's [audit log](https://docs.fordefi.com/api/openapi/audit-log) via webhooks. It receives audit-log events, verifies their signature, and flags security-sensitive categories (policy changes, user management, authentication, backups, etc.) as alerts. It also exposes admin routes for browsing the audit log and re-delivering records through the webhook pipeline.
+
+Routes:
+
+- `POST /` — webhook receiver; verifies the `X-Signature` header, then classifies the audit record by `category`. Sensitive events are printed as 🚨 alerts and appended to `live-events/audit_alerts.json`; everything else goes to `live-events/audit_events.json`. Edit `SENSITIVE_CATEGORIES` in the file to tune what counts as an alert.
+- `GET /audit-logs` — lists audit-log records via [`GET /api/v1/audit-log`](https://docs.fordefi.com/api/openapi/audit-log/list_audit_log_records_api_v1_audit_log_get). Supports `page`, `size`, `category` (repeatable), `created_after`, and `created_before` query parameters.
+- `POST /replay/{record_id}` — re-delivers a specific audit-log record to your configured webhooks via [`POST /api/v1/webhooks/trigger/audit-log/{id}`](https://docs.fordefi.com/api/openapi/webhooks/trigger_audit_log_webhook_api_v1_webhooks_trigger_audit_log__id__post). Useful for testing your pipeline end-to-end or re-processing an event your server missed.
+- `GET /health` — liveness check.
+
+Start it with:
+```bash
+uvicorn audit_logs_webhooks:app --host 0.0.0.0 --port 8080 --reload
+```
+
+When configuring the webhook in the Fordefi console (Settings > Webhooks), select **Audit logs** as the trigger type and point it at your server's public URL (e.g., via ngrok). To test the full loop, fetch a record ID from `GET /audit-logs`, then `POST /replay/{record_id}` — the replayed event will arrive back at `POST /` and be classified.
+
 ## Webhook delivery timeout (how fast your server must respond)
 
 **Fordefi gives your endpoint ~5 seconds to return a `2xx` response.** If your server

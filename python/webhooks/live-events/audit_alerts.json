@@ -1,0 +1,85 @@
+[
+  {
+    "timestamp": "2026-07-02T19:50:50.892065+00:00",
+    "event": {
+      "webhook_id": "6b2a6f2b-2c2f-4c6b-9e1b-6d8f6a9b9c9d",
+      "created_at": "2026-07-02T19:50:50.709834Z",
+      "event_id": "6b2a6f2b-2c2f-4c6b-9e1b-6d8f6a9b9c9d",
+      "attempt": 1,
+      "sent_at": "2026-07-02T19:50:50.709834Z",
+      "event": {
+        "id": "6b2a6f2b-2c2f-4c6b-9e1b-6d8f6a9b9c9d",
+        "timestamp": "2026-07-02T19:50:50.709888Z",
+        "request_id": "6b2a6f2b-2c2f-4c6b-9e1b-6d8f6a9b9c9d",
+        "category": "webhook",
+        "action": "Create webhook",
+        "created_by": {
+          "id": "6b2a6f2b-2c2f-4c6b-9e1b-6d8f6a9b9c9d",
+          "user_type": "api_user",
+          "name": "Example API User",
+          "state": "active",
+          "role": "admin"
+        },
+        "description": "The user has created a webhook Example Webhook with url https://example.com/webhook",
+        "client_ip": "127.0.0.1"
+      },
+      "event_type": "audit_log"
+    }
+  },
+  {
+    "timestamp": "2026-07-02T19:51:25.868866+00:00",
+    "event": {
+      "webhook_id": "751d4bdf-d8e6-4d06-9cb2-b3a07a88d32e",
+      "created_at": "2026-07-02T19:51:25Z",
+      "event_id": "cfd69b01-6e4d-4751-a26a-b653e1ec92af",
+      "attempt": 1,
+      "sent_at": "2026-07-02T19:51:25.692784Z",
+      "event": {
+        "id": "3fb80417-fa7b-4d18-9b94-7fb67606abeb",
+        "timestamp": "2026-07-02T19:51:25.622000Z",
+        "request_id": "50893d0f-fff5-9c10-a0bd-05f6ace082f9",
+        "category": "webhook",
+        "action": "Create webhook",
+        "created_by": {
+          "id": "fb30b30f-eabe-4b7f-a0de-60e64eb1ffcc",
+          "user_type": "person",
+          "name": "Dan Jaheny",
+          "email": "danj@fordefi.com",
+          "state": "active",
+          "role": "admin"
+        },
+        "description": "The user has created a webhook Audit Logs with url https://24e6-2a01-cb00-b80-7100-3420-5dff-858-a94f.ngrok-free.app/",
+        "client_ip": "86.245.77.181"
+      },
+      "event_type": "audit_log"
+    }
+  },
+  {
+    "timestamp": "2026-07-02T19:51:54.803815+00:00",
+    "event": {
+      "webhook_id": "751d4bdf-d8e6-4d06-9cb2-b3a07a88d32e",
+      "created_at": "2026-07-02T19:51:54Z",
+      "event_id": "fbbd098a-78c0-40e7-b504-14dd266149cb",
+      "attempt": 1,
+      "sent_at": "2026-07-02T19:51:54.621626Z",
+      "event": {
+        "id": "84e37169-a095-4af0-aac5-49677024478d",
+        "timestamp": "2026-07-02T19:51:54.540000Z",
+        "request_id": "c58da08d-4a8c-989d-8b74-b2150ccd190b",
+        "category": "policy",
+        "action": "Create policy draft",
+        "created_by": {
+          "id": "fb30b30f-eabe-4b7f-a0de-60e64eb1ffcc",
+          "user_type": "person",
+          "name": "Dan Jaheny",
+          "email": "danj@fordefi.com",
+          "state": "active",
+          "role": "admin"
+        },
+        "description": "The user has created a new policy draft with id 9252aef4-7187-4b53-a190-8f17e6fea4c2",
+        "client_ip": "86.245.77.181"
+      },
+      "event_type": "audit_log"
+    }
+  }
+]

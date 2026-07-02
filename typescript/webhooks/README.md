@@ -1,6 +1,6 @@
 # Fordefi Webhook Handlers (TypeScript)
 
-Two TypeScript Express.js webhook servers:
+Three TypeScript Express.js webhook servers:
 
 ## Implementation Options
 
@@ -9,7 +9,13 @@ Two TypeScript Express.js webhook servers:
 - Verifies `X-Signature` header using ECDSA P-256
 - Read-only — no API calls, only requires Fordefi public key
 
-### 2. Hypernative Handler (`webhooks_hypernative.ts`)
+### 2. Audit-Log Security Monitor (`webhooks_audit_logs.ts`)
+- Receives Fordefi **audit-log** webhook events and verifies `X-Signature` using ECDSA P-256
+- Flags security-sensitive categories (policy changes, user management, authentication, backups, etc.) as 🚨 alerts, logged to `live_logs/audit_alerts/`; other events go to `live_logs/audit/`
+- Admin routes for browsing the [audit log](https://docs.fordefi.com/api/openapi/audit-log/list_audit_log_records_api_v1_audit_log_get) and [re-delivering a record](https://docs.fordefi.com/api/openapi/webhooks/trigger_audit_log_webhook_api_v1_webhooks_trigger_audit_log__id__post) through the webhook pipeline — useful for end-to-end testing or re-processing missed events
+- Edit `SENSITIVE_CATEGORIES` in the file to tune what counts as an alert
+
+### 3. Hypernative Handler (`webhooks_hypernative.ts`)
 - Dedicated to Hypernative events — handles two types:
   - **Webhook Actions** (`/hypernative`) — Hypernative sends a pre-created Fordefi transaction ID in the `fordefi-transaction-id` header. The server verifies the signature and triggers signing via the Fordefi API. Uses `keys/hypernative_public_key.pem`.
   - **Risk Insights** (`/hypernative/risk-insights`) — Hypernative sends a risk insight event with the signature embedded in the body. The server verifies it and responds by executing a contract call through Fordefi's web3 provider (configured in `fordefi-response/`). Uses `keys/hypernative_public_key_2.pem`.
@@ -23,6 +29,10 @@ Two TypeScript Express.js webhook servers:
 
 ### For `webhooks_fordefi.ts`:
 - **Fordefi Public Key** — [Download from webhook docs](https://docs.fordefi.com/developers/webhooks#validate-a-webhook)
+
+### For `webhooks_audit_logs.ts`:
+- **Fordefi Public Key** — [Download from webhook docs](https://docs.fordefi.com/developers/webhooks#validate-a-webhook)
+- **Fordefi API User Token** with **ADMIN or VIEWER role** (required by the audit-log API) — [Get your token here](https://docs.fordefi.com/developers/getting-started/create-an-api-user)
 
 ### For `webhooks_hypernative.ts`:
 - **Fordefi API User Token** — [Get your token here](https://docs.fordefi.com/developers/getting-started/create-an-api-user)
@@ -42,6 +52,15 @@ npm install
 ### `webhooks_fordefi.ts`
 
 Save the Fordefi public key to `keys/fordefi_public_key.pem` ([download here](https://docs.fordefi.com/developers/webhooks#validate-a-webhook)), or set it via the `FORDEFI_PUBLIC_KEY` env var.
+
+### `webhooks_audit_logs.ts`
+
+1. Save the Fordefi public key to `keys/fordefi_public_key.pem` (or set the `FORDEFI_PUBLIC_KEY` env var)
+2. Create a `.env` file:
+   ```env
+   FORDEFI_API_USER_TOKEN=your_fordefi_api_token_here
+   ```
+3. In the Fordefi console (Settings → Webhooks), configure a webhook with trigger type **Audit logs** pointing at your server's public URL
 
 ### `webhooks_hypernative.ts`
 
@@ -64,6 +83,9 @@ Save the Fordefi public key to `keys/fordefi_public_key.pem` ([download here](ht
 # Fordefi-only webhooks
 npm run fordefi_server
 
+# Audit-log security monitor
+npm run audit_logs_server
+
 # Hypernative webhooks
 npm run hypernative_server
 ```
@@ -76,6 +98,17 @@ npm run hypernative_server
 |--------|----------|-------------|
 | `GET` | `/health` | Health check |
 | `POST` | `/` | Fordefi webhook events |
+
+### `webhooks_audit_logs.ts`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/health` | Health check |
+| `POST` | `/` | Audit-log webhook events — verifies signature, classifies by category |
+| `GET` | `/audit-logs` | Lists audit-log records (params: `page`, `size`, `category` (repeatable), `created_after`, `created_before`) |
+| `POST` | `/replay/:recordId` | Re-delivers an audit-log record to configured webhooks |
+
+To test the full loop: fetch a record `id` from `GET /audit-logs`, then `POST /replay/:recordId` — the replayed event arrives back at `POST /` and gets classified.
 
 ### `webhooks_hypernative.ts`
 
@@ -170,6 +203,7 @@ The vault and chain are configured in `fordefi-response/config.ts`. The target c
 ```
 webhooks/
 ├── webhooks_fordefi.ts              # Fordefi-only webhook server
+├── webhooks_audit_logs.ts           # Audit-log security monitor (alerts + browse/replay routes)
 ├── webhooks_hypernative.ts          # Hypernative webhook server (actions + risk insights)
 ├── fordefi-response/                # Contract call response module
 │   ├── config.ts                    # Vault, contract, and chain configuration
@@ -192,6 +226,14 @@ webhooks/
 
 | Variable | Required | Description |
 |----------|----------|-------------|
+| `FORDEFI_PUBLIC_KEY` | No* | Fordefi public key PEM content (fallback to file) |
+| `PORT` | No | Server port (default: 8080) |
+
+### `webhooks_audit_logs.ts`
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `FORDEFI_API_USER_TOKEN` | Yes | Fordefi API access token (ADMIN or VIEWER role) |
 | `FORDEFI_PUBLIC_KEY` | No* | Fordefi public key PEM content (fallback to file) |
 | `PORT` | No | Server port (default: 8080) |
 
