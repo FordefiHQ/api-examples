@@ -27,7 +27,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
 * Exchange transfers
 * Setting up Fordefi Webhooks
 * Programatically signing Bitcoin PSBT with a Segwit or Taproot address
-* Custom Co-Signer example
+* Custom Co-Signer for augmenting Fordefi's Policy engine with custom rules
 * Signing EIP-712 typed messages and EIP-191 personal messages with an EVM Fordefi vault
 * Signing Solana Personal messages
 * Programmatically adding a contact address or a batch of contact addresses to your Fordefi organization's Address Book
@@ -60,6 +60,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
     * Programmatic SPL token batch transfers using a transaction planner and executor
     * Programmatically deploy an Anchor program using a transaction planner and executor
     * Programmatically stake, unstake and withdraw SOL from any validator
+    * Programmatic subscriptions
   * With `gill`:
     * SPL token transfers
 * On Stellar:

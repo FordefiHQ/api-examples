@@ -1,7 +1,10 @@
 import base64
 import hashlib
+import logging
 import ecdsa
 from ecdsa.util import sigdecode_der
+
+logger = logging.getLogger("cosigner.signature")
 
 
 class SignatureVerifier:
@@ -17,5 +20,5 @@ class SignatureVerifier:
                 sigdecode=sigdecode_der,
             )
         except Exception as error:
-            print(f"Signature verification failed: {error}")
+            logger.warning("Signature verification failed: %s", error)
             return False
