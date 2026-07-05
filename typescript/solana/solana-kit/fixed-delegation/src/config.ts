@@ -29,7 +29,7 @@ export const fordefiConfig: FordefiSolanaConfig = {
   accessToken: process.env.FORDEFI_API_TOKEN || "",
   delegatorVault: process.env.DELEGATOR_VAULT || "",
   delegatorAddress: process.env.DELEGATOR_ADDRESS || "",
-  delegateeVault: process.env.DELEGATEE_VAULT || "",
+  delegateeVault: process.env.DELEGATEE_VAULT || "", // only required for the transfer script
   delegateeAddress: process.env.DELEGATEE_ADDRESS || "",
   privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
   apiPathEndpoint: '/api/v1/transactions',

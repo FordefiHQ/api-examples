@@ -1,22 +1,7 @@
 import axios from 'axios';
 import * as web3 from '@solana/web3.js';
-import { FordefiConfig, SwapConfig } from './config';
+import { FordefiConfig, SwapConfig, JupiterOrderResponse, JupiterSwapResult} from './interfaces';
 
-export interface JupiterOrderResponse {
-    requestId: string;
-    transaction: string;
-    inAmount?: string;
-    outAmount?: string;
-    inputMint?: string;
-    outputMint?: string;
-}
-
-export interface JupiterSwapResult {
-    fordefiRequestBody: object;
-    requestId: string;
-}
-
-// Get order from Jupiter Ultra API
 async function getSwapOrder(fordefiConfig: FordefiConfig, swapConfig: SwapConfig): Promise<JupiterOrderResponse> {
     console.log("Input token", swapConfig.inputToken);
     console.log("Output token", swapConfig.outputToken);
@@ -37,7 +22,6 @@ async function getSwapOrder(fordefiConfig: FordefiConfig, swapConfig: SwapConfig
     return orderResponse.data;
 }
 
-// Execute signed transaction via Jupiter Ultra API
 export async function executeJupiterOrder(
     signedTransaction: string,
     requestId: string,

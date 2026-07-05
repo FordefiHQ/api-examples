@@ -18,7 +18,7 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "@solana/web3.js": "^1.98.0",
+    "@solana/web3.js": "^3.0.0-rc.2",
     "axios": "1.13.2",
     "base-64": "^1.0.0",
     "bn.js": "^5.2.1",

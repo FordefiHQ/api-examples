@@ -1,5 +1,5 @@
 import { VersionedTransaction, Connection, PublicKey } from '@solana/web3.js'
-import { ApiV3PoolInfoConcentratedItem, TickUtils, PoolUtils, ClmmKeys, TxVersion } from '@raydium-io/raydium-sdk-v2'
+import { ApiV3PoolInfoConcentratedItem, TickUtil, PoolUtils, ClmmKeys, TxVersion } from '@raydium-io/raydium-sdk-v2'
 import { FordefiSolanaConfig, RaydiumOpenPositionConfig } from '../raydium_open_position'
 import { isValidClmm } from '../utils/is_valid_cllm'
 import { getJitoTipAccount } from '../utils/get_jito_tip_account'
@@ -32,16 +32,20 @@ export async function openPositionWithRaydium(fordefiConfig: FordefiSolanaConfig
     const inputAmount = openPositionConfig.inputAmount
     const [startPrice, endPrice] = [openPositionConfig.startPrice, openPositionConfig.endPrice]
 
-    const { tick: lowerTick } = TickUtils.getPriceAndTick({
-      poolInfo,
+    const { tick: lowerTick } = TickUtil.getPriceAndTick({
       price: new Decimal(startPrice),
-      baseIn: true,
+      mintADecimals: poolInfo.mintA.decimals,
+      mintBDecimals: poolInfo.mintB.decimals,
+      zeroForOne: true, // was baseIn: true in SDK v0.1.x
+      tickSpacing: poolInfo.config.tickSpacing,
     })
 
-    const { tick: upperTick } = TickUtils.getPriceAndTick({
-      poolInfo,
+    const { tick: upperTick } = TickUtil.getPriceAndTick({
       price: new Decimal(endPrice),
-      baseIn: true,
+      mintADecimals: poolInfo.mintA.decimals,
+      mintBDecimals: poolInfo.mintB.decimals,
+      zeroForOne: true, // was baseIn: true in SDK v0.1.x
+      tickSpacing: poolInfo.config.tickSpacing,
     })
 
     const epochInfo = await raydium.fetchEpochInfo()
