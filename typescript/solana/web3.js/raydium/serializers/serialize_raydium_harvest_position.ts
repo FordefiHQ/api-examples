@@ -23,10 +23,14 @@ export async function harvestPositionWithRaydium(fordefiConfig: FordefiSolanaCon
     })) as ApiV3PoolInfoConcentratedItem[]
   
     const allPositions = nonZeroPosition.reduce(
-      (acc, cur) => ({
-        ...acc,
-        [cur.poolId.toBase58()]: acc[cur.poolId.toBase58()] ? acc[cur.poolId.toBase58()].concat(cur) : [cur],
-      }),
+      (acc, cur) => {
+        const key = cur.poolId.toBase58()
+        const existing = acc[key]
+        return {
+          ...acc,
+          [key]: existing ? existing.concat(cur) : [cur],
+        }
+      },
       {} as Record<string, ClmmPositionLayout[]>
     )
 
