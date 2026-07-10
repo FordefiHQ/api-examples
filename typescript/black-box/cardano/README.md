@@ -5,7 +5,7 @@ ADA transfers, stake delegation, and reward withdrawal using a Fordefi black-box
 ## Prerequisites
 
 - Node.js
-- A Fordefi black-box vault — [docs](https://docs.fordefi.com/api/latest/openapi/vaults/create_vault_api_v1_vaults_post)
+- A Fordefi black-box vault — [docs](https://docs.fordefi.com/developers/transaction-types/black-box-signing#black-box-vaults)
 - A running Fordefi API Signer — [docs](https://docs.fordefi.com/developers/getting-started/set-up-an-api-signer/api-signer-docker)
 - A [Blockfrost](https://blockfrost.io) project id (free tier is fine)
 - ADA balance on the derived address
