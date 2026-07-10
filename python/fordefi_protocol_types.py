@@ -68,6 +68,12 @@ class SolanaMessageType(Enum):
     PERSONAL_MESSAGE = "personal_message_type"
 
 class TronMessageType(Enum):
+    # Fordefi's Tron message signing takes an OPAQUE message to be signed (V1: hex;
+    # V2: plain text or base64). There is no structured typed-data input, so despite
+    # the "typed_message" name these are personal message signatures, NOT
+    # TIP-712 structured typed data (which needs domain/types/primaryType). V2 maps to
+    # TronWeb signMessageV2 (TIP-191-style plaintext signing).
+    PERSONAL_MESSAGE_V1 = "typed_message_type_v1"
     PERSONAL_MESSAGE_V2 = "typed_message_type_v2"
 
 class StarknetMessageType(Enum):

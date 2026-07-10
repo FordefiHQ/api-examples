@@ -1,0 +1,22 @@
+{
+  "name": "@fordefi/cardano-black-box",
+  "version": "1.0.0",
+  "description": "Cardano ADA transfers using a Fordefi black-box vault (eddsa_ed25519)",
+  "type": "commonjs",
+  "scripts": {
+    "derive": "npx tsx ./src/derive_cardano_address.ts",
+    "transfer": "npx tsx ./src/cardano-transfer-run.ts",
+    "delegate": "npx tsx ./src/cardano-delegate-run.ts",
+    "withdraw": "npx tsx ./src/cardano-withdraw-run.ts"
+  },
+  "dependencies": {
+    "@emurgo/cardano-serialization-lib-nodejs": "15.0.3",
+    "axios": "1.15.2",
+    "dotenv": "17.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.8.3"
+  }
+}

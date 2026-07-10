@@ -14,6 +14,8 @@ def construct_personal_message_request(vault_id: str, message: str, chain: str) 
         "sign_mode": SignMode.AUTO.value,
         "type": TransactionType.TRON_MESSAGE.value,
         "details": {
+            # "typed_message_type_v2" signs an opaque plaintext message (TronWeb
+            # signMessageV2), NOT TIP-712 structured typed data.
             "type": TronMessageType.PERSONAL_MESSAGE_V2.value,
             "raw_data": {
                 "format": "base64",
