@@ -1,6 +1,6 @@
 # Fordefi CoSigner
 
-A webhook-driven co-signing service that augments [Fordefi Policy](https://docs.fordefi.com/user-guide/manage-transaction-policies) rules with custom programmatic validation, then approves or aborts transactions through the Fordefi API.
+A webhook-driven co-signing service that augments [Fordefi Policy](https://docs.fordefi.com/user-guide/policies) rules with custom programmatic validation, then approves or aborts transactions through the Fordefi API.
 
 ## Why a CoSigner?
 
@@ -228,4 +228,3 @@ WantedBy=multi-user.target
 - [Fordefi Developer Documentation](https://docs.fordefi.com/developers/program-overview)
 - [Fordefi Transaction API](https://docs.fordefi.com/api/openapi/transactions)
 - [Fordefi Webhooks](https://docs.fordefi.com/developers/webhooks)
-- [FastAPI Documentation](https://fastapi.tiangolo.com/)

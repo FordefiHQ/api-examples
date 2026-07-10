@@ -5,7 +5,7 @@ DOT transfers on Polkadot Asset Hub using a Fordefi black-box vault (`key_type=e
 ## Prerequisites
 
 - Node.js
-- A Fordefi black-box vault — [docs](https://docs.fordefi.com/api/latest/openapi/vaults/create_vault_api_v1_vaults_post)
+- A Fordefi black-box vault — [docs](https://docs.fordefi.com/developers/transaction-types/black-box-signing#black-box-vaults)
 - A running Fordefi API Signer — [docs](https://docs.fordefi.com/developers/getting-started/set-up-an-api-signer/api-signer-docker)
 - DOT balance on **Asset Hub** (see Notes)
 - API User private key at `./secret/private.pem`
