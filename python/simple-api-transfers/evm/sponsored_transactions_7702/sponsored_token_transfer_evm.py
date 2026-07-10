@@ -52,9 +52,9 @@ async def build_sponsored_tx(evm_chain: str, vault_id: str, destination: str, va
 USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
 EVM_VAULT_ID = os.environ["EVM_VAULT_ID"] # your upgraded smart account 
 FEE_PAYER_VAULT_ID = os.environ["FEE_PAYER_VAULT_ID_EVM"] # the Fordefi vault that will pay the fee
+destination = os.environ["DEFAULT_DESTINATION_ADDRESS_EVM"] # the beneficiary of the transfer
 evm_chain = "ethereum"
-path = "/api/v1/transactions"
-destination = "0xED8315fA2Ec4Dd0dA9870Bf8CD57eBf256A90772" # CHANGE
+path = "/api/v1/transactions"# CHANGE
 token_contract_address = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" # USDC on Ethereum
 value = str(100_000) # 0.1 USDC
 

@@ -55,7 +55,7 @@ path = "/api/v1/transactions" # CHANGE
 contract = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
 custom_note = "It's a wrap!" # Optional note
 value = str(1_000_000_000) # 0.00001 ETH (1 ETH = 0.000000000000000001 wei)
-hex_call_data = "0xd0e30db0"
+hex_call_data = "0xd0e30db00"
 
 
 def decode_signature(signature_b64, chain_id):

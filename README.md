@@ -85,6 +85,10 @@ Code examples for using the Fordefi API in Python and TypeScript.
   - [Programmatic transfer and staking using Black Box signatures](typescript/black-box/near)
 - On Avalanche P-Chain (Black Box):
   - [Transfer and staking AVAX using Black Box signatures](typescript/black-box/avalanche-p-chain)
+- On Cardano (Black Box):
+  - [ADA transfers, stake delegation, and reward withdrawal using Black Box signatures](typescript/black-box/cardano)
+- On Polkadot (Black Box):
+  - [DOT transfers on Asset Hub using Black Box signatures](typescript/black-box/polkadot)
 - On Stacks:
   - [Calling smart contracts](typescript/stacks/contract-call) with a Fordefi Stacks Vault
 - On Aptos:

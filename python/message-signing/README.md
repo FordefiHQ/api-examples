@@ -6,7 +6,7 @@ Sign messages across EVM, Solana, Tron, and Starknet blockchains using Fordefi V
 
 | Chain    | Scripts                                              | Message Types                        |
 |----------|------------------------------------------------------|--------------------------------------|
-| EVM      | `evm/sign_eip712.py`, `evm/sign_personal_message.py` | EIP-712 typed data, EIP-191 personal |
+| EVM      | `evm/sign_eip712.py`, `evm/sign_personal_message.py`, `evm/sign_aster_order.py` | EIP-712 typed data, EIP-191 personal, Aster (chainId 1666) order auth |
 | Solana   | `solana/sign_personal_message.py`                    | Personal message                     |
 | Tron     | `tron/sign_personal_message.py`                      | Personal message (v2)                |
 | Starknet | `starknet/sign_typed_message.py`                     | SNIP-12 typed data                   |
@@ -38,6 +38,7 @@ Sign messages across EVM, Solana, Tron, and Starknet blockchains using Fordefi V
    # EVM (required for EVM scripts)
    FORDEFI_EVM_VAULT_ID="your_evm_vault_id"
    EVM_CHAIN="evm_1"
+   # ASTER_SIGNER_ADDRESS="0x..."  # only for evm/sign_aster_order.py — the vault's 0x address, registered with Aster
 
    # Solana (required for Solana scripts)
    FORDEFI_SOLANA_VAULT_ID="your_solana_vault_id"
@@ -68,6 +69,7 @@ All scripts are run from the `message-signing/` directory:
 ```bash
 uv run python evm/sign_eip712.py
 uv run python evm/sign_personal_message.py
+uv run python evm/sign_aster_order.py   # Aster (chainId 1666) order auth signature; requires ASTER_SIGNER_ADDRESS
 ```
 
 ### Solana
@@ -98,6 +100,7 @@ message-signing/
 ├── evm/                    # EVM message signing
 │   ├── sign_eip712.py      # EIP-712 typed data signing
 │   ├── sign_personal_message.py  # EIP-191 personal message signing
+│   ├── sign_aster_order.py       # Aster (chainId 1666) futures order auth signing
 │   └── construct_request.py     # EVM request builders
 ├── solana/                 # Solana message signing
 │   ├── sign_personal_message.py

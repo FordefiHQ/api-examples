@@ -3,7 +3,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 from fordefi_protocol_types import TransactionType, SignerType, EvmMessageType, SignMode, TransactionState
 
-def construct_eip712_message_request(vault_id: str, data: str, chain: str) -> dict:
+def construct_eip712_message_request(vault_id: str, data: str, chain: str, note: str = "Typed Data message, permit 1inch to spend USDC") -> dict:
     print(f'Preparing transaction from Vault {vault_id}')
     request_json = {
         "signer_type": SignerType.API_SIGNER.value,
@@ -15,7 +15,7 @@ def construct_eip712_message_request(vault_id: str, data: str, chain: str) -> di
             "chain": chain
         },
         "vault_id": vault_id,
-        "note": "Typed Data message, permit 1inch to spend USDC",
+        "note": note,
         "wait_for_state": TransactionState.SIGNED.value,
         "timeout": 45,
      }
