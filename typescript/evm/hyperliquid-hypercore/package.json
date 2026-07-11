@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "action": "tsx src/run.ts"
+    "action": "tsx src/run.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/**/*.test.ts",
+    "check": "npm run typecheck && npm test"
   },
   "keywords": [],
   "author": "",
