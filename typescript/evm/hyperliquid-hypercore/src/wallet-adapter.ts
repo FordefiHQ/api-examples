@@ -1,101 +1,31 @@
-import axios from 'axios';
-import { TypedDataDomain, TypedDataField } from 'ethers';
-import { FordefiApiConfig, fordefiConfig } from './config';
-import { buildTypedMessagePayload } from './api_request/buildPayload';
-import { signWithApiUserPrivateKey } from './api_request/signer';
-import { createAndSignTx } from './api_request/pushToApi';
+import type { TypedDataDomain, TypedDataField } from "ethers";
+import type { FordefiApiConfig } from "./interfaces";
+import { buildTypedMessagePayload } from "./api_request/buildPayload";
+import { FordefiApiClient } from "./api_request/fordefi-client";
 
-/**
- * Thrown when pushMode is "manual" — the signature was obtained but the SDK
- * should not broadcast to Hyperliquid. Callers catch this to retrieve the
- * signature without submitting.
- */
 export class SignatureOnlyError extends Error {
-    signature: string;
-    constructor(signature: string) {
-        super('Signature obtained (manual mode — not broadcasting)');
-        this.name = 'SignatureOnlyError';
-        this.signature = signature;
+    constructor(readonly signature: string) {
+        super("Signature obtained (manual mode — not broadcasting)");
+        this.name = "SignatureOnlyError";
     }
 }
 
-/** Walk the error cause chain to find a SignatureOnlyError (the SDK wraps it). */
 export function findSignatureOnlyError(error: unknown): SignatureOnlyError | null {
     let current: unknown = error;
     while (current) {
         if (current instanceof SignatureOnlyError) return current;
-        current = (current as any)?.cause;
+        current = typeof current === "object" && current !== null && "cause" in current
+            ? (current as { cause?: unknown }).cause
+            : undefined;
     }
     return null;
 }
 
-/**
- * Custom wallet adapter for Fordefi integration with Hyperliquid.
- *
- * Instead of wrapping an ethers.js signer, this adapter calls the Fordefi API
- * directly for EIP-712 typed data signing. This gives full control over payload
- * fields like push_mode, and allows extracting raw signatures.
- *
- * CHAINID REQUIREMENTS:
- *
- * chainId 1337 - Works for ALL actions EXCEPT deposit:
- *   - vault_transfer, approve_agent, revoke_agent
- *   - withdraw, sendUsd, spotTransfer, placeOrder
- *
- * chainId 42161 - REQUIRED for deposit only (Arbitrum on-chain transaction)
- */
 export class FordefiWalletAdapter {
-    private config: FordefiApiConfig;
+    private readonly apiClient: FordefiApiClient;
 
-    /** Terminal states that mean the signing transaction will never produce a signature. */
-    static readonly FAILURE_STATES = ['failed', 'aborted', 'rejected', 'error'];
-
-    constructor(config: FordefiApiConfig) {
-        this.config = config;
-    }
-
-    /**
-     * Poll GET /api/v1/transactions/{id} until a signature is attached.
-     *
-     * `create-and-wait` occasionally returns once the tx is "approved" but before MPC signing
-     * has finished. This polls the same transaction until `signatures` is populated, it reaches
-     * a terminal failure state, or the attempt budget is exhausted.
-     */
-    private async pollForSignature(txId: string): Promise<string> {
-        const pollEndpoint = `/api/v1/transactions/${txId}`;
-        const maxAttempts = 15;
-
-        for (let i = 0; i < maxAttempts; i++) {
-            await new Promise((r) => setTimeout(r, 2000));
-
-            const pollTimestamp = new Date().getTime();
-            const pollPayload = `${pollEndpoint}|${pollTimestamp}|`;
-            const pollSignature = await signWithApiUserPrivateKey(this.config.privateKeyPath, pollPayload);
-
-            const pollResponse = await axios.get(`https://api.fordefi.com${pollEndpoint}`, {
-                headers: {
-                    Authorization: `Bearer ${this.config.accessToken}`,
-                    'x-signature': pollSignature,
-                    'x-timestamp': pollTimestamp,
-                },
-            });
-
-            const data = pollResponse.data;
-            const state = data.state?.toLowerCase();
-            console.log(`  Polling for signature (attempt ${i + 1}): state = ${data.state}`);
-
-            if (data.signatures && data.signatures.length > 0) {
-                return data.signatures[0];
-            }
-            if (FordefiWalletAdapter.FAILURE_STATES.includes(state)) {
-                throw new Error(`Signing transaction ${txId} failed with state: ${data.state}`);
-            }
-        }
-
-        throw new Error(
-            `No signature for transaction ${txId} after ${maxAttempts} polls. ` +
-            `Track status: GET /api/v1/transactions/${txId}`
-        );
+    constructor(private readonly config: FordefiApiConfig, apiClient?: FordefiApiClient) {
+        this.apiClient = apiClient ?? new FordefiApiClient(config.accessToken, config.privateKeyPath);
     }
 
     async getAddress(): Promise<string> {
@@ -106,107 +36,36 @@ export class FordefiWalletAdapter {
         return String(this.config.chainId);
     }
 
-    /**
-     * Sign EIP-712 typed data via the Fordefi API.
-     *
-     * Overrides the domain chainId with the configured value (1337 for most HL actions),
-     * constructs the full EIP-712 JSON, sends it to Fordefi for MPC signing,
-     * and returns the raw signature.
-     */
     async signTypedData(
         domain: TypedDataDomain,
-        types: Record<string, Array<TypedDataField>>,
-        value: Record<string, any>
+        types: Record<string, TypedDataField[]>,
+        value: Record<string, unknown>,
     ): Promise<string> {
-        console.log("Signing with domain:", JSON.stringify(domain, null, 2));
-        console.log("Types:", JSON.stringify(types, null, 2));
-        console.log("Value:", JSON.stringify(value, null, 2));
+        const modifiedDomain = { ...domain, chainId: this.config.chainId };
+        const domainFields: TypedDataField[] = [];
+        if (modifiedDomain.name !== undefined) domainFields.push({ name: "name", type: "string" });
+        if (modifiedDomain.version !== undefined) domainFields.push({ name: "version", type: "string" });
+        if (modifiedDomain.chainId !== undefined) domainFields.push({ name: "chainId", type: "uint256" });
+        if (modifiedDomain.verifyingContract !== undefined) domainFields.push({ name: "verifyingContract", type: "address" });
+        if (modifiedDomain.salt !== undefined) domainFields.push({ name: "salt", type: "bytes32" });
 
-        // Override chainId with the configured value
-        const modifiedDomain = {
-            ...domain,
-            chainId: this.config.chainId,
-        };
+        const primaryType = Object.keys(types).find((key) => key !== "EIP712Domain");
+        if (!primaryType) throw new Error("Typed data must contain a primary type");
 
-        console.log("Signing with chainId:", this.config.chainId);
-
-        // Build the EIP712Domain type array from the domain fields
-        const eip712DomainFields: TypedDataField[] = [];
-        if (modifiedDomain.name !== undefined) eip712DomainFields.push({ name: "name", type: "string" });
-        if (modifiedDomain.version !== undefined) eip712DomainFields.push({ name: "version", type: "string" });
-        if (modifiedDomain.chainId !== undefined) eip712DomainFields.push({ name: "chainId", type: "uint256" });
-        if (modifiedDomain.verifyingContract !== undefined) eip712DomainFields.push({ name: "verifyingContract", type: "address" });
-        if (modifiedDomain.salt !== undefined) eip712DomainFields.push({ name: "salt", type: "bytes32" });
-
-        // Determine primaryType (first key in types that isn't EIP712Domain)
-        const primaryType = Object.keys(types).find(k => k !== "EIP712Domain") ?? Object.keys(types)[0];
-
-        // Construct the full EIP-712 JSON structure
-        const eip712Json = {
-            types: {
-                EIP712Domain: eip712DomainFields,
-                ...types,
-            },
+        const typedData = {
+            types: { EIP712Domain: domainFields, ...types },
             domain: modifiedDomain,
             primaryType,
             message: value,
         };
+        const json = JSON.stringify(typedData, (_key, item) => typeof item === "bigint" ? item.toString() : item);
+        const rawData = `0x${Buffer.from(json, "utf8").toString("hex")}`;
+        const payload = buildTypedMessagePayload(this.config.vaultId, rawData, `evm_${this.config.chainId}`);
+        const transaction = await this.apiClient.createTransaction(this.config.pathEndpoint, payload);
+        const signatureBase64 = await this.apiClient.waitForSignature(transaction);
+        const signature = `0x${Buffer.from(signatureBase64, "base64").toString("hex")}`;
 
-        // Hex-encode the JSON (handle BigInt values)
-        const jsonStr = JSON.stringify(eip712Json, (_key, val) =>
-            typeof val === 'bigint' ? val.toString() : val
-        );
-        const rawData = '0x' + Buffer.from(jsonStr, 'utf-8').toString('hex');
-
-        // Build the Fordefi API payload
-        const chain = `evm_${this.config.chainId}`;
-        const requestJson = buildTypedMessagePayload(this.config.vaultId, rawData, chain);
-        const requestBody = JSON.stringify(requestJson);
-
-        // Sign the API request with the PEM private key
-        const timestamp = new Date().getTime();
-        const payload = `${this.config.pathEndpoint}|${timestamp}|${requestBody}`;
-        const apiSignature = await signWithApiUserPrivateKey(this.config.privateKeyPath, payload);
-
-        // POST to Fordefi API
-        console.log("Sending EIP-712 signing request to Fordefi API...");
-        const response = await createAndSignTx(
-            this.config.pathEndpoint,
-            this.config.accessToken,
-            apiSignature,
-            timestamp,
-            requestBody,
-        );
-
-        // Handle timeout / waiting-for-approval
-        if (response.data.has_timed_out && response.data.state === "waiting_for_approval") {
-            const txId = response.data.id;
-            throw new Error(
-                `Signing request timed out while waiting for approval. ` +
-                `Transaction ID: ${txId}. Track status: GET /api/v1/transactions/${txId}`
-            );
-        }
-
-        // Extract the signature. `create-and-wait` can return after the tx is "approved" but
-        // before the signature is attached, so fall back to polling rather than failing outright.
-        let signatureB64: string | undefined = response.data.signatures?.[0];
-        if (!signatureB64) {
-            const state = response.data.state?.toLowerCase();
-            if (FordefiWalletAdapter.FAILURE_STATES.includes(state)) {
-                throw new Error(`Signing request failed with state: ${response.data.state}`);
-            }
-            console.log(`No signature yet (state: ${response.data.state}); polling transaction ${response.data.id}...`);
-            signatureB64 = await this.pollForSignature(response.data.id);
-        }
-
-        const signatureBytes = Buffer.from(signatureB64, 'base64');
-        const signatureHex = '0x' + signatureBytes.toString('hex');
-
-        // In manual mode, abort before the SDK broadcasts to Hyperliquid
-        if (this.config.pushMode === 'manual') {
-            throw new SignatureOnlyError(signatureHex);
-        }
-
-        return signatureHex;
+        if (this.config.pushMode === "manual") throw new SignatureOnlyError(signature);
+        return signature;
     }
 }

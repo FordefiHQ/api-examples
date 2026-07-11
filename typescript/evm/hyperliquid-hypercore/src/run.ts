@@ -1,40 +1,33 @@
 import { approveAgentWallet, revokeAgentWallet } from "./hl-approve-or-revoke-agent";
-import { hyperliquidConfig, agentWalletConfig, orderConfig } from "./config";
-import { vault_transfer_agent } from "./hl-vault-transfer";
+import { agentWalletConfig, fordefiConfig, hyperliquidConfig, orderConfig } from "./config";
+import { vaultTransfer } from "./hl-vault-transfer";
 import { spotTransfer } from "./hl-send-to-spot";
-import { subAccountTransferRouter } from "./hl-subaccount-transfer";
-import { place_perps_order } from './hl-place-perps-order';
-import { withdraw3 } from "./hl-withdraw";
+import { subAccountTransfer } from "./hl-subaccount-transfer";
+import { placePerpsOrder } from './hl-place-perps-order';
+import { withdraw } from "./hl-withdraw";
 import { usdSend } from "./hl-send-usdc";
 import { deposit } from "./hl-deposit";
+import { dispatchAction, type ActionHandlers } from "./dispatcher";
 
-async function main() {
-    try {
-        if (hyperliquidConfig.action == "deposit"){
-            await deposit(hyperliquidConfig)
-        } else if (hyperliquidConfig.action == "withdraw"){
-            await withdraw3(hyperliquidConfig)
-        } else if (hyperliquidConfig.action == "vault_transfer"){
-            await vault_transfer_agent(hyperliquidConfig)
-        } else if (hyperliquidConfig.action == "approve_agent") {
-            await approveAgentWallet(hyperliquidConfig, agentWalletConfig)
-        } else if (hyperliquidConfig.action == "revoke_agent") {
-            await revokeAgentWallet(hyperliquidConfig, agentWalletConfig)
-        } else if (hyperliquidConfig.action == "spotTransfer") {
-            await spotTransfer(hyperliquidConfig)
-        } else if (hyperliquidConfig.action == "subAccountTransfer") {
-            await subAccountTransferRouter(hyperliquidConfig)
-        } else if (hyperliquidConfig.action == "placeOrder") {
-            await place_perps_order(hyperliquidConfig, orderConfig)
-        }
-        else {
-            await usdSend(hyperliquidConfig)
-        }
-    } catch (error) {
-        console.error("Oops, an error occured: ", error)
-    }
+const handlers: ActionHandlers = {
+    deposit,
+    withdraw,
+    sendUsd: usdSend,
+    vault_transfer: vaultTransfer,
+    approve_agent: (config) => approveAgentWallet(config, agentWalletConfig),
+    revoke_agent: (config) => revokeAgentWallet(config, agentWalletConfig),
+    spotTransfer,
+    subAccountTransfer,
+    placeOrder: (config) => placePerpsOrder(config, orderConfig),
+};
+
+export async function main(): Promise<void> {
+    const result = await dispatchAction(hyperliquidConfig, fordefiConfig.address, handlers);
+    if (result !== undefined) console.log("Action result:", result);
 }
 
-main().catch(error => {
-    console.error("Unhandled error:", error);
+void main().catch((error: unknown) => {
+    console.error("Action failed:", error instanceof Error ? error.message : String(error));
+    if (error instanceof Error && error.cause) console.error("Cause:", error.cause);
+    process.exitCode = 1;
 });

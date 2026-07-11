@@ -1,54 +1,14 @@
-import * as hl from "@nktkas/hyperliquid";
-import { FordefiWalletAdapter, findSignatureOnlyError } from './wallet-adapter';
-import { HyperliquidConfig, fordefiConfig } from './config'
+import { fordefiConfig } from "./config";
+import type { AddressAmountActionConfig } from "./interfaces";
+import { createExchangeClient, executeHyperliquidAction } from "./hyperliquid-client";
 
-export async function withdraw3(hyperliquidConfig: HyperliquidConfig) {
-    if (!hyperliquidConfig) {
-        throw new Error("Config required!");
-    }
-    try {
-        const wallet = new FordefiWalletAdapter(fordefiConfig);
-
-        const transport = new hl.HttpTransport({ isTestnet: hyperliquidConfig.isTestnet });
-
-        const exchClient = new hl.ExchangeClient({
-            wallet,
-            transport,
-            signatureChainId: '0x539'
+export async function withdraw(config: AddressAmountActionConfig<"withdraw">) {
+    return executeHyperliquidAction(async () => {
+        const result = await createExchangeClient(config.isTestnet, fordefiConfig).withdraw3({
+            destination: config.destination.toLowerCase() as `0x${string}`,
+            amount: config.amount,
         });
-        console.log("Exchange client created successfully");
-
-        if (!hyperliquidConfig.amount) {
-            throw new Error("Amount is required and cannot be empty");
-        }
-        if (!hyperliquidConfig.destination || !hyperliquidConfig.destination.startsWith('0x')) {
-            throw new Error("Destination must be a valid Ethereum address starting with '0x'");
-        }
-
-        const result = await exchClient.withdraw3({
-            destination: hyperliquidConfig.destination.toLowerCase() as `0x${string}`,
-            amount: String(hyperliquidConfig.amount),
-        });
-        console.log("Withdrawal successful:", result);
-
-    } catch (error: any) {
-        const sigOnly = findSignatureOnlyError(error);
-        if (sigOnly) {
-            console.log("Signature obtained (not broadcast):", sigOnly.signature);
-            return { signature: sigOnly.signature };
-        }
-
-        const errorMessage = error.message || String(error);
-
-        if (errorMessage.includes("Insufficient balance")) {
-            console.error("ERROR: Not enough funds for withdrawal");
-        } else if (errorMessage.includes("provider") || errorMessage.includes("connect")) {
-            console.error("ERROR: Provider connection issue");
-        } else {
-            console.error("ERROR:", errorMessage);
-        };
-        if (error.cause) {
-            console.error("Cause:", error.cause);
-        }
-    };
-};
+        console.log("Withdrawal successful");
+        return result;
+    });
+}

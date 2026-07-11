@@ -1,74 +1,23 @@
-import * as hl from "@nktkas/hyperliquid";
-import { FordefiWalletAdapter, findSignatureOnlyError } from './wallet-adapter';
-import { HyperliquidConfig, fordefiConfig } from './config';
+import type * as hl from "@nktkas/hyperliquid";
+import { fordefiConfig } from "./config";
+import type { SimpleActionConfig } from "./interfaces";
+import { createExchangeClient, createInfoClient, executeHyperliquidAction } from "./hyperliquid-client";
+import { formatPerpsOrder } from "./order-utils";
 
+export async function placePerpsOrder(config: SimpleActionConfig<"placeOrder">, orderConfig: hl.OrderParameters) {
+    return executeHyperliquidAction(async () => {
+        const info = createInfoClient(config.isTestnet);
+        const [mids, metaAndContexts] = await Promise.all([info.allMids(), info.metaAndAssetCtxs()]);
+        const assetIndex = orderConfig.orders[0]?.a;
+        if (assetIndex === undefined) throw new Error("At least one order with an asset index is required");
+        const asset = metaAndContexts[0].universe[Number(assetIndex)];
+        if (!asset) throw new Error(`No Hyperliquid metadata found for asset index ${assetIndex}`);
+        const midPrice = mids[asset.name];
+        if (!midPrice) throw new Error(`No midpoint available for ${asset.name}`);
 
-export async function place_perps_order(hyperliquidConfig: HyperliquidConfig, orderConfig: hl.OrderParameters) {
-    if (!hyperliquidConfig) {
-        throw new Error("Config required!");
-    }
-    try {
-        const wallet = new FordefiWalletAdapter(fordefiConfig);
-
-        const transport = new hl.HttpTransport({
-            isTestnet: hyperliquidConfig.isTestnet
-        });
-
-        const info = new hl.InfoClient({ transport: transport });
-        const mids = await info.allMids();
-
-        const metaAndCtxs = await info.metaAndAssetCtxs();
-        const assetIndex = orderConfig.orders[0]?.a ?? 0;
-        const assetMeta = metaAndCtxs[0].universe[Number(assetIndex)];
-        const assetName = assetMeta?.name;
-        const midPrice = assetName ? mids[assetName] : undefined;
-
-        console.log("Asset:", assetMeta);
-        console.log("Mid price:", midPrice);
-
-        // Round price to valid tick size (for BTC, ETH it's whole dollars)
-        // HyperCore uses 5 significant figures for prices
-        const roundToTickSize = (price: string): string => {
-            const p = parseFloat(price);
-            // For high-value assets like BTC, ETH, we round to nearest whole number
-            if (p >= 1000) {
-                return Math.round(p).toString();
-            }
-            // For smaller price we keep more precision
-            return p.toPrecision(5);
-        };
-
-        // Update order price to mid price (rounded)
-        if (orderConfig.orders[0] && midPrice) {
-            orderConfig.orders[0].p = roundToTickSize(midPrice);
-            console.log("Rounded price:", orderConfig.orders[0].p);
-        }
-
-        const exchClient = new hl.ExchangeClient({
-            wallet,
-            transport,
-            signatureChainId: '0x539'
-        });
-        console.log("Exchange client created successfully");
-
-        const result = await exchClient.order({
-            ...orderConfig,
-            grouping: "na",
-        });
-
-        console.log("Order result: ", result)
+        const formatted = formatPerpsOrder(orderConfig, midPrice, asset.szDecimals);
+        const result = await createExchangeClient(config.isTestnet, fordefiConfig).order({ ...formatted, grouping: "na" });
+        console.log(`Perpetual order submitted for ${asset.name} at ${formatted.orders[0]?.p}`);
         return result;
-
-    } catch (error: any) {
-        const sigOnly = findSignatureOnlyError(error);
-        if (sigOnly) {
-            console.log("Signature obtained (not broadcast):", sigOnly.signature);
-            return { signature: sigOnly.signature };
-        }
-        console.error("Error while placing order:", error.message || String(error));
-        if (error.cause) {
-            console.error("Cause:", error.cause);
-        }
-        throw error;
-    }
+    });
 }

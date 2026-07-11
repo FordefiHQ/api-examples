@@ -1,55 +1,107 @@
-export type TransferMarket = "spot" | "perps";
-export type AccountRef = "master" | `0x${string}`;   // "master" = the Fordefi vault
-export type Action = "deposit" | "withdraw" | "sendUsd" | "vault_transfer" | "approve_agent" | "revoke_agent" | "spotTransfer" | "subAccountTransfer" | "placeOrder"
+export const ACTIONS = [
+    "deposit",
+    "withdraw",
+    "sendUsd",
+    "vault_transfer",
+    "approve_agent",
+    "revoke_agent",
+    "spotTransfer",
+    "subAccountTransfer",
+    "placeOrder",
+] as const;
 
-/**
- * Structured config for the "subAccountTransfer" action.
- *
- * The Fordefi vault is always the signer (the master account). A `from`/`to` pair
- * — each either the literal "master" or a sub-account address — expresses the transfer,
- * and the router picks the right SDK call:
- *   - master → sub : isDeposit: true
- *   - sub → master : isDeposit: false
- *
- * Exactly one of `from`/`to` must be "master" (Hyperliquid has no native sub→sub call;
- * move between two sub-accounts with two transfers: sub → master, then master → sub).
- */
+export type Action = typeof ACTIONS[number];
+export type TransferMarket = "spot" | "perps";
+export type AccountRef = "master" | `0x${string}`;
+export type EvmAddress = `0x${string}`;
+
 export interface SubAccountTransferConfig {
     market: TransferMarket;
-    from: AccountRef;      // "master" or a sub-account address owned by the vault
-    to: AccountRef;        // "master" or a sub-account address owned by the vault
+    from: AccountRef;
+    to: AccountRef;
     amount: string;
-    token?: string;        // required when market === "spot" (format "TOKEN:address")
+    token?: string;
 }
 
+/** Editable input config. Required action fields are checked before dispatch. */
 export interface HyperliquidConfig {
-    action: Action
-    isTestnet: boolean,
-    destination?: `0x${string}`,
-    amount?: string,
-    token?: string,               // Required for "spotTransfer" (format: "TOKEN:address")
-    isDeposit?: boolean,          // Required for "vault_transfer" action
-    subAccountDeposit?: boolean,  // Deprecated for "subAccountTransfer" (use `transfer` instead)
-    hyperliquid_vault_address?: string
-    toSpot?: boolean              // "spotTransfer": true = Perps→Spot, false = Spot→Perps
-    usdcAddress?: string,         // Arbitrum USDC contract address (deposit action)
-    bridgeAddress?: string,       // Hyperliquid bridge contract address (deposit action)
-    transfer?: SubAccountTransferConfig,  // Required for "subAccountTransfer" action
+    action: Action;
+    isTestnet: boolean;
+    destination?: EvmAddress;
+    amount?: string;
+    token?: string;
+    isDeposit?: boolean;
+    hyperliquidVaultAddress?: EvmAddress;
+    toSpot?: boolean;
+    usdcAddress?: EvmAddress;
+    bridgeAddress?: EvmAddress;
+    transfer?: SubAccountTransferConfig;
 }
+
+interface ActionConfigBase<A extends Action> {
+    action: A;
+    isTestnet: boolean;
+}
+
+export interface DepositActionConfig extends ActionConfigBase<"deposit"> {
+    amount: string;
+    usdcAddress?: EvmAddress;
+    bridgeAddress?: EvmAddress;
+}
+
+export interface AddressAmountActionConfig<A extends "withdraw" | "sendUsd"> extends ActionConfigBase<A> {
+    destination: EvmAddress;
+    amount: string;
+}
+
+export interface VaultTransferActionConfig extends ActionConfigBase<"vault_transfer"> {
+    hyperliquidVaultAddress: EvmAddress;
+    amount: string;
+    isDeposit: boolean;
+}
+
+export interface SpotTransferActionConfig extends ActionConfigBase<"spotTransfer"> {
+    amount: string;
+    token: string;
+    toSpot: boolean;
+}
+
+export interface SubAccountTransferActionConfig extends ActionConfigBase<"subAccountTransfer"> {
+    transfer: SubAccountTransferConfig;
+}
+
+export interface SimpleActionConfig<A extends "approve_agent" | "revoke_agent" | "placeOrder"> extends ActionConfigBase<A> {}
+
+export type ValidatedActionConfig =
+    | DepositActionConfig
+    | AddressAmountActionConfig<"withdraw">
+    | AddressAmountActionConfig<"sendUsd">
+    | VaultTransferActionConfig
+    | SpotTransferActionConfig
+    | SubAccountTransferActionConfig
+    | SimpleActionConfig<"approve_agent">
+    | SimpleActionConfig<"revoke_agent">
+    | SimpleActionConfig<"placeOrder">;
 
 export interface AgentWalletConfig {
-    agentAddress: string,
-    agentName: string,
-    validUntil?: string // only required for a "approve_agent" action, MAX is 180 days in UNIX time
+    agentAddress?: EvmAddress;
+    agentName: string;
+    validUntil?: string;
+    privateKeyOutputPath?: string;
 }
 
 export interface FordefiApiConfig {
     vaultId: string;
-    address: string;
+    address: EvmAddress;
     accessToken: string;
     privateKeyPath: string;
     pathEndpoint: string;
     rpcUrl: string;
     chainId: number;
     pushMode: "auto" | "manual";
+}
+
+export interface SignatureOnlyResult {
+    signature: string;
+    broadcast: false;
 }
