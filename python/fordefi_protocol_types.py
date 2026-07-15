@@ -16,6 +16,7 @@ class TransactionType(Enum):
     TON_TRANSACTION = "ton_transaction"
     TRON_TRANSACTION = "tron_transaction"
     TRON_MESSAGE = "tron_message"
+    CANTON_TRANSACTION = "canton_transaction"
 
 
 class SignerType(Enum):
@@ -126,6 +127,13 @@ class TronTransactionDetailType(Enum):
     TRON_TRANSFER = "tron_transfer"
 
 
+class CantonTransactionDetailType(Enum):
+    CANTON_TRANSFER = "canton_transfer"
+    CANTON_PARTY_ALLOCATION = "canton_party_allocation"
+    CANTON_PRE_APPROVAL_SETUP = "canton_pre_approval_setup"
+    CANTON_APPROVE_TRANSFER = "canton_approve_transfer"
+
+
 class ExchangeTransactionDetailType(Enum):
     EXTERNAL_WITHDRAW = "external_withdraw"
     INTERNAL_TRANSFER = "internal_transfer"
@@ -143,6 +151,7 @@ class AssetIdentifierType(Enum):
     TON = "ton"
     TRON = "tron"
     UTXO = "utxo"
+    CANTON = "canton"
 
 
 
