@@ -11,7 +11,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
 
 - [Programmatic swaps](python/swaps) using Fordefi's In-app Swap feature (EVM and Solana)
 - [Programmatic EVM contract calls](python/evm-contract-calls) (with option to broadcast to a custom RPC)
-- [Simple API Transfers](python/simple-api-transfers):
+- [Simple Asset Transfers via API](python/simple-api-transfers):
   - BTC transfers on Bitcoin mainnet
   - Native EVM assets (ETH, BNB, etc.) transfers
   - ERC20 token transfers
@@ -26,6 +26,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
   - SUI token transfers with delegated fee payment from another vault ("sponsored" transactions)
   - Aptos APT and Fungible Assets transfers
   - Aptos Fungible Assets transfers with delegated fee payment from another vault ("sponsored" transactions)
+  - Canton CC transfers, vault activation (party allocation) and native CC pre-approval setup
 - [Exchange transfers](python/exchange-transfers) (Binance and Coinbase International)
 - [Setting up Fordefi Webhooks](python/webhooks)
 - [Programatically signing Bitcoin PSBT](python/bitcoin-psbt) with a Segwit or Taproot address
