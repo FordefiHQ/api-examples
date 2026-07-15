@@ -26,7 +26,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
   - SUI token transfers with delegated fee payment from another vault ("sponsored" transactions)
   - Aptos APT and Fungible Assets transfers
   - Aptos Fungible Assets transfers with delegated fee payment from another vault ("sponsored" transactions)
-  - Canton CC transfers, vault activation (party allocation) and native CC pre-approval setup
+  - Canton CC transfers, vault activation (party allocation), native CC pre-approval setup and manual deposit approval
 - [Exchange transfers](python/exchange-transfers) (Binance and Coinbase International)
 - [Setting up Fordefi Webhooks](python/webhooks)
 - [Programatically signing Bitcoin PSBT](python/bitcoin-psbt) with a Segwit or Taproot address
