@@ -17,14 +17,16 @@ USER_API_TOKEN = os.environ["FORDEFI_API_TOKEN"]
 FORDEFI_EVM_VAULT_ID = os.environ["FORDEFI_EVM_VAULT_ID"]
 PRIVATE_KEY_PEM_FILE = Path("./secret/private.pem")
 path = "/api/v1/swaps"
-sell_token_amount = str(1000000000000000) # in smallest units or decimals
-sell_token_address = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" # USDC on Ethereum
-buy_token_address = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831" # USDC on Arbitrum
+
+is_erc20_to_erc20_swap = True # if False, you'll be quoted a Native -> erc20 swap
+
+sell_token_amount = str(1_000) # in the token's smallest units or decimals
+sell_token_address = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831" # USDC (Arbitrum)
+buy_token_address = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9" # USDT0 (Arbitrum)
 chain_type = "evm"
-origin_network = "evm_ethereum_mainnet"
+origin_network = "evm_arbitrum_mainnet"
 destination_network = "evm_arbitrum_mainnet"
-slippage = "500" # in bps
-is_erc20_to_erc20_swap = False # to configure
+slippage = "100" # in bps
 
 async def main():
     try:
@@ -68,6 +70,8 @@ async def main():
             return
         
         print(f"Using quote ID: {best_quote['quote_id']} from {best_quote['provider_info']['provider_id']}")
+        print(f"Slippage in bps: {best_quote['slippage_bps']}")
+        print(f"This quote will expire at {best_quote['expiration_time']} UTC ")
 
         # Creating transaction payload using the best quote
         if is_erc20_to_erc20_swap is True:

@@ -23,8 +23,10 @@ Build an unsigned Stellar transaction locally with `@stellar/stellar-sdk`, then 
 
 ## Usage
 
+### Native XLM payment
+
 ```bash
-npm run raw
+npm run raw-payment-native
 ```
 
 The script:
@@ -33,6 +35,18 @@ The script:
 3. Submits a `stellar_raw_transaction` request to Fordefi
 4. Polls until terminal state and prints the Stellar transaction hash and explorer URL
 
+### GYEN classic-asset payment
+
+```bash
+npm run raw-payment-token
+```
+
+Same flow, but the payment operation carries a classic asset (`new Asset(code, issuer)`) instead of `Asset.native()`. The asset comes from `STELLAR_ASSET_CODE` / `STELLAR_ASSET_ISSUER` in `.env` — the `.env.example` ships with **GYEN** (a JPY-pegged stablecoin, issuer `GDF6VOEGRWLOZ64PQQGKD2IYWA22RLT37GJKS2EJXZHT2VLAGWLC5TOB`); change them to send any other classic asset.
+
+Notes:
+- `STELLAR_AMOUNT` is a **decimal string in whole units** (e.g. `"1.0"`), not stroops — the Stellar SDK handles the 7-decimal scaling.
+- The source vault **and** the destination account must each hold a trustline for the asset, or the payment fails. Use the sibling [`change-trust/`](../change-trust) example to establish one.
+
 ## How It Works
 
-The example demonstrates the general-purpose pattern for `stellar_raw_transaction`: build any operation graph locally (payment, path payment, manage offer, manage data, account merge, Soroban invoke, etc.), serialize the transaction envelope to XDR, and let Fordefi handle MPC signing and broadcast. To build a different operation, replace the `Operation.payment(...)` call in `src/run.ts` with the operation(s) you need — the rest of the flow stays the same.
+The example demonstrates the general-purpose pattern for `stellar_raw_transaction`: build any operation graph locally (payment, path payment, manage offer, manage data, account merge, Soroban invoke, etc.), serialize the transaction envelope to XDR, and let Fordefi handle MPC signing and broadcast. To build a different operation, replace the `Operation.payment(...)` call in `src/raw-payment-native.ts` (or `src/raw-payment-token.ts`) with the operation(s) you need — the rest of the flow stays the same.

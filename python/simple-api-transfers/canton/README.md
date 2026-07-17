@@ -40,4 +40,3 @@ uv run python canton/approve_deposit_canton.py <fordefi_transaction_id>
 
 - Amounts are decimal strings in smallest units; CC (Canton Coin) has **10 decimals**, so 1 CC = `10_000_000_000` units.
 - Recipient addresses are Canton party ids, e.g. `a40499fb...::1220658f...`.
-- `canton/openapi_baseline.json` contains the OpenAPI schemas for all Canton transaction types.

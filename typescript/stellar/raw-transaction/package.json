@@ -4,7 +4,8 @@
   "description": "Submit a locally-built Stellar transaction (XDR) via Fordefi",
   "main": "index.js",
   "scripts": {
-    "raw": "npx tsx src/run.ts"
+    "raw-payment-native": "npx tsx src/raw-payment-native.ts",
+    "raw-payment-token": "npx tsx src/raw-payment-token.ts"
   },
   "keywords": ["fordefi", "stellar", "raw-transaction", "xdr"],
   "author": "",

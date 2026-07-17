@@ -17,6 +17,8 @@ class TransactionType(Enum):
     TRON_TRANSACTION = "tron_transaction"
     TRON_MESSAGE = "tron_message"
     CANTON_TRANSACTION = "canton_transaction"
+    STELLAR_TRANSACTION = "stellar_transaction"
+    STELLAR_MESSAGE = "stellar_message"
 
 
 class SignerType(Enum):
@@ -134,6 +136,13 @@ class CantonTransactionDetailType(Enum):
     CANTON_APPROVE_TRANSFER = "canton_approve_transfer"
 
 
+class StellarTransactionDetailType(Enum):
+    STELLAR_TRANSFER = "stellar_transfer"
+    STELLAR_RAW_TRANSACTION = "stellar_raw_transaction"
+    STELLAR_CHANGE_TRUST = "stellar_change_trust"
+    STELLAR_CLAIM_CLAIMABLE_BALANCE = "stellar_claim_claimable_balance"
+
+
 class ExchangeTransactionDetailType(Enum):
     EXTERNAL_WITHDRAW = "external_withdraw"
     INTERNAL_TRANSFER = "internal_transfer"
@@ -152,6 +161,7 @@ class AssetIdentifierType(Enum):
     TRON = "tron"
     UTXO = "utxo"
     CANTON = "canton"
+    STELLAR = "stellar"
 
 
 
@@ -163,3 +173,4 @@ class AssetDetailType(Enum):
     SPL_TOKEN = "spl_token"
     COIN = "coin"
     TRC20 = "trc20"
+    CLASSIC_ASSET = "classic_asset"
