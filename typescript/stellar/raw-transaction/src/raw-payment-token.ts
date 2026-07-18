@@ -5,6 +5,7 @@ import {
   Networks,
   Operation,
   Asset,
+  Memo,
 } from "@stellar/stellar-sdk";
 import { fordefiConfig, tokenPaymentConfig } from "./config.js";
 import { CreateStellarTransactionRequest, submitTransaction } from "../../fordefi/index.js";
@@ -13,7 +14,7 @@ async function buildPaymentXdr(): Promise<string> {
   const server = new Horizon.Server(tokenPaymentConfig.horizonUrl);
   const account = await server.loadAccount(tokenPaymentConfig.vaultAddress);
 
-  const tx = new TransactionBuilder(account, {
+  const builder = new TransactionBuilder(account, {
     fee: BASE_FEE,
     networkPassphrase: Networks.PUBLIC,
   })
@@ -24,8 +25,14 @@ async function buildPaymentXdr(): Promise<string> {
         amount: tokenPaymentConfig.amount,
       })
     )
-    .setTimeout(180)
-    .build();
+    .setTimeout(180);
+
+  // Optional MEMO_ID (uint64). Skipped when STELLAR_MEMO_ID is unset.
+  if (tokenPaymentConfig.memoId) {
+    builder.addMemo(Memo.id(tokenPaymentConfig.memoId));
+  }
+
+  const tx = builder.build();
 
   return tx.toEnvelope().toXDR("base64");
 }
@@ -36,6 +43,7 @@ async function main() {
   console.log(`  Destination: ${tokenPaymentConfig.destination}`);
   console.log(`  Amount:      ${tokenPaymentConfig.amount} ${tokenPaymentConfig.assetCode}`);
   console.log(`  Asset:       ${tokenPaymentConfig.assetCode} (issuer ${tokenPaymentConfig.assetIssuer})`);
+  if (tokenPaymentConfig.memoId) console.log(`  Memo (id):   ${tokenPaymentConfig.memoId}`);
   console.log(`  Horizon:     ${tokenPaymentConfig.horizonUrl}`);
   console.log();
 

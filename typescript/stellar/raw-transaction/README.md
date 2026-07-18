@@ -45,7 +45,8 @@ Same flow, but the payment operation carries a classic asset (`new Asset(code, i
 
 Notes:
 - `STELLAR_AMOUNT` is a **decimal string in whole units** (e.g. `"1.0"`), not stroops — the Stellar SDK handles the 7-decimal scaling.
-- The source vault **and** the destination account must each hold a trustline for the asset, or the payment fails. Use the sibling [`change-trust/`](../change-trust) example to establish one.
+- The source vault **and** the destination account must each hold a trustline for the asset, or the payment fails. Use the sibling [`change-trust/`](../change-trust) example to establish one. (Paying an asset back to its issuer is the exception — it always succeeds and burns the amount.)
+- Set `STELLAR_MEMO_ID` in `.env` to attach an optional `MEMO_ID` (a uint64 as a decimal string, e.g. an exchange/custodian deposit id) to the payment; leave it unset to send none.
 
 ## How It Works
 
