@@ -20,19 +20,21 @@ path = "/api/v1/swaps"
 
 is_erc20_to_erc20_swap = True # if False, you'll be quoted a Native -> erc20 swap
 
-sell_token_amount = str(1_000) # in the token's smallest units or decimals
+sell_token_amount = str(1_000_000) # in the token's smallest units or decimals
 sell_token_address = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831" # USDC (Arbitrum)
 buy_token_address = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9" # USDT0 (Arbitrum)
 chain_type = "evm"
 origin_network = "evm_arbitrum_mainnet"
 destination_network = "evm_arbitrum_mainnet"
-slippage = "100" # in bps
+slippage = "1" # in bps, slippage < 1 bp is supported on all providers except jupiter, uniswap and paraswap
 
 async def main():
     try:
         # Getting list of providers
         provider_list  = await getSwapProviders(chain_type, USER_API_TOKEN)
         print("Providers: ", provider_list)
+
+        provider_list=["oneinch"]
         
         if is_erc20_to_erc20_swap is True:
         # Getting quotes from providers
