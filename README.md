@@ -50,6 +50,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
   - [Deploying and calling contracts on a local Hardhat node](typescript/evm/hardhat) for developers
   - [Signing EIP-712 and EIP-191 messages](typescript/evm/message-signing) with an EVM Fordefi vault
   - [Trading on Paradex](typescript/evm/paradex) (perps DEX on Starknet) with a Fordefi vault
+  - [Placing bets on Polymarket](typescript/polymarket)
 - On Solana:
   - With [`@solana/web3.js`](typescript/solana/web3.js):
     - [Programmatic token swaps](typescript/solana/web3.js/jupiter) using Jupiter's Ultra API (and Meteora)
