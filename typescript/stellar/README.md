@@ -6,6 +6,7 @@ TypeScript examples for creating Stellar transactions through the [Fordefi](http
 |---|---|---|
 | [`change-trust/`](./change-trust) | `stellar_change_trust` — establish a classic-asset trustline | `npm run trust` |
 | [`claim-claimable-balance/`](./claim-claimable-balance) | `stellar_claim_claimable_balance` — claim claimable balances (auto-trustline if needed) | `npm run claim` |
+| [`create-claimable-balance/`](./create-claimable-balance) | `stellar_raw_transaction` — create a claimable balance (source added as claimant by default) | `npm run create-native` |
 | [`raw-transaction/`](./raw-transaction) | `stellar_raw_transaction` — submit a locally-built unsigned XDR | `npm run raw` |
 | [`sign-message/`](./sign-message) | `stellar_message` — sign an arbitrary message (no broadcast) | `npm run sign` |
 

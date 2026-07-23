@@ -31,7 +31,7 @@ export const paymentConfig: PaymentConfig = {
 // JPY-pegged stablecoin: https://stellar.expert/explorer/public/asset/GYEN-GDF6VOEGRWLOZ64PQQGKD2IYWA22RLT37GJKS2EJXZHT2VLAGWLC5TOB
 export const tokenPaymentConfig: TokenPaymentConfig = {
   vaultAddress: requireEnv("STELLAR_VAULT_ADDRESS"),
-  destination: "GDF6VOEGRWLOZ64PQQGKD2IYWA22RLT37GJKS2EJXZHT2VLAGWLC5TOB",
+  destination: requireEnv("STELLAR_DESTINATION"),
   amount: requireEnv("STELLAR_AMOUNT"),
   horizonUrl: process.env.STELLAR_HORIZON_URL || "https://horizon.stellar.org",
   assetCode: process.env.STELLAR_ASSET_CODE!,

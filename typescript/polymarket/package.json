@@ -1,0 +1,22 @@
+{
+  "name": "polymarket",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "setup": "npx tsx src/setup.ts",
+    "bet": "npx tsx src/run.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@fordefi/web3-provider": "^0.3.2",
+    "@polymarket/builder-relayer-client": "^0.0.10",
+    "@polymarket/clob-client-v2": "^1.1.0",
+    "dotenv": "17.2.3",
+    "ethers": "^5.8.0",
+    "tsx": "^4.21.0"
+  }
+}
