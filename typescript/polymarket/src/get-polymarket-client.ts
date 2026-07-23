@@ -1,16 +1,10 @@
 import fs from "fs";
-import { HOST } from "./config";
-import { ApiKeyCreds, Chain, ClobClient, SignatureTypeV2 } from "@polymarket/clob-client-v2";
+import { HOST,CREDS_CACHE_PATH } from "./config";
 import { JsonRpcSigner } from "@ethersproject/providers";
 import { FordefiProviderConfig } from "@fordefi/web3-provider";
+import { ApiKeyCreds, Chain, ClobClient, SignatureTypeV2 } from "@polymarket/clob-client-v2";
 
 let cachedClient: ClobClient | null = null;
-
-// CLOB API credentials are deterministic per wallet, so they are cached on
-// disk after the first derivation — repeat runs then need zero ClobAuth
-// signatures from the vault. The cache lives next to the API signer key in
-// the gitignored fordefi_secret/ directory.
-const CREDS_CACHE_PATH = "./fordefi_secret/clob-creds.json";
 
 function loadCachedCreds(address: string): ApiKeyCreds | null {
     try {
