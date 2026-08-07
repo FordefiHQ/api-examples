@@ -1,9 +1,10 @@
+import path from 'node:path';
 import dotenv from 'dotenv';
 import type { OrderParameters } from "@nktkas/hyperliquid";
 import type { AgentWalletConfig, EvmAddress, FordefiApiConfig, HyperliquidConfig } from './interfaces';
-import { parseAction, validateAddress } from './validation';
+import { parseAction, parseBooleanEnv, validateAddress } from './validation';
 
-dotenv.config()
+dotenv.config({ path: path.resolve(__dirname, '../.env') })
 
 /**
  * Fordefi API Configuration
@@ -30,7 +31,7 @@ export const fordefiConfig: FordefiApiConfig = {
     address: validateAddress(process.env.FORDEFI_EVM_VAULT_ADDRESS, 'FORDEFI_EVM_VAULT_ADDRESS'),
     vaultId: process.env.FORDEFI_EVM_VAULT_ID ?? (() => { throw new Error('FORDEFI_EVM_VAULT_ID is not set'); })(),
     accessToken: process.env.FORDEFI_API_USER_TOKEN ?? (() => { throw new Error('FORDEFI_API_USER_TOKEN is not set'); })(),
-    privateKeyPath: './secret/private.pem',
+    privateKeyPath: path.resolve(__dirname, '../secret/private.pem'),
     pathEndpoint: '/api/v1/transactions/create-and-wait',
     rpcUrl: 'https://1rpc.io/arb',
     pushMode: 'auto', // set to 'manual' if you just want the signed tx
@@ -53,7 +54,9 @@ export const agentWalletConfig: AgentWalletConfig = {
 
 export const hyperliquidConfig: HyperliquidConfig = {
     action: parseAction(process.env.ACTION),
-    isTestnet: false,
+    // Defaults to testnet. An unconfigured run must never move real funds — set
+    // HYPERLIQUID_TESTNET=false explicitly to act on mainnet.
+    isTestnet: parseBooleanEnv(process.env.HYPERLIQUID_TESTNET, true, 'HYPERLIQUID_TESTNET'),
     destination: process.env.DESTINATION_ADDRESS as EvmAddress | undefined,
     amount: process.env.AMOUNT ?? "5",
     token: "USDC:0x6d1e7cde53ba9467b783cb7c530ce054",

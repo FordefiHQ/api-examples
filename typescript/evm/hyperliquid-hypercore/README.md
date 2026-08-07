@@ -38,7 +38,7 @@ Missing actions, unknown actions, invalid addresses, malformed amounts, and fail
 - Hyperliquid L1 actions use signature chain ID `1337` (`0x539`) on both mainnet and testnet.
 - Deposit permit signing uses Arbitrum chain ID `42161` automatically. You do not need to edit `fordefiConfig.chainId` before depositing.
 - Deposit is mainnet-only in this example and always broadcasts. On testnet, use the [Hyperliquid testnet faucet](https://app.hyperliquid-testnet.xyz).
-- `HYPERLIQUID_TESTNET` defaults to `true`; set it to `false` for mainnet actions.
+- `HYPERLIQUID_TESTNET` defaults to `true`; set it to `false` for mainnet actions. Any other value is rejected, so a typo fails instead of silently selecting mainnet. Every run prints the resolved network before it does anything.
 
 The `pushMode` setting in `src/config.ts` applies to Hyperliquid L1 EIP-712 actions:
 
@@ -63,7 +63,9 @@ This example remains config-driven. Common values can be supplied through `.env`
 | `approve_agent` | `agentName`; optionally an existing `agentAddress` and `validUntil` |
 | `revoke_agent` | `agentName` |
 
-EVM addresses are fully validated. USDC amounts support at most six decimal places and are converted with integer arithmetic.
+EVM addresses are parsed with `ethers.getAddress` and the zero address is rejected everywhere. Destinations for the irreversible actions (`withdraw`, `sendUsd`) additionally require an EIP-55 checksummed address: `ethers.getAddress` only verifies the checksum when the input is mixed case, so an all-lowercase address would otherwise carry no typo protection at all. Copy addresses in their checksummed form.
+
+USDC amounts support at most six decimal places and are converted with integer arithmetic.
 
 ### Deposit
 
@@ -128,12 +130,28 @@ The example supports one order at a time. It loads the selected asset metadata a
 
 Agent wallets are optional; Fordefi can sign Hyperliquid actions directly.
 
-When `approve_agent` has no configured `agentAddress`, the example creates a key at the configured `privateKeyOutputPath`. The file is created with owner-only permissions and will never overwrite an existing file. Back it up securely before using the agent. If `validUntil` is omitted, no validity suffix is added to the agent name.
+When `approve_agent` has no configured `agentAddress`, the example creates a key at the configured `privateKeyOutputPath`. The file is created with owner-only permissions and will never overwrite an existing file. Back it up securely before using the agent.
+
+An approved agent can sign trading actions (place, cancel, and modify orders, leverage changes, TWAPs) on behalf of the master account. It cannot withdraw or transfer funds out.
+
+If `validUntil` is omitted, no validity suffix is added to the agent name and the agent receives **Hyperliquid's default validity period (roughly 180 days)** — omitting it does not mean the approval is unbounded, nor that it expires immediately. Set `validUntil` in `agentWalletConfig` to a millisecond timestamp to shorten it.
+
+Note that `revoke_agent` rebuilds the agent name **without** the `valid_until` suffix that `approve_agent` used, and reports success purely from the absence of an error. After revoking, confirm in the Hyperliquid UI that the agent is actually gone.
 
 ```bash
 ACTION=approve_agent npm run action
 ACTION=revoke_agent npm run action
 ```
+
+## Security notes
+
+- **Secrets stay out of git.** `.env`, `secret/`, and any `agent-private-key*.json` are ignored by the repository root `.gitignore`, which is itself tracked so a fresh clone is protected. Never commit a `private.pem`. Keep `.env` and key files owner-only (`chmod 600`).
+- **Only put variables this example uses in `.env`.** `dotenv` loads every entry into `process.env`, where any dependency in the process can read it. Unrelated keys for other chains or services do not belong here.
+- **The API token is kept out of error output.** Transport failures are rebuilt into a bare error before they propagate, because an `AxiosError` carries the `Authorization` header on its `config` and `request` fields and would otherwise print the token to stderr on any connection failure.
+- **The signer refuses to alter what it is asked to sign.** If a caller's EIP-712 `domain.chainId` disagrees with `fordefiConfig.chainId`, signing fails rather than silently substituting the configured value.
+- **Deposit trusts a public RPC for one field.** The USDC permit nonce is read from `fordefiConfig.rpcUrl` (`https://1rpc.io/arb` by default). Point this at an RPC endpoint you control before depositing meaningful amounts. The blast radius is bounded — the permit `spender` is the hardcoded Hyperliquid bridge and the value is your own amount — but a hostile RPC can cause a signed permit you did not intend.
+- **Deposit has no idempotency key.** If the transaction poll times out, the deposit may still land. Check the Fordefi console for the transaction before re-running, or a retry can deposit twice.
+- **`sign_mode` is `auto`.** Actions are signed by the API Signer without a human approval step, so Fordefi-side policy is the only gate. Configure vault policies accordingly.
 
 ## Verification
 

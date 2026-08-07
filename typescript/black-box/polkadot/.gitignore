@@ -1,0 +1,8 @@
+.env
+secret
+bin
+node_modules
+.DS_Store
+package-lock.json
+CLAUDE.md
+notes.md

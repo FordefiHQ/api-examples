@@ -1,0 +1,26 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+uv.lock
+
+# macOS
+.DS_Store
+
+# Virtual environments
+.venv
+
+# Secrets
+secret/*
+.env
+
+# Dev scripts
+*_dev.py
+
+# Misc
+bin
+load_test
+evm/sign_aster_order.py

@@ -1,0 +1,6 @@
+node_modules
+fordefi_secret
+.env
+package-lock.json
+.claude
+bin

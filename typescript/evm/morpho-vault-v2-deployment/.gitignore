@@ -1,0 +1,26 @@
+# Compiler files
+cache/
+out/
+
+# Ignores broadcast
+broadcast
+
+
+# Dotenv file
+.env*
+
+# Addresses
+addresses/31337.json
+addresses/0.json
+
+# Logs
+anvil.log
+
+.DS_Store
+
+.claude/
+node_modules
+.env
+./secret
+package-lock.json
+fordefi_secret/

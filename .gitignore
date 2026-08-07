@@ -1,0 +1,30 @@
+.gitmodules
+.DS_Store
+git-management.txt
+
+# AGENTS
+.claude
+.agents
+tools
+skills-lock.json
+CLAUDE.md
+AGENTS.md
+snowflake-query
+
+# Secrets
+# This file must stay tracked. It is the only secret protection a fresh clone gets,
+# and every example directory asks contributors to drop real keys into secret/.
+.env
+.env.*
+!.env.example
+secret/
+fordefi_secret/
+*.pem
+*.key
+agent-private-key*.json
+# Public keys are legitimately tracked (webhook/cosigner signature verification).
+!*public_key*.pem
+!*public*.pem
+
+# Misc
+openapi_baseline.json

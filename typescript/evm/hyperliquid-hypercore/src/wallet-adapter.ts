@@ -41,6 +41,19 @@ export class FordefiWalletAdapter {
         types: Record<string, TypedDataField[]>,
         value: Record<string, unknown>,
     ): Promise<string> {
+        // A signer must not silently rewrite the payload it was handed. The caller's
+        // chainId and the configured one agree today only by coincidence across three
+        // files (config.ts, hyperliquid-client.ts's signatureChainId "0x539" -> 1337,
+        // and hl-deposit.ts's 42161). Assert that instead of overwriting, so editing
+        // fordefiConfig.chainId fails loudly here rather than producing a signature the
+        // exchange silently attributes to a different address.
+        if (domain.chainId !== undefined && Number(domain.chainId) !== this.config.chainId) {
+            throw new Error(
+                `EIP-712 domain chainId mismatch: the caller asked to sign for chainId ` +
+                `${String(domain.chainId)} but this signer is configured for ${this.config.chainId}. ` +
+                `Refusing to sign a payload that differs from the one requested.`,
+            );
+        }
         const modifiedDomain = { ...domain, chainId: this.config.chainId };
         const domainFields: TypedDataField[] = [];
         if (modifiedDomain.name !== undefined) domainFields.push({ name: "name", type: "string" });

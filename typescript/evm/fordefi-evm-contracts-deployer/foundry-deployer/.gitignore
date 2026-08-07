@@ -1,0 +1,11 @@
+.env
+package-lock.json
+node_modules
+fordefi_secret/
+cache
+types
+lib/
+out/
+certora
+x-ray/
+CLAUDE.md

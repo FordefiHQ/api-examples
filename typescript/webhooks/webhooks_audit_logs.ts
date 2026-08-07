@@ -19,19 +19,22 @@ const FORDEFI_API_BASE_URL = 'https://api.fordefi.com';
 const FORDEFI_API_USER_TOKEN = process.env.FORDEFI_API_USER_TOKEN;
 
 // Audit-log categories that should raise a security alert. The remaining
-// categories (vaults, address_book, address_group, vault_group, chains,
-// dapp_group) are logged as informational.
+// categories (vaults, chains) are logged as informational.
 const SENSITIVE_CATEGORIES = new Set([
   'policy',
   'quorum_threshold',
   'user_management',
   'user_group',
+  'vault_group',
   'authentication',
   'aml_policy',
   'webhook',
   'backup',
   'device_backup',
   'import_keys',
+  'address_book',
+  'address_group',
+  'dapp_group'
 ]);
 
 const fordefiPublicKeyPath = path.join(__dirname, 'keys', 'fordefi_public_key.pem');
@@ -97,6 +100,16 @@ function logEventToFile(dir: string, event: any) {
   console.log(`📄 Logged to ${logFile}`);
 }
 
+/** Full field-by-field terminal record of a sensitive audit event. */
+function logAuditEventDetail(auditRecord: any) {
+  console.log('\n🚨 SECURITY ALERT — sensitive audit event');
+  console.log(`  Category:  ${auditRecord.category}`);
+  console.log(`  Action:    ${auditRecord.action}`);
+  console.log(`  Actor:     ${describeActor(auditRecord.created_by)}`);
+  console.log(`  Client IP: ${auditRecord.client_ip}`);
+  console.log(`  Details:   ${auditRecord.description}`);
+}
+
 app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
@@ -135,25 +148,26 @@ app.post('/', async (req: Request, res: Response): Promise<void> => {
     const auditRecord = event.event;
 
     if (!auditRecord || typeof auditRecord !== 'object' || !('category' in auditRecord)) {
-      // Not an audit-log event (e.g. a transaction webhook pointed here)
-      console.log(`📝 Received non-audit event (event_type: ${event.event_type})`);
+      // Not an audit-log event (e.g. a transaction webhook pointed here).
+      console.warn(`\n⚠️ Received a non-audit event (event_type: ${event.event_type})`);
+      console.warn('   This server monitors audit-log events, so it was stored but not classified.');
+      console.warn('   If you expected an audit alert, check that the webhook in Fordefi');
+      console.warn('   (Settings → Webhooks) uses trigger type "Audit logs".');
       logEventToFile(liveLogsDir, event);
       res.status(200).json({ status: 'success' });
       return;
     }
 
-    if (SENSITIVE_CATEGORIES.has(auditRecord.category)) {
-      console.log('\n🚨 SECURITY ALERT — sensitive audit event');
-      console.log(`  Category:  ${auditRecord.category}`);
-      console.log(`  Action:    ${auditRecord.action}`);
-      console.log(`  Actor:     ${describeActor(auditRecord.created_by)}`);
-      console.log(`  Client IP: ${auditRecord.client_ip}`);
-      console.log(`  Details:   ${auditRecord.description}`);
-      logEventToFile(alertsLogsDir, event);
+    const isAlert = SENSITIVE_CATEGORIES.has(auditRecord.category);
+
+    // Sensitive events get the full field-by-field block; the rest a one-liner.
+    if (isAlert) {
+      logAuditEventDetail(auditRecord);
     } else {
       console.log(`\n📝 Audit event: [${auditRecord.category}] ${auditRecord.description}`);
-      logEventToFile(liveLogsDir, event);
     }
+
+    logEventToFile(isAlert ? alertsLogsDir : liveLogsDir, event);
 
     res.status(200).json({ status: 'success' });
   } catch (error) {

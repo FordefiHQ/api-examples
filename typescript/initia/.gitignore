@@ -1,0 +1,5 @@
+.env
+node_modules
+fordefi_secret/*
+package-lock.json
+bin

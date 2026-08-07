@@ -1,0 +1,5 @@
+node_modules
+secret/
+.env
+package-lock.json
+intents-solver
