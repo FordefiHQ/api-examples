@@ -1,0 +1,11 @@
+node_modules
+.DS_Store
+.venv
+.env
+/secret/*
+event.json
+bin/*
+package-lock.json
+fordefi-response/fordefi_secret/private.pem
+live_logs/
+

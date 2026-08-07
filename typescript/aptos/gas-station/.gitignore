@@ -1,0 +1,6 @@
+.env
+CLAUDE.md
+package-lock.json
+TROUBLESHOOTING.md
+secret/
+node_modules/

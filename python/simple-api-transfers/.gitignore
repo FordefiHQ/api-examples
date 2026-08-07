@@ -1,0 +1,14 @@
+.venv
+.env
+secret/*
+uv.lock
+bin/
+utils/__pycache__
+utils/broadcast_stg.py
+utils/sign_payload_stg.py
+evm/transfer_token_evm_dev.py
+evm/transfer_native_evm_dev.py
+evm/sponsored_transactions_7702/sponsored_contract_call_evm.py
+solana/sponsored_token_transfer_solana_dev.py
+solana/sponsored_token_transfer_solana_dev_stg.py
+

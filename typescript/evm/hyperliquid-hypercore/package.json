@@ -15,14 +15,14 @@
   "type": "commonjs",
   "devDependencies": {
     "@types/node": "^22.13.11",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.2"
   },
   "dependencies": {
     "@msgpack/msgpack": "^3.1.2",
     "@nktkas/hyperliquid": "0.32.2",
-    "axios": "1.13.6",
+    "axios": "1.19.0",
     "dotenv": "16.6.1",
-    "ethers": "6.15",
-    "tsx": "^4.21.0"
+    "ethers": "6.17.0"
   }
 }

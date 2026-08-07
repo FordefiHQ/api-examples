@@ -48,7 +48,11 @@ export class FordefiApiClient {
 
     private assertSuccessful<T>(response: AxiosResponse<T>): T {
         if (response.status < 200 || response.status >= 300) {
-            throw new Error(`Fordefi API returned HTTP ${response.status}: ${JSON.stringify(response.data)}`);
+            // Truncated: the body reaches the same log sink as everything else, and an
+            // unbounded API error response should not flood it.
+            const body = JSON.stringify(response.data) ?? "";
+            const detail = body.length > 500 ? `${body.slice(0, 500)}… (truncated)` : body;
+            throw new Error(`Fordefi API returned HTTP ${response.status}: ${detail}`);
         }
         return response.data;
     }
@@ -118,8 +122,28 @@ export class FordefiApiClient {
         if (FAILURE_STATES.has(state)) throw new Error(`${label} ${transaction.id} failed with state: ${transaction.state}`);
     }
 
+    /**
+     * Strip credentials out of transport-layer errors.
+     *
+     * AxiosError attaches `config` (whose `headers` hold `Authorization: Bearer <token>`)
+     * and `request` (whose raw header buffer holds it a second time) as own enumerable
+     * properties, and axios defines no custom inspect hook. Returning one of these
+     * verbatim means any `console.error`, `util.inspect`, structured logger, or error
+     * reporter that touches it prints the long-lived Fordefi API token. Rebuild a bare
+     * Error carrying only the diagnostic fields.
+     *
+     * Redaction belongs here, at the boundary that knows which fields hold secrets,
+     * rather than at each call site that might log.
+     */
     private normalizeHttpError(error: unknown): Error {
-        if (error instanceof Error) return error;
-        return new Error(`Fordefi API request failed: ${String(error)}`);
+        if (!(error instanceof Error)) return new Error(`Fordefi API request failed: ${String(error)}`);
+        if (!axios.isAxiosError(error)) return error;
+
+        const parts = [error.message];
+        if (error.code) parts.push(`code=${error.code}`);
+        if (error.response?.status) parts.push(`status=${error.response.status}`);
+        const safe = new Error(`Fordefi API request failed: ${parts.join(" ")}`);
+        safe.stack = error.stack;
+        return safe;
     }
 }

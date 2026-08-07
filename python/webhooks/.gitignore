@@ -1,0 +1,20 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.DS_Store
+uv.lock
+
+# Virtual environments
+.venv
+.env
+
+/secret/*
+event.json
+bin/*
+live-events/live_fordefi_events.json
+live-events/live_paxos_events.json
+live-events/audit_alerts.json

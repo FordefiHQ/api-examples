@@ -1,0 +1,10 @@
+.env
+node_modules
+secret/*
+bin
+agent-private-key.json
+CLAUDE.md
+
+# package-lock.json is intentionally NOT ignored. Committing it pins the
+# dependency graph for a public example, so a fresh install cannot silently pull
+# a different version of a package that handles signing keys and API tokens.

@@ -1,7 +1,7 @@
 export type SignerType = "initiator" | "api_signer";
 export type SignMode = "auto" | "triggered";
 export type PushMode = "auto" | "manual" | "deferred";
-export type StellarChain = "stellar_mainnet";
+export type StellarChain = "stellar_mainnet" | "stellar_testnet";
 
 export interface FordefiStellarConfig {
   accessToken: string;

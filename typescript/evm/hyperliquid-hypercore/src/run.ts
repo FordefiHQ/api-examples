@@ -22,6 +22,8 @@ const handlers: ActionHandlers = {
 };
 
 export async function main(): Promise<void> {
+    const network = hyperliquidConfig.isTestnet ? "TESTNET" : "MAINNET (real funds)";
+    console.log(`Network: ${network} | action: ${hyperliquidConfig.action} | vault: ${fordefiConfig.address}`);
     const result = await dispatchAction(hyperliquidConfig, fordefiConfig.address, handlers);
     if (result !== undefined) console.log("Action result:", result);
 }

@@ -1,0 +1,5 @@
+.env
+node_modules
+secret/*
+package-lock.json
+bin

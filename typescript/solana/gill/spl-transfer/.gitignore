@@ -1,0 +1,10 @@
+node_modules
+package-lock.json
+.env
+.DS_Store
+
+# Signer folder containing your Fordefi .pem signing secret
+secret/*
+
+# Dev bin
+bin

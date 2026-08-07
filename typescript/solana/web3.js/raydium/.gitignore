@@ -1,0 +1,7 @@
+.env
+node_modules
+withdraw_tx.json
+secret/*
+package-lock.json
+txs/*
+bin

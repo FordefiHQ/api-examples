@@ -14,7 +14,7 @@ export const fordefiConfig: FordefiStellarConfig = {
   accessToken: requireEnv("FORDEFI_API_USER_TOKEN"),
   apiPayloadSignKey: readSharedPrivateKey(),
   vaultId: requireEnv("FORDEFI_STELLAR_VAULT_ID"),
-  chain: "stellar_mainnet" as StellarChain,
+  chain: requireEnv("NETWORK") as StellarChain,
   pushMode: "auto" as PushMode,
 };
 

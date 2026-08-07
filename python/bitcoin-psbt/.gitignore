@@ -1,0 +1,23 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+uv.lock
+
+# macOS
+.DS_Store
+
+# Virtual environments
+.venv
+
+# Secret
+secret/*
+.env
+
+# Misc
+bin
+partially_sign
+psbt_output.txt
