@@ -3,6 +3,7 @@ import json
 import ecdsa
 import base64
 import hashlib
+import hmac
 import requests
 from pathlib import Path
 from threading import Lock
@@ -11,21 +12,30 @@ from dotenv import load_dotenv
 from ecdsa.util import sigdecode_der
 from datetime import datetime, timezone
 from typing import List, Optional
-from fastapi import FastAPI, Query, Request, HTTPException
+from fastapi import Depends, FastAPI, Header, Query, Request, HTTPException
 
 load_dotenv()
 
 FORDEFI_API_USER_TOKEN = os.getenv("FORDEFI_API_USER_TOKEN")
 FORDEFI_API_BASE_URL = "https://api.fordefi.com"
 ALLOWED_IPS = {"54.243.103.88"}  # Fordefi's NAT IP
+# Only trust X-Forwarded-For when a proxy you control overwrites it (ngrok, your load
+# balancer). The header is client-supplied, so trusting it on a directly-reachable
+# server lets anyone claim Fordefi's IP.
+TRUST_PROXY_HEADER = os.getenv("TRUST_PROXY_HEADER", "false").strip().lower() in {
+    "1", "true", "yes", "on"
+}
+# Shared secret for the admin routes below. They proxy FORDEFI_API_USER_TOKEN to the
+# Fordefi API, so they must never be reachable by an unauthenticated caller. Unset means
+# the routes refuse to serve rather than serve openly.
+ADMIN_API_TOKEN = os.getenv("ADMIN_API_TOKEN")
 public_key_path = Path("./public_key.pem")
 with open(public_key_path, "r") as f:
     FORDEFI_PUBLIC_KEY = f.read()
 signature_pub_key = ecdsa.VerifyingKey.from_pem(FORDEFI_PUBLIC_KEY)
 
 # Audit-log categories that should raise a security alert. The remaining
-# categories (vaults, address_book, address_group, vault_group, chains,
-# dapp_group) are logged as informational.
+# categories (vaults, chains) are logged as informational.
 SENSITIVE_CATEGORIES = {
     "policy",
     "quorum_threshold",
@@ -37,6 +47,10 @@ SENSITIVE_CATEGORIES = {
     "backup",
     "device_backup",
     "import_keys",
+    "address_book",
+    "address_group",
+    "vault_group",
+    "dapp_group"
 }
 
 app = FastAPI()
@@ -74,10 +88,40 @@ def verify_signature(signature: str, body: bytes) -> bool:
         return False
 
 def get_source_ip(request: Request) -> str:
-    forwarded_for = request.headers.get("x-forwarded-for")
-    if forwarded_for:
-        return forwarded_for.split(",")[0].strip()
+    """Resolve the caller's IP, consulting X-Forwarded-For only when configured to.
+
+    Requires uvicorn to run with --no-proxy-headers. Uvicorn's proxy-header middleware
+    is on by default and rewrites request.client.host from X-Forwarded-For for any
+    request arriving from 127.0.0.1, which would settle this before we are reached.
+    """
+    if TRUST_PROXY_HEADER:
+        forwarded_for = request.headers.get("x-forwarded-for")
+        if forwarded_for:
+            return forwarded_for.split(",")[0].strip()
     return request.client.host if request.client else "unknown"
+
+
+def require_admin_token(x_admin_token: Optional[str] = Header(default=None)) -> None:
+    """Gate the admin routes on a shared secret sent as X-Admin-Token.
+
+    The webhook route authenticates callers by ECDSA signature, but these routes are
+    called by you, not Fordefi, so there is no signature to check. They hand your API
+    user's token to the Fordefi API on the caller's behalf — reading the organization's
+    audit log and triggering webhook deliveries — so an open route here is an
+    unauthenticated read of who did what in your organization.
+    """
+    if not ADMIN_API_TOKEN:
+        raise HTTPException(
+            status_code=HTTPStatus.SERVICE_UNAVAILABLE,
+            detail="Admin routes are disabled: set ADMIN_API_TOKEN to enable them",
+        )
+    if not x_admin_token or not hmac.compare_digest(
+        x_admin_token.encode("utf-8"), ADMIN_API_TOKEN.encode("utf-8")
+    ):
+        raise HTTPException(
+            status_code=HTTPStatus.UNAUTHORIZED,
+            detail="Missing or invalid X-Admin-Token",
+        )
 
 def describe_actor(created_by: dict) -> str:
     if not isinstance(created_by, dict):
@@ -143,7 +187,7 @@ async def audit_log_webhook(request: Request):
 
     return {"status": "ok"}
 
-@app.get("/audit-logs")
+@app.get("/audit-logs", dependencies=[Depends(require_admin_token)])
 async def list_audit_logs(
     page: Optional[int] = None,
     size: Optional[int] = None,
@@ -165,17 +209,24 @@ async def list_audit_logs(
         params=params,
     )
     if not response.ok:
-        raise HTTPException(status_code=response.status_code, detail=response.json())
+        # The upstream body stays in the log rather than going back to the caller.
+        print(f"⚠️  Audit-log request failed ({response.status_code}): {response.text}")
+        raise HTTPException(
+            status_code=response.status_code, detail="Failed to list audit-log records"
+        )
     return response.json()
 
-@app.post("/replay/{record_id}")
+@app.post("/replay/{record_id}", dependencies=[Depends(require_admin_token)])
 async def replay_audit_log(record_id: str):
     response = requests.post(
         f"{FORDEFI_API_BASE_URL}/api/v1/webhooks/trigger/audit-log/{record_id}",
         headers={"Authorization": f"Bearer {FORDEFI_API_USER_TOKEN}"},
     )
     if not response.ok:
-        raise HTTPException(status_code=response.status_code, detail=response.json())
+        print(f"⚠️  Replay request failed ({response.status_code}): {response.text}")
+        raise HTTPException(
+            status_code=response.status_code, detail="Failed to replay audit-log record"
+        )
     return {"status": "replayed", "audit_log_id": record_id}
 
-# uvicorn audit_logs_webhooks:app --host 0.0.0.0 --port 8080 --reload
+# uvicorn audit_logs_webhooks:app --host 127.0.0.1 --port 8080 --reload --no-proxy-headers

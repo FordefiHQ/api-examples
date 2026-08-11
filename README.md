@@ -30,7 +30,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
 - [Exchange transfers](python/exchange-transfers) (Binance and Coinbase International)
 - [Setting up Fordefi Webhooks](python/webhooks)
 - [Programatically signing Bitcoin PSBT](python/bitcoin-psbt) with a Segwit or Taproot address
-- [Custom Co-Signer](python/cosigner) for augmenting Fordefi's Policy engine with custom rules
+- [Custom API Approver](python/api-approver) for augmenting Fordefi's Policy engine with custom rules
 - [Signing messages](python/message-signing) with a Fordefi vault: EVM (EIP-712 typed and EIP-191 personal messages), Solana, Tron, and Starknet
 - [Programmatically adding a contact address or a batch of contact addresses](python/address-book) to your Fordefi organization's Address Book
 - [Fordefi API CLI for AI agents](python/agent-cli) — transfers, contract calls, and swaps

@@ -19,6 +19,7 @@ from rules import (
     validate_cctp_bridge_recipient,
     validate_eip712_receiver,
     validate_oneinch_swap_receiver,
+    validate_origin_vault,
 )
 from rules.calldata import ABI_REGISTRY, ONEINCH_SWAP_V6_SELECTOR
 from rules.cctp_bridge_recipient import (
@@ -32,6 +33,7 @@ FIXTURES = Path(__file__).parent / "fixtures"
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 VAULT = "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73"
 OTHER_ADDRESS = "0x1111111111111111111111111111111111111111"
+SOLANA_VAULT = "9Wzw3aVCPnJmMe7SnRcXVWZC3jvbnhNP7Y5CbEkYLbNa"
 
 
 def make_config(origin_vault: str = VAULT) -> SimpleNamespace:
@@ -139,16 +141,22 @@ def deposit_for_burn_data(recipient: str, destination_domain: int = 0) -> bytes:
     )
 
 
-def cctp_transaction(data: bytes, accounts: list | None = None) -> dict:
+def cctp_transaction(
+    data: bytes, accounts: list | None = None, account_indexes: list | None = None
+) -> dict:
     accounts = accounts if accounts is not None else CCTP_ACCOUNTS
     return {
         "type": "solana_transaction",
+        # Signed by a Solana vault, while ORIGIN_VAULT is the EVM bridge destination.
+        "from": {"vault": {"address": SOLANA_VAULT}},
         "accounts": [{"address": {"address": pubkey}} for pubkey in accounts],
         "instructions": [
             {
                 "program": {"address": CCTP_V2_TOKEN_MESSENGER},
                 "data": base64.b64encode(data).decode(),
-                "account_indexes": list(range(len(accounts))),
+                "account_indexes": (
+                    account_indexes if account_indexes is not None else list(range(len(accounts)))
+                ),
             }
         ],
     }
@@ -201,6 +209,78 @@ class TestCctpBridge:
         }
         result = validate_cctp_bridge_recipient(make_context(transaction))
         assert result.verdict is Verdict.SKIPPED
+
+    def test_out_of_range_burn_token_index_aborts(self):
+        """A crafted account index must abort with a reason, not an IndexError."""
+        indexes = list(range(len(CCTP_ACCOUNTS)))
+        indexes[BURN_TOKEN_MINT_INDEX] = 999
+        result = validate_cctp_bridge_recipient(
+            make_context(cctp_transaction(deposit_for_burn_data(VAULT), account_indexes=indexes))
+        )
+        assert result.verdict is Verdict.ABORT
+        assert "out of range" in result.reason
+
+    def test_negative_burn_token_index_aborts(self):
+        indexes = list(range(len(CCTP_ACCOUNTS)))
+        indexes[BURN_TOKEN_MINT_INDEX] = -1
+        result = validate_cctp_bridge_recipient(
+            make_context(cctp_transaction(deposit_for_burn_data(VAULT), account_indexes=indexes))
+        )
+        assert result.verdict is Verdict.ABORT
+        assert "out of range" in result.reason
+
+    def test_invalid_base64_instruction_data_aborts(self):
+        transaction = cctp_transaction(deposit_for_burn_data(VAULT))
+        transaction["instructions"][0]["data"] = "not!valid!base64!"
+        result = validate_cctp_bridge_recipient(make_context(transaction))
+        assert result.verdict is Verdict.ABORT
+        assert "base64" in result.reason
+
+    def test_all_rules_pass_on_valid_bridge(self):
+        """The origin-vault rule must not abort a Solana bridge to an EVM ORIGIN_VAULT."""
+        result = run_rules(ALL_RULES, make_context(cctp_transaction(deposit_for_burn_data(VAULT))))
+        assert result.verdict is Verdict.PASSED
+
+
+class TestOriginVault:
+    def test_matching_vault_passes(self):
+        transaction = {"from": {"vault": {"address": VAULT}}}
+        assert validate_origin_vault(make_context(transaction)).verdict is Verdict.PASSED
+
+    def test_matching_vault_is_case_insensitive(self):
+        transaction = {"from": {"vault": {"address": VAULT.lower()}}}
+        assert validate_origin_vault(make_context(transaction)).verdict is Verdict.PASSED
+
+    def test_foreign_vault_aborts(self):
+        transaction = {"from": {"vault": {"address": OTHER_ADDRESS}}}
+        result = validate_origin_vault(make_context(transaction))
+        assert result.verdict is Verdict.ABORT
+        assert "not the origin vault" in result.reason
+
+    def test_unresolvable_vault_fails_closed(self):
+        result = validate_origin_vault(make_context({}))
+        assert result.verdict is Verdict.ABORT
+
+    def test_managed_transaction_data_fallback_resolves(self):
+        transaction = {"managed_transaction_data": {"vault": {"address": VAULT}}}
+        assert validate_origin_vault(make_context(transaction)).verdict is Verdict.PASSED
+
+    def test_different_chain_family_skips(self):
+        transaction = {"from": {"vault": {"address": SOLANA_VAULT}}}
+        result = validate_origin_vault(make_context(transaction))
+        assert result.verdict is Verdict.SKIPPED
+
+    def test_bare_native_transfer_from_foreign_vault_is_not_approved(self):
+        """The gap this rule closes: a value transfer with no calldata used to have
+        every rule skip, and an all-skipped run is an approval."""
+        transaction = {
+            "type": "evm_transaction",
+            "from": {"vault": {"address": OTHER_ADDRESS}, "address": OTHER_ADDRESS},
+            "to": {"address": OTHER_ADDRESS},
+            "value": "1000000000000000000",
+        }
+        result = run_rules(ALL_RULES, make_context(transaction))
+        assert result.verdict is Verdict.ABORT
 
 
 class TestEip712Receiver:

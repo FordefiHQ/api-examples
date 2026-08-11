@@ -4,7 +4,7 @@ import logging
 import ecdsa
 from ecdsa.util import sigdecode_der
 
-logger = logging.getLogger("cosigner.signature")
+logger = logging.getLogger("approver.signature")
 
 
 class SignatureVerifier:

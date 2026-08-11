@@ -4,7 +4,7 @@ from typing import Dict
 
 REQUEST_TIMEOUT = (5, 15)  # (connect, read) seconds
 
-logger = logging.getLogger("cosigner.api")
+logger = logging.getLogger("approver.api")
 
 
 class FordefiAPIError(Exception):
@@ -66,9 +66,11 @@ class FordefiAPI:
             error_details = self._extract_error_details(error)
             # 400 means the transaction already left waiting_for_approval — a benign
             # race with another approver or a webhook retry, so treat it as a no-op.
+            # Logged at WARNING because a malformed request also surfaces as 400: if
+            # every decision "skips", the calls are failing rather than racing.
             if self._is_bad_request_error(error):
-                logger.info(
-                    "Transaction %s %s skipped, state already changed (%s)",
+                logger.warning(
+                    "Transaction %s %s skipped, state already changed or request rejected (%s)",
                     transaction_id, action, error_details,
                 )
                 return

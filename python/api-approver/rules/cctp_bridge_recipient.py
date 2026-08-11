@@ -1,4 +1,5 @@
 import base64
+import binascii
 
 from .base import RuleContext, RuleResult
 
@@ -41,7 +42,10 @@ def validate_cctp_bridge_recipient(context: RuleContext) -> RuleResult:
     expected_recipient = b"\x00" * 12 + bytes.fromhex(context.config.origin_vault.removeprefix("0x"))
 
     for instruction in cctp_instructions:
-        data = base64.b64decode(instruction.get("data") or "")
+        try:
+            data = base64.b64decode(instruction.get("data") or "", validate=True)
+        except (binascii.Error, ValueError) as error:
+            return RuleResult.abort(f"CCTP instruction data is not valid base64: {error}")
 
         if data[:8] != DEPOSIT_FOR_BURN_DISCRIMINATOR:
             return RuleResult.abort(f"unrecognized CCTP instruction (discriminator {data[:8].hex()})")
@@ -64,7 +68,16 @@ def validate_cctp_bridge_recipient(context: RuleContext) -> RuleResult:
         accounts = transaction.get("accounts") or []
         if len(account_indexes) <= BURN_TOKEN_MINT_INDEX:
             return RuleResult.abort("depositForBurn instruction has too few accounts")
-        mint_account = accounts[account_indexes[BURN_TOKEN_MINT_INDEX]]
+        # Both hops are attacker-influenced, so bound each one rather than relying on
+        # the runner's fail-closed catch: an IndexError would abort with a raw traceback
+        # instead of a reason an operator can act on.
+        mint_index = account_indexes[BURN_TOKEN_MINT_INDEX]
+        if not isinstance(mint_index, int) or not 0 <= mint_index < len(accounts):
+            return RuleResult.abort(
+                f"depositForBurn burn-token account index {mint_index} is out of range "
+                f"for {len(accounts)} accounts"
+            )
+        mint_account = accounts[mint_index] or {}
         mint_address = (mint_account.get("address") or {}).get("address")
         if mint_address != USDC_MINT_SOLANA:
             return RuleResult.abort(f"burned token {mint_address} is not USDC")
