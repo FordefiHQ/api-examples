@@ -67,9 +67,9 @@ Code examples for using the Fordefi API in Python and TypeScript.
     - [Programmatically stake, unstake and withdraw SOL](typescript/solana/solana-kit/staking) from any validator
     - [Programmatic fixed delegations and subscriptions](typescript/solana/solana-kit/fixed-delegation)
     - [An Anchor program for batching SPL transfers](typescript/solana/solana-kit/batcher-program)
+    - [Solana gas station](typescript/solana/solana-kit/gas-station) (one vault pays fees, another provides tokens)
   - With [`gill`](typescript/solana/gill):
     - [SPL token transfers](typescript/solana/gill/spl-transfer)
-    - [Solana gas station](typescript/solana/gill/solana-gas-station) (one vault pays fees, another provides tokens)
 - On Stellar:
   - [Establishing trustlines](typescript/stellar/change-trust), [claiming claimable balances](typescript/stellar/claim-claimable-balance), [submitting raw transactions](typescript/stellar/raw-transaction), and [signing messages](typescript/stellar/sign-message)
 - On Starknet:
