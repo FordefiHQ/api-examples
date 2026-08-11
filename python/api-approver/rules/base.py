@@ -7,7 +7,7 @@ from typing import Callable, Dict, List, Optional
 from fordefi import Config
 from .calldata import DecodedCall
 
-logger = logging.getLogger("cosigner.rules")
+logger = logging.getLogger("approver.rules")
 
 
 class Verdict(Enum):

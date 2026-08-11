@@ -15,6 +15,12 @@ load_dotenv()
 
 FORDEFI_API_USER_TOKEN = os.getenv("FORDEFI_API_USER_TOKEN")
 ALLOWED_IPS = {"54.243.103.88"}  # Fordefi's NAT IP
+# Only trust X-Forwarded-For when a proxy you control overwrites it (ngrok, your load
+# balancer). The header is client-supplied, so trusting it on a directly-reachable
+# server lets anyone claim Fordefi's IP.
+TRUST_PROXY_HEADER = os.getenv("TRUST_PROXY_HEADER", "false").strip().lower() in {
+    "1", "true", "yes", "on"
+}
 public_key_path = Path("./public_key.pem")
 with open(public_key_path, "r") as f:
     FORDEFI_PUBLIC_KEY = f.read()
@@ -58,9 +64,16 @@ async def health_check():
     return {"status": "online"}
 
 def get_source_ip(request: Request) -> str:
-    forwarded_for = request.headers.get("x-forwarded-for")
-    if forwarded_for:
-        return forwarded_for.split(",")[0].strip()
+    """Resolve the caller's IP, consulting X-Forwarded-For only when configured to.
+
+    Requires uvicorn to run with --no-proxy-headers. Uvicorn's proxy-header middleware
+    is on by default and rewrites request.client.host from X-Forwarded-For for any
+    request arriving from 127.0.0.1, which would settle this before we are reached.
+    """
+    if TRUST_PROXY_HEADER:
+        forwarded_for = request.headers.get("x-forwarded-for")
+        if forwarded_for:
+            return forwarded_for.split(",")[0].strip()
     return request.client.host if request.client else "unknown"
 
 @app.post("/")
@@ -107,4 +120,4 @@ async def fordefi_webhook(request: Request):
 
     return {"status": "ok"}
 
-# uvicorn fordefi_webhooks:app --host 0.0.0.0 --port 8080 --reload
+# uvicorn fordefi_webhooks:app --host 0.0.0.0 --port 8080 --reload --no-proxy-headers

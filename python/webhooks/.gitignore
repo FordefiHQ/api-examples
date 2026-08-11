@@ -15,6 +15,7 @@ uv.lock
 /secret/*
 event.json
 bin/*
-live-events/live_fordefi_events.json
-live-events/live_paxos_events.json
-live-events/audit_alerts.json
+# Everything written by a running server: real events carry your organization's user
+# names, emails and actions, and this repo mirrors publicly. Ignore the directory
+# wholesale rather than naming files one at a time (audit_events.json was missed).
+live-events/

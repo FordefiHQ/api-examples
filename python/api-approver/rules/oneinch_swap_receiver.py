@@ -22,6 +22,10 @@ def validate_oneinch_swap_receiver(context: RuleContext) -> RuleResult:
         return RuleResult.abort("1inch swap calldata could not be decoded")
 
     dst_receiver = context.decoded_call.args["desc"][DST_RECEIVER_INDEX]
+    # Compared against the initiator rather than config.origin_vault, unlike the other
+    # rules. validate_origin_vault already pins the initiator to the origin vault, so
+    # the two are equivalent in the shipped rule set — but if you drop that rule, this
+    # one only guarantees the swap pays back to whichever vault signed it.
     from_address = (context.transaction.get("from") or {}).get("address", "")
     if not from_address:
         return RuleResult.abort("transaction has no from address")

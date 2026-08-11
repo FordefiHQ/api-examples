@@ -22,7 +22,7 @@ fordefi_secret/
 *.pem
 *.key
 agent-private-key*.json
-# Public keys are legitimately tracked (webhook/cosigner signature verification).
+# Public keys are legitimately tracked (webhook/API-approver signature verification).
 !*public_key*.pem
 !*public*.pem
 

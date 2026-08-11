@@ -11,7 +11,7 @@ class FunctionAbi:
     arg_types: Tuple[str, ...]  # eth_abi type strings; structs written as "(address,uint256,...)"
 
 
-# Function selectors the CoSigner knows how to decode. To validate a new contract call,
+# Function selectors the API Approver knows how to decode. To validate a new contract call,
 # add its selector and signature here, then read the decoded arguments from your rule.
 ABI_REGISTRY: Dict[str, FunctionAbi] = {
     # 1inch AggregationRouterV6.swap

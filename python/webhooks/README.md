@@ -32,6 +32,16 @@ It exposes a single POST endpoint which:
    Create a `.env` file in the same directory with:
    ```plaintext
    FORDEFI_API_USER_TOKEN="your_api_user_token"
+
+   # Trust X-Forwarded-For when resolving the caller's IP. Defaults to false, which uses
+   # the socket peer address so the header cannot be spoofed. Set it to true ONLY behind a
+   # proxy that overwrites the header — ngrok testing needs it, since the request reaches
+   # the server from 127.0.0.1.
+   TRUST_PROXY_HEADER=false
+
+   # Required only by audit_logs_webhooks.py, to authenticate its admin routes.
+   # Generate one with: python -c "import secrets; print(secrets.token_urlsafe(32))"
+   ADMIN_API_TOKEN="a_long_random_string"
    ```
 
 3. Obtain the Fordefi public key [here](https://docs.fordefi.com/developers/webhooks#validate-a-webhook) and save it as `public_key.pem` in the same directory as the app.py file.
@@ -51,10 +61,12 @@ It exposes a single POST endpoint which:
 
 Start the webhook server with:
 ```bash
-uvicorn fordefi_webhooks:app --host 0.0.0.0 --port 8080 --reload
+uvicorn fordefi_webhooks:app --host 0.0.0.0 --port 8080 --reload --no-proxy-headers
 ```
 
 This will start a FastAPI server on port 8080 that listens for webhook events from Fordefi.
+
+**`--no-proxy-headers` is not optional.** Uvicorn's proxy-header middleware is on by default and trusts `X-Forwarded-For` from `127.0.0.1`, so it rewrites the client IP from a client-supplied header *before* the app sees the request — defeating both `TRUST_PROXY_HEADER` and the `ALLOWED_IPS` check. The flag hands IP resolution back to the app.
 
 You can now use tools like ngrok to expose your local webhook server to the internet for testing:
 
@@ -62,7 +74,11 @@ You can now use tools like ngrok to expose your local webhook server to the inte
 ngrok http 8080
 ```
 
+Set `TRUST_PROXY_HEADER=true` when running behind ngrok: the request arrives from `127.0.0.1`, so Fordefi's real IP only survives in `X-Forwarded-For`. Turn it back off for any deployment reachable directly.
+
 Then configure your Fordefi webhook to use the ngrok URL.
+
+> The IP allowlist is defense in depth, not the primary control. Signature verification is what actually authenticates Fordefi, and it always runs.
 
 ### Configuring Fordefi Webhooks
 
@@ -79,16 +95,32 @@ A second server that monitors your organization's [audit log](https://docs.forde
 Routes:
 
 - `POST /` — webhook receiver; verifies the `X-Signature` header, then classifies the audit record by `category`. Sensitive events are printed as 🚨 alerts and appended to `live-events/audit_alerts.json`; everything else goes to `live-events/audit_events.json`. Edit `SENSITIVE_CATEGORIES` in the file to tune what counts as an alert.
-- `GET /audit-logs` — lists audit-log records via [`GET /api/v1/audit-log`](https://docs.fordefi.com/api/openapi/audit-log/list_audit_log_records_api_v1_audit_log_get). Supports `page`, `size`, `category` (repeatable), `created_after`, and `created_before` query parameters.
-- `POST /replay/{record_id}` — re-delivers a specific audit-log record to your configured webhooks via [`POST /api/v1/webhooks/trigger/audit-log/{id}`](https://docs.fordefi.com/api/openapi/webhooks/trigger_audit_log_webhook_api_v1_webhooks_trigger_audit_log__id__post). Useful for testing your pipeline end-to-end or re-processing an event your server missed.
+- `GET /audit-logs` — lists audit-log records via [`GET /api/v1/audit-log`](https://docs.fordefi.com/api/openapi/audit-log/list_audit_log_records_api_v1_audit_log_get). Supports `page`, `size`, `category` (repeatable), `created_after`, and `created_before` query parameters. **Requires `X-Admin-Token`.**
+- `POST /replay/{record_id}` — re-delivers a specific audit-log record to your configured webhooks via [`POST /api/v1/webhooks/trigger/audit-log/{id}`](https://docs.fordefi.com/api/openapi/webhooks/trigger_audit_log_webhook_api_v1_webhooks_trigger_audit_log__id__post). Useful for testing your pipeline end-to-end or re-processing an event your server missed. **Requires `X-Admin-Token`.**
 - `GET /health` — liveness check.
 
-Start it with:
+### Securing the admin routes
+
+`POST /` authenticates its caller by ECDSA signature, because Fordefi is the caller. The other two routes are called by *you*, so there is no signature to check — and they pass your `FORDEFI_API_USER_TOKEN` to the Fordefi API on the caller's behalf. Left open on a public URL, `GET /audit-logs` is an unauthenticated read of who did what in your organization: user management, authentication events, policy changes, and the names and emails behind them.
+
+So both routes require a shared secret in an `X-Admin-Token` header, compared against `ADMIN_API_TOKEN` from your `.env`. If `ADMIN_API_TOKEN` is unset, the routes return `503` rather than serving openly.
+
+Bind this server to loopback unless you specifically need it exposed, and give the webhook receiver its own process if you need one public and the other not:
+
 ```bash
-uvicorn audit_logs_webhooks:app --host 0.0.0.0 --port 8080 --reload
+uvicorn audit_logs_webhooks:app --host 127.0.0.1 --port 8080 --reload --no-proxy-headers
 ```
 
-When configuring the webhook in the Fordefi console (Settings > Webhooks), select **Audit logs** as the trigger type and point it at your server's public URL (e.g., via ngrok). To test the full loop, fetch a record ID from `GET /audit-logs`, then `POST /replay/{record_id}` — the replayed event will arrive back at `POST /` and be classified.
+When configuring the webhook in the Fordefi console (Settings > Webhooks), select **Audit logs** as the trigger type and point it at your server's public URL (e.g., via ngrok). To test the full loop:
+
+```bash
+curl -H "X-Admin-Token: $ADMIN_API_TOKEN" localhost:8080/audit-logs
+curl -X POST -H "X-Admin-Token: $ADMIN_API_TOKEN" localhost:8080/replay/<record_id>
+```
+
+The replayed event will arrive back at `POST /` and be classified.
+
+> Events written to `live-events/` contain real audit data from your organization. The whole directory is git-ignored — keep it that way.
 
 ## Webhook delivery timeout (how fast your server must respond)
 

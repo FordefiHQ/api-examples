@@ -1,7 +1,7 @@
 [project]
-name = "fordefi-cosigner"
+name = "fordefi-api-approver"
 version = "0.1.0"
-description = "Fordefi CoSigner example: programmatic transaction validation that augments Fordefi Policy rules"
+description = "Fordefi API Approver example: programmatic transaction validation that augments Fordefi Policy rules"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

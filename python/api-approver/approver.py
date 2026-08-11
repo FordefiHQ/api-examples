@@ -1,10 +1,14 @@
-"""Fordefi CoSigner — programmatic transaction validation that augments Fordefi Policy.
+"""Fordefi API Approver — programmatic transaction validation that augments Fordefi Policy.
 
 Fordefi notifies this service (via webhook) whenever a transaction is waiting for
-approval. The CoSigner fetches the full transaction from the Fordefi API, runs it
+approval. The API Approver fetches the full transaction from the Fordefi API, runs it
 through the rules in rules/, and approves or aborts it accordingly. This lets you
 enforce checks that native Policy rules cannot express, such as validating a deeply
 nested EIP-712 field or a decoded calldata argument.
+
+An API Approver does *not* cryptographically sign anything — signing stays with
+Fordefi's MPC infrastructure. It only casts an approve/abort vote with an API User
+token, which is why its rules are a check on top of Policy rather than a replacement.
 
 Response semantics: any 2xx tells Fordefi the event is handled (decision made or
 nothing to do); any other status makes Fordefi retry the webhook with backoff.
@@ -20,10 +24,15 @@ from fastapi import FastAPI, Request, HTTPException
 from fordefi import Config, FordefiAPI, FordefiAPIError, SignatureVerifier
 from rules import ALL_RULES, RuleContext, Verdict, decode_calldata, run_rules
 
+# Webhook bodies are a single transaction event; anything larger is not ours. The cap
+# is enforced before signature verification so an unauthenticated caller cannot make
+# the process buffer an arbitrary amount of data.
+MAX_BODY_BYTES = 1024 * 1024
+
 
 def configure_logging() -> None:
-    # Named loggers ("cosigner", "cosigner.api", "cosigner.rules") sit under the
-    # "cosigner" hierarchy and propagate to the root handler set up here, so the
+    # Named loggers ("approver", "approver.api", "approver.rules") sit under the
+    # "approver" hierarchy and propagate to the root handler set up here, so the
     # whole service shares one timestamped format. This is separate from uvicorn's
     # own loggers, so access logs are unaffected. Set LOG_LEVEL=DEBUG for more detail.
     level = os.environ.get("LOG_LEVEL", "INFO").upper()
@@ -34,14 +43,14 @@ def configure_logging() -> None:
     handlers: list[logging.Handler] = [console]
 
     # Persist every log line to a file for auditability. Rotates daily at midnight
-    # so each UTC day gets its own dated file (cosigner.log, cosigner.log.2026-07-03,
+    # so each UTC day gets its own dated file (approver.log, approver.log.2026-07-03,
     # ...); LOG_RETENTION_DAYS old files are pruned. LOG_DIR defaults to a
     # project-relative ./live-logs (writing to filesystem-root /live-logs would need
     # elevated permissions); point it at an absolute path in production.
     log_dir = Path(os.environ.get("LOG_DIR", "./live-logs"))
     log_dir.mkdir(parents=True, exist_ok=True)
     file_handler = TimedRotatingFileHandler(
-        log_dir / "cosigner.log",
+        log_dir / "approver.log",
         when="midnight",
         utc=True,
         backupCount=int(os.environ.get("LOG_RETENTION_DAYS", "90")),
@@ -50,11 +59,11 @@ def configure_logging() -> None:
     handlers.append(file_handler)
 
     logging.basicConfig(level=level, handlers=handlers)
-    logging.getLogger("cosigner").info("Writing audit logs to %s", log_dir.resolve())
+    logging.getLogger("approver").info("Writing audit logs to %s", log_dir.resolve())
 
 
 configure_logging()
-logger = logging.getLogger("cosigner")
+logger = logging.getLogger("approver")
 
 config = Config()
 fordefi_api = FordefiAPI(Config.FORDEFI_API_BASE_URL, config.api_user_token)
@@ -63,12 +72,23 @@ signature_verifier = SignatureVerifier(config.fordefi_public_key)
 app = FastAPI()
 
 
-def get_source_ip(request: Request) -> str:
-    # X-Forwarded-For is only trustworthy behind a proxy you control (ngrok, load
-    # balancer); when exposed directly, request.client.host is the real source.
-    forwarded_for = request.headers.get("x-forwarded-for")
-    if forwarded_for:
-        return forwarded_for.split(",")[0].strip()
+def get_source_ip(request: Request, trust_proxy_header: bool) -> str:
+    """Resolve the client IP to check against ALLOWED_SOURCE_IPS.
+
+    X-Forwarded-For is client-supplied and trivially spoofed, so it is only consulted
+    when TRUST_PROXY_HEADER says this service sits behind a proxy that overwrites it
+    (ngrok, a load balancer you control). Otherwise the socket peer is the only honest
+    answer — trusting the header by default would let anyone claim Fordefi's IP.
+
+    This only holds if uvicorn is started with --no-proxy-headers. Uvicorn's proxy-header
+    middleware is on by default and rewrites request.client.host from X-Forwarded-For for
+    any request arriving from 127.0.0.1, which would decide the question before this
+    function is reached. See the Hardening section of the README.
+    """
+    if trust_proxy_header:
+        forwarded_for = request.headers.get("x-forwarded-for")
+        if forwarded_for:
+            return forwarded_for.split(",")[0].strip()
     return request.client.host if request.client else "unknown"
 
 
@@ -79,12 +99,26 @@ async def health_check():
 
 @app.post("/")
 async def handle_webhook(request: Request):
-    raw_body = await request.body()
-
-    source_ip = get_source_ip(request)
+    # Authorize before reading the body: the IP check needs no payload, so an
+    # unauthorized caller never gets to allocate one.
+    source_ip = get_source_ip(request, config.trust_proxy_header)
     if source_ip not in Config.ALLOWED_SOURCE_IPS:
         logger.warning("Rejected webhook from unauthorized IP: %s", source_ip)
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail="Forbidden: IP not allowed")
+
+    content_length = request.headers.get("content-length")
+    if content_length and content_length.isdigit() and int(content_length) > MAX_BODY_BYTES:
+        logger.warning("Rejected oversized webhook body from %s: %s bytes", source_ip, content_length)
+        raise HTTPException(
+            status_code=HTTPStatus.REQUEST_ENTITY_TOO_LARGE, detail="Request body too large"
+        )
+
+    raw_body = await request.body()
+    if len(raw_body) > MAX_BODY_BYTES:
+        logger.warning("Rejected oversized webhook body from %s: %d bytes", source_ip, len(raw_body))
+        raise HTTPException(
+            status_code=HTTPStatus.REQUEST_ENTITY_TOO_LARGE, detail="Request body too large"
+        )
 
     signature = request.headers.get("X-Signature")
     if not signature:
@@ -115,6 +149,8 @@ async def handle_webhook(request: Request):
 
     # The webhook body only triggers the flow — validate against the transaction as
     # the Fordefi API reports it right now, not the (possibly stale) event snapshot.
+    # This is also what makes a replayed webhook harmless: on a replay the transaction
+    # has already left waiting_for_approval, so the check below turns it into a no-op.
     try:
         transaction = fordefi_api.fetch_transaction(transaction_id)
     except FordefiAPIError as error:
@@ -146,5 +182,9 @@ async def handle_webhook(request: Request):
         return {"decision": "approved"}
     except FordefiAPIError as error:
         # Let Fordefi retry the webhook; the fresh-state check above makes retries safe.
+        # The error text can carry the upstream response body, so it stays in the log
+        # rather than going back over the wire.
         logger.error("Failed to submit decision for transaction %s: %s", transaction_id, error)
-        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(error))
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Failed to submit decision"
+        )
