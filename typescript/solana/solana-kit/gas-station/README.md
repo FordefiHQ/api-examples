@@ -14,7 +14,7 @@ A TypeScript tool for executing Solana SPL token transfers using multiple vault 
 >
 > Fordefi then covers the fees from that vault on behalf of the origin vault. No setup is required on Solana, and the whole transaction is handled in one API request.
 >
-> This example is useful for understanding what that native flow does under the hood, or if you need to assemble the partially signed message yourself, or if you're using a Waas organization, since Waas organizations don't support native fee sponsorship at the moment.
+> We recommend using the native fee sponsorship flow. This example is useful for understanding what that native flow does under the hood, or if you need to assemble the partially signed message yourself, or if you're using a Waas organization, since Waas organizations don't support native fee sponsorship at the moment.
 
 ## Overview
 
