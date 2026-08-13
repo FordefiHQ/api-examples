@@ -12,12 +12,14 @@ export interface FordefiSolanaConfig {
     feePayerVault: string;
     privateKeyPem: string;
     apiPathEndpoint: string;
+    rpcUrl: string;
+    chain: string;
     tokenMint: string;
     decimals: bigint;
     amount: bigint;
     durableNonceAccount?: string
   };
-  
+
 export const fordefiConfig: FordefiSolanaConfig = {
     accessToken: process.env.FORDEFI_API_TOKEN || "",
     originVault: process.env.ORIGIN_VAULT || "",
@@ -27,7 +29,9 @@ export const fordefiConfig: FordefiSolanaConfig = {
     feePayerVault: process.env.FEE_PAYER_VAULT || "",
     privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
     apiPathEndpoint: '/api/v1/transactions',
-    tokenMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // Mainnet USDC
+    rpcUrl: 'https://api.devnet.solana.com', // or https://api.mainnet.solana.com
+    chain: 'solana_devnet', // must match rpcUrl above: solana_mainnet or solana_devnet
+    tokenMint: '4F6PM96JJxngmHnZLBh9n58RH4aTVNWvDs2nuwrT5BP7', // Devnet USDG (Token-2022)
     decimals: 6n,
-    amount: 1_000n, // 1 USCD = 1_000_000n
+    amount: 1_000n, // 1 USDG = 1_000_000n
 };

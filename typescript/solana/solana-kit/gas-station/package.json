@@ -1,0 +1,24 @@
+{
+    "name": "@fordefi/solana-gas-station",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "gas": "tsx ./src/run.ts"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "Solana gas station: one Fordefi vault pays the network fees while another provides the SPL tokens",
+    "devDependencies": {
+        "@types/node": "^22.10.2",
+        "typescript": "^5.7.2"
+    },
+    "dependencies": {
+        "@solana-program/compute-budget": "^0.16.0",
+        "@solana-program/token": "^0.14.0",
+        "@solana/kit": "^6.5.0",
+        "axios": "1.13.2",
+        "dotenv": "16.4.7",
+        "tsx": "^4.20.6"
+    }
+}

@@ -2,3 +2,8 @@
 node_modules/
 package-lock.json
 dist/
+
+# Local-only signing-scheme probe. Its finding is documented in README.md
+# (see "Security: what a message signature can be reused for").
+src/probe-signing-scheme.ts
+src/signing-schemes.ts
