@@ -7,7 +7,7 @@ import {
 import {
   findFixedDelegationPda,
   findSubscriptionAuthorityPda,
-  getTransferFixedInstruction,
+  getTransferFixedInstructionAsync,
 } from '@solana/subscriptions';
 import { fordefiConfig, delegationConfig } from './config';
 import { buildFordefiTxBody, signAndSubmit } from '../utils/fordefi-submit';
@@ -18,7 +18,7 @@ async function main(): Promise<void> {
     return
   }
   if (!fordefiConfig.delegateeVault) {
-    console.error('Error: DELEGATEE_VAULT environment variable is not set (the delegatee signs the transfer)');
+    console.error('Error: DELEGATEE_VAULT_ID environment variable is not set (the delegatee signs the transfer)');
     return
   }
   const delegator = kit.address(fordefiConfig.delegatorAddress);
@@ -61,7 +61,8 @@ async function main(): Promise<void> {
     tokenProgram: TOKEN_PROGRAM_ADDRESS,
   });
 
-  const transferIx = getTransferFixedInstruction({
+  // Async variant derives the program's event-authority PDA for us
+  const transferIx = await getTransferFixedInstructionAsync({
     delegationPda,
     subscriptionAuthority: subscriptionAuthorityPda,
     delegatorAta,

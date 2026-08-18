@@ -22,11 +22,11 @@ export interface FordefiSolanaConfig {
 
 export const fordefiConfig: FordefiSolanaConfig = {
     accessToken: process.env.FORDEFI_API_TOKEN || "",
-    originVault: process.env.ORIGIN_VAULT || "",
-    originAddress: process.env.ORIGIN_ADDRESS || "",
-    destAddress: process.env.DESTINATION_ADDRES || "",
-    feePayer: process.env.FEE_PAYER_ADDRESS || "",
-    feePayerVault: process.env.FEE_PAYER_VAULT || "",
+    originVault: process.env.FORDEFI_VAULT_ID || "",
+    originAddress: process.env.FORDEFI_VAULT_ADDRESS || "",
+    destAddress: process.env.DESTINATION_ADDRESS || "",
+    feePayer: process.env.FEE_PAYER_VAULT_ADDRESS || "",
+    feePayerVault: process.env.FEE_PAYER_VAULT_ID || "",
     privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
     apiPathEndpoint: '/api/v1/transactions',
     rpcUrl: 'https://api.devnet.solana.com', // or https://api.mainnet.solana.com

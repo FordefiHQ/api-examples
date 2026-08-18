@@ -51,8 +51,8 @@ Create a `.env` file in the project root with the following variables:
 ```env
 # Fordefi API Configuration
 FORDEFI_API_TOKEN=your_fordefi_api_token_here
-SOLANA_VAULT_ID=your_vault_id_here
-SOLANA_VAULT_ADDRESS=your_solana_vault_address_here
+FORDEFI_VAULT_ID=your_vault_id_here
+FORDEFI_VAULT_ADDRESS=your_solana_vault_address_here
 ```
 
 ### Private Key Setup

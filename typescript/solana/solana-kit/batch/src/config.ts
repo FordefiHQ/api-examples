@@ -20,10 +20,10 @@ export interface FordefiSolanaConfig {
 
 export const fordefiConfig: FordefiSolanaConfig = {
   accessToken: process.env.FORDEFI_API_TOKEN || "",
-  originVault: process.env.ORIGIN_VAULT || "",
-  originAddress: process.env.ORIGIN_ADDRESS || "",
-  destAddress: process.env.DESTINATION_ADDRES || "",
-  destAddress2: process.env.DESTINATION_ADDRES_2 || "",
+  originVault: process.env.FORDEFI_VAULT_ID || "",
+  originAddress: process.env.FORDEFI_VAULT_ADDRESS || "",
+  destAddress: process.env.DESTINATION_ADDRESS || "",
+  destAddress2: process.env.DESTINATION_ADDRESS_2 || "",
   privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
   apiPathEndpoint: '/api/v1/transactions',
   mainnetRpc: 'https://api.mainnet-beta.solana.com',

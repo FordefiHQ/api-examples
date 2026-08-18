@@ -20,10 +20,10 @@ npm install
 
 ```env
 FORDEFI_API_TOKEN=your_api_token
-DELEGATOR_VAULT=delegator_solana_vault_id
-DELEGATOR_ADDRESS=delegator_solana_vault_address
-DELEGATEE_VAULT=delegatee_solana_vault_id   # only required for the transfer script
-DELEGATEE_ADDRESS=delegatee_address
+DELEGATOR_VAULT_ID=delegator_solana_vault_id
+DELEGATOR_VAULT_ADDRESS=delegator_solana_vault_address
+DELEGATEE_VAULT_ID=delegatee_solana_vault_id   # only required for the transfer script
+DELEGATEE_VAULT_ADDRESS=delegatee_solana_vault_address
 ```
 
 2. Place your API User private key at `./secret/private.pem`
@@ -57,7 +57,7 @@ Initializes the per-(user, mint) Subscription Authority PDA if it doesn't exist 
 npm run transfer
 ```
 
-The delegatee pulls `transferAmount` from the delegator's token account to the receiver (the delegatee's own ATA by default), reducing the remaining allowance. Requires `DELEGATEE_VAULT` to be set.
+The delegatee pulls `transferAmount` from the delegator's token account to the receiver (the delegatee's own ATA by default), reducing the remaining allowance. Requires `DELEGATEE_VAULT_ID` to be set.
 
 ### 3. Revoke the delegation (signed by the delegator's vault)
 

@@ -1,0 +1,26 @@
+{
+  "name": "@fordefi/ripple-recipes",
+  "version": "1.0.0",
+  "description": "XRP Ledger transaction recipes via the Fordefi API",
+  "main": "index.js",
+  "scripts": {
+    "transfer:xrp": "npx tsx src/transfer-xrp.ts",
+    "transfer:token": "npx tsx src/transfer-token.ts",
+    "trustline": "npx tsx src/create-trustline.ts",
+    "checks:list": "npx tsx src/list-claimable-checks.ts",
+    "check:cash": "npx tsx src/cash-check.ts"
+  },
+  "keywords": ["fordefi", "ripple", "xrp", "xrpl", "trustline", "check"],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^22.13.11",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "axios": "1.16.0",
+    "dotenv": "16.6.1",
+    "tsx": "^4.21.0"
+  }
+}

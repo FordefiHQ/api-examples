@@ -18,9 +18,9 @@ npm install
 
 ```env
 FORDEFI_API_TOKEN=your_api_token
-ORIGIN_VAULT=your_solana_vault_id
-ORIGIN_ADDRESS=your_solana_vault_address
-DESTINATION_ADDRES=recipient_address
+FORDEFI_VAULT_ID=your_solana_vault_id
+FORDEFI_VAULT_ADDRESS=your_solana_vault_address
+DESTINATION_ADDRESS=recipient_address
 ```
 
 2. Place your API User private key at `./secret/private.pem`

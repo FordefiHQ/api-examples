@@ -27,8 +27,8 @@ This example demonstrates how to perform SPL token transfers on Solana using the
    Create a `.env` file in the project root:
    ```env
    FORDEFI_API_TOKEN=your_api_token_here
-   ORIGIN_VAULT=your_origin_vault_id
-   ORIGIN_ADDRESS=your_source_wallet_address
+   FORDEFI_VAULT_ID=your_solana_vault_id
+   FORDEFI_VAULT_ADDRESS=your_solana_vault_address
    DESTINATION_ADDRESS=recipient_wallet_address
    ```
 

@@ -48,8 +48,8 @@ export interface FordefiSolanaConfig {
 
 export const fordefiConfig: FordefiSolanaConfig = {
   accessToken: process.env.FORDEFI_API_TOKEN || "",
-  originVault: process.env.ORIGIN_VAULT || "",
-  originAddress: process.env.ORIGIN_ADDRESS || "",
+  originVault: process.env.FORDEFI_VAULT_ID || "",
+  originAddress: process.env.FORDEFI_VAULT_ADDRESS || "",
   privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
   apiPathEndpoint: '/api/v1/transactions',
   rpcUrl: RPC_URL,

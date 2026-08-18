@@ -27,10 +27,10 @@ export interface DelegationConfig {
 
 export const fordefiConfig: FordefiSolanaConfig = {
   accessToken: process.env.FORDEFI_API_TOKEN || "",
-  delegatorVault: process.env.DELEGATOR_VAULT || "",
-  delegatorAddress: process.env.DELEGATOR_ADDRESS || "",
-  delegateeVault: process.env.DELEGATEE_VAULT || "", // only required for the transfer script
-  delegateeAddress: process.env.DELEGATEE_ADDRESS || "",
+  delegatorVault: process.env.DELEGATOR_VAULT_ID || "",
+  delegatorAddress: process.env.DELEGATOR_VAULT_ADDRESS || "",
+  delegateeVault: process.env.DELEGATEE_VAULT_ID || "", // only required for the transfer script
+  delegateeAddress: process.env.DELEGATEE_VAULT_ADDRESS || "",
   privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
   apiPathEndpoint: '/api/v1/transactions',
   mainnetRpc: 'https://api.mainnet-beta.solana.com',

@@ -18,8 +18,8 @@ npm install
 
 ```env
 FORDEFI_API_TOKEN=your_api_token
-ORIGIN_VAULT=your_solana_vault_id
-ORIGIN_ADDRESS=your_solana_vault_address
+FORDEFI_VAULT_ID=your_solana_vault_id
+FORDEFI_VAULT_ADDRESS=your_solana_vault_address
 VALIDATOR_ADDRESS=validator_vote_account_address
 STAKE_ACCOUNT_ADDRESS=your_stake_account_address
 ```
