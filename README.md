@@ -72,6 +72,8 @@ Code examples for using the Fordefi API in Python and TypeScript.
     - [SPL token transfers](typescript/solana/gill/spl-transfer)
 - On Stellar:
   - [Establishing trustlines](typescript/stellar/change-trust), [claiming claimable balances](typescript/stellar/claim-claimable-balance), [submitting raw transactions](typescript/stellar/raw-transaction), and [signing messages](typescript/stellar/sign-message)
+- On the XRP Ledger (Ripple):
+  - [XRP and issued-token transfers, trust lines, and cashing checks](typescript/ripple)
 - On Starknet:
   - [Programmatic contract calls](typescript/starknet/contract-calls)
 - On Sui:

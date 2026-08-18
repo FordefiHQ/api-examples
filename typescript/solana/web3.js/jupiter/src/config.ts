@@ -6,8 +6,8 @@ dotenv.config()
 
 export const fordefiConfig: FordefiConfig = {
   accessToken: process.env.FORDEFI_API_TOKEN || "",
-  vaultId: process.env.VAULT_ID || "",
-  fordefiSolanaVaultAddress: process.env.VAULT_ADDRESS || "",
+  vaultId: process.env.FORDEFI_VAULT_ID || "",
+  fordefiSolanaVaultAddress: process.env.FORDEFI_VAULT_ADDRESS || "",
   privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
   apiPathEndpoint: '/api/v1/transactions'
 };

@@ -17,8 +17,8 @@ Helper code for creating and broadcasting Solana swaps with Jupiter, Meteora wit
 5. Create a `.env` file in the root directory with the following variable:
    ```typescript
    FORDEFI_API_TOKEN="<your_api_user_token>" // Your Fordefi API User JWT
-   VAULT_ID="<your_fordefi_solana_vault_id>"
-   VAULT_ADDRESS="<your_fordefi_solana_vault_address>"
+   FORDEFI_VAULT_ID="<your_fordefi_solana_vault_id>"
+   FORDEFI_VAULT_ADDRESS="<your_fordefi_solana_vault_address>"
    ```
 6. Create a `/secret` folder at the root of the `fordefi-jito` project and place your API User's `private.pem` private key file in the folder.
 

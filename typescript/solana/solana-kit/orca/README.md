@@ -41,8 +41,8 @@ This helper code allows you to programmatically interact with Orca DEX on Solana
 3. Create a `.env` file in the root directory with the following variables:
    ```
    FORDEFI_API_TOKEN=your_fordefi_api_user_token
-   VAULT_ID=your_fordefi_vault_id
-   VAULT_ADDRESS=your_fordefi_solana_wallet_address
+   FORDEFI_VAULT_ID=your_fordefi_vault_id
+   FORDEFI_VAULT_ADDRESS=your_fordefi_solana_wallet_address
    ORCA_POSITION_MINT_ADDRESS=your_position_mint_address_if_applicable
    ```
 
@@ -140,8 +140,8 @@ The `fordefiConfig` object contains all necessary configurations for interacting
 ```typescript
 export const fordefiConfig: FordefiSolanaConfig = {
   accessToken: process.env.FORDEFI_API_TOKEN || "",
-  vaultId: process.env.VAULT_ID || "",
-  fordefiSolanaVaultAddress: process.env.VAULT_ADDRESS || "",
+  vaultId: process.env.FORDEFI_VAULT_ID || "",
+  fordefiSolanaVaultAddress: process.env.FORDEFI_VAULT_ADDRESS || "",
   privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
   apiPathEndpoint: '/api/v1/transactions/create-and-wait'
 };

@@ -22,8 +22,8 @@ export interface FordefiSolanaConfig {
 
 export const fordefiConfig: FordefiSolanaConfig = {
   accessToken: process.env.FORDEFI_API_TOKEN || "",
-  originVaultId: process.env.ORIGIN_VAULT || "",
-  originVaultAddress: process.env.ORIGIN_ADDRESS || "",
+  originVaultId: process.env.FORDEFI_VAULT_ID || "",
+  originVaultAddress: process.env.FORDEFI_VAULT_ADDRESS || "",
   privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
   apiPathEndpoint: '/api/v1/transactions',
   mainnetRpc: 'https://api.mainnet-beta.solana.com',

@@ -61,7 +61,7 @@ Scripts in `app/fordefi/` handle signing through Fordefi's API:
 3. Fordefi signs with its MPC vault and optionally broadcasts
 4. The script polls until the transaction reaches `signed`/`mined` state
 
-Configuration is loaded from environment variables — see `app/fordefi/config.ts` for required values (`FORDEFI_ACCESS_TOKEN`, `FORDEFI_VAULT_ID`, `FORDEFI_ORIGIN_ADDRESS`, etc.).
+Configuration is loaded from environment variables — see `app/config.ts` for required values (`FORDEFI_API_TOKEN`, `FORDEFI_VAULT_ID`, `FORDEFI_VAULT_ADDRESS`).
 
 ## Build & Test
 

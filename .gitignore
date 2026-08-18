@@ -2,6 +2,9 @@
 .DS_Store
 git-management.txt
 
+# Local OpenAPI spec baseline — internal reference, not for the public mirror.
+openapi_baseline.json
+
 # AGENTS
 .claude
 .agents
@@ -26,5 +29,3 @@ agent-private-key*.json
 !*public_key*.pem
 !*public*.pem
 
-# Misc
-openapi_baseline.json

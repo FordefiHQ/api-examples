@@ -12,7 +12,7 @@ import { PublicKey, Connection, clusterApiUrl } from '@solana/web3.js';
 
 async function main(): Promise<void> {
   if (!fordefiConfig.accessToken || !fordefiConfig.vaultId || !fordefiConfig.fordefiSolanaVaultAddress) {
-    console.error('Error: Please set FORDEFI_API_TOKEN, SOLANA_VAULT_ID, and SOLANA_VAULT_ADDRESS environment variables.');
+    console.error('Error: Please set FORDEFI_API_TOKEN, FORDEFI_VAULT_ID, and FORDEFI_VAULT_ADDRESS environment variables.');
     return;
   }
 

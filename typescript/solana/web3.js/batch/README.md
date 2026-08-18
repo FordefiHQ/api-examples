@@ -31,8 +31,8 @@ Helper code for performing batch transfers on Solana using your Fordefi Solana v
 3. Create a `.env` file in the root directory with the following variables:
    ```
    FORDEFI_API_TOKEN=your_fordefi_api_user_token
-   VAULT_ID=your_fordefi_solana_vault_id
-   VAULT_ADDRESS=your_fordefi_solana_vault_address
+   FORDEFI_VAULT_ID=your_fordefi_solana_vault_id
+   FORDEFI_VAULT_ADDRESS=your_fordefi_solana_vault_address
    ```
 
 4. Create a `secret` directory and place your API user's private key file inside:

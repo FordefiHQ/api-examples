@@ -60,25 +60,25 @@ Create a `.env` file in the project root with the following variables:
 FORDEFI_API_TOKEN=your_fordefi_api_token_here
 
 # Vault Configuration
-ORIGIN_VAULT=vault_id_containing_tokens_to_transfer
-ORIGIN_ADDRESS=public_address_of_origin_vault
+FORDEFI_VAULT_ID=vault_id_containing_tokens_to_transfer
+FORDEFI_VAULT_ADDRESS=public_address_of_vault_holding_tokens
 
 # Destination Configuration  
-DESTINATION_ADDRES=destination_public_address_for_tokens
+DESTINATION_ADDRESS=destination_public_address_for_tokens
 
 # Fee Payer Configuration
-FEE_PAYER_ADDRESS=public_address_of_fee_payer_vault
-FEE_PAYER_VAULT=vault_id_that_will_pay_transaction_fees
+FEE_PAYER_VAULT_ADDRESS=public_address_of_fee_payer_vault
+FEE_PAYER_VAULT_ID=vault_id_that_will_pay_transaction_fees
 ```
 
 ### Configuration Details
 
 - **FORDEFI_API_TOKEN**: Your Fordefi API access token
-- **ORIGIN_VAULT**: The vault ID that contains the tokens you want to transfer
-- **ORIGIN_ADDRESS**: The public address (base58) of the origin vault
-- **DESTINATION_ADDRES**: The public address where tokens will be sent
-- **FEE_PAYER_ADDRESS**: The public address of the vault that will pay transaction fees
-- **FEE_PAYER_VAULT**: The vault ID that will pay for transaction fees
+- **FORDEFI_VAULT_ID**: The vault ID that contains the tokens you want to transfer
+- **FORDEFI_VAULT_ADDRESS**: The public address (base58) of the vault holding the tokens
+- **DESTINATION_ADDRESS**: The public address where tokens will be sent
+- **FEE_PAYER_VAULT_ADDRESS**: The public address of the vault that will pay transaction fees
+- **FEE_PAYER_VAULT_ID**: The vault ID that will pay for transaction fees
 
 ### Token Configuration
 

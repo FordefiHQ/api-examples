@@ -26,8 +26,8 @@ Marinade offers liquid staking services for Solana. This repository contain code
 5. Create a `.env` file in the root directory with the following variable:
    ```typescript
    FORDEFI_API_TOKEN="<your_api_user_token>" // Your Fordefi API User JWT
-   VAULT_ID="<your_fordefi_solana_vault_id>"
-   VAULT_ADDRESS="<your_fordefi_solana_vault_address>"
+   FORDEFI_VAULT_ID="<your_fordefi_solana_vault_id>"
+   FORDEFI_VAULT_ADDRESS="<your_fordefi_solana_vault_address>"
    ```
 6. Place your your API User's `private.pem` private key in `./fordefi_secret/private.pem`
 
@@ -44,8 +44,8 @@ This file contains configuration for Fordefi connection and staking parameters:
 // Fordefi API configuration
 export const fordefiConfig: FordefiSolanaConfig = {
   accessToken: process.env.FORDEFI_API_TOKEN || "",
-  vaultId: process.env.VAULT_ID || "",
-  fordefiSolanaVaultAddress: process.env.VAULT_ADDRESS || "",
+  vaultId: process.env.FORDEFI_VAULT_ID || "",
+  fordefiSolanaVaultAddress: process.env.FORDEFI_VAULT_ADDRESS || "",
   privateKeyPem: fs.readFileSync('./fordefi_secret/private.pem', 'utf8'),
   apiPathEndpoint: '/api/v1/transactions/create-and-wait'
 };
