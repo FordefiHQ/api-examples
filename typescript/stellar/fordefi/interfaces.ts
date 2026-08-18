@@ -59,6 +59,14 @@ export interface StellarRawTransactionDetails {
   chain: StellarChain;
   xdr_data: string;
   push_mode?: PushMode;
+  // Prediction runs against the envelope as submitted. For flows where a second
+  // signature is attached locally after Fordefi signs (multisig co-signing,
+  // sponsored reserves), that envelope is under-signed at submit time and
+  // prediction reports a failure — set this to `false` so it doesn't abort the
+  // request. Note the policy engine then only sees what it can extract
+  // statically from the transaction.
+  fail_on_prediction_failure?: boolean;
+  skip_prediction?: boolean;
 }
 
 export type StellarTransactionDetails =
@@ -108,6 +116,8 @@ export interface StellarSignature {
 export interface StellarTransactionResponse {
   id: string;
   state: TransactionState;
+  created_at?: string;
+  note?: string;
   hash?: string;
   explorer_url?: string;
   signatures?: StellarSignature[];
