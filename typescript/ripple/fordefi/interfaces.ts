@@ -79,7 +79,13 @@ export interface CreateRippleTransferRequest extends RippleDetailsCommon {
   type: "ripple_transfer";
   asset_identifier: RippleAssetIdentifierRequest;
   to: RippleRecipient;
-  /** For native XRP this is drops (1 XRP = 1,000,000 drops). */
+  /**
+   * Always an integer count of the asset's **base units**, never a decimal token
+   * amount: 10^-decimals of one token. Native XRP is drops (decimals 6, so 1 XRP
+   * = "1000000"); XRPL trust-line assets are decimals 15, so 1 USDC is
+   * "1000000000000000" and "1" is 0.000000000000001 USDC. Read `decimals` off
+   * `asset_info` (`GET /vaults/{id}/assets`) rather than assuming.
+   */
   value: CreateRequestAmount;
   /** Optional XRPL destination tag, as a numeric string. */
   tag?: string;
@@ -170,9 +176,27 @@ export type RippleReversionState =
   | "missing_recipient_trustline"
   | "transaction_rejected";
 
-export interface PricedAsset {
+export interface RippleAssetInfo {
+  id?: string;
   symbol?: string;
   name?: string;
+  /**
+   * How many base units make one whole token: an on-the-wire `value`, `amount`,
+   * `diff` or `fee_charged` is an integer count of 10^-decimals of a token.
+   * Native XRP is 6 (drops); XRPL trust-line assets are 15.
+   */
+  decimals?: number;
+  [key: string]: unknown;
+}
+
+/**
+ * Note the nesting: the symbol and decimals live under `asset_info`, not on
+ * `priced_asset` itself.
+ */
+export interface PricedAsset {
+  type?: string;
+  asset_info?: RippleAssetInfo;
+  price?: { price?: string; price_float?: string; [key: string]: unknown };
   [key: string]: unknown;
 }
 

@@ -1,47 +1,38 @@
 import {
   CreateRippleTransactionRequest,
   FordefiRippleConfig,
+  ListTransactionsQuery,
   PredictRippleTransactionRequest,
   PredictedRippleTransaction,
   RippleTransaction,
   RippleTransactionDetails,
   RippleTransactionResult,
   describeOutcome,
+  formatAmount,
+  formatLimit,
   listTransactions,
   predictTransaction,
   submitTransaction,
 } from "../fordefi/index.js";
 
-export const DROPS_PER_XRP = 1_000_000;
-const XRP_DECIMALS = 6;
-
 /**
- * Converts an XRP amount to an integer drops string without going through
- * floating point (0.1 XRP must be exactly 100000 drops).
+ * Validates an amount that is already in base units. Token recipes pass amounts
+ * straight through to the API rather than scaling them, so this only enforces
+ * what the API's own `^\d+$` schema requires — catching a decimal amount here
+ * gives a better message than a 422, and a bare "1" is a valid (if tiny) amount,
+ * not something to second-guess.
  */
-export function xrpToDrops(amountXrp: string): string {
-  const trimmed = amountXrp.trim();
-  if (!/^\d+(\.\d+)?$/.test(trimmed)) {
-    throw new Error(`Invalid XRP amount: "${amountXrp}"`);
-  }
-
-  const [whole = "0", fraction = ""] = trimmed.split(".");
-  if (fraction.length > XRP_DECIMALS) {
+export function assertBaseUnits(value: string, label = "amount"): string {
+  const trimmed = value.trim();
+  if (!/^\d+$/.test(trimmed)) {
     throw new Error(
-      `XRP amounts support at most ${XRP_DECIMALS} decimal places (1 drop), got "${amountXrp}"`
+      `${label} must be an integer in the asset's base units, got "${value}". ` +
+        `Native XRP has 6 decimals (1 XRP = "1000000" drops); XRPL trust-line ` +
+        `assets have 15 (1 USDC = "1000000000000000").`
     );
   }
-
-  const drops = `${whole}${fraction.padEnd(XRP_DECIMALS, "0")}`.replace(/^0+(?=\d)/, "");
-  if (drops === "0") throw new Error("Amount must be greater than zero");
-  return drops;
-}
-
-export function dropsToXrp(drops: string): string {
-  const padded = drops.padStart(XRP_DECIMALS + 1, "0");
-  const whole = padded.slice(0, -XRP_DECIMALS);
-  const fraction = padded.slice(-XRP_DECIMALS).replace(/0+$/, "");
-  return fraction ? `${whole}.${fraction}` : whole;
+  if (/^0+$/.test(trimmed)) throw new Error(`${label} must be greater than zero`);
+  return trimmed;
 }
 
 /** Write recipes send by default; `--dry-run` (or DRY_RUN=1) stops after the prediction. */
@@ -56,25 +47,31 @@ function printResult(label: string, result: RippleTransactionResult | undefined)
   }
 
   for (const transfer of result.effects.transfers ?? []) {
-    const symbol = transfer.priced_asset?.symbol ?? "";
     console.log(
-      `  Transfer:  ${transfer.amount} ${symbol} ${transfer.from.address} -> ${transfer.to.address}`
+      `  Transfer:  ${formatAmount(transfer.amount, transfer.priced_asset)} ` +
+        `${transfer.from.address} -> ${transfer.to.address}`
     );
   }
 
   for (const change of result.effects.balance_changes ?? []) {
-    const symbol = change.priced_asset?.symbol ?? "";
-    console.log(`  Balance:   ${change.address.address} ${change.diff} ${symbol}`);
+    console.log(
+      `  Balance:   ${change.address.address} ${formatAmount(change.diff, change.priced_asset)}`
+    );
   }
 
   for (const change of result.effects.trustline_changes ?? []) {
-    const symbol = change.priced_asset?.symbol ?? "";
-    console.log(`  Trustline: ${change.address.address} limit ${change.limit} ${symbol}`);
+    console.log(
+      `  Trustline: ${change.address.address} limit ${formatLimit(change.limit, change.priced_asset)}`
+    );
   }
 
-  if (result.fee?.fee_charged) console.log(`  Fee:       ${result.fee.fee_charged}`);
+  if (result.fee?.fee_charged) {
+    console.log(`  Fee:       ${formatAmount(result.fee.fee_charged, result.fee.priced_asset)}`);
+  }
   if (result.trustline_fee?.fee_charged) {
-    console.log(`  Trustline fee: ${result.trustline_fee.fee_charged}`);
+    console.log(
+      `  Trustline fee: ${formatAmount(result.trustline_fee.fee_charged, result.trustline_fee.priced_asset)}`
+    );
   }
   if (result.reversion && result.reversion.state !== "not_reverted") {
     console.log(
@@ -146,35 +143,88 @@ export async function previewThenSubmit(
  * Inbound XRPL trust-line transfers to a vault without the matching trust line
  * are delivered as Checks. Fordefi records them with `claim_status: "claimable"`
  * and a `check_id`; the transaction's own UUID is what `ripple_cash_check` needs.
+ *
+ * Both filters that look like they belong on this query are deliberately absent:
+ *
+ * - `direction: "incoming"` is wrong whenever the sender is another vault in the
+ *   same organization. Fordefi labels direction per organization, not per vault,
+ *   so a check written from vault A to vault B is `outgoing` on both — filtering
+ *   on `incoming` hides exactly the internal transfers used to test this flow.
+ * - `claimed: false` does not cover Ripple. The parameter is real and documented
+ *   for Stellar claimable balances and Canton transfers, but for `ripple_*`
+ *   chains both `true` and `false` match nothing, so passing it returns an empty
+ *   page even when a claimable check exists.
+ *
+ * So the claim state is filtered here instead, which makes paging mandatory: the
+ * server no longer narrows the result set, and a busy vault can push checks past
+ * the first page.
  */
 export async function findClaimableChecks(
   config: FordefiRippleConfig
 ): Promise<RippleTransaction[]> {
-  const response = await listTransactions(config, {
+  const transactions = await listAllTransactions(config, {
     vault_ids: [config.vaultId],
     chains: [config.chain],
-    direction: "incoming",
-    claimed: false,
-    size: 50,
   });
 
-  return response.transactions.filter(
-    (transaction) => transaction.claim_status === "claimable" && Boolean(transaction.check_id)
-  );
+  return transactions.filter((transaction) => isCashableCheck(transaction, config.vaultId));
 }
 
-export function describeCheck(transaction: RippleTransaction): string[] {
-  const transfer = transaction.expected_result?.effects?.transfers?.[0];
-  const amount = transfer
-    ? `${transfer.amount} ${transfer.priced_asset?.symbol ?? ""}`.trim()
-    : "(amount unavailable)";
+/**
+ * A check is cashable by this vault only if the vault is the *recipient*. Because
+ * `vault_ids` matches transactions the vault signed as well as ones it merely
+ * interacted with, an internal transfer comes back for the sending vault too —
+ * and the sender cannot cash its own check (there is no `CheckCancel` either).
+ * `recipient.vault` is populated for external senders as well, so this one test
+ * covers both cases.
+ */
+function isCashableCheck(transaction: RippleTransaction, vaultId: string): boolean {
+  if (transaction.claim_status !== "claimable" || !transaction.check_id) return false;
+  return transaction.ripple_transaction_type_details?.recipient?.vault?.id === vaultId;
+}
 
-  return [
+/** `GET /transactions` is paginated (100 per page max), so walk every page. */
+async function listAllTransactions(
+  config: FordefiRippleConfig,
+  query: Omit<ListTransactionsQuery, "page" | "size">
+): Promise<RippleTransaction[]> {
+  const size = 100;
+  const transactions: RippleTransaction[] = [];
+
+  for (let page = 1; ; page++) {
+    const response = await listTransactions(config, { ...query, page, size });
+    transactions.push(...response.transactions);
+
+    if (response.transactions.length < size || transactions.length >= response.total) {
+      return transactions;
+    }
+  }
+}
+
+/**
+ * Only `POST /transactions/predict` returns `expected_result`; the listing and
+ * read endpoints do not, and a claimable check has no mined effects yet (its
+ * value moves at `CheckCash` time). There is therefore no amount to show here —
+ * print the identifying fields the API does return instead of a blank amount.
+ */
+export function describeCheck(transaction: RippleTransaction): string[] {
+  const details = transaction.ripple_transaction_type_details;
+  const sender =
+    details && "sender" in details ? details.sender?.address : transaction.sender?.address;
+
+  const lines = [
     `Transaction ID: ${transaction.id}`,
     `Check ID:       ${transaction.check_id}`,
-    `From:           ${transfer?.from.address ?? transaction.sender?.address ?? "(unknown)"}`,
-    `Amount:         ${amount}`,
+    `From:           ${sender ?? "(unknown)"}`,
+    `To:             ${details?.recipient?.address ?? "(unknown)"} (${details?.recipient?.vault?.name ?? "this vault"})`,
     `Created:        ${transaction.created_at ?? "(unknown)"}`,
     `State:          ${transaction.state}`,
   ];
+
+  // Sender-authored free text: it often names the amount, but it is a hint rather
+  // than a value read from the ledger.
+  if (transaction.note) lines.push(`Note:           ${transaction.note}`);
+  if (transaction.explorer_url) lines.push(`Explorer:       ${transaction.explorer_url}`);
+
+  return lines;
 }

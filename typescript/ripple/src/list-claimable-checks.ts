@@ -12,8 +12,9 @@ async function main() {
   if (checks.length === 0) {
     console.log("No claimable checks found for this vault.");
     console.log();
-    console.log("Inbound issued-token transfers arrive as checks only when the vault");
-    console.log("has no trust line for that currency yet.");
+    console.log("Issued-token transfers arrive as checks only when the recipient has");
+    console.log("no trust line for that currency yet — and only the recipient vault");
+    console.log("can cash one, so check FORDEFI_RIPPLE_VAULT_ID is the payee.");
     return;
   }
 

@@ -4,7 +4,7 @@ import {
   tokenRecipientAddress,
   tokenTransferAmount,
 } from "./config.js";
-import { previewThenSubmit } from "./lib.js";
+import { assertBaseUnits, previewThenSubmit } from "./lib.js";
 import { CreateRippleTransferRequest } from "../fordefi/index.js";
 
 /**
@@ -18,7 +18,10 @@ import { CreateRippleTransferRequest } from "../fordefi/index.js";
  * `Claim status: claimable`.
  */
 async function main() {
-  const amount = tokenTransferAmount();
+  // Base units, unscaled: `value` is exactly what the API sends to the ledger.
+  // XRPL trust-line assets have 15 decimals, so "1" is 10^-15 of the token, not
+  // one token — scale in your own code if you work in display amounts.
+  const amount = assertBaseUnits(tokenTransferAmount(), "RIPPLE_TOKEN_AMOUNT");
   const recipient = tokenRecipientAddress();
 
   const details: CreateRippleTransferRequest = {
@@ -39,8 +42,6 @@ async function main() {
       type: "address",
       address: recipient,
     },
-    // Issued-token amounts are in the token's own units, not drops. Check the
-    // predicted transfer effect printed below.
     value: {
       type: "value",
       value: amount,
@@ -48,7 +49,7 @@ async function main() {
   };
 
   console.log("Issued-token (IOU) transfer:");
-  console.log(`  Amount:   ${amount} ${tokenConfig.currency}`);
+  console.log(`  Amount:   ${amount} ${tokenConfig.currency} (base units)`);
   console.log(`  Issuer:   ${tokenConfig.issuerAddress}`);
   console.log(`  To:       ${recipient}`);
   console.log(`  Chain:    ${fordefiConfig.chain}`);

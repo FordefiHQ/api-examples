@@ -1,9 +1,11 @@
 import { fordefiConfig, xrpTransferConfig } from "./config.js";
-import { previewThenSubmit, xrpToDrops } from "./lib.js";
+import { assertBaseUnits, previewThenSubmit } from "./lib.js";
 import { CreateRippleTransferRequest } from "../fordefi/index.js";
 
 async function main() {
-  const drops = xrpToDrops(xrpTransferConfig.amountXrp);
+  // Base units, unscaled: native XRP has 6 decimals, so this is drops
+  // (1 XRP = 1,000,000 drops). Scale in your own code if you work in XRP.
+  const drops = assertBaseUnits(xrpTransferConfig.amountDrops, "RIPPLE_XRP_AMOUNT");
 
   const details: CreateRippleTransferRequest = {
     type: "ripple_transfer",
@@ -19,7 +21,6 @@ async function main() {
       type: "address",
       address: xrpTransferConfig.recipientAddress,
     },
-    // Native XRP amounts are expressed in drops (1 XRP = 1,000,000 drops).
     value: {
       type: "value",
       value: drops,
@@ -34,7 +35,7 @@ async function main() {
   }
 
   console.log("XRP transfer:");
-  console.log(`  Amount: ${xrpTransferConfig.amountXrp} XRP (${drops} drops)`);
+  console.log(`  Amount: ${drops} drops`);
   console.log(`  To:     ${xrpTransferConfig.recipientAddress}`);
   if (details.tag) console.log(`  Tag:    ${details.tag}`);
   console.log(`  Chain:  ${fordefiConfig.chain}`);
@@ -43,7 +44,7 @@ async function main() {
   await previewThenSubmit(
     fordefiConfig,
     details,
-    `Transfer ${xrpTransferConfig.amountXrp} XRP to ${xrpTransferConfig.recipientAddress}`
+    `Transfer ${drops} drops to ${xrpTransferConfig.recipientAddress}`
   );
 }
 

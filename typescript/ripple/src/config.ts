@@ -34,8 +34,11 @@ export const fordefiConfig: FordefiRippleConfig = {
 
 /** Native XRP transfer (`npm run transfer:xrp`). */
 export const xrpTransferConfig = {
-  /** Amount in XRP; converted to drops before it is sent. */
-  amountXrp: requireEnv("RIPPLE_XRP_AMOUNT"),
+  /**
+   * Amount in **drops**, the native asset's base unit (6 decimals, so
+   * 1 XRP = "1000000"), passed to the API unscaled.
+   */
+  amountDrops: requireEnv("RIPPLE_XRP_AMOUNT"),
   recipientAddress: requireEnv("RIPPLE_RECIPIENT_ADDRESS"),
   /** Optional XRPL destination tag — required by most exchanges. */
   destinationTag: process.env.RIPPLE_DESTINATION_TAG,
@@ -48,7 +51,12 @@ export const tokenConfig = {
   issuerAddress: requireEnv("RIPPLE_ISSUER_ADDRESS"),
 };
 
-/** Amount for the IOU transfer, in the token's own units. */
+/**
+ * Amount for the IOU transfer, in the asset's **base units** — the same integer
+ * the API's `value` field takes, passed through unscaled. XRPL trust-line assets
+ * have 15 decimals, so 1 USDC is "1000000000000000" and "1" is 10^-15 USDC.
+ * Convert from display amounts in your own code if you need to.
+ */
 export const tokenTransferAmount = (): string => requireEnv("RIPPLE_TOKEN_AMOUNT");
 
 /** Recipient for the IOU transfer; falls back to the native transfer recipient. */
