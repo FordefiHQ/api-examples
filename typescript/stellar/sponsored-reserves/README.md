@@ -9,255 +9,152 @@ ledger entries. The sponsored account's `numSponsored` cancels out its own
 `numSubEntries`, so its minimum balance stays at zero — it can hold assets
 without ever holding XLM.
 
-## What this does
+## Transaction flow
 
-One transaction, four operations — the "sandwich" 🥪:
+The account and trustline are created in one four-operation sponsorship
+"sandwich" 🥪 :
 
-| # | Operation | Source |
-| - | --------- | ------ |
-| 0 | `BeginSponsoringFutureReserves(sponsoredId)` | **vault** (envelope source) |
-| 1 | `CreateAccount(destination, startingBalance: "0")` | vault |
-| 2 | `ChangeTrust(asset)` | **sponsored account** |
-| 3 | `EndSponsoringFutureReserves` | **sponsored account** |
+| # | Operation | Source | Purpose |
+|---|---|---|---|
+| 0 | `BeginSponsoringFutureReserves(sponsoredId)` | **Vault** (envelope source) | Open sponsorship |
+| 1 | `CreateAccount(destination, startingBalance: "0")` | Vault | Create the account without funding it |
+| 2 | `ChangeTrust(asset)` | **Sponsored account** | Add the sponsored trustline |
+| 3 | `EndSponsoringFutureReserves` | **Sponsored account** | Close sponsorship |
 
-The sandwich has to be one transaction: no is-sponsoring-future-reserves-for
-relationship may still be open when a transaction ends.
+The sandwich must remain in one transaction: Stellar does not allow an open
+sponsoring relationship at the end of a transaction.
 
-**Cost.** The vault locks **1.5 XLM** — 2 reserve units for the account (1.0) plus
-1 for the trustline (0.5) — plus ~400 stroops of fee. The XLM is locked, not
-spent: the vault's `num_sponsoring` and minimum balance both rise.
+### Signing order
 
-Getting it back is not a `RevokeSponsorship` — revoking only moves the obligation
-onto the sponsored account, and fails outright if that account can't fund itself.
-Returning the XLM to the vault means removing the entries. See
-[Revoking](#revoking-npm-run-revoke--verified).
+Both accounts must authorize their sourced operations. The sponsored account is a
+locally held ed25519 keypair—not another Fordefi vault—so the signatures can be
+collected in this order:
+
+| Step | Action |
+|---|---|
+| 1 | Build the envelope with the Fordefi vault as its source. |
+| 2 | Ask Fordefi to sign with `push_mode: "manual"` and `fail_on_prediction_failure: false`. |
+| 3 | Compare Fordefi's returned envelope with the submitted envelope. |
+| 4 | Sign the returned envelope with `SPONSORED_ED25519_SECRET`. |
+| 5 | Broadcast the fully signed envelope directly to Horizon. |
+
+Fordefi may refresh the sequence or normalize the fee before signing. The script
+therefore signs the returned envelope, not the submitted one. `diffEnvelopes()`
+logs acceptable fee/sequence changes but aborts if the operation count, order,
+type, or source changes.
+
+The vault named by `vault_id` must be the envelope source. A second Fordefi vault
+cannot co-sign that envelope because Fordefi rejects it with
+`INVALID_VAULT_FIELD`. See the [parent README](../README.md#limitation-a-vault-only-signs-envelopes-it-is-the-source-account-of).
+
+### Reserve cost
+
+| Sponsored entry | Reserve units | Locked by vault |
+|---|---:|---:|
+| Account | 2 | 1.0 XLM |
+| Trustline | 1 | 0.5 XLM |
+| **Total** | **3** | **1.5 XLM** |
+
+`num_sponsoring` and `num_sponsored` count reserve units, not entries. The vault's
+1.5 XLM is **locked, not spent**: its minimum balance rises, while its ledger
+balance changes only by the transaction fee (about 400 stroops for this flow).
 
 ## What works with what
 
-Every sponsorship operation is defined by *which account must source which
-operation*, and that determines who has to sign. Since a Stellar envelope can
-carry at most one Fordefi vault signature, that in turn decides whether a given
-counterparty pairing is possible at all.
-
-| Operation | Who must sign | Two Fordefi vaults | Vault + external key |
+| Operation | Required authorization | Two Fordefi vaults | Vault + external key |
 |---|---|---|---|
-| **Sponsor** — take on another account's reserves | sponsor (`Begin`) + sponsored (`End`) | ❌ refused, `INVALID_VAULT_FIELD` ✔ | ✅ `npm run sponsor` ✔ |
-| **Transfer** — hand the obligation to a new sponsor | old sponsor + new sponsor | ❌ refused, `INVALID_VAULT_FIELD` ✔ | ✅ in principle; not implemented |
-| **Revoke** — stop carrying the reserves | sponsor only | ✅ | ✅ `npm run revoke` ✔ |
-| **Remove / merge** — delete the entries | sponsored only, if it also sources the envelope | ✅ | ✅ `npm run merge` ✔ |
+| **Sponsor** another account | Sponsor (`Begin`) + sponsored (`End`) | ❌ `INVALID_VAULT_FIELD` ✓ | ✅ `npm run sponsor` ✓ |
+| **Transfer** to a new sponsor | Old + new sponsor | ❌ `INVALID_VAULT_FIELD` ✓ | Possible; not implemented |
+| **Revoke** sponsorship | Sponsor only | ✅ | ✅ `npm run revoke` ✓ |
+| **Remove / merge** entries | Sponsored account | ✅ if it sources the envelope | ✅ `npm run merge` ✓ |
 
-✔ = verified on mainnet in this project. Unmarked cells are read off the CAP-33
-sourcing rules and Fordefi's source-account check, not tested.
-
-Two things fall out of this:
-
-- **You can get out of a vault-to-vault sponsorship, but never into one.** The
-  operations that establish or move a sponsorship need both parties; the ones that
-  end it need only one. That asymmetry is why this example sponsors a freshly
-  generated keypair rather than an existing vault.
-- **Revoke succeeds only if the sponsored account can fund its own minimum
-  balance.** It moves the obligation rather than releasing it, so against an
-  account created with a zero starting balance it fails with
-  `revokeSponsorshipLowReserve` regardless of who signs.
-
-## Why this needs two signatures, and why that's fine
-
-Sponsorship requires **both** accounts to sign: the sponsor authorises
-`BeginSponsoringFutureReserves`, the sponsored account authorises
-`EndSponsoringFutureReserves`.
-
-That sounds like it should collide with Fordefi's one-vault-per-envelope
-constraint. Fordefi processes the envelope before signing and may refresh its
-sequence or normalize its fee, so a vault cannot reliably add its signature to a
-transaction hash someone else fixed in advance. It does not collide here, for two
-reasons:
-
-1. **These are two different accounts, not two signers on one account.** There is
-   no `SetOptions`, no threshold change, and no multisig account anywhere in this
-   flow. The sponsored account is a keypair you generate with `npm run gen-keypair`
-   and hold locally — not a second custodial signer.
-2. **Signing order sidesteps the rebuild.** The vault signs *first*, with
-   `push_mode: "manual"` so Fordefi hands the envelope back instead of
-   broadcasting an under-signed transaction. We then attach the sponsored
-   account's signature to *Fordefi's* envelope — the one it actually signed — and
-   submit to Horizon ourselves. Appending a decorated signature doesn't change the
-   transaction hash, so both signatures validate against the same envelope.
-
-It is also why this example sponsors a **freshly generated keypair** rather than an
-existing Fordefi vault. Sponsoring a second vault would need both vaults to sign
-one envelope — `Begin` sourced by the sponsor, `End` by the sponsored account — and
-that is refused with `INVALID_VAULT_FIELD` (verified). The sponsored side has to be
-a key you can sign with locally.
-
-### What is still blocked
-
-Sponsor **and** sponsored both being Fordefi vaults. The second vault would have
-to sign the first vault's already-finalised envelope, and every route is closed:
-`stellar_raw_transaction` on a non-source vault is rejected with
-`INVALID_VAULT_FIELD`; `stellar_message` domain-separates its input with SEP-53
-so the signature won't satisfy Horizon's protocol-hash check; and
-`black_box_signature` needs a BlackBox vault, not a Stellar one.
-
-## The envelope diff
-
-Because Fordefi may rebuild the envelope, `diffEnvelopes()` in `src/lib.ts` compares
-what we submitted against what came back — source, fee, sequence, time bounds,
-memo, and every operation's type and source — and prints the result.
-
-Sequence and fee changes are expected and only logged. Any change to the
-**operation list** aborts the run before broadcast: if Fordefi reordered the
-sandwich, dropped an operation, or re-sourced `EndSponsoringFutureReserves` to the
-vault, the transaction would no longer do what was asked, and there is no point
-paying to find out on-chain.
-
-This is the part worth reading in the output. Nothing else in
-`typescript/stellar/` sends a multi-operation envelope or an operation whose
-source differs from the vault, so Fordefi's behaviour on both is what this example
-actually establishes.
+✓ means verified on Stellar mainnet in this project. Sponsoring or transferring
+between two Fordefi vaults is blocked because both parties must sign. Revoke and
+removal are unilateral, so an existing vault-to-vault sponsorship can still be
+unwound.
 
 ## Setup
 
 ```bash
 npm install
-npm run gen-keypair          # prints the keypair for the account to be sponsored
-cp .env.example .env         # fill it in, including SPONSORED_ED25519_SECRET
+npm run gen-keypair          # prints a G... public key and S... secret seed
+cp .env.example .env         # add the generated seed and vault details
 npm run sponsor
 ```
 
-If `npm run sponsor` refuses to run because of stuck transactions, see
-[Sequence numbers](#sequence-numbers-are-the-thing-that-will-bite-you).
-
-| env | |
-| --- | --- |
-| `FORDEFI_API_USER_TOKEN` | required |
-| `FORDEFI_STELLAR_VAULT_ID` | the sponsoring vault |
-| `STELLAR_VAULT_ADDRESS` | the vault's `G...`; must be the envelope source |
-| `SPONSORED_ED25519_SECRET` | `S...` seed from `npm run gen-keypair` |
-| `STELLAR_ASSET_CODE` / `STELLAR_ASSET_ISSUER` | trustline asset (example: Circle USDC) |
-| `STELLAR_HORIZON_URL` | default `https://horizon.stellar.org` |
-| `STELLAR_EXPLORER_URL` | default `https://stellar.expert/explorer/public` |
-| `STELLAR_TX_TIMEOUT_SECS` | default `3600` |
+| Environment variable | Required | Purpose / default |
+|---|:---:|---|
+| `FORDEFI_API_USER_TOKEN` | Yes | Fordefi API User token |
+| `FORDEFI_STELLAR_VAULT_ID` | Yes | Sponsoring vault ID |
+| `STELLAR_VAULT_ADDRESS` | Yes | Sponsoring vault's `G...` address; must be the envelope source |
+| `SPONSORED_ED25519_SECRET` | Yes | Sponsored account's `S...` seed from `npm run gen-keypair` |
+| `STELLAR_ASSET_CODE` | Yes | Trustline asset code |
+| `STELLAR_ASSET_ISSUER` | Yes | Trustline issuer's `G...` address |
+| `STELLAR_HORIZON_URL` | No | `https://horizon.stellar.org` |
+| `STELLAR_EXPLORER_URL` | No | `https://stellar.expert/explorer/public` |
+| `STELLAR_TX_TIMEOUT_SECS` | No | `3600` seconds |
 
 The API signer key is shared across the Stellar examples and read from
 `../fordefi/secret/private.pem`.
 
-Preconditions:
+| Requirement | Detail |
+|---|---|
+| API Signer | Must be running; a transaction stuck at `approved` with no signature usually means it is offline. |
+| Vault balance | Current minimum balance plus at least **1.5 XLM** of headroom. |
+| Network | Mainnet only: `stellar_mainnet` and `Networks.PUBLIC` are hardcoded. |
+| Timeout | Keep the 3600-second default generous; expiry before broadcast causes `tx_too_late`. |
 
-- The API Signer must be running. A transaction that sits at `approved` with no
-  signatures means it's offline.
-- The vault needs its own minimum balance **plus ≥1.5 XLM** of headroom.
-- Mainnet only — `stellar_mainnet` and `Networks.PUBLIC` are hardcoded, matching
-  the sibling examples.
+`SPONSORED_ED25519_SECRET` controls the sponsored account and any assets it holds.
+Treat it as a production credential.
 
-The default 3600s timeout is deliberate: the other examples use `setTimeout(180)`,
-which is tight once you add a Fordefi sign round trip *and* your own broadcast.
-Blowing through it means `tx_too_late`.
+## Commands
 
-## Verified behaviour
-
-Run against `stellar_mainnet` on 2026-08-18, tx
-[`5dc7d3af…`](https://stellar.expert/explorer/public/tx/5dc7d3afccbfc9a264437abcc316a36e35109afd011b07fa98adcb828d76afb5).
-Nothing else in `typescript/stellar/` exercises these paths, so this is where the
-answers come from:
-
-- **Multi-operation envelopes are accepted.** Four operations, no complaint.
-- **Operation-level source accounts other than the vault are accepted.**
-  `INVALID_VAULT_FIELD` applies to the *envelope* source only; ops 2 and 3 sourced
-  by the sponsored account went through.
-- **The returned envelope preserves the sandwich.** Operation count, order, types
-  and per-op sources all came back unchanged. On this run the fee was untouched
-  (400 in, 400 out) and the sequence was returned as submitted.
-- **`fail_on_prediction_failure: false` is required and sufficient.** The envelope
-  is under-signed when Fordefi predicts it; without this the request aborts.
-
-Result on-chain — the sponsored account ends up with a **minimum balance of zero**:
-
-```
-sponsored account  XLM 0.0000000, USDC trustline present, sponsor = the vault
-  subentry_count 1, num_sponsored 3, num_sponsoring 0
-  min balance = (2 + 1 + 0 - 3) x 0.5 = 0 XLM
-sponsor vault      num_sponsoring 4 -> 7, min balance 7 -> 8.5 XLM
-```
-
-Note `num_sponsoring` / `num_sponsored` count **reserve units, not ledger
-entries**: an account entry is worth 2 and each subentry 1, so this sandwich is
-3 units — 1.5 XLM.
+| Command | Purpose | Push mode | Signatures |
+|---|---|---|---|
+| `npm run gen-keypair` | Generate the sponsored account locally | None | None |
+| `npm run sponsor` | Create the account and trustline | Manual | Vault, then sponsored key |
+| `npm run revoke` | Move reserve responsibility to the sponsored account | Auto | Vault only |
+| `npm run merge` | Remove the trustline and account, releasing reserves | Manual | Vault, then sponsored key |
 
 ## Sequence numbers are the thing that will bite you
 
 Fordefi assigns the sequence itself, as `max(the sequence you submitted, its own
-next free one)`. It keeps its own allocator, and **a transaction that reaches
-`signed` under `push_mode: "manual"` holds its sequence while it remains
-unbroadcast.** The API exposes no release mechanism.
+next free one)`. A manual-push transaction that reaches `signed` reserves that
+sequence until it is consumed.
 
-So every abandoned attempt widens the gap between the chain and Fordefi's
-allocator. Because the rule is `max()`, you cannot submit your way back down; later
-transactions fail with `tx_bad_seq` until the reserved sequences are consumed.
+| Situation | Sequence effect | Action |
+|---|---|---|
+| Signed but not broadcast | Fordefi keeps the reservation; later transactions may get `tx_bad_seq` | Broadcast reservations in ascending sequence order |
+| Included on-chain, even with an operation failure | Sequence is consumed | No allocator gap remains |
+| Rejected before consensus (`tx_bad_seq`, `tx_bad_auth`) | Sequence is not consumed | Fix the envelope and clear the reserved sequence |
+| Past `maxTime` and unbroadcast | Cannot be broadcast; allocator recovery is untested | Avoid this state by using a generous timeout |
 
-This is not specific to sponsored reserves — it applies to any manual-push Stellar
-flow.
+A signed transaction cannot be aborted: the API only permits aborting
+`WAITING_FOR_APPROVAL` or `APPROVED`. The only verified recovery is broadcasting
+the stuck envelopes in ascending sequence order. Even an on-chain failure such as
+`op_already_exists` consumes its sequence and can close the gap.
 
-`npm run sponsor` checks for this before submitting and refuses to run while a
-gap exists, rather than widening it by one. It prints what is holding which
-sequence:
+`npm run sponsor` and `npm run merge` check for stuck signed transactions before
+submitting another one. Do not walk away from a manual-push transaction before it
+has been broadcast.
 
-```
-On-chain sequence 268775449906118658 — the network will accept 268775449906118659 next.
-Transactions stuck in `signed` on this vault: 5
-  seq=268775449906118659  f7dc9bda-...  <= broadcastable now
-  seq=268775449906118660  71a7664f-...  blocked (1 ahead)
-  ...
-```
+## Managing sponsorship
 
-**A stuck `signed` transaction cannot be aborted.** `POST /transactions/{id}/abort`
-returns 400 `invalid_transaction_state` — *"Can only abort WAITING_FOR_APPROVAL or
-APPROVED transaction"* — so once Fordefi has signed, the reservation cannot be
-released through the API.
+Choose the action based on the desired account lifecycle:
 
-The only verified way to clear one is to **broadcast it**. A transaction that fails
-on-chain still consumes its sequence number, which is all that is needed: verified
-by clearing a stray sandwich whose account already existed, which landed as
-`tx_failed` / `op_already_exists` for 400 stroops and closed the gap. Broadcast in
-ascending sequence order, starting from the one matching the chain's next sequence.
+| Goal | Action | Requirement | Result |
+|---|---|---|---|
+| Keep the account running without vault sponsorship | Fund it with its full minimum balance, then `npm run revoke` | 1.5 XLM for this account and trustline | Reserve obligation moves to the account |
+| Release the vault's 1.5 XLM of reserve capacity | `npm run merge` | Trustline balance must be zero; no unknown subentries | Trustline and account entry are removed |
+| Move reserves to a new external sponsor | Transfer sponsorship | External sponsor signature; not implemented here | Account remains intact |
+| Move reserves to another Fordefi vault | Not supported | Would require both vaults to sign one envelope | `INVALID_VAULT_FIELD` |
 
-The unresolved case is a stuck transaction past its `maxTime`: it can no longer be
-broadcast, and there is no abort. Whether Fordefi's allocator ever recovers that
-sequence is untested — so keep `STELLAR_TX_TIMEOUT_SECS` generous, and don't walk
-away from a manual-push transaction you haven't broadcast.
+### Revoke sponsorship
 
-## Revoking (`npm run revoke`) — verified
-
-`RevokeSponsorship` is signed by the **sponsor alone**; the sponsored account
-does not sign. So unlike `npm run sponsor` this needs no second signature, no
-envelope recovery, and no manual push — Fordefi signs and broadcasts it in one
-step with `push_mode: "auto"`, which also keeps its sequence allocator in step
-with the chain.
-
-**But revoking does not return XLM to the sponsor.** It transfers the reserve
-*obligation* to the sponsored account, which must then cover it from its own
-balance. An account that was created with a zero starting balance cannot, and
-the operation fails.
-
-Verified on mainnet 2026-08-18, tx
-[`d5ee3d59…`](https://stellar.expert/explorer/public/tx/d5ee3d591d4c7468f664bf82d27bd85c5275e895e7b32087396f11008fd93d87):
-
-```
-op[0] revokeSponsorship -> revokeSponsorshipLowReserve
-op[1] revokeSponsorship -> revokeSponsorshipLowReserve
-transaction result: txFailed   (200 stroops charged, sequence consumed)
-```
-
-The sponsored account held 0 XLM and would have needed 1.5 to stand on its own.
-Note the transaction was *included* in the ledger and consumed its sequence
-number — an operation-level failure like this does not create the allocator gap
-described above; only pre-consensus rejections (`tx_bad_seq`, `tx_bad_auth`) do.
-
-So there are two different goals and two different instruments:
-
-| Goal | How |
-| --- | --- |
-| Stop the vault carrying the reserves; account survives on its own | Fund the sponsored account with its full minimum balance (1.5 XLM here), **then** `npm run revoke`. Vault is net −1.5 XLM. Vault signature only. |
-| Get the 1.5 XLM back to the vault | Remove the entries instead: `ChangeTrust` to limit 0, then `AccountMerge` into the vault. Reserves return automatically as each entry disappears. Both operations are sourced by the sponsored account, so this route needs its signature — the same co-sign flow as `npm run sponsor`. The account entry is deleted, though the address can be recreated later. |
+`npm run revoke` uses `push_mode: "auto"` and needs only the vault's signature.
+Revocation does **not** release the reserve obligation; it moves that obligation to
+the sponsored account. An unfunded account therefore fails with
+`revokeSponsorshipLowReserve`.
 
 ## Reclaiming the reserves (`npm run merge`) — verified
 
