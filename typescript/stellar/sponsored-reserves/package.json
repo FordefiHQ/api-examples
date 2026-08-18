@@ -1,0 +1,32 @@
+{
+  "name": "@fordefi/stellar-sponsored-reserves",
+  "version": "1.0.0",
+  "description": "Sponsor a new Stellar account and its trustline from a Fordefi vault, so the sponsored account holds assets with zero XLM of its own",
+  "main": "index.js",
+  "scripts": {
+    "sponsor": "npx tsx src/run.ts",
+    "gen-keypair": "npx tsx src/gen-keypair.ts",
+    "revoke": "npx tsx src/revoke.ts",
+    "merge": "npx tsx src/merge.ts"
+  },
+  "keywords": [
+    "fordefi",
+    "stellar",
+    "sponsored-reserves",
+    "base-reserve",
+    "trustline"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^22.13.11",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@stellar/stellar-sdk": "12.3.0",
+    "axios": "1.16.0",
+    "dotenv": "16.6.1",
+    "tsx": "^4.21.0"
+  }
+}
