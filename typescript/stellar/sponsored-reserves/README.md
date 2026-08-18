@@ -11,7 +11,7 @@ without ever holding XLM.
 
 ## What this does
 
-One transaction, four operations — the "sandwich":
+One transaction, four operations — the "sandwich" 🥪:
 
 | # | Operation | Source |
 | - | --------- | ------ |
