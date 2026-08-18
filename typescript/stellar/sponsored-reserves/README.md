@@ -5,14 +5,14 @@ with a Fordefi vault paying all the base reserves.
 
 [Sponsored reserves](https://developers.stellar.org/docs/build/guides/transactions/sponsored-reserves)
 (CAP-33) let one account carry the minimum-balance cost of another account's
-ledger entries. The sponsored account's `numSponsored` cancels out its own
-`numSubEntries`, so its minimum balance stays at zero — it can hold assets
-without ever holding XLM.
+ledger entries. Here, the sponsored account's `num_sponsored` offsets the reserve
+units for its account entry and trustline, so its minimum balance stays at zero—it
+can hold assets without holding XLM.
 
 ## Transaction flow
 
 The account and trustline are created in one four-operation sponsorship
-"sandwich" 🥪 :
+"sandwich" 🥪:
 
 | # | Operation | Source | Purpose |
 |---|---|---|---|
@@ -119,14 +119,15 @@ Treat it as a production credential.
 ## Sequence numbers are the thing that will bite you
 
 Fordefi assigns the sequence itself, as `max(the sequence you submitted, its own
-next free one)`. A manual-push transaction that reaches `signed` reserves that
-sequence until it is consumed.
+next free one)`. A manual-push transaction that reaches `signed` holds that
+sequence while it remains unbroadcast. Consuming it on-chain is the only verified
+release mechanism.
 
 | Situation | Sequence effect | Action |
 |---|---|---|
 | Signed but not broadcast | Fordefi keeps the reservation; later transactions may get `tx_bad_seq` | Broadcast reservations in ascending sequence order |
 | Included on-chain, even with an operation failure | Sequence is consumed | No allocator gap remains |
-| Rejected before consensus (`tx_bad_seq`, `tx_bad_auth`) | Sequence is not consumed | Fix the envelope and clear the reserved sequence |
+| Rejected before consensus (`tx_bad_seq`, `tx_bad_auth`) | Sequence is not consumed | Make the reserved envelope broadcastable; clear lower reservations first |
 | Past `maxTime` and unbroadcast | Cannot be broadcast; allocator recovery is untested | Avoid this state by using a generous timeout |
 
 A signed transaction cannot be aborted: the API only permits aborting
@@ -156,94 +157,65 @@ Revocation does **not** release the reserve obligation; it moves that obligation
 the sponsored account. An unfunded account therefore fails with
 `revokeSponsorshipLowReserve`.
 
-## Reclaiming the reserves (`npm run merge`) — verified
+### Reclaim reserves with merge
 
-Removing a sponsored entry ends the sponsorship and returns its reserve to the
-sponsor. No revoke, no funding, nothing stranded. Two operations, both sourced by
-the sponsored account, so this uses the same co-sign flow as `npm run sponsor`:
+`npm run merge` removes the sponsored entries, which lowers the vault's minimum
+balance and makes the 1.5 XLM spendable again:
 
-```
-op[0]  ChangeTrust(asset, limit 0)   source = sponsored   -> releases 0.5 XLM
-op[1]  AccountMerge(-> vault)        source = sponsored   -> releases 1.0 XLM
-```
+| Order | Operation | Source | Reserve released |
+|---:|---|---|---:|
+| 1 | `ChangeTrust(asset, limit: "0")` | Sponsored account | 0.5 XLM |
+| 2 | `AccountMerge(destination: vault)` | Sponsored account | 1.0 XLM |
 
-Order is forced: `AccountMerge` fails with `ACCOUNT_MERGE_HAS_SUB_ENTRIES` while
-any subentry remains, and `ChangeTrust` to limit 0 fails while the trustline holds
-a balance. The script checks both up front, and refuses if the account carries
-trustlines it doesn't know how to remove.
+The trustline must hold zero tokens, and all subentries must be removed before
+`AccountMerge`. The script refuses to proceed if it finds a funded trustline or an
+unknown trustline it cannot remove.
 
-Verified on mainnet 2026-08-18, tx
-[`a743550e…`](https://stellar.expert/explorer/public/tx/a743550e85419cde180e727dca53c4dee45960c3f73ee0d6281c8ea10bcdb713):
-
-```
-op[0] changeTrust  -> changeTrustSuccess
-op[1] accountMerge -> accountMergeSuccess        (200 stroops)
-
-sponsored account   404 — deleted
-vault  num_sponsoring  7 -> 4
-       minimum balance 8.5 -> 7 XLM     (1.5 XLM freed)
-       XLM balance     95.7046498 -> 95.7046298   (fee only)
-```
-
-Note what did and didn't move: the vault's **balance** barely changed, because the
-reserves were never spent — they were locked. What changed is the **minimum
-balance**, and therefore how much of the balance is spendable. That is the whole
-economic shape of sponsorship, and it's why "reclaiming" shows up as a drop in
-`num_sponsoring` rather than an incoming payment.
-
-### Destructive, but not permanent
-
-`AccountMerge` deletes the account **entry**, not the keypair. The same address can
-be recreated later with `CreateAccount` — verified here: this account was merged,
-then re-created from the same `SPONSORED_ED25519_SECRET` by re-running
-`npm run sponsor`, and came back with `min balance 0` exactly as before. A
-recreated account starts from a sequence number derived from the current ledger,
-so envelopes signed for its previous incarnation cannot be replayed.
-
-What the merge actually costs you is the account's **configuration**: the trustline
-goes with it and must be re-established (and re-sponsored) if you revive the
-address, along with any signers, offers or data entries. Payments sent to the
-address while no account exists fail with `op_no_destination` rather than
-vanishing.
-
-So the choice between merge and fund-then-revoke isn't "destroy vs preserve" — the
-address survives either way. It's whether the account keeps running continuously
-under its own reserves, or is torn down now and rebuilt later if needed.
+`AccountMerge` deletes the account entry and its configuration—not its keypair. The
+same address can be recreated later, but trustlines, signers, offers, and data must
+be configured again. Payments sent while the account does not exist fail with
+`op_no_destination`.
 
 ## Transferring to another sponsor — not possible between vaults
 
-Transferring is the third instrument, and on the ledger side it is the best one
-for this job: the reserve moves sponsor-to-sponsor and never lands on the
-sponsored account, so unlike a revoke it works against a zero balance, and unlike
-a merge it destroys nothing. Per CAP-33 the **new** sponsor sponsors the **old**
-one, and revoking inside that sandwich transfers the entry rather than removing it:
+Transfer keeps the account intact and moves the obligation directly between
+sponsors. It requires the **old and new sponsors** to sign; the sponsored account
+is not involved.
 
-```
-Begin(sponsoredId = old sponsor)   source: NEW sponsor
-RevokeSponsorship(trustline)       source: old sponsor
-RevokeSponsorship(account)         source: old sponsor
-End()                              source: old sponsor
-```
+| Operation | Source |
+|---|---|
+| `BeginSponsoringFutureReserves(oldSponsor)` | New sponsor |
+| `RevokeSponsorship(trustline)` | Old sponsor |
+| `RevokeSponsorship(account)` | Old sponsor |
+| `EndSponsoringFutureReserves` | Old sponsor |
 
-The sponsored account is not a party and does not sign. The signatures required
-are the **old and new sponsors** — which is what makes it impossible here: a
-Stellar envelope can carry at most one Fordefi vault signature. Verified on
-mainnet 2026-08-18; offering such a sandwich to the second sponsor's vault is
-refused at creation with `HTTP 400 INVALID_VAULT_FIELD`. See
-[`../README.md`](../README.md#limitation-a-vault-only-signs-envelopes-it-is-the-source-account-of).
+Two Fordefi vaults cannot provide those signatures on one envelope; the second
+vault is rejected with `INVALID_VAULT_FIELD`. An external new sponsor could sign
+locally, but that flow is not implemented. The supported alternative is to merge
+the account and have the new sponsor recreate it.
 
-Two things that would work, neither implemented here:
+## Verified behavior
 
-- **New sponsor as an external ed25519 key**, co-signed locally the way
-  `npm run sponsor` does.
-- **`npm run merge`, then have the new sponsor run `npm run sponsor` itself** —
-  two transactions, and the account is recreated rather than preserved.
+Mainnet verification was performed on 2026-08-18:
+
+| Scenario | Transaction | Result |
+|---|---|---|
+| Sponsor account + trustline | [`5dc7d3af…`](https://stellar.expert/explorer/public/tx/5dc7d3afccbfc9a264437abcc316a36e35109afd011b07fa98adcb828d76afb5) | Account created with 0 XLM and zero minimum balance; vault `num_sponsoring` increased by 3 units |
+| Revoke while account has 0 XLM | [`d5ee3d59…`](https://stellar.expert/explorer/public/tx/d5ee3d591d4c7468f664bf82d27bd85c5275e895e7b32087396f11008fd93d87) | Included but failed with `revokeSponsorshipLowReserve`; sequence consumed |
+| Remove trustline + merge | [`a743550e…`](https://stellar.expert/explorer/public/tx/a743550e85419cde180e727dca53c4dee45960c3f73ee0d6281c8ea10bcdb713) | Account removed; vault minimum balance fell by 1.5 XLM |
+| Transfer between two Fordefi vaults | No transaction created | API refused the second vault with `INVALID_VAULT_FIELD` |
+
+The sponsor run also verified that Fordefi accepts multi-operation envelopes and
+operation-level sources other than the vault, preserves the sandwich's operation
+order and sources, and proceeds when prediction failure is explicitly allowed.
 
 ## Files
 
-- `src/config.ts` — env loading and validation
-- `src/gen-keypair.ts` — generates the sponsored account's keypair (local only)
-- `src/lib.ts` — sandwich construction, Fordefi signing, envelope diff, signature attach, broadcast, verification
-- `src/run.ts` — end-to-end entry point
-- `src/revoke.ts` — revoke the sponsorship (vault signature only; fails unless the sponsored account is funded)
-- `src/merge.ts` — remove the trustline and merge the account, returning the reserves to the vault
+| File | Responsibility |
+|---|---|
+| `src/config.ts` | Environment loading and validation |
+| `src/gen-keypair.ts` | Local sponsored-account key generation |
+| `src/lib.ts` | Transaction construction, signing, envelope comparison, broadcast, and verification |
+| `src/run.ts` | End-to-end sponsorship flow |
+| `src/revoke.ts` | Revoke sponsorship with the vault signature |
+| `src/merge.ts` | Remove sponsored entries and release the vault's reserves |
