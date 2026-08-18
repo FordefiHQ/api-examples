@@ -10,6 +10,7 @@ import {
   RippleTransaction,
   TransactionState,
 } from "./interfaces.js";
+import { formatAmount } from "./amounts.js";
 import { signFordefiApiPayload } from "./signer.js";
 
 export const FORDEFI_API_BASE_URL = "https://api.fordefi.com";
@@ -171,11 +172,17 @@ export function describeOutcome(transaction: RippleTransaction): string[] {
     );
   }
 
-  const fee = transaction.mined_result?.fee?.fee_charged;
-  if (fee) lines.push(`Fee charged: ${fee}`);
+  const fee = transaction.mined_result?.fee;
+  if (fee?.fee_charged) {
+    lines.push(`Fee charged: ${formatAmount(fee.fee_charged, fee.priced_asset)}`);
+  }
 
-  const trustlineFee = transaction.mined_result?.trustline_fee?.fee_charged;
-  if (trustlineFee) lines.push(`Trust line fee charged: ${trustlineFee}`);
+  const trustlineFee = transaction.mined_result?.trustline_fee;
+  if (trustlineFee?.fee_charged) {
+    lines.push(
+      `Trust line fee charged: ${formatAmount(trustlineFee.fee_charged, trustlineFee.priced_asset)}`
+    );
+  }
 
   if (transaction.hash) lines.push(`Hash: ${transaction.hash}`);
   if (transaction.explorer_url) lines.push(`View: ${transaction.explorer_url}`);
