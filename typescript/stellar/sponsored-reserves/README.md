@@ -66,11 +66,11 @@ Sponsorship requires **both** accounts to sign: the sponsor authorises
 `BeginSponsoringFutureReserves`, the sponsored account authorises
 `EndSponsoringFutureReserves`.
 
-That sounds like it should collide with the limitation documented in
-[`../setup-multisig/README.md`](../setup-multisig/README.md) — Fordefi rebuilds
-every Stellar envelope before signing (refreshed sequence, normalized fee), so a
-vault can't add its signature to a transaction hash someone else fixed in advance.
-It doesn't collide, for two reasons:
+That sounds like it should collide with Fordefi's one-vault-per-envelope
+constraint. Fordefi processes the envelope before signing and may refresh its
+sequence or normalize its fee, so a vault cannot reliably add its signature to a
+transaction hash someone else fixed in advance. It does not collide here, for two
+reasons:
 
 1. **These are two different accounts, not two signers on one account.** There is
    no `SetOptions`, no threshold change, and no multisig account anywhere in this
@@ -82,9 +82,6 @@ It doesn't collide, for two reasons:
    account's signature to *Fordefi's* envelope — the one it actually signed — and
    submit to Horizon ourselves. Appending a decorated signature doesn't change the
    transaction hash, so both signatures validate against the same envelope.
-
-This is the same trick as [`../multisig-tx`](../multisig-tx), which does it for a
-genuine 2-of-2 account.
 
 It is also why this example sponsors a **freshly generated keypair** rather than an
 existing Fordefi vault. Sponsoring a second vault would need both vaults to sign
@@ -99,12 +96,11 @@ to sign the first vault's already-finalised envelope, and every route is closed:
 `stellar_raw_transaction` on a non-source vault is rejected with
 `INVALID_VAULT_FIELD`; `stellar_message` domain-separates its input with SEP-53
 so the signature won't satisfy Horizon's protocol-hash check; and
-`black_box_signature` needs a BlackBox vault, not a Stellar one. See
-[`../setup-multisig/README.md`](../setup-multisig/README.md).
+`black_box_signature` needs a BlackBox vault, not a Stellar one.
 
 ## The envelope diff
 
-Because Fordefi rebuilds the envelope, `diffEnvelopes()` in `src/lib.ts` compares
+Because Fordefi may rebuild the envelope, `diffEnvelopes()` in `src/lib.ts` compares
 what we submitted against what came back — source, fee, sequence, time bounds,
 memo, and every operation's type and source — and prints the result.
 
@@ -168,9 +164,9 @@ answers come from:
 - **Operation-level source accounts other than the vault are accepted.**
   `INVALID_VAULT_FIELD` applies to the *envelope* source only; ops 2 and 3 sourced
   by the sponsored account went through.
-- **The rebuild preserves the sandwich.** Operation count, order, types and per-op
-  sources all came back unchanged. On this run the fee was untouched (400 in, 400
-  out) and the sequence was returned as submitted.
+- **The returned envelope preserves the sandwich.** Operation count, order, types
+  and per-op sources all came back unchanged. On this run the fee was untouched
+  (400 in, 400 out) and the sequence was returned as submitted.
 - **`fail_on_prediction_failure: false` is required and sufficient.** The envelope
   is under-signed when Fordefi predicts it; without this the request aborts.
 
@@ -191,16 +187,15 @@ entries**: an account entry is worth 2 and each subentry 1, so this sandwich is
 
 Fordefi assigns the sequence itself, as `max(the sequence you submitted, its own
 next free one)`. It keeps its own allocator, and **a transaction that reaches
-`signed` under `push_mode: "manual"` holds its sequence whether or not it is ever
-broadcast.** Nothing releases it automatically — not even once the transaction's
-own `maxTime` has passed.
+`signed` under `push_mode: "manual"` holds its sequence while it remains
+unbroadcast.** The API exposes no release mechanism.
 
-So every abandoned attempt permanently widens the gap between the chain and
-Fordefi's allocator, and because the rule is `max()` you cannot submit your way
-back down. Once the gap exists, every later transaction fails with `tx_bad_seq`.
+So every abandoned attempt widens the gap between the chain and Fordefi's
+allocator. Because the rule is `max()`, you cannot submit your way back down; later
+transactions fail with `tx_bad_seq` until the reserved sequences are consumed.
 
 This is not specific to sponsored reserves — it applies to any manual-push Stellar
-flow, [`../multisig-tx`](../multisig-tx) included.
+flow.
 
 `npm run sponsor` checks for this before submitting and refuses to run while a
 gap exists, rather than widening it by one. It prints what is holding which
@@ -219,9 +214,9 @@ returns 400 `invalid_transaction_state` — *"Can only abort WAITING_FOR_APPROVA
 APPROVED transaction"* — so once Fordefi has signed, the reservation cannot be
 released through the API.
 
-The only way to clear one is to **broadcast it**. A transaction that fails on-chain
-still consumes its sequence number, which is all that is needed: verified by
-clearing a stray sandwich whose account already existed, which landed as
+The only verified way to clear one is to **broadcast it**. A transaction that fails
+on-chain still consumes its sequence number, which is all that is needed: verified
+by clearing a stray sandwich whose account already existed, which landed as
 `tx_failed` / `op_already_exists` for 400 stroops and closed the gap. Broadcast in
 ascending sequence order, starting from the one matching the chain's next sequence.
 

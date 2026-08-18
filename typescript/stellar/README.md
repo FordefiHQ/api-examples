@@ -6,7 +6,6 @@ TypeScript examples for creating Stellar transactions through the [Fordefi](http
 |---|---|---|
 | [`change-trust/`](./change-trust) | `stellar_change_trust` — establish a classic-asset trustline | `npm run trust` |
 | [`claim-claimable-balance/`](./claim-claimable-balance) | `stellar_claim_claimable_balance` — claim claimable balances (auto-trustline if needed) | `npm run claim` |
-| [`create-claimable-balance/`](./create-claimable-balance) | `stellar_raw_transaction` — create a claimable balance (source added as claimant by default) | `npm run create-native` |
 | [`raw-transaction/`](./raw-transaction) | `stellar_raw_transaction` — submit a locally-built unsigned XDR | `npm run raw` |
 | [`sign-message/`](./sign-message) | `stellar_message` — sign an arbitrary message (no broadcast) | `npm run sign` |
 | [`sponsored-reserves/`](./sponsored-reserves) | `stellar_raw_transaction` — sponsor another account's base reserves (CAP-33) | `npm run sponsor` |
@@ -22,11 +21,12 @@ HTTP 400  Invalid field: INVALID_VAULT_FIELD
   source account mismatch: XDR source GAQGT3TU... does not match vault GAT7T5PA...
 ```
 
-A second, independent barrier sits behind that one. Fordefi **rebuilds the envelope
-before signing** — it assigns the sequence number itself rather than honouring the
-one you submitted. So even if the source-account check were relaxed, asking a
-second vault to sign would rebuild the envelope, change the transaction hash, and
-void the first vault's signature.
+A second, independent barrier sits behind that one. Fordefi processes the envelope
+before signing and controls the sequence selection. It may refresh the sequence or
+normalize the fee; either change produces a different transaction hash and voids
+any signature collected against the submitted envelope. Even when the returned
+values happen to match, there is no API contract that lets a second vault add its
+signature to the first vault's finalized envelope.
 
 Together these mean:
 
@@ -36,7 +36,7 @@ Any Stellar operation that requires two vaults to sign is therefore impossible
 today. Two that come up in practice:
 
 - **2-of-2 multisig with two vaults as signers.** An account configured this way
-  can never transact — see [`setup-multisig/`](./setup-multisig).
+  cannot transact through the current public API.
 - **One vault sponsoring another vault's reserves.** CAP-33 pins both ends of the
   sandwich: `BeginSponsoringFutureReserves` must be sourced by the sponsor and
   `EndSponsoringFutureReserves` by the sponsored account, so both sign. Verified —
@@ -74,8 +74,7 @@ Order the signatures so the vault goes first, and the rebuild stops mattering:
    signature does not change the transaction hash, so both signatures validate.
 5. Broadcast to Horizon yourself.
 
-[`multisig-tx/`](./multisig-tx) does this for a 2-of-2 account;
-[`sponsored-reserves/`](./sponsored-reserves) does it for the two-account
+[`sponsored-reserves/`](./sponsored-reserves) demonstrates this for the two-account
 sponsorship sandwich.
 
 Set `fail_on_prediction_failure: false` on the request — the envelope is
@@ -83,11 +82,13 @@ deliberately under-signed when Fordefi simulates it, and the request otherwise
 aborts.
 
 > **Manual push reserves a sequence number.** A transaction that reaches `signed`
-> holds its sequence whether or not it is ever broadcast, and nothing releases it —
-> aborting is rejected past `approved`. Clear one by broadcasting it; a transaction
-> that *fails* on-chain still consumes its sequence, which is enough. An
-> under-signed envelope cannot be cleared this way, because `tx_bad_auth` is
-> rejected before consensus and never consumes the sequence. See
+> holds its sequence even if it has not been broadcast, and the API provides no
+> release mechanism — aborting is rejected past `approved`. The only verified way
+> to clear one is to broadcast it; a transaction that *fails* on-chain still
+> consumes its sequence, which is enough. An under-signed envelope cannot be
+> cleared this way, because `tx_bad_auth` is rejected before consensus and never
+> consumes the sequence. Recovery after the envelope's `maxTime` has passed remains
+> untested. See
 > [`sponsored-reserves/README.md`](./sponsored-reserves#sequence-numbers-are-the-thing-that-will-bite-you).
 
 ## Shared client
@@ -120,6 +121,5 @@ See each project's README for the env vars it expects.
 
 ## Reference
 
-- [`fordefi_api.json`](./fordefi_api.json) — full Fordefi OpenAPI spec (look for `CreateStellarChangeTrustRequest`, `CreateStellarClaimClaimableBalanceRequest`, `CreateStellarRawTransactionRequest`, `CreateStellarMessageRequest`)
 - [Fordefi API docs](https://docs.fordefi.com/api/openapi)
 - [Stellar SDK docs](https://stellar.github.io/js-stellar-sdk/)
