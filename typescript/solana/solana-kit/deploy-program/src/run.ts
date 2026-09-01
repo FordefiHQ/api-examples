@@ -18,7 +18,8 @@ async function main(): Promise<void> {
   // create executor that uses Fordefi for signing with retry logic
   const transactionPlanExecutor = kit.createTransactionPlanExecutor({
     executeTransactionMessage: async (
-      message: kit.BaseTransactionMessage & kit.TransactionMessageWithFeePayer,
+      _context,
+      message: kit.TransactionMessage & kit.TransactionMessageWithFeePayer,
     ) => {
       currentTx++;
       const maxRetries = 3;
@@ -51,7 +52,7 @@ async function main(): Promise<void> {
           const txBytes = Buffer.from(rawSignedTxBase64, 'base64');
           const transaction = kit.getTransactionDecoder().decode(txBytes);
 
-          return { transaction };
+          return { signature: txSignature, transaction };
         } catch (error: any) {
           lastError = error;
           const errorMsg = error?.cause?.message || error?.message || '';

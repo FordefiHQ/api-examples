@@ -15,7 +15,8 @@ async function main(): Promise<void> {
   // Create executor that uses Fordefi for signing
   const transactionPlanExecutor = kit.createTransactionPlanExecutor({
     executeTransactionMessage: async (
-      message: kit.BaseTransactionMessage & kit.TransactionMessageWithFeePayer,
+      _context,
+      message: kit.TransactionMessage & kit.TransactionMessageWithFeePayer,
     ) => {
       console.log('Signing transaction with Fordefi...');
 
@@ -40,7 +41,7 @@ async function main(): Promise<void> {
       const txBytes = Buffer.from(rawSignedTxBase64, 'base64');
       const transaction = kit.getTransactionDecoder().decode(txBytes);
 
-      return { transaction };
+      return { signature: txSignature, transaction };
     },
   });
   console.log('Executing transaction plan...');
