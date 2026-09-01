@@ -9,6 +9,7 @@ Fordefi API example scripts for Solana, organized by Solana SDK. Every subdirect
 ## SDK Organization
 
 - **`solana-kit/`** — `@solana/kit` v2+ (the current default for new examples): `spl-transfer`, `batch`, `batcher-program`, `create-prefunded-account`, `deploy-program`, `fixed-delegation`, `fragmetric`, `gas-station`, `orca`, `staking`
+  - Every project in this folder is on `@solana/kit ^8.2.0` with matching `@solana-program/*` clients **except** two, both held back by an upstream peer range: `fixed-delegation` stays on kit 7 because `@solana/subscriptions` (latest 0.5.0) peer-depends on `@solana/kit ^7.0.0`, and `orca` stays on kit 2 because `@orca-so/whirlpools` (latest 8.0.1) peer-depends on `@solana/kit ^5.0.0`. Keep new examples on kit 8: `@solana/keychain-fordefi` (2.x) peer-depends on `@solana/{signers,transactions,transaction-messages,addresses,keys,codecs-strings} >= 8.0.0`, which kit 8 satisfies through its own transitive deps.
 - **`web3.js/`** — legacy `@solana/web3.js` v1: `batch`, `exponent`, `jupiter`, `marinade`, `raydium`
 - **`gill/`** — `gill` SDK: `spl-transfer`, `spl-sponsored`
 

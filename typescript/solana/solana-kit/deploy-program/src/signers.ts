@@ -14,7 +14,7 @@ export async function signPayloadWithApiUserPrivateKey(payload: string, privateK
 }
 
 export async function signWithFordefi(
-  message: kit.BaseTransactionMessage & kit.TransactionMessageWithFeePayer,
+  message: kit.TransactionMessage & kit.TransactionMessageWithFeePayer,
   rpc: ReturnType<typeof kit.createSolanaRpc>,
   customFeeLamports?: string
 ): Promise<string> {

@@ -14,9 +14,9 @@
         "typescript": "^5.7.2"
     },
     "dependencies": {
-        "@solana-program/compute-budget": "^0.16.0",
-        "@solana-program/token": "^0.14.0",
-        "@solana/kit": "^6.5.0",
+        "@solana-program/compute-budget": "^0.18.0",
+        "@solana-program/token": "^0.16.0",
+        "@solana/kit": "^8.2.0",
         "axios": "1.13.2",
         "dotenv": "16.4.7",
         "tsx": "^4.20.6"
