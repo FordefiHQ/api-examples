@@ -23,28 +23,28 @@ async def main():
                     "name": "An Ethereum EOA",
                     "type": "evm",
                     "contact_type": "recipient",
-                    "address": "0x7D8D7e776aC41c5F819965b2E288b2D03fe517aE",
+                    "address": "0x...",
                     "chains":["evm_ethereum_mainnet"]  # for CUSTOM evm chains use "evm_chainId", for example evm_747474
                 },
                 {
                     "name": "A Base EOA",
                     "type": "evm",
                     "contact_type": "recipient",
-                    "address": "0x8D1A4e041A3080d9a4170e7606B5255c23298886",
+                    "address": "0x...",
                     "chains":["evm_base_mainnet"]  
                 },
                 {
                     "name": "An Ethereum Contract",
                     "type": "evm",
                     "contact_type": "contract",
-                    "address": "0x888888888889758F76e7103c6CbF23ABbF58F946",
+                    "address": "0x...",
                     "chains": ["evm_ethereum_mainnet"]
                 },
                 {
                     "name": "A Cross-Chain EVM EOA",
                     "type": "evm",
                     "contact_type": "recipient",
-                    "address": "0x0000000000000000000000000000000000000001",
+                    "address": "0x...",
                     # Remove "chain" to add the contact on "Any EVM"
                 }
                 ]
