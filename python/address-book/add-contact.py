@@ -21,6 +21,7 @@ async def main():
             "name": "RouterMcRouty",
             # "group_ids": ["82a840da-78ca-439d-b874-0fd7daf54fb4"], # Optional
             "type": "evm",
+            "contact_type": "contract",
             "address": "0x......",
             "chains": ["evm_ethereum_mainnet"] # for CUSTOM evm chains use "evm_chainId", for example evm_747474
         }
