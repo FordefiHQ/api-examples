@@ -56,7 +56,7 @@ evm_chain = "arbitrum"
 path = "/api/v1/transactions"
 destination = "0xF659feEE62120Ce669A5C45Eb6616319D552dD93" # CHANGE
 custom_note = "hello!" # Optional note
-token_contract_address = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831" # ARB on Arbitrum
+token_contract_address = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831" # USDC on Arbitrum
 value = str(100_000) # 1 USDC = 1_000_000
 
 async def main():
