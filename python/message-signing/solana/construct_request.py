@@ -2,7 +2,7 @@ import os
 import sys
 import base64
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
-from fordefi_protocol_types import TransactionType, SignerType, SolanaMessageType, SignMode, TransactionState
+from fordefi_protocol_types import TransactionType, SignerType, SolanaMessageType, SignMode
 
 
 def construct_personal_message_request(vault_id: str, message: str, chain: str) -> dict:
@@ -18,9 +18,7 @@ def construct_personal_message_request(vault_id: str, message: str, chain: str) 
             "raw_data": base64_encoded_message,
             "chain": chain
         },
-        "vault_id": vault_id,
-        "wait_for_state": TransactionState.SIGNED.value,
-        "timeout": 45
+        "vault_id": vault_id
     }
 
     return request_json

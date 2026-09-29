@@ -5,6 +5,7 @@ description = "Sign messages across EVM, Solana, and Tron using Fordefi Vaults"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "base58>=2.1.1",
     "ecdsa>=0.19.0",
     "eth-account>=0.13.7",
     "httpx[http2]>=0.28.1",

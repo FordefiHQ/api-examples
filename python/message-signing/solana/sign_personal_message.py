@@ -1,6 +1,9 @@
 import os
 import sys
 import json
+import time
+import base64
+import base58
 import datetime
 import requests
 from pathlib import Path
@@ -15,7 +18,9 @@ from solana.construct_request import construct_personal_message_request
 # Load Fordefi config
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 PRIVATE_KEY_PEM_FILE = Path(__file__).resolve().parent.parent / "secret" / "private.pem"
-PATH = "/api/v1/transactions/create-and-wait"
+PATH = "/api/v1/transactions"
+POLL_INTERVAL_SECONDS = 2
+MAX_POLL_ATTEMPTS = 60
 FORDEFI_API_USER_TOKEN = os.environ["FORDEFI_API_USER_TOKEN"]
 FORDEFI_SOLANA_VAULT_ID = os.environ["FORDEFI_SOLANA_VAULT_ID"]
 # Solana chain configuration
@@ -23,10 +28,32 @@ FORDEFI_SOLANA_VAULT_ID = os.environ["FORDEFI_SOLANA_VAULT_ID"]
 SOLANA_CHAIN = os.environ.get("SOLANA_CHAIN", "solana_mainnet")
 
 # Example message - replace with your actual message
-MESSAGE = """Hello, this is a test message to sign.
+MESSAGE = "Go Fordefi!"
 
-You can put any content here that you want to sign with your Fordefi Solana wallet."""
 
+def extract_signature(tx: dict):
+    signatures = tx.get("signatures")
+    return signatures[0]["data"] if signatures else None
+
+def poll_for_signature(tx_id: str):
+    for attempt in range(MAX_POLL_ATTEMPTS):
+        response = requests.get(
+            f"https://api.fordefi.com{PATH}/{tx_id}",
+            headers={"Authorization": f"Bearer {FORDEFI_API_USER_TOKEN}"},
+        )
+        response.raise_for_status()
+        tx = response.json()
+        state = tx.get("state")
+        print(f"  Attempt {attempt + 1}: state = {state}")
+
+        if extract_signature(tx):
+            return tx
+        if state in ("aborted", "failed", "rejected"):
+            raise RuntimeError(f"Transaction reached terminal state '{state}' without a signature")
+
+        time.sleep(POLL_INTERVAL_SECONDS)
+
+    return None
 
 def main():
     print(f"Message to sign:\n{MESSAGE}\n")
@@ -44,18 +71,26 @@ def main():
         print("Making API request to Fordefi")
         method = "post"
         response_data = make_api_request(PATH, FORDEFI_API_USER_TOKEN, signature, timestamp, request_body, method=method)
+        tx_id = response_data["id"]
+        print(f"\n✅ Transaction submitted! ID: {tx_id}")
 
-        print("\nResponse Data:")
-        print(json.dumps(response_data, indent=2))
+        print(f"Polling {PATH}/{tx_id} for the signature")
+        tx = poll_for_signature(tx_id)
 
-        if response_data.get("has_timed_out") and response_data.get("state") == "waiting_for_approval":
-            tx_id = response_data.get("id")
-            print("\n⏳ Request timed out while waiting for approval.")
+        if tx is None:
+            print("\n⏳ Timed out waiting for the signature.")
             print("   Note: The transaction is NOT cancelled - it can still be approved and signed.")
             print(f"   Transaction ID: {tx_id}")
             print(f"   Track status: GET /api/v1/transactions/{tx_id}")
             print("   Docs: https://docs.fordefi.com/api/latest/openapi/transactions/get_transaction_api_v1_transactions__id__get")
             return
+
+        signature_b64 = extract_signature(tx)
+        print(f"\nSigned message: {tx['string_data']}")
+        print(f"Signer wallet: {tx['sender']['address']}")
+        signature_bytes = base64.b64decode(signature_b64)
+        print(f"Signature (base58): {base58.b58encode(signature_bytes).decode()}")
+        print(f"Signature (hex): {signature_bytes.hex()}")
 
     except requests.exceptions.HTTPError as e:
         error_message = f"HTTP error occurred: {str(e)}"

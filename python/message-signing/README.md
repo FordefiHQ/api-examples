@@ -119,6 +119,6 @@ message-signing/
 1. Load Fordefi credentials from `.env`
 2. Construct a chain-specific message signing request
 3. Sign the request payload with your API Signer's ECDSA private key
-4. Submit to `POST /api/v1/transactions/create-and-wait`
-5. Wait for your Vault to sign the message and return the response
+4. Submit to `POST /api/v1/transactions/create-and-wait` (Solana submits to `POST /api/v1/transactions` instead)
+5. Wait for your Vault to sign the message and return the response (Solana polls `GET /api/v1/transactions/{id}` until the signature appears)
 6. (EVM only) Decode signature components (r, s, v) and recover signer address
