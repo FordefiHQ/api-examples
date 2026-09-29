@@ -8,6 +8,9 @@ openapi_baseline.json
 # AGENTS
 .claude
 .agents
+.pi
+.specs
+.mcp.json
 tools
 skills-lock.json
 CLAUDE.md

@@ -19,11 +19,12 @@ async def evm_tx_tokens(evm_chain: str, vault_id: str, destination: str, custom_
         "details": {
             "type": EvmTransactionDetailType.EVM_TRANSFER.value,
             "gas": {
-                "gas_limit": "1000000",
-                "type": GasType.CUSTOM.value,
-                "details": {
-                    "type": GasDetailsType.LEGACY.value,
-                    "price": "1000000000" # 1 GWEI
+                    "gas_limit": "50000",    # if native transfer -> only 21000 needed
+                    "type": GasType.CUSTOM.value,
+                    "details": {
+                        "type": GasDetailsType.DYNAMIC.value,
+                        "max_fee_per_gas": "100000000", # 0.1 GWEI
+                        "max_priority_fee_per_gas": "1000000"  # 0.001 GWEI tip, or even "0" depending on tx urgency
                 }
             },
             "to": destination,
@@ -55,8 +56,8 @@ evm_chain = "arbitrum"
 path = "/api/v1/transactions"
 destination = "0xF659feEE62120Ce669A5C45Eb6616319D552dD93" # CHANGE
 custom_note = "hello!" # Optional note
-token_contract_address = "0x912ce59144191c1204e64559fe8253a0e49e6548" # ARB on Arbitrum
-value = "100000" # 1 USDT = 1_000_000_000_000_000_000
+token_contract_address = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831" # USDC on Arbitrum
+value = str(100_000) # 1 USDC = 1_000_000
 
 async def main():
     try:
