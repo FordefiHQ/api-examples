@@ -1,4 +1,4 @@
-import os
+import os  # noqa: I001
 import sys
 import json
 import time
@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from shared.signer import sign_with_api_user_private_key
+from shared.signer import sign_with_api_user_private_key  # noqa: I001
 from shared.api_client import make_api_request
 from solana.construct_request import construct_personal_message_request
 
@@ -85,7 +85,7 @@ def main():
             print("   Docs: https://docs.fordefi.com/api/latest/openapi/transactions/get_transaction_api_v1_transactions__id__get")
             return
 
-        signature_b64 = extract_signature(tx)
+        signature_b64 = str(extract_signature(tx))
         print(f"\nSigned message: {tx['string_data']}")
         print(f"Signer wallet: {tx['sender']['address']}")
         signature_bytes = base64.b64decode(signature_b64)
