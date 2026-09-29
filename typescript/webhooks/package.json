@@ -20,7 +20,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@fordefi/web3-provider": "0.3.2",
+    "@fordefi/web3-provider": "0.3.3",
     "@noble/curves": "^1.4.2",
     "@types/express": "^5.0.3",
     "axios": "1.13.1",
