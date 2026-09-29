@@ -85,7 +85,7 @@ def main():
             print("   Docs: https://docs.fordefi.com/api/latest/openapi/transactions/get_transaction_api_v1_transactions__id__get")
             return
 
-        signature_b64 = extract_signature(tx)
+        signature_b64 = str(extract_signature(tx))
         print(f"\nSigned message: {tx['string_data']}")
         print(f"Signer wallet: {tx['sender']['address']}")
         signature_bytes = base64.b64decode(signature_b64)
