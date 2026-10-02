@@ -20,8 +20,10 @@ snowflake-query
 # Secrets
 # This file must stay tracked. It is the only secret protection a fresh clone gets,
 # and every example directory asks contributors to drop real keys into secret/.
+# Patterns without a slash match at any depth.
 .env
 .env.*
+*.env
 !.env.example
 secret/
 fordefi_secret/
@@ -29,6 +31,9 @@ fordefi_secret/
 *.key
 agent-private-key*.json
 # Public keys are legitimately tracked (webhook/API-approver signature verification).
+# Keep this exception narrow: a broad `*public*.pem` would also re-include names like public-and-private.pem.
 !*public_key*.pem
-!*public*.pem
 
+
+# Lockfiles — patterns without a slash match at any depth.
+package-lock.json

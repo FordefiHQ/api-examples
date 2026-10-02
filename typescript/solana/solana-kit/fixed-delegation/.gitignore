@@ -5,3 +5,6 @@ package-lock.json
 
 # Signer folder containing your Fordefi .pem signing secret
 secret/*
+
+# Subscriptions program binary cached by test/fetch-program.ts
+test/fixtures/

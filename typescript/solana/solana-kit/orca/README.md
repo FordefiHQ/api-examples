@@ -38,7 +38,7 @@ This helper code allows you to programmatically interact with Orca DEX on Solana
    npm install
    ```
 
-3. Create a `.env` file in the root directory with the following variables:
+3. Add the following variables to `solana-kit/.env`, shared by all solana-kit examples (see the [shared setup](../README.md)):
    ```
    FORDEFI_API_TOKEN=your_fordefi_api_user_token
    FORDEFI_VAULT_ID=your_fordefi_vault_id
@@ -46,10 +46,10 @@ This helper code allows you to programmatically interact with Orca DEX on Solana
    ORCA_POSITION_MINT_ADDRESS=your_position_mint_address_if_applicable
    ```
 
-4. Create a `secret` directory and place your API User's private key file inside:
+4. Place your API User's private key at `solana-kit/secret/private.pem`:
    ```bash
-   mkdir -p secret
-   # Add your private.pem file to the secret directory
+   mkdir -p ../secret
+   cp /path/to/your/private.pem ../secret/private.pem
    ```
 
 ## Usage
@@ -89,7 +89,7 @@ npm run open-position
 
 ### Harvesting Rewards
 
-Set your position's mint address in the `.env` file or directly in `harvestPositionConfig` in `orca_harvest_position.ts`:
+Set your position's mint address in `solana-kit/.env` or directly in `harvestPositionConfig` in `orca_harvest_position.ts`:
 
 Then run:
 ```bash
@@ -124,7 +124,7 @@ npm run increase-liquidity
 
 ### Closing a Position
 
-Set your position's mint address in `.env` or directly in `closePositionConfig` in `orca_close_position.ts`:
+Set your position's mint address in `solana-kit/.env` or directly in `closePositionConfig` in `orca_close_position.ts`:
 
 Then run:
 ```bash
@@ -142,7 +142,7 @@ export const fordefiConfig: FordefiSolanaConfig = {
   accessToken: process.env.FORDEFI_API_TOKEN || "",
   vaultId: process.env.FORDEFI_VAULT_ID || "",
   fordefiSolanaVaultAddress: process.env.FORDEFI_VAULT_ADDRESS || "",
-  privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
+  privateKeyPem: fs.readFileSync(PRIVATE_KEY_PATH, 'utf8'), // solana-kit/secret/private.pem
   apiPathEndpoint: '/api/v1/transactions/create-and-wait'
 };
 ```
@@ -164,4 +164,4 @@ For any operation, you can enable Jito by setting `useJito: true` in the relevan
 
 - Never share your private key or `.env` file
 - Keep your FORDEFI_API_TOKEN secure
-- The `secret` directory and `.env` are included in `.gitignore` to prevent accidental commits
+- `solana-kit/secret/` and `solana-kit/.env` are included in `.gitignore` to prevent accidental commits

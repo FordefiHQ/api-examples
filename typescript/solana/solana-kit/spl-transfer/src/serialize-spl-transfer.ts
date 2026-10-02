@@ -1,96 +1,105 @@
 import * as kit from '@solana/kit';
-import { createClient } from '../utils/solana-client-util';
-import { FordefiSolanaConfig, TransferConfig } from './config';
+import { TransferConfig } from './config';
 import {
   TOKEN_PROGRAM_ADDRESS,
   findAssociatedTokenPda,
   getTransferCheckedInstruction,
   getCreateAssociatedTokenIdempotentInstruction } from '@solana-program/token';
 
-async function deriveATA(owner: kit.Address, transferConfig: TransferConfig) {
-    const [ata] = await findAssociatedTokenPda({
-      owner:      owner,
-      mint:       kit.address(transferConfig.mint),
-      tokenProgram: TOKEN_PROGRAM_ADDRESS,
-    });
-    return [ata]
+// Token-2022. TransferChecked and the idempotent create-ATA instruction are encoded identically for
+// both token programs, so the builders above work for either once the program address is overridden.
+const TOKEN_2022_PROGRAM_ADDRESS = kit.address('TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb');
+
+/**
+ * The token program that owns a mint is part of the associated token account's seeds and must be
+ * passed to every token instruction, so resolve it from the mint itself rather than assuming the
+ * classic SPL Token program (USDG, for example, is a Token-2022 mint).
+ */
+async function getTokenProgramForMint(rpc: kit.Rpc<kit.GetAccountInfoApi>, mint: kit.Address): Promise<kit.Address> {
+    const { value } = await rpc.getAccountInfo(mint, { encoding: 'base64' }).send();
+    if (!value) {
+        throw new Error(`Mint ${mint} not found - check the mint and RPC URL in config.ts`);
+    }
+    if (value.owner !== TOKEN_PROGRAM_ADDRESS && value.owner !== TOKEN_2022_PROGRAM_ADDRESS) {
+        throw new Error(`Mint ${mint} is not owned by a token program (owner: ${value.owner})`);
+    }
+    return value.owner;
+}
+
+async function deriveATA(owner: kit.Address, mint: kit.Address, tokenProgram: kit.Address) {
+    const [ata] = await findAssociatedTokenPda({ owner, mint, tokenProgram });
+    return ata;
 }
 
 function createAtaInstruction(
     payer: kit.TransactionSigner,
     owner: kit.Address,
     mint: kit.Address,
-    ata: kit.Address
+    ata: kit.Address,
+    tokenProgram: kit.Address
 ) {
     return getCreateAssociatedTokenIdempotentInstruction({
         payer,
         owner,
         mint,
         ata,
-        tokenProgram: TOKEN_PROGRAM_ADDRESS,
+        tokenProgram,
     });
 }
 
-export async function createTx(fordefiConfig: FordefiSolanaConfig, transferConfig: TransferConfig){
-    const solana_client = await createClient();
-    const sourceVault = kit.address(fordefiConfig.originAddress);
-    const sourceVaultSigner = kit.createNoopSigner(sourceVault);
-    const destVault = kit.address(fordefiConfig.destAddress);
-    const usdcMint = kit.address(transferConfig.mint);
+// The vault signer is the Fordefi signer from @solana/keychain-fordefi: Kit asks it to sign
+// when the message is signed, so it must be used everywhere the vault appears as a signer
+export async function createTxMessage(
+    vaultSigner: kit.TransactionSigner,
+    rpc: kit.Rpc<kit.GetLatestBlockhashApi & kit.GetAccountInfoApi>,
+    destAddress: string,
+    transferConfig: TransferConfig
+){
+    const sourceVault = vaultSigner.address;
+    const destVault = kit.address(destAddress);
+    const mint = kit.address(transferConfig.mint);
+    const tokenProgram = await getTokenProgramForMint(rpc, mint);
+    console.debug("Token program", tokenProgram);
 
-    const [sourceAta] = await deriveATA(sourceVault, transferConfig);
+    const sourceAta = await deriveATA(sourceVault, mint, tokenProgram);
     console.debug("Source ATA", sourceAta);
 
-    const [destAta] = await deriveATA(destVault, transferConfig);
+    const destAta = await deriveATA(destVault, mint, tokenProgram);
     console.debug("Destination ATA", destAta);
 
     // Token transfer ixs
-    const ixes: any[] = [];
+    const ixes: kit.Instruction[] = [];
     // create the ATA if it doesn't exist
     ixes.push(
       createAtaInstruction(
-        sourceVaultSigner, 
-        destVault, 
-        usdcMint, 
-        destAta as kit.Address
+        vaultSigner,
+        destVault,
+        mint,
+        destAta,
+        tokenProgram
       )
     );
     ixes.push(
-      getTransferCheckedInstruction({
-        source:      sourceAta as kit.Address,
-        destination: destAta as kit.Address,
-        mint:        usdcMint,
-        authority:   sourceVault,
-        amount:      transferConfig.amount,
-        decimals:    Number(transferConfig.decimals)
-      })
+      // TransferChecked rather than Transfer: Token-2022 rejects the unchecked variant on mints with a transfer fee
+      getTransferCheckedInstruction(
+        {
+          source:      sourceAta,
+          destination: destAta,
+          mint,
+          authority:   vaultSigner,
+          amount:      transferConfig.amount,
+          decimals:    Number(transferConfig.decimals)
+        },
+        { programAddress: tokenProgram }
+      )
     );
 
-    const { value: latestBlockhash } = await solana_client.rpc.getLatestBlockhash().send();
+    const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
 
-    const txMessage = kit.pipe(
+    return kit.pipe(
       kit.createTransactionMessage({ version: 0 }),
-      message => kit.setTransactionMessageFeePayer(sourceVault, message),
+      message => kit.setTransactionMessageFeePayerSigner(vaultSigner, message),
       message => kit.setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, message),
       message => kit.appendTransactionMessageInstructions(ixes, message)
     );
-
-    const signedTx = await kit.partiallySignTransactionMessageWithSigners(txMessage);
-    const base64EncodedData = Buffer.from(signedTx.messageBytes).toString('base64');
-
-    const pushMode = transferConfig.useJito ? "manual" : "auto";
-    const jsonBody = {
-        "vault_id": fordefiConfig.originVault,
-        "signer_type": "api_signer",
-        "sign_mode": "auto",
-        "type": "solana_transaction",
-        "details": {
-            "type": "solana_serialized_transaction_message",
-            "push_mode": pushMode,
-            "chain": "solana_mainnet",
-            "data": base64EncodedData
-        }
-    };
-
-    return jsonBody
 }

@@ -54,14 +54,23 @@ npm run multi-batch
 
 ### Fordefi Integration
 
-Scripts in `app/fordefi/` handle signing through Fordefi's API:
+Signing goes through [`@solana/keychain-fordefi`](https://github.com/solana-foundation/solana-keychain/tree/main/typescript/packages/fordefi), a Kit signer for your Fordefi vault (created in `app/fordefi/signer.ts`). It is set as the transaction's fee payer and the batch's sender, and when Kit signs the message it signs the API request with your API User key, submits the transaction to Fordefi, waits for the MPC signature and verifies it.
 
-1. Transaction is built without a blockhash (Fordefi adds it)
-2. Serialized message is sent to Fordefi's API with a signed payload
-3. Fordefi signs with its MPC vault and optionally broadcasts
-4. The script polls until the transaction reaches `signed`/`mined` state
+`push_to_custom_url` in `app/config.ts` picks the push mode:
 
-Configuration is loaded from environment variables — see `app/config.ts` for required values (`FORDEFI_API_TOKEN`, `FORDEFI_VAULT_ID`, `FORDEFI_VAULT_ADDRESS`).
+- `false`: auto push mode. Fordefi signs and broadcasts the transaction.
+- `true`: manual push mode. Fordefi signs without broadcasting and the script sends the transaction to `RPC_URL`. Fordefi may refresh the blockhash and priority fee before signing, so the script always broadcasts the transaction Fordefi returns.
+
+Credentials are shared by all solana-kit examples: set `FORDEFI_API_TOKEN`, `FORDEFI_VAULT_ID` and `FORDEFI_VAULT_ADDRESS` in `solana-kit/.env` and put your API User private key at `solana-kit/secret/private.pem` (see the [shared setup](../README.md)).
+
+### Client tests
+
+```bash
+cd app
+npm test
+```
+
+The tests run both scripts against a mock Fordefi API and a mock Solana RPC, both backed by [LiteSVM](https://github.com/LiteSVM/litesvm). No credentials or funds are needed and nothing is sent to the network. They check the requests the signer sends to Fordefi in both push modes and that the broadcast transaction carries a valid vault signature over the message Fordefi returned. The compiled program isn't checked in, so they don't execute the batch instruction itself: the transaction passes signature verification and then stops at the missing program.
 
 ## Build & Test
 

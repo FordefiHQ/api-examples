@@ -1,7 +1,12 @@
 import dotenv from 'dotenv'
 import fs from 'fs'
+import path from 'path'
 
-dotenv.config()
+// All solana-kit examples share one .env and one API User key at the solana-kit root.
+// A .env in this project, if present, takes precedence over the shared one.
+const SOLANA_KIT_ROOT = path.resolve(__dirname, '../..');
+dotenv.config({ path: ['.env', path.join(SOLANA_KIT_ROOT, '.env')] });
+const PRIVATE_KEY_PATH = process.env.FORDEFI_PRIVATE_KEY_PATH || path.join(SOLANA_KIT_ROOT, 'secret', 'private.pem');
 
 export interface FordefiSolanaConfig {
     accessToken: string;
@@ -27,7 +32,7 @@ export const fordefiConfig: FordefiSolanaConfig = {
     destAddress: process.env.DESTINATION_ADDRESS || "",
     feePayer: process.env.FEE_PAYER_VAULT_ADDRESS || "",
     feePayerVault: process.env.FEE_PAYER_VAULT_ID || "",
-    privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
+    privateKeyPem: fs.readFileSync(PRIVATE_KEY_PATH, 'utf8'),
     apiPathEndpoint: '/api/v1/transactions',
     rpcUrl: 'https://api.devnet.solana.com', // or https://api.mainnet.solana.com
     chain: 'solana_devnet', // must match rpcUrl above: solana_mainnet or solana_devnet

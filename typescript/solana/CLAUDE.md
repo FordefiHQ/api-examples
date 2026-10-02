@@ -4,12 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-Fordefi API example scripts for Solana, organized by Solana SDK. Every subdirectory under an SDK folder is a standalone Node.js project with its own `package.json`, `.env`, and `secret/` directory. There is no monorepo tooling and no shared package — helpers like `process_tx.ts` and `signer.ts` are **copied** between projects, so a fix in one does not propagate. When changing a shared-looking helper, grep for its siblings and decide explicitly whether to replicate.
+Fordefi API example scripts for Solana, organized by Solana SDK. Every subdirectory under an SDK folder is a standalone Node.js project with its own `package.json` (in `web3.js/` and `gill/`, each also has its own `.env` and `secret/`; `solana-kit/` projects share one, see Config and Secrets). There is no monorepo tooling and no shared package — helpers like `process_tx.ts` and `signer.ts` are **copied** between projects, so a fix in one does not propagate. When changing a shared-looking helper, grep for its siblings and decide explicitly whether to replicate.
 
 ## SDK Organization
 
 - **`solana-kit/`** — `@solana/kit` v2+ (the current default for new examples): `spl-transfer`, `batch`, `batcher-program`, `create-prefunded-account`, `deploy-program`, `fixed-delegation`, `fragmetric`, `gas-station`, `orca`, `staking`
-  - Every project in this folder is on `@solana/kit ^8.2.0` with matching `@solana-program/*` clients **except** two, both held back by an upstream peer range: `fixed-delegation` stays on kit 7 because `@solana/subscriptions` (latest 0.5.0) peer-depends on `@solana/kit ^7.0.0`, and `orca` stays on kit 2 because `@orca-so/whirlpools` (latest 8.0.1) peer-depends on `@solana/kit ^5.0.0`. Keep new examples on kit 8: `@solana/keychain-fordefi` (2.x) peer-depends on `@solana/{signers,transactions,transaction-messages,addresses,keys,codecs-strings} >= 8.0.0`, which kit 8 satisfies through its own transitive deps.
+  - Every project in this folder is on `@solana/kit ^8.2.0` with matching `@solana-program/*` clients **except** `orca`, which stays on kit 2 because `@orca-so/whirlpools` (latest 8.0.1) peer-depends on `@solana/kit ^5.0.0`. `fixed-delegation` is on kit 8 only through `"overrides": { "@solana/kit": "$@solana/kit" }` in its `package.json`: `@solana/subscriptions` (0.5.0, and upstream `main`) still peer-depends on kit ^7, as do its `kit-plugin-*` deps, which are never loaded at runtime; it keeps a nested `@solana/program-client-core` 7.x as a regular dependency. Drop the override once subscriptions supports kit 8. Keep new examples on kit 8: `@solana/keychain-fordefi` (2.x) peer-depends on `@solana/{signers,transactions,transaction-messages,addresses,keys,codecs-strings} >= 8.1.0`, which kit 8 satisfies through its own transitive deps. `orca` can't take the keychain (npm ERESOLVE against its kit 5 `@solana/*` packages) and still uses the hand-rolled flow.
+  - When adding the keychain to an existing checkout and npm reports ERESOLVE against a hoisted older `@solana/*` package (fragmetric's SDK bundles kit 2, deploy-program's codama bundles kit 5), delete `node_modules` and `package-lock.json` (gitignored) and reinstall; deploy-program also pins `@solana/codecs-{core,strings}@^8.4.0` directly for this reason.
 - **`web3.js/`** — legacy `@solana/web3.js` v1: `batch`, `exponent`, `jupiter`, `marinade`, `raydium`
 - **`gill/`** — `gill` SDK: `spl-transfer`, `spl-sponsored`
 
@@ -40,7 +41,9 @@ Script runners are mixed: `tsx` in newer projects (solana-kit, gill/spl-transfer
 
 ## Tests
 
-Only the two on-chain program projects have tests:
+The keychain-based projects (`spl-transfer`, `staking`, `batch`, `batcher-program/app`, `fragmetric`, `deploy-program`, `fixed-delegation`) have offline tests: `npm test` (`npm run test:fordefi` in deploy-program, where `test` is anchor's). They run the real entry point's exported `main()` against `test/harness.ts`, which replaces `fetch()` with a mock Fordefi API (verifies the API User `x-signature`, signs with a local ed25519 "vault" key, refreshes the blockhash like Fordefi does) and a mock JSON-RPC (also used for Jito), both backed by LiteSVM with sigverify on. No credentials, funds or network. The config modules read `.env` and the PEM at import time, so tests call `prepareWorkdir()` (which sets the test env vars and points `FORDEFI_PRIVATE_KEY_PATH` at a generated key, so the real shared key is never read) and `require()` the modules afterwards. `harness.ts` is copied per project and the copies are kept identical — change one, copy it to the rest. Also `npm run typecheck`. `fixed-delegation`'s tests run the real Subscriptions program: its `pretest` (`test/fetch-program.ts`) caches the deployed binary in git-ignored `test/fixtures/` with one read-only mainnet RPC call on the first run. Note that a transaction that fails on-chain after Fordefi accepted it surfaces from the keychain's auto mode as "outcome could not be confirmed" (`BROADCAST_UNCONFIRMED`, with the Fordefi transaction id), not as the program error.
+
+The two on-chain program projects also have program tests:
 
 ```bash
 # solana-kit/batcher-program — LiteSVM (Rust), not Bankrun or anchor's JS runner
@@ -53,11 +56,22 @@ anchor build && anchor test
 npx tsx scripts/generate-clients.ts   # regenerate Codama client from target/idl/ after program changes
 ```
 
-The other 16 projects have no test infrastructure — validation is running the script against devnet/mainnet.
+The remaining projects have no test infrastructure — validation is running the script against devnet/mainnet.
 
 ## Core Flow
 
-Every example converges on the same shape, split across `config.ts` → `serialize-*.ts` → `signer.ts` → `process_tx.ts` → entry point:
+### Keychain projects (`spl-transfer`, `staking`, `batch`, `batcher-program/app`, `fragmetric`, `deploy-program`, `fixed-delegation`)
+
+Signing goes through `@solana/keychain-fordefi`'s `createFordefiSigner`, which does the API-request signing, POST, polling and signature verification described below. It's ESM-only with an `exports` map that only has an `"import"` condition, so these CommonJS projects load it with `await import('@solana/keychain-fordefi')` (a static import / `require()` fails with ERR_PACKAGE_PATH_NOT_EXPORTED). Its mode decides the Kit signer kind:
+
+- `chain` set, `pushMode` omitted → **auto**: a `TransactionSendingSigner`; send with `kit.signAndSendTransactionMessageWithSigners`. Only for transactions whose sole signer is the vault.
+- `chain` + `pushMode: 'manual'` → a `TransactionModifyingSigner`; `kit.signTransactionMessageWithSigners` returns the transaction Fordefi signed, which you broadcast yourself (Jito, plan executors, `push_to_custom_url`). The vault must be the fee payer. Local keypair signers are fine — Kit runs the Fordefi signer first and the keypairs sign Fordefi's (possibly rewritten) message, so there is no `details.signatures` array to build.
+
+Fordefi may refresh the blockhash and compute-budget instructions, so always broadcast the transaction it returns, never one compiled from your own message. Use the Fordefi signer object everywhere the vault is a signer (fee payer, ATA payer, authority): Kit throws "Multiple distinct signers" if a `createNoopSigner(vault)` or an SDK's own signer object shares the address (fragmetric re-maps the SDK's account metas for this). Fields the keychain doesn't send: `skip_prediction`, `wait_for_state`, and caller-supplied `details.signatures` — which is why `gas-station` (two Fordefi vaults on one transaction) stays on the hand-rolled flow.
+
+### Hand-rolled flow (everything else)
+
+These examples converge on the same shape, split across `config.ts` → `serialize-*.ts` → `signer.ts` → `process_tx.ts` → entry point:
 
 1. Build instructions with the SDK, using `createNoopSigner(vaultAddress)` for any Fordefi-controlled signer — the vault's key lives in MPC and cannot sign locally.
 2. Compile the message and base64-encode **`messageBytes`, not the full transaction**. The API field is `solana_serialized_transaction_message`; sending wire-format bytes fails.
@@ -87,7 +101,7 @@ Request body:
 
 ### The signatures array
 
-For multi-signer transactions, `details.signatures` is **positionally ordered** and must line up with the compiled message's signer order: `{ data: null }` is the placeholder Fordefi fills with the vault's MPC signature, and locally-produced signatures go in as base64. `create-prefunded-account/utils/fordefi-submit.ts` and `deploy-program/src/signers.ts` build this by `unshift`-ing the null at the fee-payer position and pushing the rest — reuse that logic rather than reimplementing it.
+For multi-signer transactions, `details.signatures` is **positionally ordered** and must line up with the compiled message's signer order: `{ data: null }` is the placeholder Fordefi fills with the vault's MPC signature, and locally-produced signatures go in as base64. `create-prefunded-account/utils/fordefi-submit.ts` builds this by `unshift`-ing the null at the fee-payer position and pushing the rest — reuse that logic rather than reimplementing it.
 
 ## Signing Topologies
 
@@ -95,7 +109,7 @@ Beyond the single-vault base case, five variants exist and are the main thing to
 
 - **Two-vault co-signing** (`solana-kit/gas-station`) — a fee-payer vault pays while a source vault authorizes. Two sequential API round-trips: first request has `push_mode: "manual"` and `signatures: [{data:null},{data:null}]`; the returned `raw_transaction` is decoded, its signatures re-serialized, and submitted again under the source vault's `vault_id` with `push_mode: "auto"`. Note it also rewrites `READONLY_SIGNER` → `WRITABLE_SIGNER` account roles on the token instruction, and resolves the token program from the mint's owner so Token-2022 mints work.
 - **Vault + local keypair** (`solana-kit/create-prefunded-account`) — a third-party keypair signs locally via `partiallySignTransactionMessageWithSigners`; the vault slot stays null.
-- **Transaction planner/executor** (`solana-kit/batch`, `solana-kit/deploy-program`) — `createTransactionPlanner` + `nonDivisibleSequentialInstructionPlan` auto-splits oversized instruction sets, and `createTransactionPlanExecutor` calls Fordefi per transaction. Blockhash is attached at signing time, not plan time. `deploy-program` wraps this in a 3-attempt retry on `Blockhash not found`.
+- **Transaction planner/executor** (`solana-kit/batch`, `solana-kit/deploy-program`) — `createTransactionPlanner` + `nonDivisibleSequentialInstructionPlan` auto-splits oversized instruction sets, and `createTransactionPlanExecutor` signs each transaction with the manual-mode keychain signer and broadcasts it to the configured RPC. Blockhash is attached at signing time, not plan time. `deploy-program` wraps this in a 3-attempt retry on `Blockhash not found`.
 - **Delegator/delegatee** (`solana-kit/fixed-delegation`) — two vaults with distinct roles via `@solana/subscriptions` PDAs; the delegatee signs the transfer against a delegation the delegator created.
 - **Sponsored / Octane** (`gill/spl-sponsored`, plus `dev/octane-helper.ts` in `solana-kit/spl-transfer` and `staking`) — hand-assembles the Solana wire format (`[num_sigs u8][sigs 64B each][message]`) and base58-encodes it for Octane, because the relayer wants a full transaction rather than a message.
 
@@ -118,9 +132,11 @@ The `_ID` / `_ADDRESS` suffix is the whole point of the convention — a vault I
 
 Note the TypeScript **field** names these map onto are still inconsistent (`originVault`, `vaultId`, `deployerVaultId`, `fordefiSolanaVaultAddress` all appear). Only the env var names were unified; don't assume a field name from the env var.
 
-The PEM path is `./secret/private.pem` everywhere **except** `deploy-program` and `web3.js/marinade`, which use `./fordefi_secret/private.pem`. Paths are relative to the project root, so scripts must be run from there.
+**`solana-kit/` shares one `.env` and one key at the `solana-kit/` root** (`solana-kit/.env`, `solana-kit/secret/private.pem`; template in `solana-kit/.env.example`, setup in `solana-kit/README.md`). Every config — the nine `config.ts` files and the six `orca/orca_*.ts` entrypoints, which each define their own — resolves `SOLANA_KIT_ROOT` from `__dirname`, loads `dotenv.config({ path: ['.env', <root>/.env] })` (a project-local `.env` wins, first value wins), and reads the PEM from `FORDEFI_PRIVATE_KEY_PATH` or `<root>/secret/private.pem`. Keep that block identical when adding an example, adjusting only the `__dirname` depth — plus `quiet: true` on projects using dotenv 17 (`batch`, `batcher-program/app`), which otherwise logs a banner on every load (dotenv 16's types reject the option). Other relative paths (deploy-program's keypairs and `.so`) are still cwd-relative, so run scripts from the project directory.
 
-No `.env.example` files exist in this tree; derive required vars from `config.ts`.
+Outside `solana-kit/`, the PEM path is `./secret/private.pem` everywhere **except** `web3.js/marinade`, which uses `./fordefi_secret/private.pem`. Paths are relative to the project root, so scripts must be run from there.
+
+`solana-kit/.env.example` lists every var the solana-kit examples read — update it when a config gains one. Outside `solana-kit/` no `.env.example` exists; derive required vars from `config.ts`.
 
 ## Chains
 

@@ -1,33 +1,34 @@
-import { fordefiConfig, fragmetricConfig } from './config';
-import { signWithFordefi } from './utils/process_tx'
-import { signWithApiSigner } from './utils/signer';
-import { restake } from './serialize_restaking'
+import * as kit from '@solana/kit';
+import { fordefiConfig, fragmetricConfig, solanaCluster } from './config';
+import { createTxMessage, getDepositInstructions } from './serialize_restaking'
 
-async function main(): Promise<void> {
+// Fragmetric's SDK reads mainnet state to build the deposit, so the tests pass in their own instructions
+export async function main(buildInstructions = getDepositInstructions): Promise<void> {
   if (!fordefiConfig.accessToken) {
     console.error('Error: FORDEFI_API_TOKEN environment variable is not set');
     return;
   }
+  const rpc = kit.createSolanaRpc(solanaCluster);
 
-  // Create and serialize the tx
-  const jsonBody = await restake(fordefiConfig, fragmetricConfig)
-  console.log("JSON request: ", jsonBody)
-
-  // Fetch serialized tx from json file
-  const requestBody = JSON.stringify(jsonBody);
-
-  // Create payload
-  const timestamp = new Date().getTime();
-  const payload = `${fordefiConfig.apiPathEndpoint}|${timestamp}|${requestBody}`;
+  // @solana/keychain-fordefi is ESM-only, so this CommonJS project loads it with a dynamic import
+  const { createFordefiSigner } = await import('@solana/keychain-fordefi');
+  // Auto push mode: Fordefi signs the transaction and broadcasts it to the network
+  const vaultSigner = await createFordefiSigner({
+    accessToken: fordefiConfig.accessToken,
+    vaultId: fordefiConfig.vaultId,
+    publicKey: fordefiConfig.fordefiSolanaVaultAddress,
+    privateKeyPem: fordefiConfig.privateKeyPem,
+    chain: fordefiConfig.chain,
+  });
 
   try {
-    // Send tx payload to API Signer for signature
-    const signature = await signWithApiSigner(payload, fordefiConfig.privateKeyPem);
-    
-    // Send signed payload to Fordefi
-    const response = await signWithFordefi(fordefiConfig.apiPathEndpoint, fordefiConfig.accessToken, signature, timestamp, requestBody);
-    const data = response.data;
-    console.log(data)
+    // Create the restaking tx
+    const instructions = await buildInstructions(fordefiConfig, fragmetricConfig);
+    const txMessage = await createTxMessage(vaultSigner, rpc, instructions);
+
+    const signature = await kit.signAndSendTransactionMessageWithSigners(txMessage);
+    console.log("Restaking transaction signed by vault and submitted to network 📡");
+    console.log(`Signature: ${kit.getBase58Decoder().decode(signature)}`);
 
   } catch (error: any) {
     console.error(`Failed to sign the transaction: ${error.message}`);

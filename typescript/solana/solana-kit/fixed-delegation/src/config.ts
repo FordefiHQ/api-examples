@@ -1,7 +1,12 @@
 import dotenv from 'dotenv';
 import fs from 'fs';
+import path from 'path';
 
-dotenv.config()
+// All solana-kit examples share one .env and one API User key at the solana-kit root.
+// A .env in this project, if present, takes precedence over the shared one.
+const SOLANA_KIT_ROOT = path.resolve(__dirname, '../..');
+dotenv.config({ path: ['.env', path.join(SOLANA_KIT_ROOT, '.env')] });
+const PRIVATE_KEY_PATH = process.env.FORDEFI_PRIVATE_KEY_PATH || path.join(SOLANA_KIT_ROOT, 'secret', 'private.pem');
 
 export interface FordefiSolanaConfig {
   accessToken: string;
@@ -10,7 +15,7 @@ export interface FordefiSolanaConfig {
   delegateeVault: string;
   delegateeAddress: string;
   privateKeyPem: string;
-  apiPathEndpoint: string;
+  chain: 'solana_mainnet' | 'solana_devnet';
   mainnetRpc: string;
   ws: string
 }
@@ -31,8 +36,8 @@ export const fordefiConfig: FordefiSolanaConfig = {
   delegatorAddress: process.env.DELEGATOR_VAULT_ADDRESS || "",
   delegateeVault: process.env.DELEGATEE_VAULT_ID || "", // only required for the transfer script
   delegateeAddress: process.env.DELEGATEE_VAULT_ADDRESS || "",
-  privateKeyPem: fs.readFileSync('./secret/private.pem', 'utf8'),
-  apiPathEndpoint: '/api/v1/transactions',
+  privateKeyPem: fs.readFileSync(PRIVATE_KEY_PATH, 'utf8'),
+  chain: 'solana_mainnet', // must match mainnetRpc/ws below: solana_mainnet or solana_devnet
   mainnetRpc: 'https://api.mainnet-beta.solana.com',
   ws: 'wss://api.mainnet-beta.solana.com'
 };

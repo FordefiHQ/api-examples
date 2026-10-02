@@ -44,16 +44,11 @@ Because both vaults sign the *same* serialized message, the transaction is built
    npm install
    ```
 
-3. **Create the secret directory**:
-   ```bash
-   mkdir -p secret
-   ```
-
-4. **Add your private key**: Place your API User's private key in PEM format at `secret/private.pem`
+3. **Add your private key**: Place your API User's private key in PEM format at `solana-kit/secret/private.pem`, shared by all solana-kit examples (see the [shared setup](../README.md))
 
 ## Configuration
 
-Create a `.env` file in the project root with the following variables:
+Add the following variables to `solana-kit/.env`, shared by all solana-kit examples:
 
 ```env
 # Fordefi API Configuration
@@ -144,11 +139,8 @@ gas-station/
 │   ├── serialize-spl.ts    # Transaction building and serialization
 │   ├── process_tx.ts       # Fordefi API interaction
 │   └── signer.ts           # Utilities for signing your transaction with your API User's private key
-├── secret/
-│   └── private.pem         # Your API signer private key (create this)
 ├── package.json
-├── tsconfig.json
-└── .env                    # Environment configuration (create this)
+└── tsconfig.json
 ```
 
 ## Implementation Notes
