@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "plan": "tsx ./src/run.ts"
+    "plan": "tsx ./src/run.ts",
+    "test": "tsx --test test/*.test.ts",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
@@ -14,10 +16,14 @@
     "@solana-program/system": "^0.14.0",
     "@solana-program/token": "^0.16.0",
     "@solana/instruction-plans": "^8.2.0",
+    "@solana/keychain-fordefi": "^2.0.0",
     "@solana/kit": "^8.2.0",
-    "axios": "1.13.2",
     "dotenv": "17.2.3",
-    "tsx": "^4.21.0",
+    "tsx": "^4.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "litesvm": "^1.5.0",
     "typescript": "^5.9.3"
   }
 }

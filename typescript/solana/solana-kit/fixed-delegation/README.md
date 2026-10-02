@@ -16,7 +16,7 @@ npm install
 
 ## Configuration
 
-1. Create a `.env` file:
+1. Credentials are shared by all solana-kit examples: put your API User private key at `solana-kit/secret/private.pem` and these variables in `solana-kit/.env` (see the [shared setup](../README.md)):
 
 ```env
 FORDEFI_API_TOKEN=your_api_token
@@ -26,9 +26,7 @@ DELEGATEE_VAULT_ID=delegatee_solana_vault_id   # only required for the transfer 
 DELEGATEE_VAULT_ADDRESS=delegatee_solana_vault_address
 ```
 
-2. Place your API User private key at `./secret/private.pem`
-
-3. Edit `src/config.ts` to configure the delegation:
+2. Edit `src/config.ts` to configure the delegation:
 
 ```typescript
 export const delegationConfig: DelegationConfig = {

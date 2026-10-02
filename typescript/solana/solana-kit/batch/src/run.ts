@@ -1,34 +1,47 @@
 import * as kit from '@solana/kit';
 import { fordefiConfig } from './config';
 import { createTxPlan } from './tx-planner';
-import { signWithFordefi } from './signers';
 import { createClient, Client } from "./solana-client-util";
 
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
   if (!fordefiConfig.accessToken) {
     console.error('Error: FORDEFI_API_TOKEN environment variable is not set');
     return;
   }
   const solana_client: Client = await createClient();
-  const transactionPlan = await createTxPlan(fordefiConfig);
+
+  // @solana/keychain-fordefi is ESM-only, so this CommonJS project loads it with a dynamic import
+  const { createFordefiSigner } = await import('@solana/keychain-fordefi');
+  // Manual push mode: Fordefi signs without broadcasting, so the plan executor pushes the tx to our own RPC
+  const vaultSigner = await createFordefiSigner({
+    accessToken: fordefiConfig.accessToken,
+    vaultId: fordefiConfig.originVault,
+    publicKey: fordefiConfig.originAddress,
+    privateKeyPem: fordefiConfig.privateKeyPem,
+    chain: fordefiConfig.chain,
+    pushMode: 'manual',
+  });
+  const transactionPlan = await createTxPlan(fordefiConfig, vaultSigner, solana_client.rpc);
 
   // Create executor that uses Fordefi for signing
   const transactionPlanExecutor = kit.createTransactionPlanExecutor({
     executeTransactionMessage: async (
-      _context,
+      context,
       message: kit.TransactionMessage & kit.TransactionMessageWithFeePayer,
     ) => {
-      console.log('Signing transaction with Fordefi...');
+      const { value: latestBlockhash } = await solana_client.rpc.getLatestBlockhash().send();
+      const messageWithBlockhash = kit.setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, message);
 
-      // Sign with Fordefi (includes getting blockhash)
-      const rawSignedTxBase64 = await signWithFordefi(message, solana_client.rpc);
+      console.log('Signing transaction with Fordefi...');
+      // Fordefi may refresh the blockhash and fees before signing, so we broadcast the transaction it returns
+      const transaction = await kit.signTransactionMessageWithSigners(messageWithBlockhash);
+      context.transaction = transaction;
       console.log('Transaction signed by Fordefi MPC 🖋️✅');
 
       // Broadcast via RPC directly (the transaction is already fully signed)
-      // Fordefi returns base64, so we need to specify the encoding
       console.log('Broadcasting transaction...');
       const txSignature = await solana_client.rpc.sendTransaction(
-        rawSignedTxBase64 as kit.Base64EncodedWireTransaction,
+        kit.getBase64EncodedWireTransaction(transaction),
         {
           skipPreflight: false,
           preflightCommitment: 'confirmed',
@@ -37,9 +50,6 @@ async function main(): Promise<void> {
       ).send();
 
       console.log(`Transaction broadcast📡\nSignature: ${txSignature}`);
-
-      const txBytes = Buffer.from(rawSignedTxBase64, 'base64');
-      const transaction = kit.getTransactionDecoder().decode(txBytes);
 
       return { signature: txSignature, transaction };
     },

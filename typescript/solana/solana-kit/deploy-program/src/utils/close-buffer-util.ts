@@ -1,6 +1,6 @@
 import * as kit from '@solana/kit';
 import { fordefiConfig } from '../config';
-import { signWithFordefi } from '../signers';
+import { createDeployerVaultSigner, signWithFordefi } from '../signers';
 import { createClient } from "./solana-client-util";
 import * as loader from '@solana-program/loader-v3';
 
@@ -18,8 +18,8 @@ async function main(): Promise<void> {
   console.log(`Reclaiming lamports to: ${fordefiConfig.deployerVaultAddress}`);
 
   const solana_client = await createClient();
-  const deployerVault = kit.address(fordefiConfig.deployerVaultAddress);
-  const deployerVaultSigner = kit.createNoopSigner(deployerVault);
+  const deployerVaultSigner = await createDeployerVaultSigner(fordefiConfig);
+  const deployerVault = deployerVaultSigner.address;
 
   // Check buffer account exists and get its balance
   const bufferAddress = kit.address(BUFFER_ADDRESS);
@@ -46,12 +46,12 @@ async function main(): Promise<void> {
   );
 
   console.log('Signing transaction with Fordefi...');
-  const rawSignedTxBase64 = await signWithFordefi(message, solana_client.rpc);
+  const transaction = await signWithFordefi(message, solana_client.rpc);
   console.log('Transaction signed');
 
   console.log('Broadcasting transaction...');
   const txSignature = await solana_client.rpc.sendTransaction(
-    rawSignedTxBase64 as kit.Base64EncodedWireTransaction,
+    kit.getBase64EncodedWireTransaction(transaction),
     {
       skipPreflight: false,
       preflightCommitment: 'confirmed',

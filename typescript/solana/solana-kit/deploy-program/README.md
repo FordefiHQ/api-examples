@@ -2,6 +2,14 @@
 
 This project demonstrates how to deploy Solana (Anchor) programs using Fordefi as the deployer wallet. The deployment process involves creating a buffer, uploading program bytes in chunks, and deploying the buffer as an upgradeable program.
 
+Signing goes through [`@solana/keychain-fordefi`](https://github.com/solana-foundation/solana-keychain/tree/main/typescript/packages/fordefi), a Kit signer for your Fordefi vault: it signs the API request with your API User key, submits each transaction to Fordefi, waits for the MPC signature and verifies it before handing it back to Kit.
+
+## How Signing Works
+
+The deployer vault is the fee payer of every transaction and is created in Fordefi's **manual push mode** (`src/signers.ts`): Fordefi signs but does not broadcast, so the plan executor can add the local signatures and push each transaction to our own RPC.
+
+Some transactions also need local keypairs: creating the buffer is signed by `buffer-keypair.json` and creating the program account by `program-keypair.json`. These stay ordinary Kit `KeyPairSigner`s inside the instructions. `kit.signTransactionMessageWithSigners` signs with the Fordefi vault first, because Fordefi may rewrite the message (for example by refreshing the blockhash) before it signs. The local keypairs then sign the message Fordefi returned, so every signature covers the same bytes.
+
 ## Prerequisites
 
 1. **Fordefi API Setup**: Complete the [API Signer setup guide](https://docs.fordefi.com/developers/getting-started/set-up-an-api-signer/api-signer-docker)
@@ -12,7 +20,7 @@ This project demonstrates how to deploy Solana (Anchor) programs using Fordefi a
 
 ## Environment Setup
 
-Create a `.env` file with your Fordefi credentials:
+Credentials are shared by all solana-kit examples: put your API User private key at `solana-kit/secret/private.pem` and these variables in `solana-kit/.env` (see the [shared setup](../README.md)):
 
 ```env
 FORDEFI_API_TOKEN=your_api_user_token
@@ -20,7 +28,7 @@ FORDEFI_VAULT_ID=your_solana_vault_id
 FORDEFI_VAULT_ADDRESS=your_solana_vault_address
 ```
 
-Place your Fordefi API user private key at `./fordefi_secret/private.pem`.
+This example used to read its key from `./fordefi_secret/private.pem`; move it to `solana-kit/secret/private.pem`.
 
 ## Configuration
 
@@ -42,12 +50,12 @@ All deployment settings are centralized in `src/config.ts`:
 ├── src/
 │   ├── config.ts                      # Fordefi configuration to modify
 │   ├── tx-planner.ts                  # Transaction planning (buffer + deploy)
-│   ├── signers.ts                     # Fordefi signing logic
+│   ├── signers.ts                     # Fordefi vault signer (@solana/keychain-fordefi)
 │   ├── run.ts                         # Main deployment script
-│   ├── process-tx.ts                  # Fordefi API helpers
 │   └── utils/
 │       ├── solana-client-util.ts      # Solana RPC client
 │       └── close-buffer-util.ts       # Utility to close failed buffers
+├── test/                              # Offline tests (mock Fordefi + LiteSVM)
 ├── buffer-keypair.json                # Keypair for the buffer account
 ├── program-keypair.json               # Keypair for the program ID
 └── target/deploy/*.so                 # Compiled program binary
@@ -161,19 +169,14 @@ This will call the `initialize` instruction and you should see "This program was
 
 **Problem:** Fordefi's default fee estimation was charging ~0.07 SOL per transaction. With 212+ write transactions, this resulted in ~15 SOL in fees alone!
 
-**Solution:** Always pass a `defaultFeeLamports` field to the Fordefi config object in `src/config.ts`:
+**Solution:** Always set `defaultFeeLamports` in `src/config.ts`. `src/signers.ts` passes it to the Fordefi signer as a custom fee:
 
 ```typescript
-const jsonBody = {
+const deployerVaultSigner = await createFordefiSigner({
   // ... other fields
-  details: {
-    // ... other fields
-    fee: {
-      type: "custom",
-      unit_price: feeLamports  // 5000 lamports is usually enough = 0.000005 SOL (base fee)
-    }
-  }
-};
+  pushMode: 'manual',
+  fee: { type: 'custom', unit_price: fordefiConfig.defaultFeeLamports }, // 5000 lamports is usually enough = 0.000005 SOL (base fee)
+});
 ```
 
 ### 2. Buffer Cleanup After Failed Deployments
@@ -274,6 +277,14 @@ const message = kit.pipe(
 );
 ```
 
+### Offline Deployment Test
+
+```bash
+npm run test:fordefi
+```
+
+This runs the real deployment script (`src/run.ts`) against a mock Fordefi API and a mock Solana RPC, both backed by [LiteSVM](https://github.com/LiteSVM/litesvm). It needs no credentials, funds, Anchor build or network. The mock Fordefi refreshes the blockhash before signing, as the real one may, so the test only passes if the local keypairs sign the message Fordefi returned. It deploys a small real program binary (SPL Memo, bundled with LiteSVM), checks each request sent to Fordefi (manual push mode, devnet, custom fee), and then invokes the deployed program.
+
 ### Running Tests
 
 The project includes Mocha-based integration tests that call the deployed program through Fordefi:
@@ -295,4 +306,4 @@ Tests are located in `tests/` and use the generated Codama client to build trans
 
 1. Program must be deployed (see Deployment Flow above)
 2. Fordefi API signer must be running
-3. `.env` configured with valid Fordefi credentials
+3. `solana-kit/.env` configured with valid Fordefi credentials

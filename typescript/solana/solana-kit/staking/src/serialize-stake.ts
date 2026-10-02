@@ -1,6 +1,5 @@
 import * as kit from '@solana/kit';
 import { FordefiSolanaConfig } from './config';
-import { Client } from './utils/solana-client-util';
 import { getCreateAccountWithSeedInstruction } from '@solana-program/system';
 import { getInitializeInstruction, getDelegateStakeInstruction, STAKE_PROGRAM_ADDRESS } from '@solana-program/stake';
 
@@ -20,16 +19,31 @@ async function deriveStakeAccountAddress(
   return stakeAccountAddress;
 }
 
-export async function createTx(fordefiConfig: FordefiSolanaConfig, solana_client: Client) {
-  const staker = kit.address(fordefiConfig.originVaultAddress);
-  const stakerSigner = kit.createNoopSigner(staker);
+// The vault signer is the Fordefi signer from @solana/keychain-fordefi: Kit asks it to sign
+// when the message is signed, so it must be used everywhere the vault appears as a signer
+export async function createTx(
+  stakerSigner: kit.TransactionSigner,
+  rpc: kit.Rpc<kit.GetLatestBlockhashApi & kit.GetMinimumBalanceForRentExemptionApi & kit.GetStakeMinimumDelegationApi>,
+  fordefiConfig: FordefiSolanaConfig
+) {
+  const staker = stakerSigner.address;
   const validatorVoteAccount = kit.address(fordefiConfig.validatorAddress);
 
   const amountToStakeLamports = BigInt(
     Math.floor(parseFloat(fordefiConfig.amountToStake) * 1e9)
   );
 
-  const rentExemptLamports = await solana_client.rpc
+  // The stake program rejects delegations below the network minimum (1 SOL on mainnet), so check before
+  // asking Fordefi to sign a transaction that cannot succeed
+  const { value: minimumDelegation } = await rpc.getStakeMinimumDelegation().send();
+  if (amountToStakeLamports < minimumDelegation) {
+    throw new Error(
+      `amountToStake is ${fordefiConfig.amountToStake} SOL, below the network's minimum stake delegation of ` +
+      `${Number(minimumDelegation) / 1e9} SOL - raise amountToStake in config.ts`
+    );
+  }
+
+  const rentExemptLamports = await rpc
     .getMinimumBalanceForRentExemption(STAKE_ACCOUNT_SIZE)
     .send();
 
@@ -70,38 +84,18 @@ export async function createTx(fordefiConfig: FordefiSolanaConfig, solana_client
     getDelegateStakeInstruction({
       stake: stakeAccount,
       vote: validatorVoteAccount,
-      stakeHistory: kit.address('SysvarStakeHistory1111111111111111111111111'),
-      unused: kit.address('StakeConfig11111111111111111111111111111111'),
       stakeAuthority: stakerSigner,
     })
   );
 
-  const { value: latestBlockhash } = await solana_client.rpc
+  const { value: latestBlockhash } = await rpc
     .getLatestBlockhash()
     .send();
 
-  const txMessage = kit.pipe(
+  return kit.pipe(
     kit.createTransactionMessage({ version: 0 }),
-    (message) => kit.setTransactionMessageFeePayer(staker, message),
+    (message) => kit.setTransactionMessageFeePayerSigner(stakerSigner, message),
     (message) => kit.setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, message),
     (message) => kit.appendTransactionMessageInstructions(ixes, message)
   );
-
-  const signedTx = await kit.partiallySignTransactionMessageWithSigners(txMessage);
-  const base64EncodedData = Buffer.from(signedTx.messageBytes).toString('base64');
-
-  const jsonBody = {
-    vault_id: fordefiConfig.originVaultId,
-    signer_type: 'api_signer',
-    sign_mode: 'auto',
-    type: 'solana_transaction',
-    details: {
-      type: 'solana_serialized_transaction_message',
-      push_mode: 'auto',
-      chain: 'solana_mainnet',
-      data: base64EncodedData,
-    },
-  };
-
-  return jsonBody;
 }

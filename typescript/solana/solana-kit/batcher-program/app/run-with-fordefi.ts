@@ -1,6 +1,4 @@
 import {
-  address,
-  createNoopSigner,
   pipe,
   createTransactionMessage,
   setTransactionMessageFeePayerSigner,
@@ -15,19 +13,18 @@ import {
     getCreateAssociatedTokenIdempotentInstructionAsync,
     TOKEN_PROGRAM_ADDRESS,
 } from '@solana-program/token';
-import type { Base64EncodedWireTransaction } from "@solana/transactions";
 import { getBatchTransferSameTokenInstruction } from "./src/instructions";
 import {
   fordefiConfig,
   SAME_TOKEN_TRANSFERS,
 } from "./config";
-import { signWithFordefi } from "./fordefi/signers";
+import { createVaultSigner, signAndSendWithFordefi } from "./fordefi/signer";
 import { createClient } from "./fordefi/solana-client-util";
 
-async function main() {
+export async function main() {
   const token_mint = fordefiConfig.single_token_batch_mint;
-  const senderAddress = address(fordefiConfig.originAddress);
-  const signer = createNoopSigner(senderAddress);
+  const signer = await createVaultSigner();
+  const senderAddress = signer.address;
   console.log("Sender (Fordefi vault):", senderAddress);
 
   const { rpc } = createClient();
@@ -67,35 +64,14 @@ async function main() {
   );
 
   console.log("Signing transaction via Fordefi...");
-  const rawSignedTxBase64 = await signWithFordefi(txMessage, rpc);
-
-  if (fordefiConfig.push_to_custom_url) {
-    console.log("Sending signed transaction to network...");
-    const signature = await rpc
-      .sendTransaction(rawSignedTxBase64 as Base64EncodedWireTransaction, {
-        encoding: "base64",
-        skipPreflight: false,
-        preflightCommitment: "confirmed",
-      })
-      .send();
-
-    console.log("Transaction signature:", signature);
-    console.log(`Explorer: https://explorer.solana.com/tx/${signature}?cluster=devnet`);
-
-    console.log("Waiting for confirmation...");
-    const { value: statuses } = await rpc.getSignatureStatuses([signature]).send();
-    const status = statuses[0];
-    if (status?.err) {
-      console.error("Transaction failed on-chain:", status.err);
-      process.exit(1);
-    }
-    console.log("Transaction sent successfully.");
-  } else {
-    console.log("Transaction pushed by Fordefi (push_mode: auto).");
-  }
+  const signature = await signAndSendWithFordefi(txMessage, rpc);
+  const cluster = fordefiConfig.chain === "solana_devnet" ? "?cluster=devnet" : "";
+  console.log(`Explorer: https://explorer.solana.com/tx/${signature}${cluster}`);
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}

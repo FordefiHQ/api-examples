@@ -1,49 +1,46 @@
-import { createAndSignTx, pollForSignedTransaction } from '../utils/process_tx';
+import * as kit from '@solana/kit';
 import { fordefiConfig, transferConfig } from './config';
-import { signWithApiUserPrivateKey } from './signer';
-import { createTx } from './serialize-spl-transfer';
+import { createTxMessage } from './serialize-spl-transfer';
+import { createClient } from '../utils/solana-client-util';
 import { pushToJito } from '../utils/push_to_jito';
 
 
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
   if (!fordefiConfig.accessToken) {
     console.error('Error: FORDEFI_API_TOKEN environment variable is not set');
     return
   }
-  // We create the tx
-  const jsonBody = await createTx(fordefiConfig, transferConfig);
-  // Fetch serialized tx from json file
-  const requestBody = JSON.stringify(jsonBody);
-  // Define endpoint and create timestamp
-  const timestamp = new Date().getTime();
-  const payload = `${fordefiConfig.apiPathEndpoint}|${timestamp}|${requestBody}`;
+  const solana_client = createClient();
+
+  // @solana/keychain-fordefi is ESM-only, so this CommonJS project loads it with a dynamic import
+  const { createFordefiSigner } = await import('@solana/keychain-fordefi');
+  const signerConfig = {
+    accessToken: fordefiConfig.accessToken,
+    vaultId: fordefiConfig.originVault,
+    publicKey: fordefiConfig.originAddress,
+    privateKeyPem: fordefiConfig.privateKeyPem,
+    chain: fordefiConfig.chain,
+  };
 
   try {
-    // Sign payload with API User private key
-    const signature = await signWithApiUserPrivateKey(payload, fordefiConfig.privateKeyPem);
-    
-    // Send signed payload to Fordefi for MPC signature
-    const response = await createAndSignTx(fordefiConfig, signature, timestamp, requestBody);
-    const data = response.data;
+    if (transferConfig.useJito) {
+      // Manual push mode: Fordefi signs the transaction without broadcasting it, so we can push it to Jito.
+      // Fordefi may refresh the blockhash and fees, so we always broadcast the transaction it returns.
+      const vaultSigner = await createFordefiSigner({ ...signerConfig, pushMode: 'manual' });
+      const txMessage = await createTxMessage(vaultSigner, solana_client.rpc, fordefiConfig.destAddress, transferConfig);
+      const signedTx = await kit.signTransactionMessageWithSigners(txMessage);
+      console.log(`Transaction signed by source vault 🖋️✅\nSignature: ${kit.getSignatureFromTransaction(signedTx)}`);
 
-    // Optional push to Jito
-    if(transferConfig.useJito){
-      try {
-        const transaction_id = data.id;
-        console.log(`Transaction ID: ${transaction_id}`);
-  
-        await pushToJito(transaction_id, fordefiConfig.accessToken);
-  
-      } catch (error: any){
-        console.error(`Failed to push the transaction to Jito: ${error.message}`);
-      }
+      await pushToJito(kit.getBase64EncodedWireTransaction(signedTx));
     } else {
-      console.log("Transaction signed by source vault and submitted to network 📡");
-      console.log(`Transaction ID: ${data.id}`);
-      const rawTxResult = await pollForSignedTransaction(data.id, fordefiConfig.accessToken);
-      console.log(`Raw transaction: \n${rawTxResult}`);
-    }
+      // Auto push mode: Fordefi signs the transaction and broadcasts it to the network
+      const vaultSigner = await createFordefiSigner(signerConfig);
+      const txMessage = await createTxMessage(vaultSigner, solana_client.rpc, fordefiConfig.destAddress, transferConfig);
+      const signature = await kit.signAndSendTransactionMessageWithSigners(txMessage);
 
+      console.log("Transaction signed by source vault and submitted to network 📡");
+      console.log(`Signature: ${kit.getBase58Decoder().decode(signature)}`);
+    }
   } catch (error: any) {
     console.error(`Failed to sign the transaction: ${error.message}`);
   }

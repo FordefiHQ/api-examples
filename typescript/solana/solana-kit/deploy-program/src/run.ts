@@ -1,16 +1,17 @@
 import * as kit from '@solana/kit';
 import { fordefiConfig } from './config';
 import { createTxPlan } from './tx-planner';
-import { signWithFordefi } from './signers';
+import { createDeployerVaultSigner, signWithFordefi } from './signers';
 import { createClient, Client } from "./utils/solana-client-util";
 
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
   if (!fordefiConfig.accessToken) {
     console.error('Error: FORDEFI_API_TOKEN environment variable is not set');
     return;
   }
   const solana_client: Client = await createClient();
-  const transactionPlan = await createTxPlan(fordefiConfig, solana_client);
+  const deployerVaultSigner = await createDeployerVaultSigner(fordefiConfig);
+  const transactionPlan = await createTxPlan(fordefiConfig, solana_client, deployerVaultSigner);
 
   // current tx counter for tracking progress
   let currentTx = 0;
@@ -34,12 +35,12 @@ async function main(): Promise<void> {
           console.log(`[TX ${currentTx}] Message size: ${txSize} bytes`);
 
           // sign with Fordefi (we get a fresh blockhash for each attempt)
-          const rawSignedTxBase64 = await signWithFordefi(message, solana_client.rpc);
+          const transaction = await signWithFordefi(message, solana_client.rpc);
           console.log(`[TX ${currentTx}] Signed by Fordefi MPC 🖋️✅`);
 
           console.log(`[TX ${currentTx}] Broadcasting...`);
           const txSignature = await solana_client.rpc.sendTransaction(
-            rawSignedTxBase64 as kit.Base64EncodedWireTransaction,
+            kit.getBase64EncodedWireTransaction(transaction),
             {
               skipPreflight: false,
               preflightCommitment: 'confirmed',
@@ -48,9 +49,6 @@ async function main(): Promise<void> {
           ).send();
 
           console.log(`[TX ${currentTx}] Broadcast 📡 Signature: ${txSignature}`);
-
-          const txBytes = Buffer.from(rawSignedTxBase64, 'base64');
-          const transaction = kit.getTransactionDecoder().decode(txBytes);
 
           return { signature: txSignature, transaction };
         } catch (error: any) {

@@ -6,9 +6,10 @@ import * as system from '@solana-program/system';
 import * as loader from '@solana-program/loader-v3';
 
 
-export async function createTxPlan(fordefiConfig: FordefiSolanaConfig, client: Client) {
-    const deployerVault = kit.address(fordefiConfig.deployerVaultAddress);
-    const deployerVaultSigner = kit.createNoopSigner(deployerVault);
+// deployerVaultSigner is the Fordefi vault signer (see signers.ts): Kit asks it to sign when each
+// planned transaction is signed, so it must be used everywhere the vault appears as a signer
+export async function createTxPlan(fordefiConfig: FordefiSolanaConfig, client: Client, deployerVaultSigner: kit.TransactionSigner) {
+    const deployerVault = deployerVaultSigner.address;
 
     // Load buffer account keypair
     const bufferKeypairBytes = new Uint8Array(JSON.parse(fs.readFileSync(fordefiConfig.bufferKeypairPath, 'utf-8')));
