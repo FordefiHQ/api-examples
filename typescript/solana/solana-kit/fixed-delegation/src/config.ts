@@ -15,7 +15,7 @@ export interface FordefiSolanaConfig {
   delegateeVault: string;
   delegateeAddress: string;
   privateKeyPem: string;
-  apiPathEndpoint: string;
+  chain: 'solana_mainnet' | 'solana_devnet';
   mainnetRpc: string;
   ws: string
 }
@@ -37,7 +37,7 @@ export const fordefiConfig: FordefiSolanaConfig = {
   delegateeVault: process.env.DELEGATEE_VAULT_ID || "", // only required for the transfer script
   delegateeAddress: process.env.DELEGATEE_VAULT_ADDRESS || "",
   privateKeyPem: fs.readFileSync(PRIVATE_KEY_PATH, 'utf8'),
-  apiPathEndpoint: '/api/v1/transactions',
+  chain: 'solana_mainnet', // must match mainnetRpc/ws below: solana_mainnet or solana_devnet
   mainnetRpc: 'https://api.mainnet-beta.solana.com',
   ws: 'wss://api.mainnet-beta.solana.com'
 };

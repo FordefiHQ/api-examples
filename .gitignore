@@ -34,3 +34,6 @@ agent-private-key*.json
 # Keep this exception narrow: a broad `*public*.pem` would also re-include names like public-and-private.pem.
 !*public_key*.pem
 
+
+# Lockfiles — patterns without a slash match at any depth.
+package-lock.json

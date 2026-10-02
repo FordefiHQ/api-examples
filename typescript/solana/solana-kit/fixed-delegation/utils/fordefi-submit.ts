@@ -1,55 +1,37 @@
 import * as kit from '@solana/kit';
 import { createClient } from './solana-client-util';
-import { createAndSignTx, pollForSignedTransaction } from './process_tx';
-import { signWithApiUserPrivateKey } from '../src/signer';
 import { FordefiSolanaConfig } from '../src/config';
 
-// Serializes instructions into Fordefi's solana_serialized_transaction_message request body
-export async function buildFordefiTxBody(
-  vaultId: string,
-  feePayer: kit.Address,
-  ixes: kit.Instruction[]
-) {
+// One of the example's Fordefi vaults as a Kit signer, backed by @solana/keychain-fordefi.
+// Auto push mode: Fordefi signs each transaction and broadcasts it to the network.
+export async function createVaultSigner(fordefiConfig: FordefiSolanaConfig, vaultId: string, vaultAddress: string) {
+  // @solana/keychain-fordefi is ESM-only, so this CommonJS project loads it with a dynamic import
+  const { createFordefiSigner } = await import('@solana/keychain-fordefi');
+  return await createFordefiSigner({
+    accessToken: fordefiConfig.accessToken,
+    vaultId,
+    publicKey: vaultAddress,
+    privateKeyPem: fordefiConfig.privateKeyPem,
+    chain: fordefiConfig.chain,
+  });
+}
+
+// Builds a transaction paid for and signed by the vault, then has Fordefi sign and broadcast it.
+// Use the vault signer in the instructions too, wherever the vault is a signer.
+export async function signAndSend(vaultSigner: kit.TransactionSigner, ixes: kit.Instruction[]): Promise<string> {
   const solana_client = createClient();
   const { value: latestBlockhash } = await solana_client.rpc.getLatestBlockhash().send();
 
   const txMessage = kit.pipe(
     kit.createTransactionMessage({ version: 0 }),
-    message => kit.setTransactionMessageFeePayer(feePayer, message),
+    message => kit.setTransactionMessageFeePayerSigner(vaultSigner, message),
     message => kit.setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, message),
     message => kit.appendTransactionMessageInstructions(ixes, message)
   );
 
-  const signedTx = await kit.partiallySignTransactionMessageWithSigners(txMessage);
-  const base64EncodedData = Buffer.from(signedTx.messageBytes).toString('base64');
-
-  return {
-    "vault_id": vaultId,
-    "signer_type": "api_signer",
-    "sign_mode": "auto",
-    "type": "solana_transaction",
-    "details": {
-        "type": "solana_serialized_transaction_message",
-        "push_mode": "auto",
-        "chain": "solana_mainnet",
-        "data": base64EncodedData
-    }
-  };
-}
-
-// Signs the request with the API User private key, submits to Fordefi and waits for the MPC signature
-export async function signAndSubmit(fordefiConfig: FordefiSolanaConfig, jsonBody: any): Promise<string> {
-  const requestBody = JSON.stringify(jsonBody);
-  const timestamp = new Date().getTime();
-  const payload = `${fordefiConfig.apiPathEndpoint}|${timestamp}|${requestBody}`;
-
-  const signature = await signWithApiUserPrivateKey(payload, fordefiConfig.privateKeyPem);
-  const response = await createAndSignTx(fordefiConfig, signature, timestamp, requestBody);
-  const data = response.data;
-
+  const signature = kit.getBase58Decoder().decode(await kit.signAndSendTransactionMessageWithSigners(txMessage));
   console.log("Transaction signed by vault and submitted to network 📡");
-  console.log(`Transaction ID: ${data.id}`);
-  await pollForSignedTransaction(data.id, fordefiConfig.accessToken);
+  console.log(`Signature: ${signature}`);
 
-  return data.id;
+  return signature;
 }

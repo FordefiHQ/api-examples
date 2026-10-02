@@ -5,7 +5,10 @@
     "scripts": {
         "create-delegation": "tsx ./src/create-delegation.ts",
         "transfer": "tsx ./src/transfer-fixed.ts",
-        "revoke": "tsx ./src/revoke-delegation.ts"
+        "revoke": "tsx ./src/revoke-delegation.ts",
+        "test": "tsx --test test/*.test.ts",
+        "typecheck": "tsc --noEmit",
+        "pretest": "tsx test/fetch-program.ts"
     },
     "keywords": [],
     "author": "",
@@ -13,14 +16,18 @@
     "description": "",
     "devDependencies": {
         "@types/node": "^22.10.2",
-        "typescript": "^5.7.2"
+        "litesvm": "^1.5.0",
+        "typescript": "^5.9.3"
     },
     "dependencies": {
-        "@solana-program/token": "^0.15.0",
-        "@solana/kit": "^7.0.0",
+        "@solana-program/token": "^0.16.0",
+        "@solana/keychain-fordefi": "^2.0.0",
+        "@solana/kit": "^8.2.0",
         "@solana/subscriptions": "^0.5.0",
-        "axios": "1.13.2",
         "dotenv": "16.4.7",
         "tsx": "^4.20.6"
+    },
+    "overrides": {
+        "@solana/kit": "$@solana/kit"
     }
 }
