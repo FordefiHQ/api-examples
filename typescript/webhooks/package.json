@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "nodemon --exec ts-node webhooks_hypernative.ts",
     "build": "tsc",
-    "fordefi_server": "npx tsx webhooks_fordefi.ts",
+    "tx_logs_server": "npx tsx webhooks_tx_logs.ts",
     "audit_logs_server": "npx tsx webhooks_audit_logs.ts",
     "hypernative_server": "npx tsx webhooks_hypernative.ts"
   },
@@ -24,7 +24,7 @@
     "@noble/curves": "^1.4.2",
     "@types/express": "^5.0.3",
     "axios": "1.13.1",
-    "dotenv": "17.0.0",
+    "dotenv": "^17.0.0",
     "express": "^5.1.0",
     "ts-node-dev": "^2.0.0"
   }

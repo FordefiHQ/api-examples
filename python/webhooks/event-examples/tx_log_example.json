@@ -1,0 +1,807 @@
+{
+  "webhook_id": "e11c3788-3e91-47c1-9db5-d397bd0de80b",
+  "created_at": "2026-10-05T09:41:50Z",
+  "event_id": "e48da0a1-7310-49c6-831f-87ba03cbe690",
+  "attempt": 1,
+  "sent_at": "2026-10-05T09:41:50.808749Z",
+  "event": {
+    "id": "baecd203-075b-46ca-b483-ce0990ad8208",
+    "created_at": "2026-10-05T09:41:40.630000Z",
+    "modified_at": "2026-10-05T09:41:50.635000Z",
+    "managed_transaction_data": {
+      "created_by": {
+        "id": "fb30b30f-eabe-4b7f-a0de-60e64eb1ffcc",
+        "user_type": "person",
+        "name": "Dan",
+        "email": "danj@fordefi.com",
+        "state": "active",
+        "role": "admin"
+      },
+      "device_signing_request": {
+        "created_by": {
+          "id": "fb30b30f-eabe-4b7f-a0de-60e64eb1ffcc",
+          "user_type": "person",
+          "name": "Dan",
+          "email": "danj@fordefi.com",
+          "state": "active",
+          "role": "admin"
+        },
+        "signers": [
+          {
+            "user": {
+              "id": "fb30b30f-eabe-4b7f-a0de-60e64eb1ffcc",
+              "user_type": "person",
+              "name": "Dan",
+              "email": "danj@fordefi.com",
+              "state": "active",
+              "role": "admin"
+            },
+            "modified_at": "2026-10-05T09:41:41.320000Z",
+            "has_signed": false
+          }
+        ]
+      },
+      "policy_match": {
+        "is_default": false,
+        "rule_id": "8a3df579-62b5-489b-ac0b-a29ffb201140",
+        "rule_name": "Uniswap Rule",
+        "action_type": "allow"
+      },
+      "signer_type": "initiator",
+      "risks": [],
+      "screenings": [
+        {
+          "provider": "hypernative",
+          "status": "completed",
+          "result": {
+            "type": "hypernative",
+            "recommendation": "accept",
+            "assessment_id": "9f226562-e3c4-4f6d-9524-53cfde7d3470",
+            "assessment_timestamp": "2026-10-05T09:41:41.147000Z",
+            "findings": [],
+            "ri_id": "5PLF43PE5ZF3"
+          },
+          "evaluated_at": "2026-10-05T09:41:40.648000Z"
+        }
+      ],
+      "vault": {
+        "id": "81e82853-3c4f-4cd4-b494-78fb4abf168a",
+        "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+        "vault_group_ids": [
+          "fa2c5851-a377-4bff-a32f-ae78c24684bd"
+        ],
+        "name": "EVM Vault",
+        "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+        "state": "active",
+        "type": "evm",
+        "is_external_signer": false
+      },
+      "has_current_user_vault_permissions": true,
+      "push_mode": "auto",
+      "last_pushed_at": "2026-10-05T09:41:46.598000Z",
+      "sign_mode": "auto",
+      "tx_policy_explanation_id": "3dc5d3f6-28f7-4dc7-bfd3-2497d467de33"
+    },
+    "signatures": [
+      {
+        "data": "zWlyMgPgzyq7MPPFjwRxjIITm6AnrsFb2Lgg443RIEBwHAwJCALR5cJ0RQw8OaQvaOA4CGkuDp8hmEx1idB+ygA=",
+        "signed_by": {
+          "id": "fb30b30f-eabe-4b7f-a0de-60e64eb1ffcc",
+          "user_type": "person",
+          "name": "Dan",
+          "email": "danj@fordefi.com",
+          "state": "active",
+          "role": "admin"
+        }
+      }
+    ],
+    "note": "",
+    "spam_state": "unset",
+    "direction": "outgoing",
+    "signed_externally": false,
+    "interacted_vaults": [
+      {
+        "id": "81e82853-3c4f-4cd4-b494-78fb4abf168a",
+        "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+        "vault_group_ids": [
+          "fa2c5851-a377-4bff-a32f-ae78c24684bd"
+        ],
+        "name": "EVM Vault",
+        "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+        "state": "active",
+        "type": "evm",
+        "is_external_signer": false
+      }
+    ],
+    "organization_id": "9c426481-0243-414a-b982-24e8ac817045",
+    "block": {
+      "number": 26125339,
+      "hash": "0x3ae99a1f0269d41153daa6593275642f09d91e3bc5498c29f9ccc85fc5a53ab5",
+      "mined_at": "2026-10-05T09:41:47Z"
+    },
+    "state": "mined",
+    "state_changes": [
+      {
+        "changed_at": "2026-10-05T09:41:40.630000Z",
+        "new_state": "waiting_for_approval"
+      },
+      {
+        "changed_at": "2026-10-05T09:41:41.316000Z",
+        "previous_state": "waiting_for_approval",
+        "new_state": "approved"
+      },
+      {
+        "changed_at": "2026-10-05T09:41:46.566000Z",
+        "previous_state": "approved",
+        "new_state": "signed"
+      },
+      {
+        "changed_at": "2026-10-05T09:41:46.605000Z",
+        "previous_state": "signed",
+        "new_state": "queued"
+      },
+      {
+        "changed_at": "2026-10-05T09:41:47Z",
+        "previous_state": "queued",
+        "new_state": "mined"
+      }
+    ],
+    "aml_check": {
+      "results": {
+        "scan_status": "skipped"
+      }
+    },
+    "mined_result_status": "success",
+    "simulation_status_result": {
+      "simulation_status": "success",
+      "details": "not reverted"
+    },
+    "is_cancelation": false,
+    "is_acceleration": false,
+    "type": "evm_transaction",
+    "evm_transaction_type_details": {
+      "type": "contract_call"
+    },
+    "chain": {
+      "chain_type": "evm",
+      "named_chain_id": "ethereum_mainnet",
+      "chain_id": 1,
+      "unique_id": "evm_ethereum_mainnet",
+      "name": "Ethereum",
+      "native_currency_symbol": "ETH",
+      "native_currency_name": "Ether",
+      "blockchain_explorer": {
+        "transaction_url": "https://etherscan.io/tx/",
+        "address_url": "https://etherscan.io/address/",
+        "root_url": "https://etherscan.io/",
+        "transaction_format_url": "https://etherscan.io/tx/%s",
+        "address_format_url": "https://etherscan.io/address/%s",
+        "asset_format_url": "https://etherscan.io/address/%s"
+      },
+      "logo_url": "https://logos-staging.stg.arnac.io/chains/evm/default/1.svg",
+      "is_testnet": false,
+      "is_enabled": true,
+      "gas_type": "dynamic",
+      "supports_secure_node": true,
+      "supports_mev_protected_node": true,
+      "source": "default",
+      "supports_7702": true
+    },
+    "from": {
+      "vault": {
+        "id": "81e82853-3c4f-4cd4-b494-78fb4abf168a",
+        "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+        "vault_group_ids": [
+          "fa2c5851-a377-4bff-a32f-ae78c24684bd"
+        ],
+        "name": "EVM Vault",
+        "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+        "state": "active",
+        "type": "evm",
+        "is_external_signer": false
+      },
+      "explorer_url": "https://etherscan.io/address/0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+      "type": "evm",
+      "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+      "contract": {
+        "name": "",
+        "is_verified": false
+      }
+    },
+    "to": {
+      "explorer_url": "https://etherscan.io/address/0x23617e59A5925b2A4Bf75d73ff6711cD0b29De85",
+      "type": "evm",
+      "address": "0x23617e59A5925b2A4Bf75d73ff6711cD0b29De85",
+      "contract": {
+        "name": "UniversalRouter",
+        "dapp": {
+          "id": "a44c28f3-d09d-5d4c-9d3e-4aba83d34c2f",
+          "name": "Uniswap V4",
+          "url": "https://app.uniswap.org/",
+          "logo_url": "https://logos.fordefi.com/dapps/a44c28f3-d09d-5d4c-9d3e-4aba83d34c2f.png",
+          "contracts_count": 5
+        },
+        "is_verified": true
+      }
+    },
+    "value": "73750653572335",
+    "data": "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",
+    "hex_data": "0x3593564c000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000006ac377d500000000000000000000000000000000000000000000000000000000000000030b100c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000004e00000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000004313698214ef0000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000003090b0e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000026000000000000000000000000000000000000000000000000000000000000002e000000000000000000000000000000000000000000000000000000000000001e00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb4800000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000001a00000000000000000000000000000000000000000000000000000000000030d4000000000000000000000000000000000000000000000000000004313698214ef00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000020000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc200000000000000000000000000000000000000000000000000000000000001f4000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb480000000000000000000000008bfcf9e2764bc84de4bbd0a0f5aaf19f47027a730000000000000000000000000000000000000000000000000000000000030d4000000000000000000000000000000000000000000000000000000000000000400000000000000000000000008bfcf9e2764bc84de4bbd0a0f5aaf19f47027a730000000000000000000000000000000000000000000000000000000000000000756e6978000001a10b7094c98000bed80000000c0100",
+    "parsed_data": {
+      "method": "execute",
+      "method_arguments": [
+        {
+          "name": "commands",
+          "type": "bytes",
+          "value": "0x0b100c",
+          "children": []
+        },
+        {
+          "name": "inputs",
+          "type": "bytes[]",
+          "value": "[0x000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000004313698214ef 0x000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000003090b0e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000026000000000000000000000000000000000000000000000000000000000000002e000000000000000000000000000000000000000000000000000000000000001e00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb4800000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000001a00000000000000000000000000000000000000000000000000000000000030d4000000000000000000000000000000000000000000000000000004313698214ef00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000020000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc200000000000000000000000000000000000000000000000000000000000001f4000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb480000000000000000000000008bfcf9e2764bc84de4bbd0a0f5aaf19f47027a730000000000000000000000000000000000000000000000000000000000030d40 0x0000000000000000000000008bfcf9e2764bc84de4bbd0a0f5aaf19f47027a730000000000000000000000000000000000000000000000000000000000000000]",
+          "children": [
+            {
+              "name": "inputs[0]",
+              "type": "bytes",
+              "value": "0x000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000004313698214ef",
+              "children": []
+            },
+            {
+              "name": "inputs[1]",
+              "type": "bytes",
+              "value": "0x000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000003090b0e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000026000000000000000000000000000000000000000000000000000000000000002e000000000000000000000000000000000000000000000000000000000000001e00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb4800000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000001a00000000000000000000000000000000000000000000000000000000000030d4000000000000000000000000000000000000000000000000000004313698214ef00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000020000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc200000000000000000000000000000000000000000000000000000000000001f4000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb480000000000000000000000008bfcf9e2764bc84de4bbd0a0f5aaf19f47027a730000000000000000000000000000000000000000000000000000000000030d40",
+              "children": []
+            },
+            {
+              "name": "inputs[2]",
+              "type": "bytes",
+              "value": "0x0000000000000000000000008bfcf9e2764bc84de4bbd0a0f5aaf19f47027a730000000000000000000000000000000000000000000000000000000000000000",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "deadline",
+          "type": "uint256",
+          "value": "1791195093",
+          "children": []
+        }
+      ]
+    },
+    "hash": "0xabdeda9c301e128670877c4a3733ef7795ef7f0232efe4c380f1519cbb8ddcf7",
+    "nonce": 756,
+    "mined_result": {
+      "reversion": {
+        "state": "not_reverted"
+      },
+      "gas_debit": {
+        "gas_used": "158359",
+        "gas_price": "140525043",
+        "total_fee": "22253405284437",
+        "priced_asset": {
+          "type": "asset_price",
+          "asset_info": {
+            "id": "ebef1507-2916-4a42-bfb1-2c65d164f6f5",
+            "asset_identifier": {
+              "type": "evm",
+              "details": {
+                "type": "native",
+                "chain": "evm_ethereum_mainnet"
+              },
+              "chain": {
+                "chain_type": "evm",
+                "named_chain_id": "ethereum_mainnet",
+                "chain_id": 1,
+                "unique_id": "evm_ethereum_mainnet",
+                "name": "Ethereum",
+                "native_currency_symbol": "ETH",
+                "native_currency_name": "Ether",
+                "blockchain_explorer": {
+                  "transaction_url": "https://etherscan.io/tx/",
+                  "address_url": "https://etherscan.io/address/",
+                  "root_url": "https://etherscan.io/",
+                  "transaction_format_url": "https://etherscan.io/tx/%s",
+                  "address_format_url": "https://etherscan.io/address/%s",
+                  "asset_format_url": "https://etherscan.io/address/%s"
+                },
+                "logo_url": "https://logos-staging.stg.arnac.io/chains/evm/default/1.svg",
+                "is_testnet": false,
+                "is_enabled": true,
+                "gas_type": "dynamic",
+                "supports_secure_node": true,
+                "supports_mev_protected_node": true,
+                "source": "default",
+                "supports_7702": true
+              }
+            },
+            "name": "Ether",
+            "symbol": "ETH",
+            "decimals": 18,
+            "verified": true,
+            "metadata_uri": "",
+            "is_spam": false
+          },
+          "price": {
+            "price": "0",
+            "price_float": "271844",
+            "is_negative": false,
+            "fiat_currency": {
+              "currency_symbol": "usd",
+              "decimals": 2
+            }
+          }
+        }
+      },
+      "effects": {
+        "balance_changes": [
+          {
+            "priced_asset": {
+              "type": "asset_price",
+              "asset_info": {
+                "id": "ebef1507-2916-4a42-bfb1-2c65d164f6f5",
+                "asset_identifier": {
+                  "type": "evm",
+                  "details": {
+                    "type": "native",
+                    "chain": "evm_ethereum_mainnet"
+                  },
+                  "chain": {
+                    "chain_type": "evm",
+                    "named_chain_id": "ethereum_mainnet",
+                    "chain_id": 1,
+                    "unique_id": "evm_ethereum_mainnet",
+                    "name": "Ethereum",
+                    "native_currency_symbol": "ETH",
+                    "native_currency_name": "Ether",
+                    "blockchain_explorer": {
+                      "transaction_url": "https://etherscan.io/tx/",
+                      "address_url": "https://etherscan.io/address/",
+                      "root_url": "https://etherscan.io/",
+                      "transaction_format_url": "https://etherscan.io/tx/%s",
+                      "address_format_url": "https://etherscan.io/address/%s",
+                      "asset_format_url": "https://etherscan.io/address/%s"
+                    },
+                    "logo_url": "https://logos-staging.stg.arnac.io/chains/evm/default/1.svg",
+                    "is_testnet": false,
+                    "is_enabled": true,
+                    "gas_type": "dynamic",
+                    "supports_secure_node": true,
+                    "supports_mev_protected_node": true,
+                    "source": "default",
+                    "supports_7702": true
+                  }
+                },
+                "name": "Ether",
+                "symbol": "ETH",
+                "decimals": 18,
+                "verified": true,
+                "metadata_uri": "",
+                "is_spam": false
+              },
+              "price": {
+                "price": "0",
+                "price_float": "271844",
+                "is_negative": false,
+                "fiat_currency": {
+                  "currency_symbol": "usd",
+                  "decimals": 2
+                }
+              }
+            },
+            "diff": "-73566736730509",
+            "address": {
+              "vault": {
+                "id": "81e82853-3c4f-4cd4-b494-78fb4abf168a",
+                "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+                "vault_group_ids": [
+                  "fa2c5851-a377-4bff-a32f-ae78c24684bd"
+                ],
+                "name": "EVM Vault",
+                "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+                "state": "active",
+                "type": "evm",
+                "is_external_signer": false
+              },
+              "explorer_url": "https://etherscan.io/address/0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+              "type": "evm",
+              "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+              "contract": {
+                "name": "",
+                "is_verified": false
+              }
+            }
+          },
+          {
+            "priced_asset": {
+              "type": "asset_price",
+              "asset_info": {
+                "id": "06c83661-df1f-4500-8e20-303f120bcb99",
+                "asset_identifier": {
+                  "type": "evm",
+                  "details": {
+                    "type": "erc20",
+                    "token": {
+                      "chain": "evm_ethereum_mainnet",
+                      "hex_repr": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+                    }
+                  },
+                  "chain": {
+                    "chain_type": "evm",
+                    "named_chain_id": "ethereum_mainnet",
+                    "chain_id": 1,
+                    "unique_id": "evm_ethereum_mainnet",
+                    "name": "Ethereum",
+                    "native_currency_symbol": "ETH",
+                    "native_currency_name": "Ether",
+                    "blockchain_explorer": {
+                      "transaction_url": "https://etherscan.io/tx/",
+                      "address_url": "https://etherscan.io/address/",
+                      "root_url": "https://etherscan.io/",
+                      "transaction_format_url": "https://etherscan.io/tx/%s",
+                      "address_format_url": "https://etherscan.io/address/%s",
+                      "asset_format_url": "https://etherscan.io/address/%s"
+                    },
+                    "logo_url": "https://logos-staging.stg.arnac.io/chains/evm/default/1.svg",
+                    "is_testnet": false,
+                    "is_enabled": true,
+                    "gas_type": "dynamic",
+                    "supports_secure_node": true,
+                    "supports_mev_protected_node": true,
+                    "source": "default",
+                    "supports_7702": true
+                  }
+                },
+                "name": "USD Coin",
+                "symbol": "USDC",
+                "decimals": 6,
+                "verified": true,
+                "metadata_uri": "",
+                "is_spam": false,
+                "logo_url": "https://logos.fordefi.com/tokens/1/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
+                "explorer_url": "https://etherscan.io/address/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+              },
+              "price": {
+                "price": "0",
+                "price_float": "99.987",
+                "is_negative": false,
+                "fiat_currency": {
+                  "currency_symbol": "usd",
+                  "decimals": 2
+                }
+              }
+            },
+            "diff": "200000",
+            "address": {
+              "vault": {
+                "id": "81e82853-3c4f-4cd4-b494-78fb4abf168a",
+                "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+                "vault_group_ids": [
+                  "fa2c5851-a377-4bff-a32f-ae78c24684bd"
+                ],
+                "name": "EVM Vault",
+                "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+                "state": "active",
+                "type": "evm",
+                "is_external_signer": false
+              },
+              "explorer_url": "https://etherscan.io/address/0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+              "type": "evm",
+              "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+              "contract": {
+                "name": "",
+                "is_verified": false
+              }
+            }
+          }
+        ],
+        "transfers": [
+          {
+            "priced_asset": {
+              "type": "asset_price",
+              "asset_info": {
+                "id": "ebef1507-2916-4a42-bfb1-2c65d164f6f5",
+                "asset_identifier": {
+                  "type": "evm",
+                  "details": {
+                    "type": "native",
+                    "chain": "evm_ethereum_mainnet"
+                  },
+                  "chain": {
+                    "chain_type": "evm",
+                    "named_chain_id": "ethereum_mainnet",
+                    "chain_id": 1,
+                    "unique_id": "evm_ethereum_mainnet",
+                    "name": "Ethereum",
+                    "native_currency_symbol": "ETH",
+                    "native_currency_name": "Ether",
+                    "blockchain_explorer": {
+                      "transaction_url": "https://etherscan.io/tx/",
+                      "address_url": "https://etherscan.io/address/",
+                      "root_url": "https://etherscan.io/",
+                      "transaction_format_url": "https://etherscan.io/tx/%s",
+                      "address_format_url": "https://etherscan.io/address/%s",
+                      "asset_format_url": "https://etherscan.io/address/%s"
+                    },
+                    "logo_url": "https://logos-staging.stg.arnac.io/chains/evm/default/1.svg",
+                    "is_testnet": false,
+                    "is_enabled": true,
+                    "gas_type": "dynamic",
+                    "supports_secure_node": true,
+                    "supports_mev_protected_node": true,
+                    "source": "default",
+                    "supports_7702": true
+                  }
+                },
+                "name": "Ether",
+                "symbol": "ETH",
+                "decimals": 18,
+                "verified": true,
+                "metadata_uri": "",
+                "is_spam": false
+              },
+              "price": {
+                "price": "0",
+                "price_float": "271844",
+                "is_negative": false,
+                "fiat_currency": {
+                  "currency_symbol": "usd",
+                  "decimals": 2
+                }
+              }
+            },
+            "amount": "73750653572335",
+            "onchain_identifier": "call_0",
+            "from": {
+              "vault": {
+                "id": "81e82853-3c4f-4cd4-b494-78fb4abf168a",
+                "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+                "vault_group_ids": [
+                  "fa2c5851-a377-4bff-a32f-ae78c24684bd"
+                ],
+                "name": "EVM Vault",
+                "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+                "state": "active",
+                "type": "evm",
+                "is_external_signer": false
+              },
+              "explorer_url": "https://etherscan.io/address/0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+              "type": "evm",
+              "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+              "contract": {
+                "name": "",
+                "is_verified": false
+              }
+            },
+            "to": {
+              "explorer_url": "https://etherscan.io/address/0x23617e59A5925b2A4Bf75d73ff6711cD0b29De85",
+              "type": "evm",
+              "address": "0x23617e59A5925b2A4Bf75d73ff6711cD0b29De85",
+              "contract": {
+                "name": "UniversalRouter",
+                "dapp": {
+                  "id": "a44c28f3-d09d-5d4c-9d3e-4aba83d34c2f",
+                  "name": "Uniswap V4",
+                  "url": "https://app.uniswap.org/",
+                  "logo_url": "https://logos.fordefi.com/dapps/a44c28f3-d09d-5d4c-9d3e-4aba83d34c2f.png",
+                  "contracts_count": 5
+                },
+                "is_verified": true
+              }
+            }
+          },
+          {
+            "priced_asset": {
+              "type": "asset_price",
+              "asset_info": {
+                "id": "ebef1507-2916-4a42-bfb1-2c65d164f6f5",
+                "asset_identifier": {
+                  "type": "evm",
+                  "details": {
+                    "type": "native",
+                    "chain": "evm_ethereum_mainnet"
+                  },
+                  "chain": {
+                    "chain_type": "evm",
+                    "named_chain_id": "ethereum_mainnet",
+                    "chain_id": 1,
+                    "unique_id": "evm_ethereum_mainnet",
+                    "name": "Ethereum",
+                    "native_currency_symbol": "ETH",
+                    "native_currency_name": "Ether",
+                    "blockchain_explorer": {
+                      "transaction_url": "https://etherscan.io/tx/",
+                      "address_url": "https://etherscan.io/address/",
+                      "root_url": "https://etherscan.io/",
+                      "transaction_format_url": "https://etherscan.io/tx/%s",
+                      "address_format_url": "https://etherscan.io/address/%s",
+                      "asset_format_url": "https://etherscan.io/address/%s"
+                    },
+                    "logo_url": "https://logos-staging.stg.arnac.io/chains/evm/default/1.svg",
+                    "is_testnet": false,
+                    "is_enabled": true,
+                    "gas_type": "dynamic",
+                    "supports_secure_node": true,
+                    "supports_mev_protected_node": true,
+                    "source": "default",
+                    "supports_7702": true
+                  }
+                },
+                "name": "Ether",
+                "symbol": "ETH",
+                "decimals": 18,
+                "verified": true,
+                "metadata_uri": "",
+                "is_spam": false
+              },
+              "price": {
+                "price": "0",
+                "price_float": "271844",
+                "is_negative": false,
+                "fiat_currency": {
+                  "currency_symbol": "usd",
+                  "decimals": 2
+                }
+              }
+            },
+            "amount": "183916841826",
+            "onchain_identifier": "call_0_4",
+            "from": {
+              "explorer_url": "https://etherscan.io/address/0x23617e59A5925b2A4Bf75d73ff6711cD0b29De85",
+              "type": "evm",
+              "address": "0x23617e59A5925b2A4Bf75d73ff6711cD0b29De85",
+              "contract": {
+                "name": "UniversalRouter",
+                "dapp": {
+                  "id": "a44c28f3-d09d-5d4c-9d3e-4aba83d34c2f",
+                  "name": "Uniswap V4",
+                  "url": "https://app.uniswap.org/",
+                  "logo_url": "https://logos.fordefi.com/dapps/a44c28f3-d09d-5d4c-9d3e-4aba83d34c2f.png",
+                  "contracts_count": 5
+                },
+                "is_verified": true
+              }
+            },
+            "to": {
+              "vault": {
+                "id": "81e82853-3c4f-4cd4-b494-78fb4abf168a",
+                "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+                "vault_group_ids": [
+                  "fa2c5851-a377-4bff-a32f-ae78c24684bd"
+                ],
+                "name": "EVM Vault",
+                "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+                "state": "active",
+                "type": "evm",
+                "is_external_signer": false
+              },
+              "explorer_url": "https://etherscan.io/address/0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+              "type": "evm",
+              "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+              "contract": {
+                "name": "",
+                "is_verified": false
+              }
+            }
+          },
+          {
+            "priced_asset": {
+              "type": "asset_price",
+              "asset_info": {
+                "id": "06c83661-df1f-4500-8e20-303f120bcb99",
+                "asset_identifier": {
+                  "type": "evm",
+                  "details": {
+                    "type": "erc20",
+                    "token": {
+                      "chain": "evm_ethereum_mainnet",
+                      "hex_repr": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+                    }
+                  },
+                  "chain": {
+                    "chain_type": "evm",
+                    "named_chain_id": "ethereum_mainnet",
+                    "chain_id": 1,
+                    "unique_id": "evm_ethereum_mainnet",
+                    "name": "Ethereum",
+                    "native_currency_symbol": "ETH",
+                    "native_currency_name": "Ether",
+                    "blockchain_explorer": {
+                      "transaction_url": "https://etherscan.io/tx/",
+                      "address_url": "https://etherscan.io/address/",
+                      "root_url": "https://etherscan.io/",
+                      "transaction_format_url": "https://etherscan.io/tx/%s",
+                      "address_format_url": "https://etherscan.io/address/%s",
+                      "asset_format_url": "https://etherscan.io/address/%s"
+                    },
+                    "logo_url": "https://logos-staging.stg.arnac.io/chains/evm/default/1.svg",
+                    "is_testnet": false,
+                    "is_enabled": true,
+                    "gas_type": "dynamic",
+                    "supports_secure_node": true,
+                    "supports_mev_protected_node": true,
+                    "source": "default",
+                    "supports_7702": true
+                  }
+                },
+                "name": "USD Coin",
+                "symbol": "USDC",
+                "decimals": 6,
+                "verified": true,
+                "metadata_uri": "",
+                "is_spam": false,
+                "logo_url": "https://logos.fordefi.com/tokens/1/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
+                "explorer_url": "https://etherscan.io/address/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+              },
+              "price": {
+                "price": "0",
+                "price_float": "99.987",
+                "is_negative": false,
+                "fiat_currency": {
+                  "currency_symbol": "usd",
+                  "decimals": 2
+                }
+              }
+            },
+            "amount": "200000",
+            "onchain_identifier": "890",
+            "from": {
+              "explorer_url": "https://etherscan.io/address/0x000000000004444c5dc75cB358380D2e3dE08A90",
+              "type": "evm",
+              "address": "0x000000000004444c5dc75cB358380D2e3dE08A90",
+              "contract": {
+                "name": "PoolManager",
+                "dapp": {
+                  "id": "a44c28f3-d09d-5d4c-9d3e-4aba83d34c2f",
+                  "name": "Uniswap V4",
+                  "url": "https://app.uniswap.org/",
+                  "logo_url": "https://logos.fordefi.com/dapps/a44c28f3-d09d-5d4c-9d3e-4aba83d34c2f.png",
+                  "contracts_count": 5
+                },
+                "is_verified": true
+              }
+            },
+            "to": {
+              "vault": {
+                "id": "81e82853-3c4f-4cd4-b494-78fb4abf168a",
+                "vault_group_id": "fa2c5851-a377-4bff-a32f-ae78c24684bd",
+                "vault_group_ids": [
+                  "fa2c5851-a377-4bff-a32f-ae78c24684bd"
+                ],
+                "name": "EVM Vault",
+                "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+                "state": "active",
+                "type": "evm",
+                "is_external_signer": false
+              },
+              "explorer_url": "https://etherscan.io/address/0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+              "type": "evm",
+              "address": "0x8BFCF9e2764BC84DE4BBd0a0f5AAF19F47027A73",
+              "contract": {
+                "name": "",
+                "is_verified": false
+              }
+            }
+          }
+        ],
+        "allowances": [],
+        "bridge": [],
+        "bridges": [],
+        "contract_deployments": [],
+        "set_code_authorizations": []
+      }
+    },
+    "gas_submitted": {
+      "max_priority_fee_per_gas": "12290986",
+      "max_fee_per_gas": "166171854",
+      "priority": "medium",
+      "limit": "270436",
+      "type": "dynamic"
+    },
+    "use_secure_node": false,
+    "use_mev_protected_node": false,
+    "explorer_url": "https://etherscan.io/tx/0xabdeda9c301e128670877c4a3733ef7795ef7f0232efe4c380f1519cbb8ddcf7",
+    "raw_transaction": "0x02f9068e018202f483bb8baa8409e794ce830420649423617e59a5925b2a4bf75d73ff6711cd0b29de85864313698214efb9061a3593564c000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000006ac377d500000000000000000000000000000000000000000000000000000000000000030b100c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000004e00000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000004313698214ef0000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000003090b0e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000026000000000000000000000000000000000000000000000000000000000000002e000000000000000000000000000000000000000000000000000000000000001e00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb4800000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000001a00000000000000000000000000000000000000000000000000000000000030d4000000000000000000000000000000000000000000000000000004313698214ef00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000020000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc200000000000000000000000000000000000000000000000000000000000001f4000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb480000000000000000000000008bfcf9e2764bc84de4bbd0a0f5aaf19f47027a730000000000000000000000000000000000000000000000000000000000030d4000000000000000000000000000000000000000000000000000000000000000400000000000000000000000008bfcf9e2764bc84de4bbd0a0f5aaf19f47027a730000000000000000000000000000000000000000000000000000000000000000756e6978000001a10b7094c98000bed80000000c0100c080a0cd69723203e0cf2abb30f3c58f04718c82139ba027aec15bd8b820e38dd12040a0701c0c090802d1e5c274450c3c39a42f68e03808692e0e9f21984c7589d07eca"
+  },
+  "event_type": "enriched_transaction_state_update"
+}

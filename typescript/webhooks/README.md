@@ -4,7 +4,7 @@ Three TypeScript Express.js webhook servers:
 
 ## Implementation Options
 
-### 1. Fordefi Handler (`webhooks_fordefi.ts`)
+### 1. Fordefi Handler (`webhooks_tx_logs.ts`)
 - Receives and logs Fordefi transaction webhook events
 - Verifies `X-Signature` header using ECDSA P-256
 - Read-only — no API calls, only requires Fordefi public key
@@ -27,7 +27,7 @@ Three TypeScript Express.js webhook servers:
 - **Node.js 18+**
 - **npm** or **yarn**
 
-### For `webhooks_fordefi.ts`:
+### For `webhooks_tx_logs.ts`:
 - **Fordefi Public Key** — [Download from webhook docs](https://docs.fordefi.com/developers/webhooks#validate-a-webhook)
 
 ### For `webhooks_audit_logs.ts`:
@@ -49,7 +49,7 @@ npm install
 
 ## Configuration
 
-### `webhooks_fordefi.ts`
+### `webhooks_tx_logs.ts`
 
 Save the Fordefi public key to `keys/fordefi_public_key.pem` ([download here](https://docs.fordefi.com/developers/webhooks#validate-a-webhook)), or set it via the `FORDEFI_PUBLIC_KEY` env var.
 
@@ -81,7 +81,7 @@ Save the Fordefi public key to `keys/fordefi_public_key.pem` ([download here](ht
 
 ```bash
 # Fordefi-only webhooks
-npm run fordefi_server
+npm run tx_logs_server
 
 # Audit-log security monitor
 npm run audit_logs_server
@@ -92,7 +92,7 @@ npm run hypernative_server
 
 ## API Endpoints
 
-### `webhooks_fordefi.ts`
+### `webhooks_tx_logs.ts`
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -202,7 +202,7 @@ The vault and chain are configured in `fordefi-response/config.ts`. The target c
 
 ```
 webhooks/
-├── webhooks_fordefi.ts              # Fordefi-only webhook server
+├── webhooks_tx_logs.ts              # Fordefi-only webhook server
 ├── webhooks_audit_logs.ts           # Audit-log security monitor (alerts + browse/replay routes)
 ├── webhooks_hypernative.ts          # Hypernative webhook server (actions + risk insights)
 ├── fordefi-response/                # Contract call response module
@@ -222,7 +222,7 @@ webhooks/
 
 ## Environment Variables
 
-### `webhooks_fordefi.ts`
+### `webhooks_tx_logs.ts`
 
 | Variable | Required | Description |
 |----------|----------|-------------|

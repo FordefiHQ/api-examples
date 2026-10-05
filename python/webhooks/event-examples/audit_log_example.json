@@ -1,0 +1,28 @@
+{
+  "webhook_id": "b4e88855-0398-4d5c-b5ad-d4cdb899f55c",
+  "created_at": "2026-10-05T09:37:11Z",
+  "event_id": "70e1f4ef-ca31-42d8-8fa6-590ca004028f",
+  "attempt": 1,
+  "sent_at": "2026-10-05T09:37:11.342698Z",
+  "organization_id": "9c426481-0243-414a-b982-24e8ac817045",
+  "organization_name": "Dan PRD",
+  "event": {
+    "id": "28e2ad82-83ac-48cd-b165-83af5e01f8f8",
+    "timestamp": "2026-10-05T09:37:11.269000Z",
+    "request_id": "25530d73-5d60-9e18-a065-d701c4bafebd",
+    "category": "policy",
+    "action": "Create policy draft",
+    "created_by": {
+      "id": "fb30b30f-eabe-4b7f-a0de-60e64eb1ffcc",
+      "user_type": "person",
+      "name": "Dan",
+      "email": "danj@fordefi.com",
+      "state": "active",
+      "role": "admin"
+    },
+    "description": "The user has created a new policy draft with id 8cd438b6-0199-4990-bd12-8154922b4796",
+    "client_ip": "93.38.67.12",
+    "change_request_id": "8cd438b6-0199-4990-bd12-8154922b4796"
+  },
+  "event_type": "audit_log"
+}
