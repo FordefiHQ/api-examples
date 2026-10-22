@@ -21,6 +21,7 @@ npm run <script>   # see package.json scripts for available commands
 Key run commands per project:
 - **raw-evm-requests/raw-api-transfer**: `npm run tx`
 - **raw-evm-requests/raw-contract-deployment**: `npm run deploy` (runs `forge build` first)
+- **raw-evm-requests/raw-contract-calls**: `npm run raw`, `npm run abi`
 - **ethena**: `npm run ethena`
 - **message-signing**: `npm run sign-712-v5`, `npm run sign-712-v6`, `npm run sign-personal-v6`
 - **swap-with-cowswap**: `npm run swap`
@@ -38,7 +39,7 @@ Only hardhat has test infrastructure (`npx hardhat test`). Other projects are pu
 ### Pattern A: Web3Provider (most projects)
 Uses `@fordefi/web3-provider` package → wraps in ethers.js `Web3Provider` → standard signer interface. Each project has a `get-provider.ts` that creates a `FordefiWeb3Provider`, waits for the `'connect'` event, and returns it (or an ethers wrapper).
 
-Used by: ethena, message-signing, swap-with-cowswap, uniswap-v3, morpho-vault-v2-deployment, hyperliquid-hypercore, paradex, foundry-deployer.
+Used by: ethena, message-signing, swap-with-cowswap, uniswap-v3, morpho-vault-v2-deployment, hyperliquid-hypercore, paradex, foundry-deployer, raw-evm-requests/raw-contract-calls.
 
 ### Pattern B: Direct API (lower-level)
 Manually constructs JSON payloads, signs with the API User's PEM private key, POSTs to Fordefi API, and polls for the transaction hash.
@@ -61,4 +62,4 @@ Projects use either ethers v5 or v6 — check each project's `package.json`. The
 - **v6**: `new ethers.BrowserProvider(fordefiProvider)` or raw FordefiWeb3Provider used directly
 
 Projects on ethers v5: ethena, swap-with-cowswap, uniswap-v3.
-Projects on ethers v6: message-signing, hardhat, foundry-deployer, morpho-vault-v2-deployment, hyperliquid-hypercore, paradex.
+Projects on ethers v6: message-signing, hardhat, foundry-deployer, morpho-vault-v2-deployment, hyperliquid-hypercore, paradex, raw-evm-requests/raw-contract-calls.
