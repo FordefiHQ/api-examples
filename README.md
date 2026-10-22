@@ -38,7 +38,7 @@ Code examples for using the Fordefi API in Python and TypeScript.
 ## TypeScript Examples 🟦
 
 - [Setting up Fordefi Webhooks and a server that listens and reacts to Hypernative Risk Insights](typescript/webhooks)
-- [Calling EVM contracts](typescript/contract-calls/evm) with a Fordefi vault
+- [Calling EVM contracts](typescript/evm/raw-evm-requests/raw-contract-calls) with a Fordefi vault
 - [Cross-chain USDC transfers](typescript/bridge/cctp) using Circle's CCTP
 - On EVM chains (Ethereum, Base, Arbitrum, etc.):
   - [Deploying EVM smart contracts](typescript/evm/fordefi-evm-contracts-deployer) from your Fordefi vault using Hardhat or Foundry
@@ -46,7 +46,8 @@ Code examples for using the Fordefi API in Python and TypeScript.
   - [Swapping tokens programmatically with CowSwap](typescript/evm/swap-with-cowswap)
   - [Swapping tokens programmatically with Uniswap v3](typescript/evm/uniswap-v3)
   - [Minting/Redeeming USDe with Ethena](typescript/evm/ethena)
-  - [Programmatic EVM transfers](typescript/evm/simple-api-transfers) using the Fordefi API
+  - [Programmatic EVM transfers](typescript/evm/raw-evm-requests/raw-api-transfer) using the Fordefi API
+  - [Programmatic EVM contract deployment](typescript/evm/raw-evm-requests/raw-contract-deployment) with Foundry and the Fordefi API
   - [Deploying and calling contracts on a local Hardhat node](typescript/evm/hardhat) for developers
   - [Signing EIP-712 and EIP-191 messages](typescript/evm/message-signing) with an EVM Fordefi vault
   - [Trading on Paradex](typescript/evm/paradex) (perps DEX on Starknet) with a Fordefi vault

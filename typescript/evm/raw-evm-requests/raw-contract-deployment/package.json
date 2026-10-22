@@ -1,9 +1,10 @@
 {
-  "name": "@fordefi/simple-api-transfers",
+  "name": "@fordefi/raw-contract-deployment",
   "version": "1.0.0",
   "main": "dist/index.js",
   "scripts": {
-    "tx": "npx ts-node run.ts"
+    "build": "forge build",
+    "deploy": "forge build && npx ts-node run.ts"
   },
   "author": "dan jaheny",
   "license": "ISC",
