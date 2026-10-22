@@ -19,7 +19,8 @@ npm run <script>   # see package.json scripts for available commands
 ```
 
 Key run commands per project:
-- **simple-api-transfers**: `npm run tx`
+- **raw-evm-requests/raw-api-transfer**: `npm run tx`
+- **raw-evm-requests/raw-contract-deployment**: `npm run deploy` (runs `forge build` first)
 - **ethena**: `npm run ethena`
 - **message-signing**: `npm run sign-712-v5`, `npm run sign-712-v6`, `npm run sign-personal-v6`
 - **swap-with-cowswap**: `npm run swap`
@@ -42,7 +43,7 @@ Used by: ethena, message-signing, swap-with-cowswap, uniswap-v3, morpho-vault-v2
 ### Pattern B: Direct API (lower-level)
 Manually constructs JSON payloads, signs with the API User's PEM private key, POSTs to Fordefi API, and polls for the transaction hash.
 
-Used by: simple-api-transfers, hardhat.
+Used by: raw-evm-requests (raw-api-transfer, raw-contract-deployment), hardhat.
 
 ## Project Structure Convention
 
