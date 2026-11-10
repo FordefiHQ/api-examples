@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 // All solana-kit examples share one .env and one API User key at the solana-kit root.
-// A .env in this project, if present, takes precedence over the shared one.
+// A .env in this project overrides the shared one.
 const SOLANA_KIT_ROOT = path.resolve(__dirname, '../..');
 dotenv.config({ path: ['.env', path.join(SOLANA_KIT_ROOT, '.env')] });
 const PRIVATE_KEY_PATH = process.env.FORDEFI_PRIVATE_KEY_PATH || path.join(SOLANA_KIT_ROOT, 'secret', 'private.pem');
@@ -26,7 +26,7 @@ export const fordefiConfig: FordefiSolanaConfig = {
   vaultAddress: process.env.FORDEFI_VAULT_ADDRESS || "",
   privateKeyPem: fs.readFileSync(PRIVATE_KEY_PATH, 'utf8'),
   apiBaseUrl: process.env.FORDEFI_API_BASE_URL || 'https://api.fordefi.com',
-  chain: 'solana_mainnet', // must match rpcUrl below: solana_devnet uses https://api.devnet.solana.com
+  chain: 'solana_mainnet', // Must match rpcUrl. For solana_devnet, use https://api.devnet.solana.com
   rpcUrl: 'https://api.mainnet-beta.solana.com',
 };
 
@@ -37,5 +37,5 @@ export const nonceConfig = {
 
 export const transferConfig = {
   destinationAddress: process.env.DESTINATION_ADDRESS || "",
-  amountLamports: 1_000_000n, // 0.001 SOL (>= the ~0.0009 SOL rent-exempt minimum, so it works for fresh recipient accounts)
+  amountLamports: 1_000_000n, // 0.001 SOL. A new recipient account needs at least the rent-exempt minimum (about 0.0009 SOL).
 };

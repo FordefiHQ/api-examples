@@ -4,12 +4,12 @@ import { fordefiGet, fordefiPost, pollUntilTerminal } from '../utils/fordefi-res
 /**
  * Creates one or more Solana durable nonce accounts for a Fordefi vault.
  *
- * Submits Fordefi's native `solana_nonce_account_creation` transaction: Fordefi
+ * Submits Fordefi's native `solana_nonce_account_creation` transaction. Fordefi
  * derives the new nonce account address, funds it with the rent-exempt minimum,
- * sets the vault as the nonce authority, signs and broadcasts (push_mode auto).
- * Once the transaction completes, the accounts appear in the vault's nonce pool
- * (GET /api/v1/vaults/{id}/solana-nonce-accounts) ready to be spent by
- * `npm run transfer`.
+ * sets the vault as the nonce authority, then signs and broadcasts it
+ * (push_mode auto). When the transaction completes, the accounts appear in the
+ * vault's nonce pool (GET /api/v1/vaults/{id}/solana-nonce-accounts), and
+ * `npm run transfer` can use them.
  */
 async function main(): Promise<void> {
   if (!fordefiConfig.accessToken) {
@@ -29,8 +29,8 @@ async function main(): Promise<void> {
     details: {
       type: 'solana_nonce_account_creation',
       chain: fordefiConfig.chain,
-      // The vault becomes the nonce authority, so vault-signed transactions
-      // can spend the stored nonce.
+      // The vault becomes the nonce authority, so transactions the vault
+      // signs can spend the stored nonce.
       authority: fordefiConfig.vaultAddress,
       count: nonceConfig.count,
       push_mode: 'auto',
@@ -41,10 +41,10 @@ async function main(): Promise<void> {
   console.log('Request:', JSON.stringify(requestBody, null, 2));
 
   const created = await fordefiPost(fordefiConfig, '/api/v1/transactions', requestBody);
-  console.log(`Transaction submitted to Fordefi 📡 (id: ${created.id})`);
+  console.log(`Transaction submitted to Fordefi (id: ${created.id})`);
 
   await pollUntilTerminal(fordefiConfig, created.id);
-  console.log('Nonce account creation completed ✅');
+  console.log('Nonce account creation completed');
 
   const pool = await fordefiGet(
     fordefiConfig,
@@ -63,7 +63,7 @@ async function main(): Promise<void> {
 
 main().catch(error => {
   console.error(`Failed to create the nonce account: ${error.message}`);
-  // SignerError from the Fordefi signer carries the API response body in .context
+  // A SignerError from the Fordefi signer has the API response body in .context
   if (error.context) {
     console.error('Error context:', JSON.stringify(error.context, null, 2));
   }

@@ -4,9 +4,9 @@ import { Rpc, SolanaRpcApi } from '@solana/kit';
 export const SYSTEM_PROGRAM_ADDRESS = '11111111111111111111111111111111';
 
 export interface NonceAccount {
-  /** The account's nonce authority: the only signer allowed to spend the nonce. */
+  /** The nonce authority. Only this signer can spend the nonce. */
   authority: string;
-  /** The stored durable nonce, usable as a transaction lifetime in place of a recent blockhash. */
+  /** The stored durable nonce. A transaction can use it as its lifetime instead of a recent blockhash. */
   durableNonce: string;
 }
 
@@ -14,7 +14,7 @@ export interface NonceAccount {
  * Decodes the System program's nonce account layout (80 bytes):
  *   4-byte version (1) | 4-byte state tag (1 = initialized) | 32-byte authority
  *   | 32-byte durable nonce | 8-byte lamports-per-signature
- * Parsed JSON from RPC labels the state differently per cluster, so read the raw bytes.
+ * RPC's parsed JSON labels the state differently on each cluster, so this reads the raw bytes.
  */
 export function parseNonceAccountData(data: Uint8Array): NonceAccount {
   if (data.length !== 80) {
