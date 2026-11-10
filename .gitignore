@@ -35,5 +35,6 @@ agent-private-key*.json
 !*public_key*.pem
 
 
-# Lockfiles — patterns without a slash match at any depth.
+# Lockfiles and node modules — patterns without a slash match at any depth.
 package-lock.json
+node_modules
