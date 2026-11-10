@@ -7,6 +7,7 @@ solana-kit/
 ├── .env                  # credentials and addresses for every example
 ├── secret/
 │   └── private.pem       # your Fordefi API User private key
+├── durable-nonce-txs/
 ├── spl-transfer/
 ├── staking/
 └── ...

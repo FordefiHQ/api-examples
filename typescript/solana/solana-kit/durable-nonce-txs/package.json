@@ -1,0 +1,26 @@
+{
+    "name": "@fordefi/durable-nonce-txs",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "create-nonce-account": "tsx ./src/create-nonce-account.ts",
+        "transfer": "tsx ./src/transfer.ts",
+        "test": "tsx --test test/*.test.ts",
+        "typecheck": "tsc --noEmit"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "Create a Solana durable nonce account with Fordefi and spend it in a transfer",
+    "devDependencies": {
+        "@types/node": "^22.10.2",
+        "typescript": "^5.9.3"
+    },
+    "dependencies": {
+        "@solana-program/system": "^0.14.0",
+        "@solana/kit": "^8.2.0",
+        "bs58": "^6.0.0",
+        "dotenv": "16.4.7",
+        "tsx": "^4.20.6"
+    }
+}
