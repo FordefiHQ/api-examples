@@ -1,8 +1,8 @@
 import crypto from 'crypto';
 import { FordefiSolanaConfig } from '../src/config';
 
-// POST requests must be signed with the API User private key over
-// `<path>|<timestamp>|<body>`; GET requests only need the bearer token.
+// POST requests need a signature over `<path>|<timestamp>|<body>` made with
+// the API User private key. GET requests need only the bearer token.
 export function signApiRequestPayload(payload: string, privateKeyPem: string): string {
   const signature = crypto.createSign('SHA256').update(payload, 'utf8').end();
   return signature.sign(crypto.createPrivateKey(privateKeyPem), 'base64');
@@ -46,7 +46,7 @@ const TERMINAL_FAILURE_STATES = new Set([
 ]);
 
 // Polls GET /api/v1/transactions/{id} until the transaction reaches a terminal
-// state, logging every state change on the way.
+// state, and logs each state change.
 export async function pollUntilTerminal(
   fordefiConfig: FordefiSolanaConfig,
   txId: string,
