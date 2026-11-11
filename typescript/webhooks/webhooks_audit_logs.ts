@@ -14,7 +14,7 @@ const app = express();
 app.set('trust proxy', true);
 app.use(express.raw({ type: 'application/json' }));
 const PORT = Number(process.env.PORT) || 8080;
-const ALLOWED_IPS = ['54.243.103.88']; // Fordefi's NAT IP
+const ALLOWED_IPS = ['54.243.103.88', '184.33.202.141']; // Fordefi's NAT IPs (us-east-1, us-west-2)
 const FORDEFI_API_BASE_URL = 'https://api.fordefi.com';
 const FORDEFI_API_USER_TOKEN = process.env.FORDEFI_API_USER_TOKEN;
 

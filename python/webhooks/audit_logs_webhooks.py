@@ -18,7 +18,7 @@ load_dotenv()
 
 FORDEFI_API_USER_TOKEN = os.getenv("FORDEFI_API_USER_TOKEN")
 FORDEFI_API_BASE_URL = "https://api.fordefi.com"
-ALLOWED_IPS = {"54.243.103.88"}  # Fordefi's NAT IP
+ALLOWED_IPS = {"54.243.103.88", "184.33.202.141"}  # Fordefi's NAT IPs (us-east-1, us-west-2)
 # Only trust X-Forwarded-For when a proxy you control overwrites it (ngrok, your load
 # balancer). The header is client-supplied, so trusting it on a directly-reachable
 # server lets anyone claim Fordefi's IP.
