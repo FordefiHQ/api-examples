@@ -13,7 +13,7 @@ class Config:
     FORDEFI_API_BASE_URL = "https://api.fordefi.com/api/v1"
     ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 
-    ALLOWED_SOURCE_IPS = {"54.243.103.88"}  # Fordefi's NAT IP
+    ALLOWED_SOURCE_IPS = {"54.243.103.88", "184.33.202.141"}  # Fordefi's NAT IPs (us-east-1, us-west-2)
 
     def __init__(self):
         load_dotenv()

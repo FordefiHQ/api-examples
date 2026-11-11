@@ -77,10 +77,12 @@ class TestSourceIpEnforcement:
         monkeypatch.setattr(approver.config, "trust_proxy_header", False)
         assert call_webhook(FakeRequest(client_host="203.0.113.9")).status_code == 403
 
-    def test_invalid_signature_is_rejected(self, monkeypatch):
+    # Both NAT IPs (us-east-1, us-west-2) get past the IP check and on to the signature check.
+    @pytest.mark.parametrize("fordefi_ip", [FORDEFI_IP, "184.33.202.141"])
+    def test_invalid_signature_is_rejected(self, monkeypatch, fordefi_ip):
         monkeypatch.setattr(approver.config, "trust_proxy_header", False)
         request = FakeRequest(
-            client_host=FORDEFI_IP, headers={"X-Signature": "bm90LWEtc2lnbmF0dXJl"}, body=b"{}"
+            client_host=fordefi_ip, headers={"X-Signature": "bm90LWEtc2lnbmF0dXJl"}, body=b"{}"
         )
         assert call_webhook(request).status_code == 401
 

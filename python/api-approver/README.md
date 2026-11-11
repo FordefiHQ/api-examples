@@ -38,7 +38,7 @@ transaction created ──▶ Fordefi Policy: require approval ──▶ webhook
 
 Design choices worth knowing:
 
-- **Only accepts webhooks from Fordefi**: requests must originate from Fordefi's webhook source IP (`54.243.103.88`) *and* carry a valid ECDSA signature.
+- **Only accepts webhooks from Fordefi**: requests must originate from one of Fordefi's webhook source IPs (`54.243.103.88`, `184.33.202.141`) *and* carry a valid ECDSA signature.
 - **Validates against a fresh `GET /transactions/{id}` response**, never the webhook body alone. The webhook only triggers the flow; the API is the source of truth (and provides `parsed_data` — Fordefi's own calldata decoding — plus the full transaction object).
 - **Fails closed.** If a rule applies to a transaction but can't complete its check (missing field, undecodable calldata, unexpected exception), the transaction is aborted, not waved through.
 - **No external tooling.** Calldata is decoded in-process with [`eth-abi`](https://pypi.org/project/eth-abi/) against a small selector registry — no Foundry, no subprocesses, no third-party signature databases.
@@ -193,7 +193,7 @@ Fordefi retries webhook deliveries (with backoff) on any non-2xx response. The A
 | `200` | Decision made (approved/aborted) or nothing to do (wrong state, no tx id) |
 | `400` | Body isn't JSON |
 | `401` | Missing or invalid `X-Signature` — check your public key configuration |
-| `403` | Request didn't come from Fordefi's webhook source IP (`54.243.103.88`) |
+| `403` | Request didn't come from one of Fordefi's webhook source IPs (`54.243.103.88`, `184.33.202.141`) |
 | `413` | Body exceeds `MAX_BODY_BYTES` (1 MiB) |
 | `503` | Couldn't fetch the transaction from the Fordefi API → Fordefi retries |
 | `500` | Approve/abort API call failed → Fordefi retries (safe: the fresh-state check skips already-decided transactions) |
@@ -261,7 +261,7 @@ WantedBy=multi-user.target
 Fordefi recommends three independent layers; combined, they mean a request has to come from Fordefi's network, prove Fordefi signed it, and the approver's token has to be usable only from your own host:
 
 1. **Webhook signature verification** — always on, no bypass flag. This is the control that actually authenticates Fordefi.
-2. **Inbound IP allowlisting** — the app rejects requests not originating from `54.243.103.88` (see `ALLOWED_SOURCE_IPS` in `fordefi/config.py`). Enforce it at the firewall/security-group level too. Two settings decide whether this layer is real:
+2. **Inbound IP allowlisting** — the app rejects requests not originating from Fordefi's NAT IPs, `54.243.103.88` (us-east-1) and `184.33.202.141` (us-west-2). Fordefi can send from either region, so allow both (see `ALLOWED_SOURCE_IPS` in `fordefi/config.py`). Enforce it at the firewall/security-group level too. Two settings decide whether this layer is real:
    - Run uvicorn with **`--no-proxy-headers`**. Without it, uvicorn rewrites the client IP from `X-Forwarded-For` for any request arriving from `127.0.0.1`, so a local process — or a proxy on the same host — can present itself as Fordefi.
    - Leave **`TRUST_PROXY_HEADER=false`** unless a proxy you control overwrites `X-Forwarded-For`. The header is client-supplied, so trusting it on a directly-reachable service lets anyone claim Fordefi's IP.
 
