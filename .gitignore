@@ -38,3 +38,6 @@ agent-private-key*.json
 # Lockfiles and node modules — patterns without a slash match at any depth.
 package-lock.json
 node_modules
+
+# Solana programs
+solana-cctp-contracts
